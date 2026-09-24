@@ -1,0 +1,3733 @@
+{
+  "$comment": "EVIDENCIA de cada criterio: grado de confianza, citas y nota. El algoritmo NO la consume, solo usa los números de exercises.json; existe para explicar al usuario por qué entra un ejercicio y con qué respaldo. El 92 % de las puntuaciones son juicio de programación, no evidencia directa.",
+  "version": 1,
+  "evidence": {
+    "press-banca": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:32922646",
+          "PMID:29541130"
+        ],
+        "note": "Carga alta en estiramiento esternal; ecografía constata hipertrofia en esternocostal, pero no aísla porción clavicular."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:32922646"
+        ],
+        "note": "ROM amplio delimitado por la barra en contacto esternal sin aducción horizontal terminal."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:29541130"
+        ],
+        "note": "Curva de resistencia ascendente con brazo de momento decreciente hacia el bloqueo articular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Banco provee soporte dorsal sólido; balanceo escapulohumeral libre requiere coordinación motora moderada."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sobrecarga milimétrica óptima mediante discos olímpicos y microcargas estandarizadas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:35291645"
+        ],
+        "note": "Fatiga del sistema nervioso y estrés articular glenohumeral moderado a cargas altas submáximas."
+      }
+    },
+    "press-banca-mancuernas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite mayor descenso y estiramiento que la barra libre al eliminar el tope esternal."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido amplio con convergencia humeral natural y máxima excursión de aducción horizontal."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de momento gravitacional decrece a cero al alinear muñeca y hombro arriba."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Inestabilidad multiplanar elevada; fallo técnico suele preceder al agotamiento contráctil del pectoral."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Saltos de carga discontinuos en mancuernas condicionan la aplicación de sobrecarga progresiva."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor fatiga neural axil general; estrés estabilizador localizado en manguito rotador."
+      }
+    },
+    "press-banca-declinado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "La angulación del tronco reduce el estiramiento fisiológico relativo de fibras superiores pectorales."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "ROM restringido por tope torácico y trayectoria descendente con menor flexión humeral."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pico de momento en mitad de recorrido; descarga al bloqueo concéntrico."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo declinado fijo con fijación de piernas provee notable estabilidad corporal."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Barra libre permite microprogresiones precisas de masa externa idénticas al press horizontal."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Presión cefálica aumentada por declinación; fatiga axial global leve a moderada."
+      }
+    },
+    "press-pecho-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ajuste de leva o asiento permite carga pesada en elongación máxima sin riesgo articular."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Guía mecánica asegura arco constante con trayectoria convergente en diseños modernos."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva o brazo de palanca mantiene torque constante coincidente con curva muscular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estabilidad intrínseca máxima; demanda de equilibrio nula, optimizando reclutamiento motor diana."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Torre de placas o discos permite progresión fija aunque dependiente del diseño constructivo."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga central reducida al eliminar estabilización libre; tensión local focalizada."
+      }
+    },
+    "press-banca-smith": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:32922646"
+        ],
+        "note": "Carga predecible en estiramiento; estudio analizó hipertrofia con trayectorias fijas estandarizadas."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Trayectoria vertical estricta; permite descenso completo pero restringe cinemática glenohumeral tridimensional."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fricción de carriles constante; menor tensión activa en la extensión final completa."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Guiado sobre raíles anula desviaciones sagitales y frontales, maximizando aislamiento contráctil."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Uso de discos olímpicos universales con microcargas fijas sobre barra lineal."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Seguridad asistida reduce fatiga psicológica; bajo estrés sistémico no muscular."
+      }
+    },
+    "fondos-paralelas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Máxima elongación y tensión pasiva sobre fibras esternocostales al descender hombro respecto al codo."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido profundo limitado exclusivamente por tolerancia capsular anterior glenohumeral."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca máximo en inversión profunda; menor resistencia en bloqueo vertical."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Masa corporal suspendida en el aire requiere coactivación escapular y abdominal considerable."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite lastre milimétrico con cinturón, aunque el peso corporal añade variabilidad intradiaria."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elevada tensión articular en cintura escapular; demanda neural moderada a alta."
+      }
+    },
+    "flexiones": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:29541130"
+        ],
+        "note": "Ecografía demostró hipertrofia de pectoral y tríceps equiparable a press 40% 1RM."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "El suelo interrumpe la trayectoria, frenando la máxima extensión horizontal humeral."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "La resistencia elástica corporal relativa se desvanece al alcanzar el bloqueo superior."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Exige rigidez de la columna mediante activación isométrica de la musculatura del core."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sobrecarga progresiva difícil de cuantificar sin chalecos lastrados o discos inestables."
+      },
+      "systemicFatigueCost": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:29541130"
+        ],
+        "note": "Coste sistémico bajo; ejercicio calisténico con bajo impacto articular axial."
+      }
+    },
+    "aperturas-mancuernas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca máximo coincide exactamente con la posición de mayor estiramiento muscular."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tercio final de aducción carece de tensión mecánica por gravedad paralela al brazo."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Consenso desmentido: sobrecarga excesiva en estiramiento articular y nula tensión en contracción."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Requiere estabilización manual extrema para evitar torsión lesiva del codo y hombro."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresiones pequeñas suponen saltos porcentuales de momento articular difíciles de tolerar."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estrés sistémico mínimo por ser monoarticular, pero elevado estrés conectivo local."
+      }
+    },
+    "cruces-polea-media": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Línea de tracción del cable genera tensión perpendicular en máxima abducción horizontal."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite cruzamiento de manos terminal, explorando un rango completo de aducción pectoral."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Polea mantiene tensión uniforme y continua durante todo el recorrido del movimiento."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Posición en bipedestación exige soporte postural del tronco ante fuerzas de retracción."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Limitada por saltos de placas de torre, requerimiento de pasadores auxiliares fraccionarios."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Demanda metabólica local alta con nulo compromiso de la columna lumbar espinal."
+      }
+    },
+    "pec-deck": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite ajustar el tope excéntrico asegurando máxima elongación pectoral con total seguridad."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aducción horizontal guiada completa hasta contacto de almohadillas frontales."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mecanismo de levas empareja la resistencia con la curva fisiológica en acortamiento."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Espalda firmemente fijada al respaldo anula costes estabilizadores periféricos corporales."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Torre de placas estándar con progresión fija, replicable intersesión de forma rigurosa."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aislamiento monoarticular estricto con nula carga axial o fatiga central general."
+      }
+    },
+    "press-inclinado-barra": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:32922646"
+        ],
+        "note": "Ecografía evidenció mayor hipertrofia en pectoral clavicular comparado con press horizontal exclusivo."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:32922646"
+        ],
+        "note": "ROM amplio delimitado mecánicamente por el impacto óseo sobre el esternoclavicular."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pico de torque gravitacional a mitad de recorrido; descarga al cierre articular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Banco inclinado provee soporte posterior; balanceo de barra demanda estabilización media."
+      },
+      "loadProgressability": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:32922646"
+        ],
+        "note": "Estudio registró incrementos lineales continuos de 1RM con discos olímpicos estandarizados."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga moderada; mayor implicación del deltoides anterior incrementa el estrés escapular."
+      }
+    },
+    "press-inclinado-mancuernas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Profundidad optimizada sin restricción por barra rígida en el pectoral superior."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Arco convergente tridimensional que abarca aducción horizontal y flexión glenohumeral completa."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión gravitatoria nula al alinear mancuernas sobre articulación glenohumeral bloqueada."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Alta demanda estabilizadora para posicionar mancuernas pesadas e iniciar la serie."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Incrementos escalonados fijos por pares dificultan la progresión semanal fina."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bajo estrés axial espinal; fatiga confinada a hombro anterior y tríceps."
+      }
+    },
+    "press-inclinado-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Máxima carga segura en estiramiento clavicular sin requerimientos motores de equilibrio."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido convergente predeterminado que garantiza trayectoria óptima para fibras superiores."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Perfil de levas compensa la ventaja mecánica del pectoral hacia el acortamiento."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estabilidad externa total provista por máquina; enfoque absoluto en el esfuerzo contráctil."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite incrementos de peso repetibles mediante selectores de columna o discos."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica reducida; bajo estrés neural extra fuera del músculo trabajado."
+      }
+    },
+    "cruces-polea-baja": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Vector ascendente genera tensión continua en estiramiento inferior de la aducción humeral."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Arco de flexión y aducción que optimiza acortamiento de fibras claviculares superiores."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Polea mantiene vector perpendicular eficiente a lo largo de toda la fase concéntrica."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bipedestación requiere equilibrio postural y fijación escapular voluntaria frente a cargas."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresiones pequeñas en torres de poleas pueden suponer saltos porcentuales elevados."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Coste global bajo; fatiga localizada preferentemente en pectoral clavicular y deltoides."
+      }
+    },
+    "aperturas-inclinadas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Momento máximo en separación horizontal profunda bajo gravedad sobre fibras claviculares."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aducción terminal pierde resistencia mecánica por desalineación respecto a línea gravitacional."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Desajuste severo: máxima exigencia articular en estiramiento y ausencia completa arriba."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Dificultad de estabilizar mancuernas en el plano frontal sobre banco inclinado."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Saltos de peso tradicionales provocan descompensaciones técnicas notables al progresar carga."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga central limitada, pero demanda y desgaste articular glenohumeral considerable."
+      }
+    },
+    "dominadas": {
+      "stretchedPositionLoading": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:35291645"
+        ],
+        "note": "Suspensión completa proporciona estiramiento longitudinal masivo del dorsal ancho bajo masa corporal."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Depresión y aducción escapular completa desde bloqueo superior hasta mentón sobre barra."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Palanca articular desfavorable en acortamiento final dificulta cierre de movimiento completo."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cuerpo libre oscila en espacio sagital requiriendo control de core significativo."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Lastre cuantificable pero condicionado por fluctuaciones intradiarias del peso del atleta."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elevada demanda neuromuscular general y esfuerzo de agarre ante cargas submáximas."
+      }
+    },
+    "dominadas-supinas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fuerte estiramiento del dorsal y porción larga del bíceps en el cuelgue."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite mayor flexión de codo facilitando recorrido concéntrico hasta pecho alto."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mejor ventaja mecánica del bíceps ayuda a superar el punto de estancamiento."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Suspensión libre exige estabilidad abdominal para evitar balanceos corporales parásitos."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Adición de lastres mediante cinturón precisa de equipamiento pero es medible."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Coste neural y de antebrazos moderado-alto; bajo estrés compresivo lumbar espinal."
+      }
+    },
+    "jalon-al-pecho": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elevación de brazos en polea elonga el dorsal bajo carga controlada reproducible."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Arco continuo desde bloqueo escapular superior hasta tracción esternal completa clavicular."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cable conserva tensión perpendicular constante superior a la de calistenia suspendida."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Rodillos fijadores de muslos aíslan al cuerpo de fuerzas de despegue vertical."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Torre de placas convencional permite progresión fija mediante pasador y placas fraccionadas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga axial espinal ausente; fatiga central muy inferior a las dominadas libres."
+      }
+    },
+    "jalon-agarre-neutro": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Orientación neutra sitúa fibras del dorsal en excelente alineación de tracción longitudinal."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite descenso humeral cercano al torso sin comprimir articulación acromioclavicular anterior."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión estable a lo largo de todo el rango angular de tracción."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fijación sobre asiento elimina inestabilidad vertical por peso del propio implemento."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ajuste numérico de placas escalonadas sistemático en entornos de entrenamiento comercial."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estrés articular reducido en muñeca y hombro; fatiga global contenida baja."
+      }
+    },
+    "jalon-unilateral": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Alinea de forma individual el cable con el origen e inserción dorsal."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión lateral sutil permite excursión completa tanto en estiramiento como acortamiento."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Vector de tracción coincide de forma precisa con el plano de movimiento."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo con la mano no trabajadora estabiliza sólidamente el torso erguido."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Saltos de peso en placas individuales pueden resultar proporcionalmente amplios unilateralmente."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Nula compresión espinal y mínimo impacto neural sistémico por serie ejecutada."
+      }
+    },
+    "remo-con-barra": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cuelgue de barra elonga dorsales y retractores escapulares con carga externa alta."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Limitado en contracción por contacto de barra con abdomen o caja torácica."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mayor exigencia en máxima flexión de codos coincidiendo con menor ventaja muscular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga isométrica de lumbares e isquiotibiales suele forzar el cese del ejercicio."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Incrementos precisos con discos calibrados olímpicos en barra recta estándar universal."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Altísimo estrés de cizallamiento espinal, compresión axial y fatiga neuromuscular general."
+      }
+    },
+    "remo-mancuerna": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite protracción escapular pronunciada abajo cargando fibras dorsales en máxima longitud."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Excursión amplia al superar el plano del torso sin choque óseo frontal."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca gravitacional exige máxima fuerza en punto concéntrico final."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo de tres puntos en banco reduce pero no erradica torsión rotacional."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Incrementos fijos de mancuernas dificultan progresiones intermedias suaves a cargas altas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor fatiga lumbar que barra bípeda, pero demanda estabilización contralateral persistente."
+      }
+    },
+    "remo-sentado-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión anterior controlada permite elongación escapular bajo tensión continua del cable."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido horizontal amplio; tope físico condicionado por agarre y contacto abdominal."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión del cable constante en todo el plano sagital de tracción mecánica."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo de pies en plataforma bloquea desplazamientos; demanda lumbar isométrica moderada."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Columna de placas permite incremento lineal cuantificable de resistencia en cada sesión."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bajo estrés axial comparado con barra libre; fatiga sistémica notablemente contenida."
+      }
+    },
+    "remo-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga guiada en estiramiento con seguridad total sin riesgo de compensación lumbar."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Trayectoria fijada optimizada para retracción escapular y extensión del hombro completa."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca curvo o leva empareja resistencia y capacidad contráctil."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Máquina anula demandas de equilibrio permitiendo entrega máxima de fuerza voluntaria."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ajuste preciso de carga mediante placas selectoras o discos en soporte guiado."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga central mínima; nula carga sobre columna vertebral ni estabilizadores inferiores."
+      }
+    },
+    "remo-t": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elevada carga en máxima separación escapular al inicio de la fase concéntrica."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Placas de 20 kg colisionan con el pecho reduciendo el acortamiento muscular."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Momento máximo en paralelo al suelo; disminución angular hacia arriba en pivote."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Exige estabilización isométrica espinal intensa en versión no soportada sobre pecho."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fácil adición progresiva de discos estándar directamente sobre la barra inclinada."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga axial y lumbar considerable si no cuenta con apoyo pectoral integrado."
+      }
+    },
+    "pullover-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tracción angular de polea mantiene resistencia en flexión glenohumeral superior a 120°."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Extensión pura de hombro sin limitación impuesta por flexión del codo."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mantiene tensión a lo largo del arco, a diferencia de implementos libres."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bipedestación requiere fijación isométrica de erectores y pared abdominal anterior constante."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Palanca larga hace que pequeños incrementos de placa limiten el movimiento súbitamente."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Monoarticular con bajo estrés neural general y nula compresión ósea lumbar."
+      }
+    },
+    "pullover-mancuerna": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión gravitacional máxima coincide estrictamente con la máxima flexión de hombros elongada."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Al ascender verticalmente sobre el rostro, la tensión sobre el dorsal desaparece."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mito desmentido: perfil opuesto; tensión nula en la mitad superior de extensión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo transversal en banco exige control de caderas y estabilidad cervical."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Saltos entre mancuernas pesadas limitan sobrecarga progresiva en arcos articulares vulnerables."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estrés sistémico moderado; elevada tensión tendinosa en caja torácica y tríceps."
+      }
+    },
+    "extension-hombro-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga moderada en estiramiento dependiendo del ángulo relativo del banco o cuerpo."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aísla extensión glenohumeral terminal hasta hiperextensión anatómica del brazo atrás."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Alineación de polea asegura brazo de momento consistente a lo largo del arco."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Generalmente apoyado sobre banco o ejecutable unilateralmente sujetando la torre."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cargas bajas utilizadas en aislamiento hacen sensible el salto entre placas estándar."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga fisiológica sistémica mínima; tensión puramente analítica en dorsal e inserciones."
+      }
+    },
+    "remo-pecho-apoyado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite relajar escápulas en estiramiento completo sin transferir sobrecarga a columna."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Excelente recorrido de retracción escapular y extensión sin interferencia de balanceos corporales."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva o palancas convergentes emparejan la curva de producción de fuerza escapular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Soporte esternal bloquea el torso; anula fallo de estabilización lumbopélvica por completo."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión medible constante con placas o discos según manufactura de la máquina."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Coste de fatiga sistémica ínfimo; óptima relación estímulo por serie para espalda."
+      }
+    },
+    "remo-invertido": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cuelgue con brazos rectos elonga la musculatura periescapular bajo carga calisténica fraccionaria."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Limitado en contracción al tocar la barra con el pecho anterior inferior."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Curva con mayor exigencia al aproximarse a la barra en flexión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mantener puente de glúteos y línea corporal recta exige coactivación isométrica posterior."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sobrecarga depende de cambiar ángulo corporal o usar chalecos con lastre."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga central moderada-baja; no comprime discos axiales de forma relevante."
+      }
+    },
+    "remo-barra-agarre-supino": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Gran tensión excéntrica en dorsales y flexores braquiales en cuelgue bajo."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Facilita aproximación de codos pegados al cuerpo ampliando extensión de hombro."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pico de momento máximo en acortamiento cuando el brazo de palanca resiste gravedad."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fuerte limitación por estabilización isométrica lumbopélvica y resistencia del erector espinal."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Facilidad máxima para graduar peso kilo a kilo con discos homologados."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Muy alto coste de fatiga axial, articular en muñeca y estrés neural."
+      }
+    },
+    "remo-mancuernas-tumbado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Descenso libre de mancuernas produce excelente estiramiento escapular sin riesgo lumbopélvico."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mancuernas superan los laterales del banco permitiendo aducción escapular y extensión completa."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca vertical requiere máxima fuerza en posición terminal contraída."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Banco sostiene enteramente el cuerpo, eliminando demanda de equilibrio axial por completo."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Inconveniente para manipular mancuernas excesivamente voluminosas al tumbarse sobre el soporte."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica despreciable; permite sobrecarga local masiva con mínima interferencia general."
+      }
+    },
+    "encogimientos-barra": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Depresión escapular pasiva bajo peso elonga trapecio superior de forma sustancial."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido vertical de elevación de la cintura escapular es anatómicamente corto."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "La resistencia vertical coincide linealmente con el vector de tracción del trapecio."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bipedestación con cargas elevadas exige contención de la musculatura axial de soporte."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga muy progresable con discos pesados y agarre asistido por correas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Alta compresión espinal cervical y torácica derivada de cargas absolutas muy grandes."
+      }
+    },
+    "encogimientos-mancuernas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mancuernas laterales permiten cuelgue profundo en depresión escapular sin roce corporal."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elevación superior y ligera retracción dentro de la reducida excursión articular escapular."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Gravedad pura vertical que opone directamente la elevación de clavícula y escápula."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Posición neutra de brazos lateralmente reduce momentos torso-lumbares respecto a barra anterior."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Límite impuesto por el tamaño máximo de mancuernas disponibles en gimnasios comunes."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estrés axial moderado por peso sostenido; demanda de agarre mitigable con correas."
+      }
+    },
+    "encogimientos-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Línea de cable diagonal permite tracción en sentido de fibras oblicuas del trapecio."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido ligeramente superior al permitir vectores convergentes de elevación escapular diagonal."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Vector diagonal constante alinea mejor el vector resistivo con fibras musculares."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor compresión vertical de la columna que la barra libre cargada directamente."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Límite superior condicionado por la capacidad máxima de las torres de placas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor carga compresiva axial directa sobre discos vertebrales cervicales y lumbares."
+      }
+    },
+    "paseo-granjero": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión sostenida meramente isométrica pasiva; nula oscilación dinámica a través de longitudes."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Consenso desmentido: ausencia completa de recorrido dinámico concéntrico-excéntrico para hipertrofia."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga puramente estática suspendida; no existe correspondencia dinámica de curva contráctil."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Inestabilidad locomotriz dinámica máxima; balanceo pélvico y oscilación desafían el equilibrio."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Facilidad para incrementar masa mediante manijas especiales cargables con discos estándar."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Altísimo desgaste cardiorrespiratorio, compresión espinal global y fatiga de prensión palmar."
+      }
+    },
+    "encogimientos-inclinado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Inclinación del tronco incrementa la tensión en estiramiento del trapecio medio."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Movimiento angular de elevación y retracción escapular diagonal sin interferencias articulares."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Gravedad desafía la retracción escapular diagonal en plano inclinado fijo."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pecho fijado sobre el respaldo banco inclinado anula completamente balanceos corporales."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ajuste por mancuernas graduadas con saltos de masa típicos de centros deportivos."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga axial nula al encontrarse la columna descargada completamente sobre el banco."
+      }
+    },
+    "y-raise-inclinado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elongación moderada de fibras inferiores del trapecio con brazos en suspensión anterior."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Rotación hacia arriba y depresión escapular completa en el plano escaptular."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca externo máximo al final de la elevación horizontal concéntrica."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Soporte esternal sobre banco inclinado elimina oscilaciones indeseadas del tronco superior."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Demanda cargas muy pequeñas; saltos de 1 kg provocan pérdida del patrón."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica mínima al movilizar baja masa de carga externa sobre articulaciones."
+      }
+    },
+    "retraccion-escapular-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión del cable tracciona escápulas a protracción completa manteniendo resistencia continua."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Excursión pura de aducción escapular con codos extendidos fijos sin flexión braquial."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Vector horizontal del cable mantiene tensión uniforme durante toda la fase contráctil."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Generalmente sentado con apoyo de pies lo cual provee base sólida estable."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión condicionada por la graduación fija de peso de la torre empleada."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga central insignificante; estímulo estrictamente acotado a romboides y trapecio medio."
+      }
+    },
+    "remo-alto-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "El ángulo descendente de la polea elonga deltoides posterior y periescapulares."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tracción amplia con abducción horizontal humeral a la altura del cuello/pecho alto."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Resistencia por cable uniforme y adaptada a la trayectoria sin puntos muertos."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo de asiento y piernas en estación de polea garantiza soporte corporal."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ajuste sencillo de placas selectoras con incrementos estandarizados en máquina de gimnasio."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Baja demanda axial en la columna espinal; fatiga confinada a musculatura dorsal."
+      }
+    },
+    "press-militar-barra": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "En clavícula el deltoides anterior se elonga, pero la cabeza medial sufre."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Extensión vertical completa desde hombros hasta bloqueo por encima de la cabeza."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Punto de estancamiento pronunciado a nivel de la frente; descarga en bloqueo."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bipedestación libre exige equilibrio y estabilidad lumbopélvica para evitar hiperextensión lumbar."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Incrementos precisos y micrométricos mediante barras y discos olímpicos calibrados mundialmente."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Notable fatiga axial espinal, cardiovascular y del sistema nervioso en cargas pesadas."
+      }
+    },
+    "press-militar-mancuernas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mancuernas permiten descenso profundo por fuera de hombros sin limitar clavículas."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Arco convergente amplio en el plano escapular con extensión superior humeral completa."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca disminuye arriba al colocarse mancuernas sobre la articulación."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sentado en banco mejora estabilidad frente a barra bípeda, pero exige equilibrio."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Dificultad de posicionar mancuernas pesadas para comenzar la serie sin ayuda externa."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor fatiga que press libre de pie; fatiga focalizada en deltoides."
+      }
+    },
+    "press-hombro-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite cargar el punto inferior con absoluta seguridad biomecánica y máxima tensión."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Trayectoria guiada fija diseñada anatómicamente para optimizar recorrido del deltoides anterior."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva o compensador de carga mantiene torque consistente hasta el bloqueo articular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estabilidad intrínseca máxima; ausencia total de requerimientos de equilibrio postural corporal."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Selección mediante clavija en columna de placas o discos en soporte guiado."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bajo coste neural sistémico; focalización contráctil en el deltoides anterior y tríceps."
+      }
+    },
+    "press-arnold": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Rotación en punto inferior no incrementa la tensión de estiramiento deltoidea."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido amplio que añade rotación axial humeral al plano de empuje vertical."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Consenso desmentido: rotación no aporta ventaja de resistencia y dispersa la tensión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Coordinación compleja durante la transición compromete la fuerza efectiva entregada al deltoides."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Complejidad técnica restringe el incremento sistemático y seguro de cargas pesadas externas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga articular en manguito rotador superior al press militar sentado tradicional."
+      }
+    },
+    "elevacion-frontal": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo colgando en línea de gravedad genera nula tensión en deltoides anterior."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Arco de 90° de flexión; superar la horizontal transfiere la carga al trapecio."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de momento gravitacional máximo arriba donde el hombro pierde fuerza mecánica."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ejercicio monoarticular sencillo; requiere evitar balanceo de espalda en fase concéntrica."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Palanca larga hace que incrementos mínimos de mancuerna desestabilicen la técnica estrictamente."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga central mínima; ejercicio redundante si ya se ejecutan presses de pectoral."
+      }
+    },
+    "elevacion-lateral-mancuernas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión cero al inicio del movimiento por alineación paralela a la gravedad."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Abducción limitada a 90°; ángulos mayores transfieren dominancia al serrato y trapecio."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mito desmentido: sobrecarga máxima a 90° de abducción donde el deltoides medial pierde fuerza."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tendencia frecuente al balanceo espinal o impulso de cadera al fatigarse."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Saltos de 1-2 kg representan cambios de porcentaje inmanejables para este músculo."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga general nula; ejercicio aislado con bajo estrés sobre otros sistemas corporales."
+      }
+    },
+    "elevacion-lateral-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cable cruzando por detrás o polea a altura de rodilla otorga tensión inicial."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite aducción horizontal cruzada inicial ampliando el rango útil del deltoides."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Línea de fuerza del cable coincide uniformemente con curva fisiológica de abducción."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sujeción a la torre con brazo contralateral provee anclaje corporal muy estable."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Requiere microcargas magnéticas accesorias para progresiones fraccionales inferiores al kilo."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aislamiento monoarticular estricto con fatiga sistémica y articular totalmente despreciable."
+      }
+    },
+    "elevacion-lateral-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Diseño moderno posiciona almohadillas de empuje con tensión desde el primer grado."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Arco guiado constante que previene compensaciones con musculatura cervical y trapecios."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva compensatoria replica fielmente la disminución fisiológica de fuerza en abducción terminal."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Asiento con cinturón o almohadilla torácica anula completamente balanceos del atleta."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pasador de placas permite registro objetivo numérico idéntico en cada sesión programada."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Impacto sistémico prácticamente inexistente; fatiga metabólica concentrada en deltoides lateral."
+      }
+    },
+    "elevacion-lateral-inclinado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Inclinación del tronco sobre banco modifica el ángulo de inicio aumentando tensión."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite iniciar la abducción con mayor elongación previa de fibras medias deltoideas."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "El pico de momento ocurre antes que en la versión de pie."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo sobre banco inclinado evita trampeos con piernas y columna lumbar."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión compleja al depender de mancuernas fijas con incrementos no adaptados."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica reducida; bajo coste neural general y nula compresión axial."
+      }
+    },
+    "remo-al-menton": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cuelgue de barra elonga trapecio superior y fibras deltoideas bajo carga directa."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Abducción de hombros combinada con flexión de codos hasta altura esternal alta."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Resistencia gravitacional lineal ascendente con choque articular subacromial potencial arriba."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Exige control de tronco y espalda para evitar oscilaciones de impulso concéntrico."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite agregar microdiscos en barra olímpica o agarre con polea baja."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Potencial molestia o estrés por pinzamiento acromial; fatiga sistémica media."
+      }
+    },
+    "pajaros-mancuernas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazos colgando hacia el suelo generan tensión nula sobre el deltoides posterior."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Abducción horizontal limitada por la posición inclinada del torso y retracción periescapular."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca máximo a 90° de abducción donde el músculo está acortado."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Posición doblada de pie exige fatiga isométrica en isquiotibiales y columna lumbar."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Saltos convencionales entre mancuernas perjudican el control de la abducción horizontal."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga lumbar molesta; fatiga deltoidea posterior aislada con bajo impacto central."
+      }
+    },
+    "pajaros-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cables cruzados aplican tensión en aducción horizontal completa alargando el deltoides posterior."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Arco continuo que abarca desde el cruce frontal hasta la hiperextensión horizontal."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Vectores de los cables mantienen resistencia perpendicular uniforme durante todo el recorrido."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ejecutable sentado o de pie con apoyo esternal eliminando oscilaciones de cadera."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Torres de poleas comerciales precisan microcargas accesorias para incrementos finos."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Nulo estrés vertebral espinal; fatiga metabólica altamente concentrada en el hombro posterior."
+      }
+    },
+    "pec-deck-invertido": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite configurar los topes para iniciar con deltoides posterior elongado bajo resistencia."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Abducción horizontal guiada completa hasta línea coronal sin desvíos técnicos escapulares."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mecanismo rotatorio de leva conserva tensión pareja en la contracción terminal."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Soporte frontal acolchado en el pecho suprime cualquier posibilidad de inestabilidad."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Selección mediante clavija numerada que asegura progresiones repetibles de serie a serie."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aislamiento monoarticular estricto con fatiga sistémica corporal completamente ausente."
+      }
+    },
+    "face-pull": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión moderada en extensión de brazos frente a la polea a altura facial."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Integra abducción horizontal, flexión de codo y rotación externa del hombro."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cuerda en polea permite tracción divergente continua sin pérdidas de momento articular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bipedestación exige resistencia postural para contrarrestar la tracción anterior del cable."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aumentar peso excesivamente suele degradar la rotación externa transformándolo en un remo."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bajo estrés fisiológico general; excelente estímulo preventivo para la cintura escapular."
+      }
+    },
+    "curl-barra": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazos alineados verticalmente al costado del tronco generan tensión inicial mínima gravitatoria."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión de codo completa desde extensión casi total hasta flexión cercana a 140°."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca máximo a 90° de flexión; pérdida de tensión al verticalizarse arriba."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Posición de pie susceptible a balanceos lumbares o impulsos anteriores de cadera."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite microcarga mediante discos fraccionales de 0.5 a 1.25 kg fácilmente."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga monoarticular aislada; demanda espinal baja si la técnica es estricta."
+      }
+    },
+    "curl-inclinado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Hiperextensión de hombro en banco a 45°-60° elonga activamente la cabeza larga."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido fisiológico articular ampliado tanto por detrás como por delante del torso."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión gravitatoria persiste más en estiramiento, pero decae en flexión final vertical."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Espalda apoyada en respaldo anula inercias y balanceos corporales durante la serie."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Saltos de 2 kg por mancuerna son difíciles de absorber para los flexores."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica nula; elevado aislamiento del compartimento braquial anterior."
+      }
+    },
+    "curl-predicador": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33977835"
+        ],
+        "note": "Ecografía demostró que entrenar flexión de codo en ángulos iniciales alargados genera hipertrofia distal superior."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33977835"
+        ],
+        "note": "Rango enfocado en la fase inicial excéntrica profunda de máxima extensión del codo."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Inclinación del banco coloca el pico de brazo de momento en máxima elongación."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazos fijados sobre la almohadilla bloquean hombros y anulan balanceos corporales."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite progresión precisa con barra Z o mancuernas con microcargas fijas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga general nula; estrés localizado elevado en tendón distal del bíceps."
+      }
+    },
+    "curl-martillo": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Posición neutra del antebrazo con brazo paralelo a gravedad; estiramiento pasivo limitado."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión amplia de codo reclutando braquial anterior y braquiorradial sin restricciones."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Palanca gravitatoria clásica con máxima demanda contráctil a 90° de flexión articular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Buena estabilidad, especialmente si se ejecuta sentado con soporte posterior espinal."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión condicionada por la disponibilidad de incrementos de mancuernas del gimnasio."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica despreciable; alta tolerancia de volumen en musculatura del antebrazo."
+      }
+    },
+    "curl-polea-baja": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Dando un paso adelante, el cable tracciona diagonalmente hacia atrás elongando el bíceps."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión continua a lo largo de todo el recorrido desde extensión hasta flexión."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ángulo del cable mantiene resistencia constante sin la descarga superior de pesas libres."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión del cable exige leve firmeza de core; fácilmente ejecutable y controlable."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ajuste por placas en torre; permite añadir pines fraccionarios de peso menor."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga central mínima; excelente tolerancia articular en muñecas y codos."
+      }
+    },
+    "curl-concentrado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Codo apoyado en muslo interno ubica el hombro flexionado, reduciendo estiramiento."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión completa con supinación activa aislada sin intervención del deltoides anterior."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Máxima resistencia a mitad de recorrido; descarga al verticalizarse en contracción final."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo del codo en muslo y posición sentada anulan por completo el impulso."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Dependiente del escalonamiento fijo de mancuernas individuales en la instalación deportiva."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aislamiento extremo de bajo estrés general; coste de fatiga fisiológica nulo."
+      }
+    },
+    "curl-araña": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Hombros flexionados verticalmente hacia el suelo reducen elongación pasiva de la cabeza larga."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión pura de codo enfatizando el pico de acortamiento concéntrico de flexores."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Máximo brazo de momento a 90° de flexión; resistencia nula en extensión vertical."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pecho apoyado firmemente en el banco inclinado suprime cualquier balanceo motor indeseado."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Utilización de barra Z permite añadir pequeños discos olímpicos fraccionales calibrados."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Impacto sistémico despreciable; fatiga circunscrita en bíceps braquial y braquial anterior."
+      }
+    },
+    "extension-sobre-cabeza-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:35819335"
+        ],
+        "note": "Resonancia magnética confirmó hipertrofia significativamente mayor en cabeza larga al entrenar en posición sobre la cabeza."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:35819335"
+        ],
+        "note": "Permite flexión profunda de codos bajo flexión humeral de 180° continuada."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:35819335"
+        ],
+        "note": "Polea proporciona resistencia constante en el punto de estiramiento donde pesos libres descargan."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo de espalda contra la torre o bipedestación sólida facilita control postural."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión cuantitativa por placas; permite uso de pasadores auxiliares de 1 kg."
+      },
+      "systemicFatigueCost": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:35819335"
+        ],
+        "note": "Menores cargas absolutas reducen el estrés articular produciendo idéntica o mayor hipertrofia."
+      }
+    },
+    "extension-sobre-cabeza-mancuerna": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:35819335"
+        ],
+        "note": "Elonga fuertemente la cabeza larga del tríceps mediante la flexión completa de hombro."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión de codo completa limitada por el choque de mancuerna contra la espalda."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pico de resistencia en flexión profunda; desciende a cero al bloquear arriba."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Manipular una mancuerna pesada tras la nuca exige balance y movilidad de hombro."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Saltos fijos de peso de mancuernas complican el avance progresivo en atletas avanzados."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estrés articular elevado en codos; fatiga general moderada a baja por serie."
+      }
+    },
+    "press-frances": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:21858666",
+          "PMID:23657165"
+        ],
+        "note": "Resonancia magnética evidenció reclutamiento e hipertrofia no uniforme a lo largo del tríceps."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:23657165"
+        ],
+        "note": "Flexión completa llevando la barra hacia la coronilla o detrás de la cabeza."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca elevado en flexión de 90°; nulo si se bloquea verticalmente."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Espalda firmemente apoyada en banco plano; estabilidad articular del codo demandante."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite progresión precisa con barra Z y adición de discos fraccionales finos."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estrés significativo sobre el tendón tricipital distal; baja fatiga neural general."
+      }
+    },
+    "pushdown-cuerda": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:35819335"
+        ],
+        "note": "Brazos junto al tronco acortan la cabeza larga del tríceps induciendo menor hipertrofia."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite abrir la cuerda en extensión terminal para lograr máximo acortamiento lateral."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cable conserva tensión uniforme hasta la apertura final de muñecas hacia afuera."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bipedestación estable frente a la polea con leve inclinación anterior del tronco."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión limitada por saltos de placas en la torre de poleas comercial."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica prácticamente nula; excelente tolerancia periarticular en muñecas."
+      }
+    },
+    "pushdown-barra": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:35819335"
+        ],
+        "note": "Hombro neutro posiciona la cabeza larga en longitudes más cortas comparado con polea alta."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Barra rígida colisiona con el torso limitando la extensión y rotación terminal."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mantiene resistencia continua eficiente durante el descenso y extensión del antebrazo."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Barra fija reduce demandas de estabilización lateral respecto a cuerdas libres."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite movilizar más carga que la cuerda y registrar progresiones reproducibles."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica mínima; bajo estrés extraarticular fuera del codo."
+      }
+    },
+    "extension-triceps-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Dependiendo del diseño del asiento, suele ubicar brazos a 90° de flexión."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Arco guiado estricto desde flexión pronunciada hasta extensión articular completa."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva compensatoria ajusta la resistencia exactamente a la curva de fuerza muscular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Soporte dorsal y almohadillas en codos anulan desvíos o compensaciones articulares."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fácil graduación de sobrecarga mediante selector de columna de placas numeradas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica nula; aislamiento mecánico perfecto para acumulación de volumen semanal."
+      }
+    },
+    "fondos-banco": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Hiperextensión glenohumeral profunda bajo peso corporal genera estiramiento anterior agresivo."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Descenso excesivo condicionado por compresión acromioclavicular y deslizamiento anterior humeral."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Descarga de tensión relativa al llegar al bloqueo vertical del codo."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pies apoyados al frente estabilizan el cuerpo, pero la posición escapular sufre."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Colocar discos sobre los muslos es inestable y limita sobrecargas progresivas seguras."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elevado estrés ligamentoso capsular en hombro; fatiga general moderada."
+      }
+    },
+    "press-banca-cerrado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mayor flexión del codo en la parte inferior genera elongación relevante del tríceps."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido amplio desde contacto esternal hasta extensión final completa de brazos."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:32922646"
+        ],
+        "note": "Pico de momento en flexión profunda; curva ascendente al aproximarse al bloqueo."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Banco plano ofrece apoyo dorsal robusto; menor anchura de agarre exige estabilidad."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Excelente capacidad de sobrecarga progresiva milimétrica con barra y discos olímpicos."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga moderada al involucrar conjuntamente masas musculares de pectoral, deltoides y brazos."
+      }
+    },
+    "sentadilla-libre": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:31230110"
+        ],
+        "note": "RM constató mayor hipertrofia en glúteo mayor y aductores en sentadilla profunda (140°) vs parcial (90°)."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:31230110"
+        ],
+        "note": "Flexión profunda de rodilla y cadera; nula hipertrofia en isquiosurales biarticulares comprobada."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:31230110"
+        ],
+        "note": "Curva ascendente con punto de estancamiento severo en inversión profunda sobre cuádriceps."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Alta demanda de equilibrio; fatiga del core/lumbar frecuentemente limita el fallo en cuádriceps."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Referencia universal de sobrecarga; incrementos fraccionarios exactos mediante discos de competición."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Altísima fatiga del sistema nervioso central, compresión axial severa y estrés cardiorrespiratorio."
+      }
+    },
+    "sentadilla-frontal": {
+      "stretchedPositionLoading": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:31230110"
+        ],
+        "note": "Torso erguido acentúa flexión de rodilla bajo estiramiento de vastos cuadricipitales."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Gran flexión de rodilla con menor cierre angular de cadera respecto a sentadilla trasera."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Curva ascendente con exigencia biomecánica extrema en el punto de inversión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fuerza de la espalda alta y estabilización torácica fallan antes que los cuádriceps."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión milimétrica estandarizada sobre barra olímpica con discos pequeños."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica y de soporte escapular muy alta; constricción torácica respiratoria."
+      }
+    },
+    "sentadilla-hack": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Soporte dorsal inclinado permite flexión de rodilla aguda y máximo estiramiento de cuádriceps."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Excursión profunda completa de rodilla sin restricción de movilidad lumbopélvica."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Plataforma angulada optimiza momento extensor de rodilla manteniendo tensión continua."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Espalda guiada y bloqueo de carril eliminan completamente demandas de equilibrio periférico."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite cargar discos pesados con microincrementos y seguridad mecánica total."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga axial sobre hombros presente, pero elimina fatiga neural de estabilización libre."
+      }
+    },
+    "prensa-45": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:378797420"
+        ],
+        "note": "Ultrasonido demostró hipertrofia de cuádriceps y glúteo; cadera a 90° limita elongación glútea extrema."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido delimitado por la flexión de cadera para evitar retroversión pélvica lumbar."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Resistencia constante por gravedad en riel inclinado a 45°; tensión sostenida."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Atleta encajado en respaldo anatómico; balance cero, permitiendo máxima expresión contráctil."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Soporta gran volumen de discos olímpicos con adición milimétrica precisa y repetible."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Descarga axial sobre la columna lumbar, pero alta demanda circulatoria y metabólica."
+      }
+    },
+    "sentadilla-smith": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Posicionando pies adelantados se logra máxima flexión de rodilla y elongación de vastos."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite descenso profundo vertical seguro sin compromiso del equilibrio del levantador."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Guía lineal canaliza la resistencia contra la extensión de rodilla de forma continua."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Guía vertical anula desequilibrios sagitales y frontales maximizando tensión en cuádriceps."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sobrecarga con discos olímpicos sobre barra guiada con topes mecánicos de seguridad."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Compresión axial sobre la columna persiste, pero la fatiga del SNC por balanceo se reduce."
+      }
+    },
+    "sentadilla-goblet": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga frontal facilita posición vertical profunda de torso y estiramiento de cuádriceps."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite excelente profundidad articular sin comprometer la curvatura natural de la columna."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pico de momento en flexión profunda; descarga progresiva hacia la extensión erguida."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fuerza de agarre palmar y fatiga de bíceps/deltoides anterior pueden limitar la serie."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sostener mancuernas de más de 40 kg frente al esternón es mecánicamente inviable."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga axial vertebral baja; adecuada para estímulos metabólicos de hipertrofia accesoria."
+      }
+    },
+    "bulgara": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pierna trasera elevada permite flexión de cadera y rodilla profundas bajo gran estiramiento."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido vertical completo que explora máxima excursión articular del miembro anterior."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Momento máximo de resistencia en la inversión inferior; menor carga al bloquear."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Alta demanda de equilibrio monopodal; el balance lateral suele limitar antes que los cuádriceps."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite cargar mancuernas pesadas o barra, aunque la inestabilidad dificulta saltos altos."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elevado coste cardiovascular y neural al duplicar el trabajo unilateral por serie."
+      }
+    },
+    "zancadas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fase de descenso produce estiramiento activo en extensores de rodilla y glúteo."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Paso amplio permite descenso completo de rodilla retrasada hasta rozar el suelo."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Momento resistivo gravitatorio máximo en la transición angular más baja."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Desaceleración dinámica en cada paso desafía el equilibrio frontal y rotacional."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cargar mancuernas o barras en movimiento dinámico compromete la técnica estricta."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Alto coste cardiovascular e impacto articular repetido por desaceleración cíclica."
+      }
+    },
+    "subidas-cajon": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cajón alto coloca cadera y rodilla en fuerte flexión y elongación muscular inicial."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Extensión unipedal completa desde flexión profunda hasta bipedestación sobre soporte."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Dificultad inicial extrema que decrece verticalmente al extender la articulación."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Exige control de equilibrio sobre superficie elevada; propensión a impulsos del pie de apoyo."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión limitada por seguridad al ascender con cargas libres sobre la plataforma."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Demanda metabólica moderada-alta sin compresión espinal axil desmesurada."
+      }
+    },
+    "extension-cuadriceps": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33977835"
+        ],
+        "note": "Ecografía demostró que repeticiones parciales en el ángulo de máxima flexión (100°-65°) generan mayor hipertrofia que rango completo."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33977835"
+        ],
+        "note": "Aísla extensión pura de rodilla sin limitación de fatiga de cadera o tronco."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva compensatoria ajusta la resistencia mecánica al brazo de palanca del cuádriceps."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sedestación con almohadilla fija; demanda de equilibrio nula, optimizando reclutamiento motor."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Graduación precisa mediante clavija en columna de placas con adiciones auxiliares."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Nula compresión espinal y mínimo coste metabólico sistémico por serie efectuada."
+      }
+    },
+    "sentadilla-sissy": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Extensión pura de cadera combinada con flexión extrema de rodilla elonga al recto femoral."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión articular muy amplia del complejo femororrotuliano sin apoyo de cadera."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca gravitacional sobre la rodilla se vuelve masivo en descenso."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Gran demanda de balance corporal sobre metatarsos a menos que se use soporte comercial fijo."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Complejo de sobrecargar de forma estable más allá del peso corporal y pequeños discos."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bajo coste sistémico neural; muy alto estrés de cizallamiento sobre tendón rotuliano."
+      }
+    },
+    "peso-muerto-rumano": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33009197"
+        ],
+        "note": "Bisagra de cadera somete a isquiosurales a elongación pasiva extrema bajo momento de carga masivo."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión de cadera amplia; rango útil termina donde la pelvis inicia retroversión."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca coincide óptimamente con la capacidad de torque extensor de cadera."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Exige control técnico estricto para evitar flexión toracolumbar bajo cargas elevadas."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Capacidad óptima de sobrecarga progresiva mediante discos estándar y uso de correas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elevada fatiga del SNC, tensión isométrica en erectores y cizallamiento lumbosacro."
+      }
+    },
+    "peso-muerto-rumano-mancuernas": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite deslizar cargas junto al centro de gravedad optimizando estiramiento isquiosural."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Excelente recorrido de bisagra de cadera con trayectoria libre de muñecas."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Momento articular máximo en elongación isquiotibial profunda descendente."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor restricción sagital que barra, pero demanda control escapular y lumbar constante."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Límite superior condicionado por la graduación máxima de mancuernas disponibles."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor fatiga neural absoluta que con barra pesada; estímulo localizado muy potente."
+      }
+    },
+    "peso-muerto-piernas-rigidas": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33009197"
+        ],
+        "note": "Rodillas casi bloqueadas incrementan la longitud de los isquiosurales al máximo anatómico."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Descenso profundo condicionado estrictamente por la flexibilidad miofascial posterior."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca sobre columna lumbar aumenta exponencialmente al alejarse la barra."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fuerte demanda sobre erectores espinales para resistir colapso en flexión lumbar."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión sistemática con discos olímpicos sobre barra recta convencional."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estrés axial y cizallamiento espinal severo; alta fatiga neuromuscular residual."
+      }
+    },
+    "buenos-dias": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Barra en espalda alta maximiza el brazo de palanca sobre la cadera en estiramiento."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión de cadera amplia; limitada por tolerancia de isquiotibiales y columna."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Palanca de resistencia desfavorable aumenta con el avance horizontal del torso."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Masa sobre la espalda alta desafía intensamente la estabilidad del core toracolumbar."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresable con barra, pero el margen de error técnico es sumamente estrecho."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Alta compresión espinal y fatiga de extensores vertebrales por serie efectuada."
+      }
+    },
+    "curl-femoral-sentado": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33009197"
+        ],
+        "note": "RM confirmó que la flexión de cadera pre-estira los isquiosurales produciendo +14% volumen vs +9% en versión tumbada."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33009197"
+        ],
+        "note": "Flexión de rodilla completa manteniendo tensión en longitudes musculares alargadas eficaces."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33009197"
+        ],
+        "note": "Leva de la máquina empareja la resistencia con la curva fisiológica en flexión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Almohadilla fijadora de muslos anula el despegue corporal y la inestabilidad periférica."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Graduación precisa mediante clavija en la columna de placas estandarizada."
+      },
+      "systemicFatigueCost": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33009197"
+        ],
+        "note": "Ausencia de fatiga espinal o axial; ejercicio de altísima eficiencia estímulo-fatiga."
+      }
+    },
+    "curl-femoral-tumbado": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33009197"
+        ],
+        "note": "Cadera en extensión anatómica mantiene isquiosurales biarticulares en longitud acortada, reduciendo hipertrofia."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33009197"
+        ],
+        "note": "Flexión de rodilla guiada completa pero operando en rangos musculares subóptimos."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva rotatoria compensa la palanca mecánica a lo largo del arco de flexión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo prono estable; tendencia a elevar la pelvis si la carga es excesiva."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión medible mediante columna de placas de resistencia comercial."
+      },
+      "systemicFatigueCost": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:33009197"
+        ],
+        "note": "Fatiga central mínima; nula sobrecarga compresiva sobre la columna espinal."
+      }
+    },
+    "nordic-curl": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:381309062"
+        ],
+        "note": "RM constató que entrenamiento excéntrico en estado alargado es superior al nórdico para hipertrofia del bíceps femoral."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:381309062"
+        ],
+        "note": "Fase concéntrica raramente completada; mayoritariamente ejecutado en modo puramente excéntrico."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:381309062"
+        ],
+        "note": "Brazo de palanca corporal gravitacional crece exponencialmente hacia el suelo haciéndolo inmanejable."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fijación de tobillos obligatoria; exige control de estabilidad del core para evitar flexión de cadera."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sobrecarga basada en masa corporal difícil de graduar finamente sin bandas de descarga."
+      },
+      "systemicFatigueCost": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:381309062"
+        ],
+        "note": "Produce severo daño muscular inducido por contracciones excéntricas supramáximas."
+      }
+    },
+    "hip-thrust": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:31230110",
+          "PMID:378797420"
+        ],
+        "note": "Carga mínima en estiramiento; contrasta con la sentadilla que elonga masivamente el glúteo mayor."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:31230110"
+        ],
+        "note": "Recorrido limitado a extensión de cadera terminal desde unos 90° de flexión inicial."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:378797420"
+        ],
+        "note": "EMG muestra activación máxima en bloqueo, pero desacuerdos empíricos confirman hipertrofia similar a sentadilla."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo escaptular en banco y pies anclados en suelo confieren base de sustentación sólida."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Gran capacidad de sobrecarga con barra olímpica y discos pesados de forma medible."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bajo estrés compresivo sobre raquis lumbar en comparación con sentadillas y pesos muertos."
+      }
+    },
+    "peso-muerto-convencional": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Posición de salida demanda elongación de glúteos y extensores vertebrales bajo carga masiva."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Inicio condicionado por altura reglamentaria de discos; nula sobrecarga excéntrica terminal."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Máxima resistencia en despegue del suelo; descarga progresiva hacia el bloqueo erguido."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apoyo bipodal firme en suelo; control lumbopélvico demandante ante momentos de flexión."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sobrecarga milimétrica absoluta mediante barras y discos calibrados universalmente."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Máximo coste de fatiga del sistema nervioso central y compresión espinal de la lista."
+      }
+    },
+    "peso-muerto-sumo": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Torso más erguido reduce estiramiento isquiotibial respecto al agarre convencional."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor recorrido vertical de la barra al ampliar considerablemente la base de apoyo."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Gran demanda en el despegue inicial con mayor momento sobre aductores y cuádriceps."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Base ancha otorga firmeza sagital, pero exige gran movilidad y control de cadera."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Capacidad máxima para incorporar discos estándar en barra de levantamiento."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor cizallamiento lumbar que peso muerto convencional; elevada fatiga periférica coxofemoral."
+      }
+    },
+    "puente-gluteo": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Espalda en el suelo limita la excursión a flexión profunda de cadera; estiramiento mínimo."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido angular reducido exclusivamente al tercio superior de extensión de cadera."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión gravitacional máxima focalizada en la extensión terminal concéntrica."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Suelo proporciona una plataforma de estabilidad completa y totalmente segura."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Complicado colocar barras muy pesadas de forma cómoda sin soporte elevado."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica prácticamente nula; nulo impacto axial en la columna vertebral."
+      }
+    },
+    "patada-gluteo-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Línea de tiro del cable permite mantener resistencia moderada en flexión de cadera."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aísla extensión coxofemoral pura sin restricciones impuestas por la articulación de rodilla."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Polea conserva resistencia angular constante coincidiendo con el plano muscular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sujeción firme a la torre de poleas neutraliza demandas de equilibrio monopodal."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Incrementos escalonados por placas fijas pueden representar saltos porcentuales altos."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga central mínima; nula compresión de la columna torácica o lumbosacra."
+      }
+    },
+    "abduccion-cadera-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite iniciar desde aducción cruzada estirando fibras de glúteo medio y menor."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido guiado completo desde cierre de rodillas hasta máxima abducción activa."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva rotatoria empareja la curva de fuerza de los abductores coxofemorales."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sedestación con respaldo fijo; elimina toda exigencia de equilibrio corporal."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión cuantitativa sencilla mediante clavija selectora de placas comerciales."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga fisiológica sistémica inexistente; alto aislamiento del compartimento abductor."
+      }
+    },
+    "abduccion-cadera-banda": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Resistencia elástica es nula cuando las piernas están juntas en punto de estiramiento."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Limitado por la rigidez exponencial de la goma en los grados terminales de apertura."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Perfil de resistencia hiper-ascendente que sobrecarga de forma desproporcionada el acortamiento."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bipedestación o sedestación sin fijación requiere control voluntario de pelvis."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sobrecarga inquantificable objetivamente por degradación elástica del material y deformación."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bajo coste metabólico general; tensión puramente periférica sobre musculatura lateral."
+      }
+    },
+    "aduccion-cadera-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Apertura máxima de almohadillas somete al aductor mayor a elongación sustancial bajo peso."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido amplio desde abducción forzada hasta cierre completo medial de rodillas."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mecanismo rotatorio de leva conserva tensión uniforme en todo el plano de aducción."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Posición sentada bloqueada; suprime requerimientos de equilibrio postural en el atleta."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ajuste milimétrico mediante selector de placas estándar en la torre de entrenamiento."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga general nula; nula sobrecarga vertebral o estrés articular axial lumbar."
+      }
+    },
+    "copenhagen": {
+      "stretchedPositionLoading": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:26782762"
+        ],
+        "note": "Ensayo evaluó ganancia de fuerza excéntrica en aductores; tensión en estiramiento pasivo limitada."
+      },
+      "rangeOfMotion": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:26782762"
+        ],
+        "note": "Movimiento oscilatorio corto o isométrica pura según variante ejecutada."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca largo por peso corporal suspendido; no graduable durante el arco."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Altísimo coste de estabilidad; fallo de hombro, core lateral y equilibrio precede a aductores."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Complejo de cuantificar; progresión mediante reducción de palanca en banco o tiempo."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Gran fatiga de la musculatura lateral del core y cinturón pélvico estabilizador."
+      }
+    },
+    "sentadilla-sumo-mancuerna": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Separación de pies y flexión acentuada estiran profundamente el compartimento aductor."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Profundidad delimitada por el impacto de la mancuerna suspendida contra el suelo."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga gravitacional pura; exigencia máxima abajo con descarga relativa al erguirse."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Base de sustentación amplia y mancuerna vertical en línea media proporcionan buen soporte."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Limitada por el tamaño de la mancuerna y fuerza de prensión manual del levantador."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor compresión espinal que con barra sobre trapecios; fatiga moderada."
+      }
+    },
+    "gemelos-sentado": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:38156065"
+        ],
+        "note": "Consenso desmentido: rodilla a 90° induce insuficiencia activa del gastrocnemio; hipertrofia gastrocnemia casi nula (1.7% vs 12.4% de pie)."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:38156065"
+        ],
+        "note": "Excelente rango para el sóleo monoarticular, pero inefectivo para el complejo gastrocnemio biarticular."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca rotatorio mantiene resistencia sobre la articulación tibiotarsiana."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Almohadilla sobre muslos fija al atleta; demanda de equilibrio corporal nula."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga fácil con discos en soporte de palanca o selector de placas integrado."
+      },
+      "systemicFatigueCost": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:38156065"
+        ],
+        "note": "Aislamiento periférico distal de bajo coste sistémico o neural; nulo impacto espinal."
+      }
+    },
+    "gemelos-de-pie": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:38156065"
+        ],
+        "note": "RM demostró hipertrofia masiva del gastrocnemio con rodilla extendida que elonga fibras biarticulares."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:38156065"
+        ],
+        "note": "Máxima dorsiflexión en borde de tarima hasta flexión plantar completa con rodilla trabada."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mantiene resistencia continua adecuada en todo el arco funcional de flexión plantar."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Almohadillas sobre hombros guían el movimiento; exige firmeza de rodillas y pelvis."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite sobrecarga progresiva cuantificable mediante columna pesada de placas de acero."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Compresión axial sobre hombros presente, pero fatiga sistémica global baja."
+      }
+    },
+    "gemelos-prensa": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:38156065"
+        ],
+        "note": "Rodillas extendidas reproducen la condición óptima de longitud muscular para el gastrocnemio."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite dorsiflexión pronunciada sobre el borde de la plataforma sin tope óseo."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Resistencia constante por deslizamiento de placas a 45° a lo largo de la extensión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Espalda y pelvis totalmente apoyadas en respaldo de prensa; estabilidad perfecta."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Capacidad máxima para añadir discos estándar con precisión y seguridad asegurada."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cero compresión vertebral axial; excelente relación de estímulo puro para pantorrillas."
+      }
+    },
+    "gemelos-mancuerna": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ejecución unilateral en escalón permite máxima dorsiflexión bajo peso gravitatorio."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido libre profundo sin restricciones mecánicas de levas o topes de máquina."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Resistencia gravitacional vertical con reducción relativa en flexión plantar máxima."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Unilateral sobre metatarso exige apoyarse con la mano libre para no perder equilibrio."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Saltos fijos de mancuernas dificultan progresiones intermedias a atletas avanzados."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga central insignificante; estímulo puramente distal sobre gastrocnemio y sóleo."
+      }
+    },
+    "dorsiflexion-banda": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Goma elástica pierde tensión casi por completo en máxima flexión plantar."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido articular delimitado por la tensión deformante variable del material elástico."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Máxima resistencia en acortamiento terminal de tibiales; desajuste con capacidad muscular."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sentado en el suelo con pierna apoyada elimina problemas de equilibrio corporal."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Imposible medir y progresar carga de manera precisa y estandarizada entre sesiones."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga fisiológica sistémica completamente nula; baja magnitud de fuerza."
+      }
+    },
+    "dorsiflexion-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite elongar el tibial anterior en flexión plantar completa bajo resistencia constante."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido anatómico óptimo de la articulación del tobillo guiado sin desvíos."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca o leva conserva tensión en el rango medio de dorsiflexión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Piernas bloqueadas y asiento fijo garantizan estabilidad total del tren inferior."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite registrar peso mediante discos o placas selectoras de forma precisa."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga general nula; ejercicio monoarticular con bajo estrés neural o articular."
+      }
+    },
+    "dorsiflexion-peso-libre": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Peso gravitacional suspendido en la punta del pie ofrece tensión en descenso."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Excursión amplia permitida si la pierna cuelga libre sobre el borde de un banco."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Momento de resistencia gravitatorio máximo a mitad de la elevación angular del pie."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fijación inestable del lastre o mancuerna al calzado requiere excesiva precaución."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ajuste mediante pequeños discos atados o dispositivos portátiles específicos de tobillo."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Coste sistémico nulo; estímulo acotado al compartimento tibial anterior."
+      }
+    },
+    "hiperextensiones": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión de cadera profunda en banco a 45° estira glúteos e isquiosurales."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Desde flexión anterior completa hasta extensión lumbopélvica alineada con tronco."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca del torso contra la gravedad ofrece curva uniforme de tensión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Muslos y tobillos fijados sólidamente por los rodillos acolchados del banco."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite sostener discos olímpicos o barras frente al pecho para sobrecargar."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menor fatiga neural que un peso muerto; excelente estímulo lumbar y de glúteo."
+      }
+    },
+    "extension-lumbar-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión guiada del tronco estira los erectores espinales bajo resistencia constante."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Arco de flexión y extensión vertebral controlado dentro de márgenes de seguridad."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva de la máquina compensa la pérdida de palanca de los erectores torácicos."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pelvis y fémures anclados con cinturón eliminan toda necesidad de equilibrio periférico."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Graduación precisa mediante pasador en columna de placas estandarizada."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica controlada; sobrecarga pura sobre la musculatura paravertebral."
+      }
+    },
+    "reverse-hyper": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión pendular anterior de piernas estira moderadamente glúteos e isquiosurales."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Elevación de piernas hacia atrás desde flexión anterior hasta alineación horizontal pélvica."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mecanismo pendular con mayor inercia y descarga en inversión inferior."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tronco firmemente apoyado sobre mesa acolchada con sujeción manual fija."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga de discos en el brazo pendular con incrementos finos y repetibles."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Descarga de compresión axial vertebral al traccionar la pelvis hacia descompresión."
+      }
+    },
+    "crunch-polea": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Extensión torácica en posición arrodillada elonga el recto abdominal contra el cable."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión espinal activa completa acercando las costillas hacia la sínfisis púbica."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Vector del cable mantiene tensión uniforme a lo largo del acortamiento abdominal."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Posición de rodillas en suelo confiere base estable si se evita balanceo de caderas."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresión cuantitativa simple mediante selección de placas en la columna de polea."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga general mínima; impacto metabólico y contráctil concentrado en el abdomen."
+      }
+    },
+    "elevacion-piernas-colgado": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Suspensión vertical elonga pared abdominal bajo retroversión pélvica pasiva inicial."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Exige retroversión de pelvis para reclutar recto abdominal y no solo psoas."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca gravitacional máximo en horizontal con piernas paralelas al suelo."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Suspensión libre susceptible a balanceos parásitos y fatiga de agarre palmar."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Dificultad para añadir lastre medible sin comprometer la mecánica con mancuernas."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga de antebrazos y dorsal por suspensión; baja demanda metabólica sistémica."
+      }
+    },
+    "crunch-maquina": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Respaldo permite hiperextensión fisiológica torácica estirando la pared del recto abdominal."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Flexión vertebral anatómica pura contra resistencia guiada sin compensación psoas."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Leva compensatoria mantiene tensión proporcional a lo largo de toda la flexión."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Asiento y almohadillas anclan completamente la pelvis y extremidades del levantador."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite sobrecarga progresiva milimétrica y objetiva mediante torre de placas de peso."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica completamente nula; óptima seguridad y focalización abdominal."
+      }
+    },
+    "rueda-abdominal": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Extensión horizontal completa elonga intensamente el recto abdominal bajo tensión excéntrica."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Gran recorrido desde cierre en flexión hasta extensión casi total paralela al suelo."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Momento de resistencia se vuelve desmesurado en máxima extensión; descarga rápida al regresar."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Exige alta estabilidad multiplanar; fallo en erectores causa colapso lumbar lesivo."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sobrecarga depende de aumentar recorrido o chalecos; difícil regulación milimétrica."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Alta fatiga de hombros, serratos y musculatura espinal por contracción isométrica intensa."
+      }
+    },
+    "pallof-press": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión antirrotacional sostenida isométrica; sin elongación dinámica del oblicuo."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Consenso desmentido: ejercicio de estabilización isométrica pura sin ciclo excéntrico-concéntrico dinámico."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aumenta momento torsional al extender los codos alejando el cable del eje."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bipedestación estricta desafiada por vector transversal; demanda de equilibrio deliberada."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ajuste de placas en torre de poleas, condicionado por saltos mínimos de la máquina."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bajo estrés del SNC; excelente perfil profiláctico sin fatiga residual compresiva."
+      }
+    },
+    "plancha": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Tensión isométrica estática sin deformación sarcomérica longitudinal dinámica."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mito desmentido: rango cero; es un ejercicio de estabilización y no de hipertrofia dinámica."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Brazo de palanca estático determinado por la longitud corporal del sujeto."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Cuatro puntos de contacto en el suelo; fatiga postural deltoidea a menudo precede al abdomen."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Solo progresa por tiempo acumulado o discos inestables colocados sobre la espalda."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga sistémica baja pero ineficiente en tiempo invertido por unidad de tensión hipertrófica."
+      }
+    }
+  }
+}

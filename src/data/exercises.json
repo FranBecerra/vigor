@@ -1,0 +1,2099 @@
+{
+  "$comment": "CATÁLOGO DE EJERCICIOS — fuente de verdad, editable a mano. Los seis criterios vienen de la auditoría biomecánica; su grado de confianza, citas y notas viven en exercise-evidence.json. Ver src/data/README.md.",
+  "version": 2,
+  "exercises": [
+    {
+      "id": "press-banca",
+      "name": "Press de banca",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [
+        "TRICEPS",
+        "DELTS_FRONT"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "press-banca-mancuernas",
+      "name": "Press de banca con mancuernas",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [
+        "TRICEPS",
+        "DELTS_FRONT"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "press-banca-declinado",
+      "name": "Press declinado",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [
+        "TRICEPS"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "press-pecho-maquina",
+      "name": "Press de pecho en máquina",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [
+        "TRICEPS",
+        "DELTS_FRONT"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "press-banca-smith",
+      "name": "Press de banca en multipower",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [
+        "TRICEPS",
+        "DELTS_FRONT"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "SMITH_MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 5,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "fondos-paralelas",
+      "name": "Fondos en paralelas",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [
+        "TRICEPS",
+        "DELTS_FRONT"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "flexiones",
+      "name": "Flexiones",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [
+        "TRICEPS",
+        "DELTS_FRONT"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "aperturas-mancuernas",
+      "name": "Aperturas con mancuernas",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 1,
+        "stabilityCost": 2,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "cruces-polea-media",
+      "name": "Cruces en polea a la altura del pecho",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "pec-deck",
+      "name": "Contractor de pecho",
+      "primaryMuscle": "CHEST_MID_LOWER",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "press-inclinado-barra",
+      "name": "Press inclinado con barra",
+      "primaryMuscle": "CHEST_UPPER",
+      "secondaryMuscles": [
+        "DELTS_FRONT",
+        "TRICEPS"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "press-inclinado-mancuernas",
+      "name": "Press inclinado con mancuernas",
+      "primaryMuscle": "CHEST_UPPER",
+      "secondaryMuscles": [
+        "DELTS_FRONT",
+        "TRICEPS"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "press-inclinado-maquina",
+      "name": "Press inclinado en máquina",
+      "primaryMuscle": "CHEST_UPPER",
+      "secondaryMuscles": [
+        "DELTS_FRONT",
+        "TRICEPS"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "cruces-polea-baja",
+      "name": "Cruces en polea baja",
+      "primaryMuscle": "CHEST_UPPER",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "aperturas-inclinadas",
+      "name": "Aperturas inclinadas",
+      "primaryMuscle": "CHEST_UPPER",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 1,
+        "stabilityCost": 2,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "dominadas",
+      "name": "Dominadas",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "BICEPS",
+        "RHOMBOIDS"
+      ],
+      "movementVector": "PULL_VERTICAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "dominadas-supinas",
+      "name": "Dominadas supinas",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "BICEPS"
+      ],
+      "movementVector": "PULL_VERTICAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "jalon-al-pecho",
+      "name": "Jalón al pecho",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "BICEPS",
+        "RHOMBOIDS"
+      ],
+      "movementVector": "PULL_VERTICAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "jalon-agarre-neutro",
+      "name": "Jalón con agarre neutro",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "BICEPS"
+      ],
+      "movementVector": "PULL_VERTICAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "jalon-unilateral",
+      "name": "Jalón unilateral en polea",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "BICEPS"
+      ],
+      "movementVector": "PULL_VERTICAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "remo-con-barra",
+      "name": "Remo con barra",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "RHOMBOIDS",
+        "BICEPS",
+        "TRAPS_MID_LOWER",
+        "ERECTORS"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 1,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 1
+      }
+    },
+    {
+      "id": "remo-mancuerna",
+      "name": "Remo con mancuerna",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "RHOMBOIDS",
+        "BICEPS"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "remo-sentado-polea",
+      "name": "Remo sentado en polea",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "RHOMBOIDS",
+        "BICEPS",
+        "TRAPS_MID_LOWER"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "remo-maquina",
+      "name": "Remo en máquina",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "RHOMBOIDS",
+        "BICEPS"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "remo-t",
+      "name": "Remo en T",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "RHOMBOIDS",
+        "BICEPS",
+        "TRAPS_MID_LOWER"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "pullover-polea",
+      "name": "Pullover en polea alta",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "pullover-mancuerna",
+      "name": "Pullover con mancuerna",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [
+        "CHEST_MID_LOWER"
+      ],
+      "movementVector": "SHOULDER_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 1,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "extension-hombro-polea",
+      "name": "Extensión de hombro en polea",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "remo-pecho-apoyado",
+      "name": "Remo con pecho apoyado",
+      "primaryMuscle": "RHOMBOIDS",
+      "secondaryMuscles": [
+        "LATS",
+        "TRAPS_MID_LOWER",
+        "BICEPS"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "remo-invertido",
+      "name": "Remo invertido",
+      "primaryMuscle": "RHOMBOIDS",
+      "secondaryMuscles": [
+        "LATS",
+        "BICEPS"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "remo-barra-agarre-supino",
+      "name": "Remo con barra agarre supino",
+      "primaryMuscle": "RHOMBOIDS",
+      "secondaryMuscles": [
+        "LATS",
+        "BICEPS",
+        "TRAPS_MID_LOWER"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 1,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 1
+      }
+    },
+    {
+      "id": "remo-mancuernas-tumbado",
+      "name": "Remo con mancuernas tumbado en banco",
+      "primaryMuscle": "RHOMBOIDS",
+      "secondaryMuscles": [
+        "DELTS_REAR",
+        "LATS"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 5,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "encogimientos-barra",
+      "name": "Encogimientos con barra",
+      "primaryMuscle": "TRAPS_UPPER",
+      "secondaryMuscles": [],
+      "movementVector": "SCAPULAR_ELEVATION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 2,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "encogimientos-mancuernas",
+      "name": "Encogimientos con mancuernas",
+      "primaryMuscle": "TRAPS_UPPER",
+      "secondaryMuscles": [],
+      "movementVector": "SCAPULAR_ELEVATION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "encogimientos-polea",
+      "name": "Encogimientos en polea",
+      "primaryMuscle": "TRAPS_UPPER",
+      "secondaryMuscles": [],
+      "movementVector": "SCAPULAR_ELEVATION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "paseo-granjero",
+      "name": "Paseo del granjero",
+      "primaryMuscle": "TRAPS_UPPER",
+      "secondaryMuscles": [
+        "CORE",
+        "ERECTORS"
+      ],
+      "movementVector": "LOADED_CARRY",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 1,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 1,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 1
+      }
+    },
+    {
+      "id": "encogimientos-inclinado",
+      "name": "Encogimientos en banco inclinado",
+      "primaryMuscle": "TRAPS_MID_LOWER",
+      "secondaryMuscles": [
+        "RHOMBOIDS"
+      ],
+      "movementVector": "SCAPULAR_ELEVATION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 5,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "y-raise-inclinado",
+      "name": "Elevación en Y en banco inclinado",
+      "primaryMuscle": "TRAPS_MID_LOWER",
+      "secondaryMuscles": [
+        "DELTS_REAR"
+      ],
+      "movementVector": "SHOULDER_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 5,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "retraccion-escapular-polea",
+      "name": "Retracción escapular en polea",
+      "primaryMuscle": "TRAPS_MID_LOWER",
+      "secondaryMuscles": [
+        "RHOMBOIDS"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "remo-alto-polea",
+      "name": "Remo alto en polea",
+      "primaryMuscle": "TRAPS_MID_LOWER",
+      "secondaryMuscles": [
+        "DELTS_REAR",
+        "RHOMBOIDS"
+      ],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "press-militar-barra",
+      "name": "Press militar con barra",
+      "primaryMuscle": "DELTS_FRONT",
+      "secondaryMuscles": [
+        "TRICEPS",
+        "DELTS_LATERAL"
+      ],
+      "movementVector": "PUSH_VERTICAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "press-militar-mancuernas",
+      "name": "Press militar con mancuernas",
+      "primaryMuscle": "DELTS_FRONT",
+      "secondaryMuscles": [
+        "TRICEPS",
+        "DELTS_LATERAL"
+      ],
+      "movementVector": "PUSH_VERTICAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "press-hombro-maquina",
+      "name": "Press de hombro en máquina",
+      "primaryMuscle": "DELTS_FRONT",
+      "secondaryMuscles": [
+        "TRICEPS"
+      ],
+      "movementVector": "PUSH_VERTICAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "press-arnold",
+      "name": "Press Arnold",
+      "primaryMuscle": "DELTS_FRONT",
+      "secondaryMuscles": [
+        "DELTS_LATERAL",
+        "TRICEPS"
+      ],
+      "movementVector": "PUSH_VERTICAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 2,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "elevacion-frontal",
+      "name": "Elevación frontal",
+      "primaryMuscle": "DELTS_FRONT",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 1,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 4,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "elevacion-lateral-mancuernas",
+      "name": "Elevación lateral con mancuernas",
+      "primaryMuscle": "DELTS_LATERAL",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 1,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 1,
+        "stabilityCost": 3,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "elevacion-lateral-polea",
+      "name": "Elevación lateral en polea",
+      "primaryMuscle": "DELTS_LATERAL",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "elevacion-lateral-maquina",
+      "name": "Elevación lateral en máquina",
+      "primaryMuscle": "DELTS_LATERAL",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "elevacion-lateral-inclinado",
+      "name": "Elevación lateral inclinado",
+      "primaryMuscle": "DELTS_LATERAL",
+      "secondaryMuscles": [],
+      "movementVector": "SHOULDER_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "remo-al-menton",
+      "name": "Remo al mentón",
+      "primaryMuscle": "DELTS_LATERAL",
+      "secondaryMuscles": [
+        "TRAPS_UPPER",
+        "BICEPS"
+      ],
+      "movementVector": "PULL_VERTICAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "pajaros-mancuernas",
+      "name": "Pájaros con mancuernas",
+      "primaryMuscle": "DELTS_REAR",
+      "secondaryMuscles": [
+        "RHOMBOIDS"
+      ],
+      "movementVector": "SHOULDER_HORIZONTAL_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 1,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 1,
+        "stabilityCost": 2,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "pajaros-polea",
+      "name": "Pájaros en polea",
+      "primaryMuscle": "DELTS_REAR",
+      "secondaryMuscles": [
+        "RHOMBOIDS"
+      ],
+      "movementVector": "SHOULDER_HORIZONTAL_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "pec-deck-invertido",
+      "name": "Contractor invertido",
+      "primaryMuscle": "DELTS_REAR",
+      "secondaryMuscles": [
+        "RHOMBOIDS"
+      ],
+      "movementVector": "SHOULDER_HORIZONTAL_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "face-pull",
+      "name": "Face pull",
+      "primaryMuscle": "DELTS_REAR",
+      "secondaryMuscles": [
+        "TRAPS_MID_LOWER",
+        "RHOMBOIDS"
+      ],
+      "movementVector": "SHOULDER_HORIZONTAL_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "curl-barra",
+      "name": "Curl con barra",
+      "primaryMuscle": "BICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "curl-inclinado",
+      "name": "Curl inclinado con mancuernas",
+      "primaryMuscle": "BICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "curl-predicador",
+      "name": "Curl en banco predicador",
+      "primaryMuscle": "BICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "curl-martillo",
+      "name": "Curl martillo",
+      "primaryMuscle": "BICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "curl-polea-baja",
+      "name": "Curl en polea baja",
+      "primaryMuscle": "BICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "curl-concentrado",
+      "name": "Curl concentrado",
+      "primaryMuscle": "BICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 5,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "curl-araña",
+      "name": "Curl araña",
+      "primaryMuscle": "BICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "extension-sobre-cabeza-polea",
+      "name": "Extensión de tríceps sobre la cabeza en polea",
+      "primaryMuscle": "TRICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "extension-sobre-cabeza-mancuerna",
+      "name": "Extensión de tríceps sobre la cabeza con mancuerna",
+      "primaryMuscle": "TRICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "press-frances",
+      "name": "Press francés",
+      "primaryMuscle": "TRICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "pushdown-cuerda",
+      "name": "Extensión de tríceps en cuerda",
+      "primaryMuscle": "TRICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "pushdown-barra",
+      "name": "Extensión de tríceps en polea con barra",
+      "primaryMuscle": "TRICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "extension-triceps-maquina",
+      "name": "Extensión de tríceps en máquina",
+      "primaryMuscle": "TRICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "fondos-banco",
+      "name": "Fondos en banco",
+      "primaryMuscle": "TRICEPS",
+      "secondaryMuscles": [
+        "DELTS_FRONT"
+      ],
+      "movementVector": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "press-banca-cerrado",
+      "name": "Press de banca agarre cerrado",
+      "primaryMuscle": "TRICEPS",
+      "secondaryMuscles": [
+        "CHEST_MID_LOWER",
+        "DELTS_FRONT"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "sentadilla-libre",
+      "name": "Sentadilla libre",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES",
+        "ERECTORS"
+      ],
+      "movementVector": "KNEE_DOMINANT",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 1
+      }
+    },
+    {
+      "id": "sentadilla-frontal",
+      "name": "Sentadilla frontal",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES",
+        "ERECTORS"
+      ],
+      "movementVector": "KNEE_DOMINANT",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 1,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 1
+      }
+    },
+    {
+      "id": "sentadilla-hack",
+      "name": "Sentadilla hack",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES"
+      ],
+      "movementVector": "KNEE_DOMINANT",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "prensa-45",
+      "name": "Prensa a 45 grados",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES"
+      ],
+      "movementVector": "KNEE_DOMINANT",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "sentadilla-smith",
+      "name": "Sentadilla en multipower",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES"
+      ],
+      "movementVector": "KNEE_DOMINANT",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "SMITH_MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "sentadilla-goblet",
+      "name": "Sentadilla goblet",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES"
+      ],
+      "movementVector": "KNEE_DOMINANT",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "bulgara",
+      "name": "Sentadilla búlgara",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES",
+        "ADDUCTORS"
+      ],
+      "movementVector": "UNILATERAL_KNEE",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "zancadas",
+      "name": "Zancadas",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES"
+      ],
+      "movementVector": "UNILATERAL_KNEE",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "subidas-cajon",
+      "name": "Subidas al cajón",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES"
+      ],
+      "movementVector": "UNILATERAL_KNEE",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "extension-cuadriceps",
+      "name": "Extensión de cuádriceps",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [],
+      "movementVector": "KNEE_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "sentadilla-sissy",
+      "name": "Sentadilla sissy",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [],
+      "movementVector": "KNEE_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "peso-muerto-rumano",
+      "name": "Peso muerto rumano",
+      "primaryMuscle": "HAMSTRINGS",
+      "secondaryMuscles": [
+        "GLUTES",
+        "ERECTORS"
+      ],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 3,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "peso-muerto-rumano-mancuernas",
+      "name": "Peso muerto rumano con mancuernas",
+      "primaryMuscle": "HAMSTRINGS",
+      "secondaryMuscles": [
+        "GLUTES",
+        "ERECTORS"
+      ],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "peso-muerto-piernas-rigidas",
+      "name": "Peso muerto a piernas rígidas",
+      "primaryMuscle": "HAMSTRINGS",
+      "secondaryMuscles": [
+        "GLUTES",
+        "ERECTORS"
+      ],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 1
+      }
+    },
+    {
+      "id": "buenos-dias",
+      "name": "Buenos días",
+      "primaryMuscle": "HAMSTRINGS",
+      "secondaryMuscles": [
+        "ERECTORS",
+        "GLUTES"
+      ],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "curl-femoral-sentado",
+      "name": "Curl femoral sentado",
+      "primaryMuscle": "HAMSTRINGS",
+      "secondaryMuscles": [],
+      "movementVector": "KNEE_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "curl-femoral-tumbado",
+      "name": "Curl femoral tumbado",
+      "primaryMuscle": "HAMSTRINGS",
+      "secondaryMuscles": [],
+      "movementVector": "KNEE_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "nordic-curl",
+      "name": "Curl nórdico",
+      "primaryMuscle": "HAMSTRINGS",
+      "secondaryMuscles": [],
+      "movementVector": "KNEE_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 2,
+        "loadProgressability": 1,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "hip-thrust",
+      "name": "Hip thrust",
+      "primaryMuscle": "GLUTES",
+      "secondaryMuscles": [
+        "HAMSTRINGS"
+      ],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "peso-muerto-convencional",
+      "name": "Peso muerto convencional",
+      "primaryMuscle": "GLUTES",
+      "secondaryMuscles": [
+        "HAMSTRINGS",
+        "ERECTORS",
+        "TRAPS_MID_LOWER",
+        "QUADS"
+      ],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 1
+      }
+    },
+    {
+      "id": "peso-muerto-sumo",
+      "name": "Peso muerto sumo",
+      "primaryMuscle": "GLUTES",
+      "secondaryMuscles": [
+        "QUADS",
+        "ADDUCTORS",
+        "ERECTORS"
+      ],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "puente-gluteo",
+      "name": "Puente de glúteo",
+      "primaryMuscle": "GLUTES",
+      "secondaryMuscles": [
+        "HAMSTRINGS"
+      ],
+      "movementVector": "HIP_EXTENSION_ISOLATED",
+      "profile": "ISOLATION",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 1,
+        "rangeOfMotion": 2,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "patada-gluteo-polea",
+      "name": "Patada de glúteo en polea",
+      "primaryMuscle": "GLUTES",
+      "secondaryMuscles": [],
+      "movementVector": "HIP_EXTENSION_ISOLATED",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "abduccion-cadera-maquina",
+      "name": "Abducción de cadera en máquina",
+      "primaryMuscle": "GLUTES",
+      "secondaryMuscles": [],
+      "movementVector": "HIP_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "abduccion-cadera-banda",
+      "name": "Abducción de cadera con banda",
+      "primaryMuscle": "GLUTES",
+      "secondaryMuscles": [],
+      "movementVector": "HIP_ABDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "BANDS",
+      "criteria": {
+        "stretchedPositionLoading": 1,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 3,
+        "loadProgressability": 1,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "aduccion-cadera-maquina",
+      "name": "Aducción de cadera en máquina",
+      "primaryMuscle": "ADDUCTORS",
+      "secondaryMuscles": [],
+      "movementVector": "HIP_ADDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "copenhagen",
+      "name": "Plancha Copenhague",
+      "primaryMuscle": "ADDUCTORS",
+      "secondaryMuscles": [
+        "CORE"
+      ],
+      "movementVector": "HIP_ADDUCTION",
+      "profile": "ISOLATION",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 2,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 1,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "sentadilla-sumo-mancuerna",
+      "name": "Sentadilla sumo con mancuerna",
+      "primaryMuscle": "ADDUCTORS",
+      "secondaryMuscles": [
+        "QUADS",
+        "GLUTES"
+      ],
+      "movementVector": "KNEE_DOMINANT",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "gemelos-sentado",
+      "name": "Elevación de gemelos sentado",
+      "primaryMuscle": "CALVES",
+      "secondaryMuscles": [],
+      "movementVector": "ANKLE_PLANTAR_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 1,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "gemelos-de-pie",
+      "name": "Elevación de gemelos de pie",
+      "primaryMuscle": "CALVES",
+      "secondaryMuscles": [],
+      "movementVector": "ANKLE_PLANTAR_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "gemelos-prensa",
+      "name": "Elevación de gemelos en prensa",
+      "primaryMuscle": "CALVES",
+      "secondaryMuscles": [],
+      "movementVector": "ANKLE_PLANTAR_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "gemelos-mancuerna",
+      "name": "Elevación de gemelos con mancuerna",
+      "primaryMuscle": "CALVES",
+      "secondaryMuscles": [],
+      "movementVector": "ANKLE_PLANTAR_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 5,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "dorsiflexion-banda",
+      "name": "Dorsiflexión con banda",
+      "primaryMuscle": "TIBIALIS",
+      "secondaryMuscles": [],
+      "movementVector": "ANKLE_DORSIFLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BANDS",
+      "criteria": {
+        "stretchedPositionLoading": 1,
+        "rangeOfMotion": 3,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 4,
+        "loadProgressability": 1,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "dorsiflexion-maquina",
+      "name": "Dorsiflexión en máquina",
+      "primaryMuscle": "TIBIALIS",
+      "secondaryMuscles": [],
+      "movementVector": "ANKLE_DORSIFLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "dorsiflexion-peso-libre",
+      "name": "Dorsiflexión con peso en el pie",
+      "primaryMuscle": "TIBIALIS",
+      "secondaryMuscles": [],
+      "movementVector": "ANKLE_DORSIFLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "hiperextensiones",
+      "name": "Hiperextensiones",
+      "primaryMuscle": "ERECTORS",
+      "secondaryMuscles": [
+        "GLUTES",
+        "HAMSTRINGS"
+      ],
+      "movementVector": "SPINAL_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "extension-lumbar-maquina",
+      "name": "Extensión lumbar en máquina",
+      "primaryMuscle": "ERECTORS",
+      "secondaryMuscles": [],
+      "movementVector": "SPINAL_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "reverse-hyper",
+      "name": "Hiperextensión inversa",
+      "primaryMuscle": "ERECTORS",
+      "secondaryMuscles": [
+        "GLUTES"
+      ],
+      "movementVector": "SPINAL_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "crunch-polea",
+      "name": "Crunch en polea",
+      "primaryMuscle": "CORE",
+      "secondaryMuscles": [],
+      "movementVector": "SPINAL_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 4,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "elevacion-piernas-colgado",
+      "name": "Elevación de piernas colgado",
+      "primaryMuscle": "CORE",
+      "secondaryMuscles": [],
+      "movementVector": "SPINAL_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 2,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "crunch-maquina",
+      "name": "Crunch en máquina",
+      "primaryMuscle": "CORE",
+      "secondaryMuscles": [],
+      "movementVector": "SPINAL_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 5,
+        "stabilityCost": 5,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "rueda-abdominal",
+      "name": "Rueda abdominal",
+      "primaryMuscle": "CORE",
+      "secondaryMuscles": [],
+      "movementVector": "CORE_ANTI_MOVEMENT",
+      "profile": "ISOLATION",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 2,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "pallof-press",
+      "name": "Pallof press",
+      "primaryMuscle": "CORE",
+      "secondaryMuscles": [],
+      "movementVector": "CORE_ANTI_MOVEMENT",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 1,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 3,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "plancha",
+      "name": "Plancha",
+      "primaryMuscle": "CORE",
+      "secondaryMuscles": [],
+      "movementVector": "CORE_ANTI_MOVEMENT",
+      "profile": "ISOLATION",
+      "equipment": "BODYWEIGHT",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 1,
+        "resistanceProfileMatch": 2,
+        "stabilityCost": 3,
+        "loadProgressability": 1,
+        "systemicFatigueCost": 4
+      }
+    }
+  ]
+}

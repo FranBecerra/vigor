@@ -1,0 +1,152 @@
+rules_version = '2';
+
+// =============================================================================
+// Reglas de seguridad de Firestore — Vigor (PRD §7)
+//
+// SUSTITUYEN al "modo de prueba", que permite lectura y escritura a CUALQUIERA
+// y además caduca. Principios:
+//
+//  1. Nada es accesible sin autenticación.
+//  2. Cada usuario solo puede leer y escribir SUS datos: se comprueba el campo
+//     `userId` del documento, no solo la ruta.
+//  3. Los datos clínicos y de salud viven en subcolecciones privadas
+//     `users/{uid}/...` y NO son accesibles por nadie más, ni siquiera para
+//     lectura. El PRD los blinda explícitamente (§7).
+//  4. El catálogo de ejercicios es de LECTURA pública (para usuarios
+//     autenticados) y de escritura prohibida desde el cliente: se administra
+//     desde consola o funciones. Un usuario no puede alterar el catálogo global
+//     porque eso afectaría a las prescripciones de todos.
+//  5. Deny por defecto: cualquier ruta no contemplada queda cerrada.
+// =============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Helpers ----------------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** El documento pertenece al usuario autenticado. */
+    function ownsExisting() {
+      return isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    /**
+     * El documento que se intenta escribir se atribuye al usuario autenticado.
+     * Impide crear datos "a nombre de otro".
+     */
+    function ownsIncoming() {
+      return isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    /** Escritura permitida solo si el dueño no cambia. */
+    function keepsOwner() {
+      return ownsExisting() && ownsIncoming();
+    }
+
+    // --- Catálogo de ejercicios ------------------------------------------
+    // Lectura para cualquier usuario autenticado; escritura solo administrativa.
+    match /exercises/{exerciseId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // --- Perfil de usuario y subcolecciones PRIVADAS ----------------------
+    // Todo lo que vive bajo users/{uid} es exclusivo de ese usuario. Incluye
+    // biomarcadores, lesiones, dolor, rutinas de rehabilitación y readiness.
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+
+      match /{privateCollection=**} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+
+    // --- Datos de entrenamiento propios ----------------------------------
+    // Mismo patrón para todas: leer si eres el dueño, crear atribuyéndote el
+    // documento, y actualizar sin poder cambiar de dueño.
+    // Routines: the template a mesocycle is instantiated from. Same ownership
+    // pattern as everything else, enforced by the userId FIELD and not only by the
+    // path, so a document cannot be written under someone else's name.
+    match /routines/{docId} {
+      allow read: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    match /mesocycles/{docId} {
+      allow read: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    match /microcycles/{docId} {
+      allow read: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    match /workoutSessions/{docId} {
+      allow read: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    match /microcycleCheckIns/{docId} {
+      allow read: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    match /cardioSessions/{docId} {
+      allow read: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    match /weeklyVolumePlans/{docId} {
+      allow read: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    match /muscleGroupAnalytics/{docId} {
+      allow read: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    match /nutritionEntries/{docId} {
+      allow read: if ownsExisting();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    // --- Feed social (fase 2, PRD §7) ------------------------------------
+    // Lectura para usuarios autenticados: es el muro compartido. Escritura solo
+    // de eventos propios. NUNCA debe contener datos de salud: el modelo solo
+    // expone volumen, ejercicios y marcas de e1RM.
+    match /feedEvents/{docId} {
+      allow read: if isSignedIn();
+      allow create: if ownsIncoming();
+      allow update: if keepsOwner();
+      allow delete: if ownsExisting();
+    }
+
+    // --- Deny por defecto -------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
