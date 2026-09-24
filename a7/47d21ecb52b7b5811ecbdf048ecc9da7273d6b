@@ -1,0 +1,45 @@
+src/app/(tabs)/(train)/session.tsx
+  s_174fec81e3370e::t_4b3aa531d0adf3 1-430
+src/app/(tabs)/bio.tsx
+  s_9626cbf53af44f::t_75c5a300b995cc 1-11
+src/app/(tabs)/nutrition.tsx
+  s_9626cbf53af44f::t_01423339a8d0ce 1-11
+src/components/PlaceholderScreen.tsx
+  s_9626cbf53af44f::t_616ca0d335d15a 1-44
+src/hooks/useSessionPersistence.ts
+  s_174fec81e3370e::t_e8d69ce9e95c71 1-137
+src/models/cardio.ts
+  s_9626cbf53af44f::t_3ebcad2322499f 1-74
+src/models/readiness.ts
+  s_9626cbf53af44f::t_895ed14896aa11 1-46
+src/services/repositories/__tests__/BaseRepository.test.ts
+  s_174fec81e3370e::t_aa2e4e9e2553f2 1-148
+src/services/training/__tests__/sessionMapper.test.ts
+  s_174fec81e3370e::t_50fa8cde4e982a 1-207
+src/services/training/sessionMapper.ts
+  s_174fec81e3370e::t_0a7e9fc6ee3ef4 1-152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a747d21ecb52b7b5811ecbdf048ecc9da7273d6b",
+  "prompts": {},
+  "sessions": {
+    "s_174fec81e3370e": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f3158c45dffe9ZTNpYFqsHzIXL",
+        "model": "gpt-5.6-luna"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_9626cbf53af44f": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_f3b45788effeJ2A2bYR3wN3tNL",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
