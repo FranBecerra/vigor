@@ -438,9 +438,6 @@ export const HIGH_COST_PRIORITY_SLOTS = 1;
 export const LOW_COST_PRIORITY_SLOTS = 0.5;
 export const MAX_PRIORITY_REGIONS = 3;
 
-/** Tope de regiones desprioriorizadas. */
-export const MAX_DEPRIORITIZED_REGIONS = 3;
-
 /** Plazas que consume priorizar una región. */
 export function prioritySlotsOf(region: VolumeRegion): number {
   return LOW_COST_REGIONS.includes(region) ? LOW_COST_PRIORITY_SLOTS : HIGH_COST_PRIORITY_SLOTS;
@@ -477,12 +474,6 @@ export function assertEmphasisLimits(
     throw new EmphasisLimitError(
       `Prioridades por encima del presupuesto: ${slots} plazas de ${PRIORITY_SLOT_BUDGET}. ` +
         'Dos regiones de alto coste de recuperación, o hasta tres cuando alguna es de bajo coste.',
-    );
-  }
-  if (deprioritized.length > MAX_DEPRIORITIZED_REGIONS) {
-    throw new EmphasisLimitError(
-      `Como máximo ${MAX_DEPRIORITIZED_REGIONS} regiones desprioriorizadas; ` +
-        `se han pedido ${deprioritized.length}.`,
     );
   }
 }

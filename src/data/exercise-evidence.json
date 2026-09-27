@@ -1817,6 +1817,38 @@
         "note": "Fatiga sistémica nula; elevado aislamiento del compartimento braquial anterior."
       }
     },
+    "curl-bayesian": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": ["PMID:40082069"],
+        "note": "El hombro extendido alarga el bíceps, aunque un ensayo con perfiles de resistencia igualados no encontró más hipertrofia que el predicador."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": ["PMID:40082069"],
+        "note": "El cable permite flexión completa del codo manteniendo el hombro detrás del torso."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "direct-evidence",
+        "citations": ["PMID:40082069"],
+        "note": "La línea de la polea puede ajustarse para cargar el recorrido largo; no se presupone superioridad frente a otro perfil bien igualado."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "La ejecución unilateral de pie exige estabilización moderada sin convertirla en el limitante principal."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "La torre de placas ofrece incrementos repetibles, aunque no siempre suficientemente pequeños."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Aislamiento unilateral con coste sistémico mínimo."
+      }
+    },
     "curl-predicador": {
       "stretchedPositionLoading": {
         "confidence": "direct-evidence",

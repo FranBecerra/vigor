@@ -39,17 +39,11 @@ import { SetType } from '@/models';
 import type { MesocyclePlan } from './mesocyclePlanner';
 import type { DistributedSession } from './sessionDistribution';
 import { deriveSetRIRs } from './setIntensity';
-import { targetRIR } from './rirAutoregulation';
+import { exercisePrescription } from './exercisePrescription';
+import { TrainingGoal } from './volumePlan';
 import { toTargetVolumePerGroup } from './volumePlan';
 
-/**
- * Default target reps for a prescribed set.
- *
- * A single number rather than a range per exercise: rep targets belong to the
- * intensity model, not to the catalogue, and the athlete adjusts them in the
- * session. Using one honest default beats inventing per-exercise ranges that no
- * evidence supports.
- */
+/** Legacy single-value fallback retained for older callers and migrations. */
 export const DEFAULT_TARGET_REPS = 10;
 
 /**
@@ -62,6 +56,7 @@ export const DEFAULT_TARGET_REPS = 10;
  */
 export function toPlannedSession(
   session: DistributedSession,
+  goal: TrainingGoal = TrainingGoal.HYPERTROPHY,
   isFinalMicrocycleBeforeDeload = false,
 ): PlannedSession {
   return {
@@ -72,8 +67,16 @@ export function toPlannedSession(
       // Per-set RIR is DERIVED, never written by hand: the last set reaches the
       // exercise target and earlier ones leave one more rep in reserve. Writing it
       // out would desynchronise from the set count the moment either changes.
-      const exerciseTarget = targetRIR(entry.exercise.profile, isFinalMicrocycleBeforeDeload);
-      const perSet = deriveSetRIRs(exerciseTarget, entry.sets);
+      const prescription = exercisePrescription(
+        goal,
+        entry.exercise.profile,
+        isFinalMicrocycleBeforeDeload,
+      );
+      const perSet = deriveSetRIRs(
+        prescription.targetRIR,
+        entry.sets,
+        prescription.maxExtraReserve,
+      );
       return {
         exerciseId: entry.exercise.id,
         order,
@@ -81,7 +84,8 @@ export function toPlannedSession(
         sets: perSet.map(
           (rir): PlannedSet => ({
             setType: SetType.NORMAL,
-            targetReps: DEFAULT_TARGET_REPS,
+            targetRepsMin: prescription.reps.min,
+            targetReps: prescription.reps.max,
             targetRIR: rir,
           }),
         ),
@@ -96,7 +100,7 @@ export function toPlannedSessions(
   isFinalMicrocycleBeforeDeload = false,
 ): PlannedSession[] {
   return plan.distribution.sessions.map((session) =>
-    toPlannedSession(session, isFinalMicrocycleBeforeDeload),
+    toPlannedSession(session, plan.plan.goal, isFinalMicrocycleBeforeDeload),
   );
 }
 

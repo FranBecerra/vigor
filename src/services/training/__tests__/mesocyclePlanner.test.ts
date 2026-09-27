@@ -1,6 +1,10 @@
 import { ExerciseProfile, MuscleGroup } from '@/models';
 import { ExperienceLevel } from '@/models/athlete';
-import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
+import {
+  EXERCISE_CATALOGUE,
+  filterCatalogue,
+} from '@/services/training/exerciseCatalogue';
+import { DEFAULT_GENERATOR_EQUIPMENT } from '@/services/training/generatorDefaults';
 import { planMesocycle } from '@/services/training/mesocyclePlanner';
 import {
   MAX_SQUEEZE,
@@ -187,6 +191,32 @@ describe('planMesocycle — cuál de los dos techos manda', () => {
     }
   });
 
+  it('uses the upper end of the intermediate range and all five 65-minute sessions', () => {
+    const screenCatalogue = filterCatalogue(EXERCISE_CATALOGUE, {
+      availableEquipment: DEFAULT_GENERATOR_EQUIPMENT,
+    });
+
+    Array.from({ length: 20 }, (_, seed) => seed + 1).forEach((seed) => {
+      const result = planMesocycle({
+        ...base,
+        catalogue: screenCatalogue,
+        seed,
+        capacity: capacity(5, 65),
+      });
+      const sessionSets = result.distribution.sessions.map((session) =>
+        session.exercises.reduce((sum, entry) => sum + entry.sets, 0),
+      );
+
+      expect(result.selection.performedSets).toBeGreaterThanOrEqual(80);
+      expect(result.selection.performedSets).toBeLessThanOrEqual(90);
+      expect(Math.min(...sessionSets)).toBeGreaterThanOrEqual(10);
+      expect(
+        result.distribution.maxSessionWorkMinutes -
+          result.distribution.minSessionWorkMinutes,
+      ).toBeLessThanOrEqual(25);
+    });
+  });
+
   it('avisa cuando NI en mantenimiento cabe el plan', () => {
     const result = planMesocycle({ ...base, capacity: capacity(1, 30) });
     expect(result.limitedBy).toBe('insufficient-time');
@@ -200,22 +230,31 @@ describe('planMesocycle — cuál de los dos techos manda', () => {
   });
 });
 
-describe('planMesocycle — el aislamiento es lo primero que sobra', () => {
+describe('planMesocycle — efficient compounds come before isolation', () => {
   const tight = planMesocycle({ ...base, capacity: capacity(3, 45) });
   const roomy = planMesocycle({ ...base, capacity: capacity(8, 90) });
 
-  it('con el tiempo apretado, un músculo con multiarticulares NO recibe aislamiento', () => {
-    // Regla y no sesgo: con una ponderación probabilística el pecho salía alguna
-    // vez con contractor y cruces y ningún press.
+  it('under time pressure, isolation only complements an existing compound pattern', () => {
+    // A muscle may use isolation after its non-redundant compound family is
+    // already present. This prevents two near-identical compound variants while
+    // preserving the stronger rule: isolation never replaces the base pattern.
     const withCompounds = new Set(
       EXERCISE_CATALOGUE.filter((e) => e.profile !== ExerciseProfile.ISOLATION).map(
         (e) => e.primaryMuscle,
       ),
     );
     tight.selection.selected.forEach((entry) => {
-      if (entry.exercise.profile === ExerciseProfile.ISOLATION) {
-        expect(withCompounds.has(entry.exercise.primaryMuscle)).toBe(false);
-      }
+      if (
+        entry.exercise.profile !== ExerciseProfile.ISOLATION ||
+        !withCompounds.has(entry.exercise.primaryMuscle)
+      ) return;
+      expect(
+        tight.selection.selected.some(
+          (candidate) =>
+            candidate.exercise.primaryMuscle === entry.exercise.primaryMuscle &&
+            candidate.exercise.profile !== ExerciseProfile.ISOLATION,
+        ),
+      ).toBe(true);
     });
   });
 

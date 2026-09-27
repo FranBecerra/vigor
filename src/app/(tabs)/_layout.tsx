@@ -18,8 +18,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GlassSurface } from '@/components/GlassSurface';
 import { TrainIcon, BioIcon, NutritionIcon, ProfileIcon } from '@/components/icons';
 import { useTheme } from '@/theme/useTheme';
+import {
+  FLOATING_TAB_BAR_HEIGHT,
+  floatingTabBarBottom,
+} from '@/components/navigation/tabBarMetrics';
 
-const BAR_HEIGHT = 62;
 /** Margen lateral: cuanto mayor, más estrecha queda la cápsula flotante. */
 const BAR_MARGIN = 54;
 
@@ -78,11 +81,16 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
         tabBarStyle: {
           position: 'absolute',
-          left: barLeft,
+          // BottomTabBar defines logical `start: 0` and `end: 0`. Using physical
+          // left/right here does not override those defaults on iOS, which kept
+          // the correctly sized capsule pinned to the leading edge.
+          start: barLeft,
+          end: undefined,
+          left: undefined,
           width: barWidth,
           right: undefined,
-          bottom: Math.max(insets.bottom, 14),
-          height: BAR_HEIGHT,
+          bottom: floatingTabBarBottom(insets.bottom),
+          height: FLOATING_TAB_BAR_HEIGHT,
           borderRadius: radius.pill,
           backgroundColor: 'transparent',
           borderTopWidth: 0,
@@ -144,7 +152,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    height: BAR_HEIGHT,
+    height: FLOATING_TAB_BAR_HEIGHT,
   },
   /** Pastilla de cristal sobre la pestaña activa. */
   pill: {

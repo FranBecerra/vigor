@@ -14,6 +14,7 @@ import { GlassSurface } from '@/components/GlassSurface';
 import type { Exercise } from '@/models';
 import type { PlannedSession } from '@/models';
 import type { LimitingFactor } from '@/services/training/mesocyclePlanner';
+import { REGION_OF_MUSCLE } from '@/services/training/volumePlan';
 
 interface PlanPreviewProps {
   sessions: readonly PlannedSession[];
@@ -61,48 +62,74 @@ export function PlanPreview({
         </Text>
       </GlassSurface>
 
-      {sessions.map((session) => (
-        <View
-          key={session.index}
-          style={{
-            backgroundColor: colors.surface,
-            borderRadius: radius.md,
-            borderWidth: 1,
-            borderColor: colors.surfaceBorder,
-            padding: spacing.lg,
-            marginBottom: spacing.md,
-          }}
-        >
-          <View style={styles.sessionHeader}>
-            <Text style={[typography.title, { color: colors.textPrimary, flex: 1 }]}>
-              {t('generate.previewSession', { index: session.index + 1 })}
-              {'  '}
-              <Text style={{ color: colors.textMuted }}>
-                {t(`generate.focus${session.focus}`)}
-              </Text>
-            </Text>
-            <Text style={[typography.caption, { color: colors.textMuted }]}>
-              {t('generate.previewMinutes', {
-                minutes: Math.round(session.estimatedWorkMinutes),
-              })}
-            </Text>
-          </View>
-
-          {session.exercises.map((exercise) => (
-            <View key={exercise.exerciseId} style={styles.exerciseRow}>
-              <Text
-                numberOfLines={1}
-                style={[typography.body, { color: colors.textPrimary, flex: 1 }]}
-              >
-                {exercisesById.get(exercise.exerciseId)?.name ?? exercise.exerciseId}
-              </Text>
-              <Text style={[typography.metric, { color: colors.textSecondary }]}>
-                {t('generate.previewSetsShort', { count: exercise.sets.length })}
+      {sessions.map((session) => {
+        const regions = [
+          ...new Set(
+            session.exercises
+              .map((entry) => exercisesById.get(entry.exerciseId)?.primaryMuscle)
+              .filter((muscle) => muscle !== undefined)
+              .map((muscle) => REGION_OF_MUSCLE[muscle]),
+          ),
+        ];
+        return (
+          <View
+            key={session.index}
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: radius.md,
+              borderWidth: 1,
+              borderColor: colors.surfaceBorder,
+              padding: spacing.lg,
+              marginBottom: spacing.md,
+            }}
+          >
+            <View style={styles.sessionHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={[typography.title, { color: colors.textPrimary }]}> 
+                  {t('generate.previewSession', { index: session.index + 1 })}
+                  {'  '}
+                  <Text style={{ color: colors.textMuted }}>
+                    {t(`generate.focus${session.focus}`)}
+                  </Text>
+                </Text>
+                <Text
+                  numberOfLines={1}
+                  style={[typography.caption, { color: sectionAccent.train, marginTop: 2 }]}
+                >
+                  {regions.map((region) => t(`region.${region}`)).join(' · ')}
+                </Text>
+              </View>
+              <Text style={[typography.caption, { color: colors.textMuted }]}> 
+                {t('generate.previewMinutes', {
+                  minutes: Math.round(session.estimatedWorkMinutes),
+                })}
               </Text>
             </View>
-          ))}
-        </View>
-      ))}
+
+            {session.exercises.map((exercise) => {
+              const firstSet = exercise.sets[0];
+              const reps = firstSet
+                ? firstSet.targetRepsMin === undefined
+                  ? String(firstSet.targetReps)
+                  : `${firstSet.targetRepsMin}–${firstSet.targetReps}`
+                : '—';
+              return (
+                <View key={exercise.exerciseId} style={styles.exerciseRow}>
+                  <Text
+                    numberOfLines={1}
+                    style={[typography.body, { color: colors.textPrimary, flex: 1 }]}
+                  >
+                    {exercisesById.get(exercise.exerciseId)?.name ?? exercise.exerciseId}
+                  </Text>
+                  <Text style={[typography.metric, { color: colors.textSecondary }]}> 
+                    {exercise.sets.length} × {reps}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
+        );
+      })}
     </View>
   );
 }

@@ -117,6 +117,9 @@ export interface Routine {
  */
 export interface PlannedSet {
   setType: SetType;
+  /** Lower bound of the prescribed repetition range; absent on legacy plans. */
+  targetRepsMin?: number;
+  /** Upper bound of the prescribed range and legacy single-target fallback. */
   targetReps: number;
   /** Reps in reserve, derived per set by `deriveSetRIRs` from the exercise target. */
   targetRIR: number;

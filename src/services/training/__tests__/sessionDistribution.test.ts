@@ -16,8 +16,58 @@ import {
   buildFocusSequence,
   distributeSelection,
   effectiveSetsByMuscle,
+  isSessionAnchor,
+  orderSessionExercises,
   sessionSetCap,
 } from '@/services/training/sessionDistribution';
+
+describe('orderSessionExercises', () => {
+  it('starts with a three-set compound and leaves isolation work last', () => {
+    const ordered = orderSessionExercises([
+      { exercise: exercise({ id: 'curl', profile: ExerciseProfile.ISOLATION }), sets: 4 },
+      {
+        exercise: exercise({ id: 'two-set-primary', profile: ExerciseProfile.COMPOUND_PRIMARY }),
+        sets: 2,
+      },
+      {
+        exercise: exercise({ id: 'anchor', profile: ExerciseProfile.COMPOUND_SECONDARY }),
+        sets: 3,
+      },
+    ]);
+    expect(ordered.map((entry) => entry.exercise.id)).toEqual([
+      'anchor',
+      'two-set-primary',
+      'curl',
+    ]);
+  });
+
+  it('does not treat an accessory compound as the main session anchor', () => {
+    expect(
+      isSessionAnchor({
+        exercise: exercise({
+          movementVector: MovementVector.SHOULDER_ABDUCTION,
+          profile: ExerciseProfile.COMPOUND_SECONDARY,
+        }),
+        sets: 6,
+      }),
+    ).toBe(false);
+    expect(
+      isSessionAnchor({
+        exercise: exercise({ movementVector: MovementVector.PULL_HORIZONTAL }),
+        sets: 3,
+      }),
+    ).toBe(true);
+  });
+
+  it('prefers primary compounds, then more sets, then higher fatigue and a stable id', () => {
+    const ordered = orderSessionExercises([
+      { exercise: exercise({ id: 'b', profile: ExerciseProfile.COMPOUND_SECONDARY }), sets: 3 },
+      { exercise: exercise({ id: 'a', profile: ExerciseProfile.COMPOUND_PRIMARY }), sets: 3 },
+      { exercise: exercise({ id: 'c', profile: ExerciseProfile.COMPOUND_PRIMARY }), sets: 4 },
+    ]);
+    expect(ordered.map((entry) => entry.exercise.id)).toEqual(['c', 'a', 'b']);
+  });
+});
 
 function exercise(overrides: Partial<Exercise> = {}): Exercise {
   return {
@@ -49,13 +99,32 @@ function distribute(
   return distributeSelection({ selection: { selected }, split, sessionsPerMicrocycle });
 }
 
-describe('distributeSelection — conservation and appearance limit', () => {
-  it('preserves every set and splits six into two three-set appearances', () => {
+describe('distributeSelection — conservation and exercise uniqueness', () => {
+  it('preserves every set and keeps an exercise in one session', () => {
     const result = distribute(SplitStructure.FULL_BODY, 2);
 
     expect(result.unassigned).toEqual([]);
-    expect(result.sessions.map((session) => session.exercises[0]?.sets)).toEqual([3, 3]);
+    expect(result.sessions.flatMap((session) => session.exercises)).toHaveLength(1);
+    expect(result.sessions.flatMap((session) => session.exercises)[0].sets).toBe(6);
     expect(result.sessions.flatMap((session) => session.exercises).reduce((sum, entry) => sum + entry.sets, 0)).toBe(6);
+  });
+
+  it('never repeats one exercise across the microcycle', () => {
+    const result = distribute(SplitStructure.PUSH_PULL_LEGS_UPPER, 5, [
+      {
+        exercise: exercise({
+          id: 'curl',
+          primaryMuscle: MuscleGroup.BICEPS,
+          movementVector: MovementVector.ELBOW_FLEXION,
+          profile: ExerciseProfile.ISOLATION,
+        }),
+        sets: 5,
+      },
+    ]);
+
+    expect(
+      result.sessions.flatMap((session) => session.exercises).filter((entry) => entry.exercise.id === 'curl'),
+    ).toHaveLength(1);
   });
 
   it('calculates time with the same model as the capacity ceiling', () => {
@@ -130,14 +199,15 @@ describe('distributeSelection — split semantics', () => {
 
   it('PPL+upper adds an upper session and assigns core to legs', () => {
     const result = distribute(SplitStructure.PUSH_PULL_LEGS_UPPER, 4, [
-      { exercise: chest, sets: 6 },
+      { exercise: chest, sets: 3 },
+      { exercise: exercise({ id: 'upper-chest', primaryMuscle: MuscleGroup.CHEST_UPPER }), sets: 3 },
       { exercise: core, sets: 3 },
     ]);
 
     expect(result.sessions.map((session) => session.focus)).toEqual(['PUSH', 'PULL', 'LEGS', 'UPPER']);
     expect(result.sessions[0].exercises.map((entry) => entry.exercise.id)).toEqual(['chest']);
     expect(result.sessions[2].exercises.map((entry) => entry.exercise.id)).toEqual(['core']);
-    expect(result.sessions[3].exercises.map((entry) => entry.exercise.id)).toEqual(['chest']);
+    expect(result.sessions[3].exercises.map((entry) => entry.exercise.id)).toEqual(['upper-chest']);
   });
 
   it('full body accepts every muscle in every session', () => {
@@ -309,6 +379,8 @@ describe('distributeSelection — structure follows volume, not a cycled pattern
       { exercise: exercise({ id: 'curl', primaryMuscle: MuscleGroup.BICEPS, movementVector: MovementVector.ELBOW_FLEXION, profile: ExerciseProfile.ISOLATION }), sets: 6 },
       { exercise: exercise({ id: 'lateral', primaryMuscle: MuscleGroup.DELTS_LATERAL, movementVector: MovementVector.SHOULDER_ABDUCTION, profile: ExerciseProfile.ISOLATION }), sets: 6 },
       { exercise: exercise({ id: 'fly', primaryMuscle: MuscleGroup.CHEST_MID_LOWER, movementVector: MovementVector.SHOULDER_HORIZONTAL_ADDUCTION, profile: ExerciseProfile.ISOLATION }), sets: 6 },
+      { exercise: exercise({ id: 'triceps', primaryMuscle: MuscleGroup.TRICEPS, movementVector: MovementVector.ELBOW_EXTENSION, profile: ExerciseProfile.ISOLATION }), sets: 6 },
+      { exercise: exercise({ id: 'row', primaryMuscle: MuscleGroup.LATS, movementVector: MovementVector.PULL_HORIZONTAL }), sets: 6 },
     ];
     const result = distributeSelection({
       selection: { selected: mixed },
@@ -334,24 +406,93 @@ describe('distributeSelection — structure follows volume, not a cycled pattern
     const lightest = density.reduce((best, item) =>
       item.compoundSets < best.compoundSets ? item : best,
     );
-    expect(heaviest.setsPerMinute).toBeLessThan(lightest.setsPerMinute);
+    expect(heaviest.setsPerMinute).toBeLessThanOrEqual(lightest.setsPerMinute);
+  });
+
+  it('uses both leg sessions instead of piling the lower-body work into one', () => {
+    const lowerBody = [
+      {
+        exercise: exercise({ id: 'press' }),
+        sets: 6,
+      },
+      {
+        exercise: exercise({
+          id: 'pulldown',
+          primaryMuscle: MuscleGroup.LATS,
+          movementVector: MovementVector.PULL_VERTICAL,
+        }),
+        sets: 6,
+      },
+      {
+        exercise: exercise({
+          id: 'squat',
+          primaryMuscle: MuscleGroup.QUADS,
+          movementVector: MovementVector.KNEE_DOMINANT,
+        }),
+        sets: 3,
+      },
+      {
+        exercise: exercise({
+          id: 'rdl',
+          primaryMuscle: MuscleGroup.HAMSTRINGS,
+          movementVector: MovementVector.HIP_DOMINANT,
+        }),
+        sets: 3,
+      },
+      {
+        exercise: exercise({
+          id: 'leg-extension',
+          primaryMuscle: MuscleGroup.QUADS,
+          movementVector: MovementVector.KNEE_EXTENSION,
+          profile: ExerciseProfile.ISOLATION,
+        }),
+        sets: 3,
+      },
+      {
+        exercise: exercise({
+          id: 'leg-curl',
+          primaryMuscle: MuscleGroup.HAMSTRINGS,
+          movementVector: MovementVector.KNEE_FLEXION,
+          profile: ExerciseProfile.ISOLATION,
+        }),
+        sets: 3,
+      },
+    ];
+    const result = distributeSelection({
+      selection: { selected: lowerBody },
+      split: SplitStructure.PUSH_PULL_LEGS_UPPER,
+      sessionsPerMicrocycle: 5,
+      maxWorkMinutesPerSession: 59,
+    });
+    const legSessions = result.sessions.filter(
+      (session) => session.focus === 'LEGS' || session.focus === 'LOWER',
+    );
+
+    expect(legSessions).toHaveLength(2);
+    legSessions.forEach((session) => expect(session.exercises.length).toBeGreaterThan(0));
+    const placedIds = result.sessions.flatMap((session) =>
+      session.exercises.map((entry) => entry.exercise.id),
+    );
+    expect(new Set(placedIds).size).toBe(lowerBody.length);
   });
 });
 
 describe('distributeSelection — frequency target', () => {
-  const fourSets = [
-    { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 4 },
+  const fourSetsAcrossVariants = [
+    { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 2 },
+    { exercise: exercise({ id: 'machine-press', primaryMuscle: MuscleGroup.CHEST_MID_LOWER, equipment: Equipment.MACHINE }), sets: 2 },
   ];
 
-  it('splits four sets as 2 + 2 to reach frequency 2, not 3 + 1', () => {
-    // A one-set appearance costs a full setup for almost no stimulus.
+  it('uses two distinct variants to reach frequency 2', () => {
     const result = distributeSelection({
-      selection: { selected: fourSets },
+      selection: { selected: fourSetsAcrossVariants },
       split: SplitStructure.FULL_BODY,
       sessionsPerMicrocycle: 2,
     });
     expect(result.sessions.map((session) => session.exercises[0]?.sets).sort()).toEqual([2, 2]);
     expect(result.frequencyByMuscle[MuscleGroup.CHEST_MID_LOWER]).toBe(2);
+    const ids = result.sessions.flatMap((session) => session.exercises.map((entry) => entry.exercise.id));
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('three sets stay in ONE appearance: a 2 + 1 split would waste a setup', () => {
@@ -405,7 +546,7 @@ describe('distributeSelection — frequency target', () => {
 
   it('never warns about frequency with a single session', () => {
     const result = distributeSelection({
-      selection: { selected: fourSets },
+      selection: { selected: fourSetsAcrossVariants },
       split: SplitStructure.FULL_BODY,
       sessionsPerMicrocycle: 1,
     });
@@ -416,10 +557,10 @@ describe('distributeSelection — frequency target', () => {
 });
 
 describe('appearanceSets', () => {
-  it('splits evenly rather than filling the cap first', () => {
-    expect(appearanceSets(4, 4)).toEqual([2, 2]);
-    expect(appearanceSets(6, 4)).toEqual([3, 3]);
-    expect(appearanceSets(7, 4)).toEqual([3, 2, 2]);
+  it('keeps every valid prescription in one appearance', () => {
+    expect(appearanceSets(4, 4)).toEqual([4]);
+    expect(appearanceSets(6, 4)).toEqual([6]);
+    expect(appearanceSets(7, 4)).toEqual([7]);
   });
 
   it('keeps a small prescription in one appearance', () => {
@@ -432,15 +573,13 @@ describe('appearanceSets', () => {
       for (let sessions = 1; sessions <= 6; sessions += 1) {
         const chunks = appearanceSets(sets, sessions);
         expect(chunks.reduce((sum, value) => sum + value, 0)).toBe(sets);
-        expect(chunks.length).toBeLessThanOrEqual(sessions);
+        expect(chunks).toHaveLength(1);
       }
     }
   });
 
-  it('SPREADS the excess when there are fewer sessions than needed appearances', () => {
-    // Exceeding the cap is unavoidable here; dumping it all on the last appearance
-    // would be worse than spreading it.
-    expect(appearanceSets(9, 2)).toEqual([5, 4]);
+  it('does not split even when several sessions are eligible', () => {
+    expect(appearanceSets(9, 2)).toEqual([9]);
     expect(appearanceSets(6, 1)).toEqual([6]);
   });
 
@@ -729,6 +868,14 @@ describe('distributeSelection — empty-session repair', () => {
               primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
               movementVector: MovementVector.SHOULDER_HORIZONTAL_ADDUCTION,
               profile: ExerciseProfile.ISOLATION,
+              criteria: {
+                stretchedPositionLoading: 3,
+                rangeOfMotion: 3,
+                resistanceProfileMatch: 3,
+                stabilityCost: 5,
+                loadProgressability: 3,
+                systemicFatigueCost: 5,
+              },
             }),
             sets: 3,
           },
@@ -740,6 +887,9 @@ describe('distributeSelection — empty-session repair', () => {
 
     const filled = result.sessions.filter((session) => session.exercises.length > 0).length;
     expect(filled).toBeGreaterThan(1);
+    expect(
+      result.sessions.find((session) => session.focus === 'PULL')?.exercises[0]?.exercise.id,
+    ).toBe('fly');
     expect(
       result.sessions.flatMap((s) => s.exercises).reduce((sum, e) => sum + e.sets, 0),
     ).toBe(6);

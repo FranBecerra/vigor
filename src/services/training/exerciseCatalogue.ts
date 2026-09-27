@@ -26,6 +26,7 @@
  */
 import {
   Equipment,
+  ExerciseGenerationTier,
   ExerciseProfile,
   MovementVector,
   MuscleGroup,
@@ -122,6 +123,18 @@ function parseCriteria(raw: unknown, exerciseId: string): ExerciseCriteria {
   return criteria;
 }
 
+function parseStimulusTags(raw: unknown, exerciseId: string): string[] | undefined {
+  if (raw === undefined) return undefined;
+  if (
+    !Array.isArray(raw) ||
+    raw.some((tag) => typeof tag !== 'string' || !/^[A-Z_]+:[A-Z_]+$/.test(tag)) ||
+    new Set(raw).size !== raw.length
+  ) {
+    throw new CatalogueValidationError(exerciseId, 'stimulusTags', raw);
+  }
+  return raw;
+}
+
 /** Validates one raw JSON entry and turns it into an `Exercise`. */
 export function parseExercise(raw: unknown): Exercise {
   if (typeof raw !== 'object' || raw === null) {
@@ -149,6 +162,7 @@ export function parseExercise(raw: unknown): Exercise {
     throw new CatalogueValidationError(id, 'secondaryMuscles', primaryMuscle);
   }
 
+  const stimulusTags = parseStimulusTags(entry.stimulusTags, id);
   return {
     id,
     name: entry.name,
@@ -158,6 +172,11 @@ export function parseExercise(raw: unknown): Exercise {
     profile: assertEnum(ExerciseProfile, entry.profile, id, 'profile'),
     equipment: assertEnum(Equipment, entry.equipment, id, 'equipment'),
     criteria: parseCriteria(entry.criteria, id),
+    generationTier:
+      entry.generationTier === undefined
+        ? ExerciseGenerationTier.STANDARD
+        : assertEnum(ExerciseGenerationTier, entry.generationTier, id, 'generationTier'),
+    ...(stimulusTags === undefined ? {} : { stimulusTags }),
     isCustom: false,
   };
 }

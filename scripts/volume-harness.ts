@@ -10,9 +10,10 @@
  *   npm run volume -- --brief                     solo el veredicto
  *   npm run volume -- --goal=strength
  *   npm run volume -- --level=beginner
- *   npm run volume -- --priority=LATS,QUADS       hacia el MRV (máx. 2-3)
- *   npm run volume -- --deprioritize=CALVES,CORE  a mantenimiento (máx. 3)
- *   npm run volume -- --sessions=3 --minutes=60     capacidad real del atleta
+ *   npm run volume -- --priority-regions=BACK,QUADS
+ *   npm run volume -- --deprioritize-regions=CALVES,CORE
+ *   npm run volume -- --sessions=3 --minutes=60
+ *   npm run volume -- --split=upper_lower
  *   npm run volume -- --deload                    el microciclo de descarga
  *   npm run volume -- --regions=CHEST,BACK,QUADS  solo estas
  *   npm run volume -- --add-regions=CALVES
@@ -23,8 +24,12 @@
  *   npm run volume -- --veto=press-banca
  *   npm run volume -- --compare
  */
-import { Equipment, MuscleGroup } from '../src/models/biomechanics';
-import { ExperienceLevel } from '../src/models/athlete';
+import {
+  Equipment,
+  ExerciseGenerationTier,
+  MuscleGroup,
+} from '../src/models/biomechanics';
+import { ExperienceLevel, SplitStructure } from '../src/models/athlete';
 import {
   DEFAULT_TRAINED_REGIONS,
   EmphasisLimitError,
@@ -40,10 +45,20 @@ import {
   type VolumePlan,
 } from '../src/services/training/volumePlan';
 import { EXERCISE_CATALOGUE, filterCatalogue } from '../src/services/training/exerciseCatalogue';
-import { selectExercises, type SelectionResult } from '../src/services/training/exerciseSelection';
+import {
+  equipmentFamily,
+  selectExercises,
+  type SelectionResult,
+} from '../src/services/training/exerciseSelection';
 import { approximateSetCapacity } from '../src/services/training/trainingCapacity';
 import { stimulusQuality } from '../src/services/training/exerciseCatalogue';
 import { planMesocycle, type MesocyclePlan } from '../src/services/training/mesocyclePlanner';
+import { isSessionAnchor } from '../src/services/training/sessionDistribution';
+import { DEFAULT_GENERATOR_EQUIPMENT } from '../src/services/training/generatorDefaults';
+import {
+  exercisePrescription,
+  formatRepRange,
+} from '../src/services/training/exercisePrescription';
 
 // --- Parámetros -------------------------------------------------------------
 
@@ -89,6 +104,15 @@ function parseGoal(raw: string | undefined): TrainingGoal {
   const goal = map[raw.toLowerCase()];
   if (!goal) fail(`Objetivo desconocido: "${raw}". Usa hypertrophy o strength.`);
   return goal;
+}
+
+function parseSplit(raw: string | undefined): SplitStructure {
+  if (raw === undefined) return SplitStructure.AUTO;
+  const normalized = raw.trim().toUpperCase();
+  if (!Object.values(SplitStructure).includes(normalized as SplitStructure)) {
+    fail(`Unknown split: "${raw}". Use ${Object.values(SplitStructure).join(', ')}.`);
+  }
+  return normalized as SplitStructure;
 }
 
 /** Valida contra el enum: un valor mal escrito debe fallar, no ignorarse. */
@@ -183,6 +207,118 @@ function printCapacity(result: MesocyclePlan, sessions: number, minutes: number)
       `${Math.round(result.estimatedWorkMinutes)} de ${result.availableWorkMinutes} min de trabajo  ` +
       `${DIM}·${RESET} ${limited}` +
       (result.squeeze > 0 ? `  ${DIM}·${RESET} ${DIM}recorte ${result.squeeze.toFixed(2)}${RESET}` : ''),
+  );
+}
+
+function printInputs(input: {
+  name: string;
+  level: ExperienceLevel;
+  goal: TrainingGoal;
+  sessions: number;
+  minutes: number;
+  split: SplitStructure;
+  equipment: readonly Equipment[];
+  priorityRegions: readonly VolumeRegion[];
+  deprioritizedRegions: readonly VolumeRegion[];
+  seed: number;
+  vetoed: readonly string[];
+}): void {
+  console.log(`\n${DIM}INPUTS${RESET}`);
+  console.log(`  name             ${input.name || '(empty)'}`);
+  console.log(`  level / goal     ${input.level} / ${input.goal}`);
+  console.log(`  capacity         ${input.sessions} × ${input.minutes} min`);
+  console.log(`  split            ${input.split}`);
+  console.log(`  equipment        ${input.equipment.join(', ')}`);
+  console.log(`  priority         ${input.priorityRegions.join(', ') || '(none)'}`);
+  console.log(`  deprioritized    ${input.deprioritizedRegions.join(', ') || '(none)'}`);
+  console.log(`  vetoed           ${input.vetoed.join(', ') || '(none)'}`);
+  console.log(`  seed             ${input.seed}`);
+}
+
+function printSessions(result: MesocyclePlan): void {
+  console.log(`\n${DIM}SESSIONS · ${result.distribution.resolvedSplit}${RESET}`);
+  result.distribution.sessions.forEach((session) => {
+    const sets = session.exercises.reduce((sum, entry) => sum + entry.sets, 0);
+    console.log(
+      `\n${BOLD}${session.index + 1}. ${session.focus}${RESET}  ` +
+        `${AQUA}${sets} sets${RESET} · ${Math.round(session.estimatedWorkMinutes)} min`,
+    );
+    session.exercises.forEach((entry) => {
+      const prescription = exercisePrescription(result.plan.goal, entry.exercise.profile);
+      console.log(
+        `   ${pad(entry.exercise.name, 44)} ` +
+          `${padLeft(`${entry.sets} × ${formatRepRange(prescription.reps)}`, 10)} ` +
+          `${DIM}RPE ${10 - prescription.targetRIR}${RESET}`,
+      );
+    });
+  });
+  result.distribution.structureWarnings.forEach((warning) =>
+    console.log(`${AMBER} ! ${warning.kind}${RESET} ${DIM}${warning.detail}${RESET}`),
+  );
+  result.distribution.sequencingWarnings.forEach((warning) =>
+    console.log(
+      `${AMBER} ! sequencing${RESET} ${DIM}${warning.precedingSessionIndex ?? 'previous'} → ` +
+        `${warning.followingSessionIndex}; risk ${warning.risk.toFixed(1)}${RESET}`,
+    ),
+  );
+}
+
+function printCapacitySeedAudit(
+  count: number,
+  planForSeed: (seed: number) => MesocyclePlan,
+): void {
+  const plans = Array.from({ length: count }, (_, index) => planForSeed(index + 1));
+  const performed = plans.map((plan) => plan.selection.performedSets);
+  const minimumSessionSets = plans.map((plan) =>
+    Math.min(
+      ...plan.distribution.sessions.map((session) =>
+        session.exercises.reduce((sum, entry) => sum + entry.sets, 0),
+      ),
+    ),
+  );
+  const loadSpread = plans.map(
+    (plan) => plan.distribution.maxSessionWorkMinutes - plan.distribution.minSessionWorkMinutes,
+  );
+  const duplicatePlans = plans.filter((plan) => {
+    const ids = plan.distribution.sessions.flatMap((session) =>
+      session.exercises.map((entry) => entry.exercise.id),
+    );
+    return new Set(ids).size !== ids.length;
+  }).length;
+  const fallbackPlans = plans.filter((plan) =>
+    plan.selection.selected.some(
+      (entry) => entry.exercise.generationTier === ExerciseGenerationTier.FALLBACK,
+    ),
+  ).length;
+  const sessionsWithoutAnchor = plans.reduce(
+    (total, plan) =>
+      total +
+      plan.distribution.sessions.filter((session) => {
+        const first = session.exercises[0];
+        return first === undefined || !isSessionAnchor(first);
+      }).length,
+    0,
+  );
+  const equipmentShares = plans.map((plan) => {
+    const families = plan.selection.selected.map((entry) => equipmentFamily(entry.exercise));
+    return {
+      free: families.filter((family) => family === 'FREE_WEIGHT').length / families.length,
+      guided: families.filter((family) => family === 'GUIDED').length / families.length,
+    };
+  });
+
+  console.log(`\n${DIM}SEED AUDIT · ${count} plans${RESET}`);
+  console.log(
+    `  performed sets      ${Math.min(...performed)}–${Math.max(...performed)}\n` +
+      `  min session sets   ${Math.min(...minimumSessionSets)}\n` +
+      `  max load spread    ${Math.round(Math.max(...loadSpread))} min\n` +
+      `  repeated exercise  ${duplicatePlans} plans\n` +
+      `  fallback exercise  ${fallbackPlans} plans\n` +
+      `  sessions no anchor ${sessionsWithoutAnchor} of ${count * plans[0].distribution.sessions.length}\n` +
+      `  free-weight share  ${Math.round(Math.min(...equipmentShares.map((item) => item.free)) * 100)}–` +
+      `${Math.round(Math.max(...equipmentShares.map((item) => item.free)) * 100)}%\n` +
+      `  guided share       ${Math.round(Math.min(...equipmentShares.map((item) => item.guided)) * 100)}–` +
+      `${Math.round(Math.max(...equipmentShares.map((item) => item.guided)) * 100)}%`,
   );
 }
 
@@ -377,8 +513,20 @@ function printLevelComparison(
 function main(): void {
   const level = parseLevel(arg('level'));
   const goal = parseGoal(arg('goal'));
+  const split = parseSplit(arg('split'));
+  const name = arg('name') ?? '';
   const priorityMuscles = parseEnumList(MuscleGroup, arg('priority'), 'Músculo');
   const deprioritizedMuscles = parseEnumList(MuscleGroup, arg('deprioritize'), 'Músculo');
+  const priorityRegions = parseEnumList(
+    VolumeRegion,
+    arg('priority-regions'),
+    'Priority region',
+  );
+  const deprioritizedRegions = parseEnumList(
+    VolumeRegion,
+    arg('deprioritize-regions'),
+    'Deprioritized region',
+  );
   const declaredVolume = parseDeclared(arg('declared'));
   const equipment = parseEnumList(Equipment, arg('equipment'), 'Material');
   const vetoed = arg('veto')?.split(',').map((id) => id.trim()) ?? [];
@@ -393,13 +541,22 @@ function main(): void {
         ? [...DEFAULT_TRAINED_REGIONS, ...addRegions]
         : undefined;
 
+  const resolvedEquipment = equipment.length > 0 ? equipment : [...DEFAULT_GENERATOR_EQUIPMENT];
   const catalogue = filterCatalogue(EXERCISE_CATALOGUE, {
-    availableEquipment: equipment.length > 0 ? equipment : undefined,
+    availableEquipment: resolvedEquipment,
     vetoedExerciseIds: vetoed,
   });
   if (catalogue.length === 0) fail('El filtro de material y vetos ha dejado el catálogo vacío.');
 
-  const base = { goal, trainedRegions, declaredVolume, priorityMuscles, deprioritizedMuscles };
+  const base = {
+    goal,
+    trainedRegions,
+    declaredVolume,
+    priorityMuscles,
+    deprioritizedMuscles,
+    priorityRegions,
+    deprioritizedRegions,
+  };
 
   if (hasFlag('compare')) {
     printLevelComparison(base, catalogue, seed);
@@ -414,12 +571,16 @@ function main(): void {
       : undefined;
 
   if (capacity !== undefined) {
-    const planned = planMesocycle({ ...base, level, capacity, catalogue, seed });
+    const planned = planMesocycle({ ...base, level, capacity, catalogue, seed, split });
     const labelWithCapacity = [
       level.toLowerCase(),
       goal.toLowerCase(),
-      priorityMuscles.length > 0 ? `▲${priorityMuscles.length}` : '',
-      deprioritizedMuscles.length > 0 ? `▼${deprioritizedMuscles.length}` : '',
+      priorityMuscles.length + priorityRegions.length > 0
+        ? `▲${priorityMuscles.length + priorityRegions.length}`
+        : '',
+      deprioritizedMuscles.length + deprioritizedRegions.length > 0
+        ? `▼${deprioritizedMuscles.length + deprioritizedRegions.length}`
+        : '',
     ]
       .filter(Boolean)
       .join(' · ');
@@ -431,14 +592,40 @@ function main(): void {
       planned.limitedBy === 'insufficient-time',
     );
     printCapacity(planned, capacity.sessionsPerMicrocycle, capacity.minutesPerSession);
+    printInputs({
+      name,
+      level,
+      goal,
+      sessions: capacity.sessionsPerMicrocycle,
+      minutes: capacity.minutesPerSession,
+      split,
+      equipment: resolvedEquipment,
+      priorityRegions,
+      deprioritizedRegions,
+      seed,
+      vetoed,
+    });
     console.log(
       `${DIM}          capacidad aproximada ${approximateSetCapacity(capacity)} series · ` +
         `plan sin recortar ${totalAttributedSets(planned.uncappedPlan)} atribuidas${RESET}`,
     );
+    if (arg('seeds')) {
+      const seedCount = parseNumber(arg('seeds'), 20, 'Número de semillas');
+      if (!Number.isInteger(seedCount) || seedCount < 1) {
+        fail('Número de semillas debe ser un entero positivo.');
+      }
+      printCapacitySeedAudit(
+        seedCount,
+        (auditSeed) => planMesocycle({ ...base, level, capacity, catalogue, seed: auditSeed, split }),
+      );
+      console.log('');
+      return;
+    }
     if (hasFlag('brief')) {
       console.log('');
       return;
     }
+    printSessions(planned);
     printPlan(planned.plan);
     printExercises(planned.selection, planned.plan);
     return;

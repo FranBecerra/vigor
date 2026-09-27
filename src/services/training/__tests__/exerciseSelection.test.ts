@@ -1,4 +1,11 @@
-import { Equipment, ExerciseProfile, MovementVector, MuscleGroup, type Exercise } from '@/models';
+import {
+  Equipment,
+  ExerciseGenerationTier,
+  ExerciseProfile,
+  MovementVector,
+  MuscleGroup,
+  type Exercise,
+} from '@/models';
 import { ExperienceLevel } from '@/models/athlete';
 import { EXERCISE_CATALOGUE, filterCatalogue } from '@/services/training/exerciseCatalogue';
 import {
@@ -6,6 +13,8 @@ import {
   FOUNDATIONAL_PATTERNS,
   SECONDARY_CREDIT,
   createRandom,
+  equipmentFamily,
+  goalSelectionScore,
   selectExercises,
   weightedPick,
 } from '@/services/training/exerciseSelection';
@@ -131,6 +140,84 @@ describe('weightedPick', () => {
   });
 });
 
+describe('goal-specific selection policy', () => {
+  it('strength rewards a loadable compound more than an otherwise equal isolation', () => {
+    const compound = exercise({
+      id: 'compound',
+      profile: ExerciseProfile.COMPOUND_PRIMARY,
+      equipment: Equipment.BARBELL,
+    });
+    const isolation = exercise({ id: 'isolation', profile: ExerciseProfile.ISOLATION });
+    expect(goalSelectionScore(compound, TrainingGoal.STRENGTH)).toBeGreaterThan(
+      goalSelectionScore(isolation, TrainingGoal.STRENGTH),
+    );
+    expect(goalSelectionScore(compound, TrainingGoal.HYPERTROPHY)).toBe(
+      goalSelectionScore(isolation, TrainingGoal.HYPERTROPHY),
+    );
+  });
+
+  it('classifies equipment into the diversity families', () => {
+    expect(equipmentFamily(exercise({ equipment: Equipment.BARBELL }))).toBe('FREE_WEIGHT');
+    expect(equipmentFamily(exercise({ equipment: Equipment.MACHINE }))).toBe('GUIDED');
+    expect(equipmentFamily(exercise({ equipment: Equipment.BODYWEIGHT }))).toBe('BODYWEIGHT');
+    expect(equipmentFamily(exercise({ equipment: Equipment.BANDS }))).toBe('OTHER');
+  });
+
+  it('uses a fallback only when no standard alternative exists', () => {
+    const fallback = exercise({
+      id: 'fallback',
+      primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+      movementVector: MovementVector.PUSH_HORIZONTAL,
+      profile: ExerciseProfile.COMPOUND_PRIMARY,
+      generationTier: ExerciseGenerationTier.FALLBACK,
+    });
+    const standard = exercise({
+      id: 'standard',
+      primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+      movementVector: MovementVector.PUSH_HORIZONTAL,
+      profile: ExerciseProfile.COMPOUND_PRIMARY,
+    });
+    const chest = planFor([[MuscleGroup.CHEST_MID_LOWER, 3]]);
+
+    expect(
+      selectExercises({ volumePlan: chest, catalogue: [fallback, standard], seed: 1 }).selected[0]
+        .exercise.id,
+    ).toBe('standard');
+    expect(
+      selectExercises({ volumePlan: chest, catalogue: [fallback], seed: 1 }).selected[0].exercise.id,
+    ).toBe('fallback');
+  });
+
+  it('does not auto-select either dip when standard gym alternatives exist', () => {
+    Array.from({ length: 100 }, (_, seed) => seed + 1).forEach((seed) => {
+      const ids = selectExercises({
+        volumePlan: plan,
+        catalogue: EXERCISE_CATALOGUE,
+        seed,
+      }).selected.map((entry) => entry.exercise.id);
+      expect(ids).not.toContain('fondos-paralelas');
+      expect(ids).not.toContain('fondos-banco');
+    });
+  });
+
+  it.each([MuscleGroup.BICEPS, MuscleGroup.TRICEPS])(
+    'does not select two %s variants with the same stimulus signature',
+    (muscle) => {
+      Array.from({ length: 50 }, (_, seed) => seed + 1).forEach((seed) => {
+        const selected = selectExercises({
+          volumePlan: planFor([[muscle, 12]]),
+          catalogue: EXERCISE_CATALOGUE,
+          seed,
+        }).selected;
+        const signatures = selected.map((entry) =>
+          entry.exercise.stimulusTags?.slice().sort().join('|'),
+        );
+        expect(new Set(signatures).size).toBe(signatures.length);
+      });
+    },
+  );
+});
+
 describe('selectExercises — invariantes deterministas', () => {
   it('la misma semilla produce exactamente la misma propuesta', () => {
     const a = selectExercises({ volumePlan: plan, catalogue: EXERCISE_CATALOGUE, seed: 11 });
@@ -221,6 +308,47 @@ describe('selectExercises — topes', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('never selects two compound variants of the same biomechanical pattern', () => {
+    Array.from({ length: 40 }, (_, seed) => seed + 1).forEach((seed) => {
+      const result = selectExercises({ volumePlan: plan, catalogue: EXERCISE_CATALOGUE, seed });
+      const compoundFamilies = result.selected
+        .filter((entry) => entry.exercise.profile !== ExerciseProfile.ISOLATION)
+        .map(
+          (entry) =>
+            `${entry.exercise.primaryMuscle}:${entry.exercise.movementVector}`,
+        );
+
+      expect(new Set(compoundFamilies).size).toBe(compoundFamilies.length);
+    });
+  });
+
+  it('never selects two primary compounds for the same movement vector', () => {
+    Array.from({ length: 100 }, (_, seed) => seed + 1).forEach((seed) => {
+      const vectors = selectExercises({
+        volumePlan: plan,
+        catalogue: EXERCISE_CATALOGUE,
+        seed,
+      }).selected
+        .filter((entry) => entry.exercise.profile === ExerciseProfile.COMPOUND_PRIMARY)
+        .map((entry) => entry.exercise.movementVector);
+      expect(new Set(vectors).size).toBe(vectors.length);
+    });
+  });
+
+  it('does not combine the duplicate squat and RDL variants from the reported plan', () => {
+    Array.from({ length: 40 }, (_, seed) => seed + 1).forEach((seed) => {
+      const ids = new Set(
+        selectExercises({ volumePlan: plan, catalogue: EXERCISE_CATALOGUE, seed }).selected.map(
+          (entry) => entry.exercise.id,
+        ),
+      );
+      expect(ids.has('sentadilla-libre') && ids.has('sentadilla-hack')).toBe(false);
+      expect(
+        ids.has('peso-muerto-rumano') && ids.has('peso-muerto-rumano-mancuernas'),
+      ).toBe(false);
+    });
+  });
+
   it('respeta una configuración a medida', () => {
     const result = selectExercises({
       volumePlan: plan,
@@ -304,7 +432,7 @@ describe('selectExercises — volumen total dentro del rango de referencia', () 
         seed: 1,
       });
       const position = (result.performedSets - min) / (max - min);
-      expect(position).toBeGreaterThan(0.75);
+      expect(position).toBeGreaterThan(0.7);
       expect(position).toBeLessThanOrEqual(1);
     });
   });

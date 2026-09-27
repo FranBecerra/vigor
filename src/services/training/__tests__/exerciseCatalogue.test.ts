@@ -1,4 +1,11 @@
-import { Equipment, ExerciseProfile, MovementVector, MuscleGroup, type Exercise } from '@/models';
+import {
+  Equipment,
+  ExerciseGenerationTier,
+  ExerciseProfile,
+  MovementVector,
+  MuscleGroup,
+  type Exercise,
+} from '@/models';
 import {
   CatalogueValidationError,
   CRITERIA_KEYS,
@@ -51,6 +58,7 @@ describe('parseExercise', () => {
       movementVector: MovementVector.PUSH_HORIZONTAL,
       profile: ExerciseProfile.COMPOUND_PRIMARY,
       equipment: Equipment.BARBELL,
+      generationTier: ExerciseGenerationTier.STANDARD,
       criteria: {
         stretchedPositionLoading: 4,
         rangeOfMotion: 4,
@@ -68,8 +76,25 @@ describe('parseExercise', () => {
     ['movementVector', 'EMPUJE'],
     ['profile', 'COMPUESTO'],
     ['equipment', 'BARRA'],
+    ['generationTier', 'PREFERRED'],
   ])('rechaza un %s desconocido', (field, value) => {
     expect(() => parseExercise(rawExercise({ [field]: value }))).toThrow(CatalogueValidationError);
+  });
+
+  it('accepts validated stimulus tags and rejects malformed or duplicate tags', () => {
+    expect(
+      parseExercise(rawExercise({ stimulusTags: ['SHOULDER:EXTENDED', 'GRIP:SUPINATED'] }))
+        .stimulusTags,
+    ).toEqual(['SHOULDER:EXTENDED', 'GRIP:SUPINATED']);
+    expect(() => parseExercise(rawExercise({ stimulusTags: 'SHOULDER:EXTENDED' }))).toThrow(
+      CatalogueValidationError,
+    );
+    expect(() => parseExercise(rawExercise({ stimulusTags: ['not-valid'] }))).toThrow(
+      CatalogueValidationError,
+    );
+    expect(() =>
+      parseExercise(rawExercise({ stimulusTags: ['GRIP:NEUTRAL', 'GRIP:NEUTRAL'] })),
+    ).toThrow(CatalogueValidationError);
   });
 
   it('rechaza una entrada que no es un objeto', () => {

@@ -1960,3 +1960,69 @@ Botón *Nueva rutina* en E1, junto al de entrenamiento vacío y con su mismo pat
 **Cerrado un descuadre de i18n preexistente y ajeno a esta tanda:** cinco claves de `train.` (los tramos extra) existían solo en español, incumpliendo la paridad de los cuatro idiomas. Traducidas. La comprobación de paridad ahora cubre las 190 claves y pasa entera; merece ser un test en lugar de una comprobación manual.
 
 **La pantalla no se ha ejecutado.** El agente no puede compilar iOS, así que lo verificado es tipos, lógica y la cadena de datos, no el resultado en pantalla. Nada del aspecto, el espaciado ni el comportamiento táctil está comprobado. Los vetos de ejercicio tampoco tienen control todavía: el modelo los guarda y el generador los acepta, pero la pantalla envía la lista vacía.
+
+### 2026-09-27 — Personal-first scope and short-term direction
+
+#### Product intent
+
+Vigor is being built first as a personal training app for its creator. Commercial launch, market validation, user interviews, and a public beta are not current project goals. The quality bar is whether the app fits the creator's real training, is understandable, and is useful enough to replace the current mix of tools and manual decisions. Sharing or commercializing it may be reconsidered later, but does not drive near-term architecture or scope.
+
+The central training problem is generating an editable mesocycle from athlete inputs, then evaluating completed training and progress to inform future volume and intensity decisions. The intended distinction from basic workout logging is the complete loop: individual inputs → proposed block → editable sessions → recorded execution → progress/stall review → explained next-step adjustments.
+
+#### Evidence boundary for volume landmarks
+
+MEV/MAV/MRV remain programming landmarks used by the generator, not directly measured biological thresholds for an individual. Population research supports dose-response relationships, while evidence for classifying individual response and identifying precise personal thresholds remains heterogeneous and developing ([Cheng et al., 2024 systematic review](https://pubmed.ncbi.nlm.nih.gov/38708326/); [autoregulated versus standardized prescription meta-analysis](https://pmc.ncbi.nlm.nih.gov/articles/PMC8762534/)). The app must distinguish population-derived starting estimates, user-declared training history, observed performance/recovery data, and programming judgment. Any claim that the system has identified an athlete's personal MEV or MRV requires an explicit method and validation; until then the UI and documentation should call these estimates or working ranges.
+
+#### Injury and rehabilitation scope
+
+The intended secondary feature is personal tracking and scheduling: record an injury and its self-reported evolution, attach a rehabilitation routine that the athlete already has, set its requested weekly frequency, log completion, and make the routine available in the pre-workout flow. Vigor does not diagnose an injury, select treatment, prescribe rehabilitation exercises, or claim to determine recovery. Any future change that adds clinical recommendations requires a separate product and evidence decision.
+
+#### Near-term implementation sequence
+
+1. Run the existing generation screen in the iOS simulator/device and fix visible interaction/layout defects. Verify generate → preview → save and retain a failed-save plan for retry. Do not infer visual correctness from TypeScript or unit tests.
+2. Make the saved routine reachable from E1 and the mesocycle view, then start a planned session from persisted data. Replace mocks only along this core path first; preserve unrelated mock screens until their replacement is in scope.
+3. Add the user's essential editing controls, including exercise replacement, set changes, ordering, and exercise vetoes, then verify the edited routine survives reload and regeneration respects locked choices.
+4. Connect planned and performed sessions. First report adherence, progress signals, and possible stalls with the source data visible; next-step changes to volume/intensity should be proposals the athlete can inspect and edit before automatic application is considered.
+5. Add the rehabilitation tracker and recurring pre-workout routine flow described above, keeping its exercise prescription under the athlete's control.
+
+Firestore rule deployment is infrastructure work and remains subject to the project's explicit-approval rule. Before any deployment, inspect the exact rules diff, test ownership and denial cases locally where possible, and present the proposed deployment for approval.
+
+This entry records product intent and sequencing, not a claim that the current generator has scientifically identified individual volume landmarks. Every implementation step remains subject to the project's testing and changelog requirements.
+
+### 2026-09-27 — Generator parity, exercise-family diversity, session balance, and bottom actions
+
+#### Capacity is permission, not an instruction to add junk volume
+
+The 40–90 total-set reference for an intermediate remains a recovery sanity range, not a claim that every intermediate needs at least 80 sets. The product calibration is narrower: when an intermediate hypertrophy plan uses the default commercial-gym equipment and has five 65-minute sessions available, the unsqueezed proposal should use the upper part of that range. The regression contract is **80–90 performed sets across twenty deterministic seeds**, with at least ten sets in every session and no more than 25 minutes between the longest and shortest session. Measured after this change: **84–89 sets across the first twenty seeds**; a wider 100-seed audit produced **82–89**, at least 12 sets per session, and at most 22 minutes of session-load spread.
+
+This is explicitly a scenario calibration, not a universal scientific minimum and not a rule to fill every available minute. When the recovery-derived plan is already complete, unused time remains unused rather than being padded with low-value work.
+
+#### Near-duplicate compound variants are one programming family
+
+Exercise identity is no longer enough to claim variety. Compound exercises with the same primary muscle and movement vector are treated as one biomechanical programming family, independent of equipment. Only one member of that family can be selected in a proposal. This prevents pairs such as barbell RDL plus dumbbell RDL, and back squat plus hack squat, while still allowing a distinct pattern such as a knee-flexion exercise to complement a hip hinge. Isolation variants have a cap of two per family because some high-volume regions need more than six direct sets; the distributor keeps equivalent variants in different sessions whenever the split provides another valid slot.
+
+The rule is a programming constraint, not an efficacy ranking. It prevents redundant exposure and avoidable fatigue; it does not claim that one implement is biologically superior. Under time pressure, an isolation exercise may complement a non-redundant compound already selected for the muscle, but it cannot replace the foundational compound pattern.
+
+#### Session assignment hierarchy
+
+Distribution now follows this order:
+
+1. Preserve every prescribed set and the three-set appearance cap.
+2. Keep an exercise in a matching session focus while a matching session has time and productive per-muscle capacity.
+3. Among valid matching sessions, use the least-loaded session; sequencing risk decides ties.
+4. Keep equivalent exercise variants in different sessions when possible.
+5. Use a mismatched focus only as an overflow valve when no matching session can accept the work.
+
+This closes the observed failure in which one leg session held four hard variants while the other contained almost no leg work. It also prevents two appearances of the same exercise from being recombined in one session.
+
+#### Harness parity with the generation screen
+
+`scripts/volume-harness.ts` now accepts and prints the screen inputs that affect or identify a proposal: name, goal, level, sessions, minutes, split, equipment, priority regions, deprioritized regions, vetoes, and seed. The default equipment preset is shared with the screen rather than duplicated. A capacity run prints the resolved split and every session with its exercises, performed sets, estimated minutes, structural warnings, and sequencing warnings. This makes a screenshot reproducible and exposes distribution defects that a whole-plan total cannot show.
+
+#### Floating navigation and fixed actions
+
+Expo Router's JavaScript-tab guidance states that an absolutely positioned tab bar does not reserve content space automatically. Floating-tab geometry is now shared by the tab layout and the generation screen. The fixed Generate/Save action bar reserves the tab height, safe-area-aware bottom offset, and an additional visual gap, so the primary action sits above the capsule rather than underneath it. The bar now overrides React Navigation's logical `start`/`end` defaults rather than trying to center with physical `left`/`right`; the previous combination sized the capsule correctly but left it pinned to the leading edge.
+
+**Visual verification:** iPhone 18 Pro simulator, iOS 27.0. The 5×65 AUTO case generated **88 sets**, the fixed Generate/Save action rendered fully above the floating tab capsule, and the capsule was centred horizontally.
+
+**Verification:** `tsc --noEmit` clean · **629 tests, 26 suites passing** · **100% statements, branches, functions, and lines** in the measured scope.

@@ -4,6 +4,7 @@ import {
   choiceOf,
   cycleChoice,
   EMPTY_EMPHASIS,
+  GENERATOR_EMPHASIS_REGIONS,
   isLowCost,
   prioritizeBlockedReason,
   remainingSlots,
@@ -13,7 +14,6 @@ import {
 } from '@/services/training/emphasisSelection';
 import {
   assertEmphasisLimits,
-  MAX_DEPRIORITIZED_REGIONS,
   PRIORITY_SLOT_BUDGET,
   VolumeRegion,
 } from '@/services/training/volumePlan';
@@ -101,14 +101,18 @@ describe('prioritizeBlockedReason', () => {
 });
 
 describe('canDeprioritize', () => {
-  it('allows up to the cap and refuses beyond it', () => {
-    const atCap: EmphasisSelection = {
+  it('allows unlimited maintenance regions', () => {
+    const several: EmphasisSelection = {
       priority: [],
       deprioritized: [BICEPS, TRICEPS, CALVES],
     };
-    expect(atCap.deprioritized).toHaveLength(MAX_DEPRIORITIZED_REGIONS);
-    expect(canDeprioritize(atCap, CORE)).toBe(false);
-    expect(canDeprioritize(atCap, BICEPS)).toBe(true);
+    expect(canDeprioritize(several, CORE)).toBe(true);
+    expect(canDeprioritize(several, BICEPS)).toBe(true);
+  });
+
+  it('hides tibialis from the standard generator without deleting the domain region', () => {
+    expect(GENERATOR_EMPHASIS_REGIONS).not.toContain(VolumeRegion.TIBIALIS);
+    expect(GENERATOR_EMPHASIS_REGIONS).toContain(VolumeRegion.CALVES);
   });
 });
 
@@ -138,12 +142,17 @@ describe('withChoice', () => {
     expect(withChoice(full, QUADS, 'PRIORITY')).toBe(full);
   });
 
-  it('returns the selection UNCHANGED when deprioritising past the cap', () => {
-    const atCap: EmphasisSelection = {
+  it('adds another maintenance region when several are already selected', () => {
+    const several: EmphasisSelection = {
       priority: [],
       deprioritized: [BICEPS, TRICEPS, CALVES],
     };
-    expect(withChoice(atCap, CORE, 'DEPRIORITIZED')).toBe(atCap);
+    expect(withChoice(several, CORE, 'DEPRIORITIZED').deprioritized).toEqual([
+      BICEPS,
+      TRICEPS,
+      CALVES,
+      CORE,
+    ]);
   });
 
   it('does not mutate the input', () => {
@@ -172,12 +181,12 @@ describe('cycleChoice', () => {
     expect(choiceOf(cycled, QUADS)).toBe('DEPRIORITIZED');
   });
 
-  it('leaves the selection alone when neither state is available', () => {
+  it('skips a full priority state and still reaches maintenance', () => {
     const jammed: EmphasisSelection = {
       priority: [CHEST, BACK],
       deprioritized: [BICEPS, TRICEPS, CALVES],
     };
-    expect(cycleChoice(jammed, QUADS)).toBe(jammed);
+    expect(choiceOf(cycleChoice(jammed, QUADS), QUADS)).toBe('DEPRIORITIZED');
   });
 });
 

@@ -65,7 +65,9 @@ export const EXERCISE_SETUP_SECONDS = 60;
  * The real session distribution enforces this limit. Capacity calculations keep
  * it to estimate appearances when called before a distribution is available.
  */
-export const MAX_SETS_PER_EXERCISE_APPEARANCE = 3;
+export const MAX_SETS_PER_EXERCISE_APPEARANCE = 6;
+/** Typical generated prescription, used only by the quick capacity hint. */
+export const TYPICAL_SETS_PER_EXERCISE = 3;
 
 /** Minutos totales disponibles en el microciclo, descontada la puesta en marcha. */
 export function workMinutesAvailable(capacity: TrainingCapacity): number {
@@ -128,6 +130,6 @@ export function approximateSetCapacity(capacity: TrainingCapacity): number {
       restDurationFor(ExerciseProfile.ISOLATION)) /
     2;
   const perSetSeconds =
-    WORK_SECONDS_PER_SET + averageRest + EXERCISE_SETUP_SECONDS / MAX_SETS_PER_EXERCISE_APPEARANCE;
+    WORK_SECONDS_PER_SET + averageRest + EXERCISE_SETUP_SECONDS / TYPICAL_SETS_PER_EXERCISE;
   return Math.floor((workMinutesAvailable(capacity) * 60) / perSetSeconds);
 }

@@ -3,9 +3,8 @@ import { ExperienceLevel } from '@/models/athlete';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
 import { planMesocycle, type MesocyclePlan } from '@/services/training/mesocyclePlanner';
 import { TrainingGoal, VolumeRegion } from '@/services/training/volumePlan';
-import { targetRIR } from '@/services/training/rirAutoregulation';
+import { exercisePrescription } from '@/services/training/exercisePrescription';
 import {
-  DEFAULT_TARGET_REPS,
   editedExerciseIds,
   plannedExerciseIds,
   toMesocycleDraft,
@@ -17,10 +16,14 @@ import {
 
 const NOW = 1_800_000_000_000;
 
-function generate(sessions = 4, minutes = 60): MesocyclePlan {
+function generate(
+  sessions = 4,
+  minutes = 60,
+  goal: TrainingGoal = TrainingGoal.HYPERTROPHY,
+): MesocyclePlan {
   return planMesocycle({
     level: ExperienceLevel.INTERMEDIATE,
-    goal: TrainingGoal.HYPERTROPHY,
+    goal,
     catalogue: EXERCISE_CATALOGUE,
     seed: 1,
     split: SplitStructure.AUTO,
@@ -64,7 +67,9 @@ describe('toPlannedSession', () => {
     planned.exercises.forEach((exercise, order) => {
       const rirs = exercise.sets.map((set) => set.targetRIR);
       const profile = session.exercises[order].exercise.profile;
-      expect(rirs[rirs.length - 1]).toBe(targetRIR(profile));
+      expect(rirs[rirs.length - 1]).toBe(
+        exercisePrescription(TrainingGoal.HYPERTROPHY, profile).targetRIR,
+      );
       for (let index = 1; index < rirs.length; index += 1) {
         expect(rirs[index]).toBeLessThanOrEqual(rirs[index - 1]);
       }
@@ -74,7 +79,7 @@ describe('toPlannedSession', () => {
   it('raises intensity in the final microcycle before a deload', () => {
     // Volume is static within the mesocycle, so intensity is the only thing that
     // moves between microcycles (§3).
-    const peak = toPlannedSession(session, true);
+    const peak = toPlannedSession(session, TrainingGoal.HYPERTROPHY, true);
     const routine = planned.exercises[0].sets.map((set) => set.targetRIR);
     const peaked = peak.exercises[0].sets.map((set) => set.targetRIR);
     expect(peaked.every((rir, index) => rir <= routine[index])).toBe(true);
@@ -85,11 +90,11 @@ describe('toPlannedSession', () => {
     planned.exercises.forEach((exercise) => expect(exercise.isEdited).toBe(false));
   });
 
-  it('prescribes normal working sets with the default rep target', () => {
+  it('prescribes hypertrophy ranges by exercise profile', () => {
     planned.exercises.forEach((exercise) =>
       exercise.sets.forEach((set) => {
         expect(set.setType).toBe(SetType.NORMAL);
-        expect(set.targetReps).toBe(DEFAULT_TARGET_REPS);
+        expect(set.targetRepsMin).toBeLessThan(set.targetReps);
       }),
     );
   });
@@ -127,6 +132,28 @@ describe('toPlannedSessions — conservation', () => {
 
   it('leaves no session empty', () => {
     sessions.forEach((session) => expect(session.exercises.length).toBeGreaterThan(0));
+  });
+
+  it('does not repeat an exercise in another session of the microcycle', () => {
+    const ids = sessions.flatMap((session) =>
+      session.exercises.map((exercise) => exercise.exerciseId),
+    );
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('maps a strength plan to lower compound rep ranges and RPE-specific RIR', () => {
+    const strengthPlan = generate(4, 60, TrainingGoal.STRENGTH);
+    const mapped = toPlannedSessions(strengthPlan);
+    const primary = strengthPlan.distribution.sessions
+      .flatMap((session) => session.exercises)
+      .find((entry) => entry.exercise.profile === 'COMPOUND_PRIMARY');
+    expect(primary).toBeDefined();
+    const prescription = mapped
+      .flatMap((session) => session.exercises)
+      .find((entry) => entry.exerciseId === primary?.exercise.id);
+    expect(prescription?.sets[0].targetRepsMin).toBe(3);
+    expect(prescription?.sets[0].targetReps).toBe(5);
+    expect(prescription?.sets.at(-1)?.targetRIR).toBe(2);
   });
 });
 

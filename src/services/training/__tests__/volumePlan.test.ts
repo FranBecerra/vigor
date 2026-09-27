@@ -8,7 +8,6 @@ import {
   DELOAD_VOLUME_FACTOR,
   EmphasisLimitError,
   LOW_COST_REGIONS,
-  MAX_DEPRIORITIZED_REGIONS,
   MAX_PRIORITY_REGIONS,
   NORMAL_RANGE_FRACTION,
   NORMAL_RANGE_FRACTION_WITH_PRIORITY,
@@ -383,23 +382,20 @@ describe('límites de énfasis', () => {
     ).toThrow(EmphasisLimitError);
   });
 
-  it('acepta hasta tres desprioriorizadas y rechaza la cuarta', () => {
-    const three = [MuscleGroup.CORE, MuscleGroup.GLUTES, MuscleGroup.CALVES];
-    expect(three).toHaveLength(MAX_DEPRIORITIZED_REGIONS);
+  it('accepts any number of deprioritized regions', () => {
+    const deprioritized = [
+      MuscleGroup.CORE,
+      MuscleGroup.GLUTES,
+      MuscleGroup.CALVES,
+      MuscleGroup.TIBIALIS,
+    ];
     expect(() =>
       buildVolumePlan({
         level: ExperienceLevel.INTERMEDIATE,
         goal: TrainingGoal.HYPERTROPHY,
-        deprioritizedMuscles: three,
+        deprioritizedMuscles: deprioritized,
       }),
     ).not.toThrow();
-    expect(() =>
-      buildVolumePlan({
-        level: ExperienceLevel.INTERMEDIATE,
-        goal: TrainingGoal.HYPERTROPHY,
-        deprioritizedMuscles: [...three, MuscleGroup.TIBIALIS],
-      }),
-    ).toThrow(EmphasisLimitError);
   });
 
   it('RECHAZA una región priorizada y desprioriorizada a la vez', () => {

@@ -49,3 +49,6 @@ coverage/
 
 # Copias de seguridad del plist de Firebase (contienen ids del proyecto)
 GoogleService-Info.plist.bak-*
+
+# Kiro
+.kiro/

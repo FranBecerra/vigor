@@ -55,6 +55,7 @@ import {
   choiceOf,
   cycleChoice,
   EMPTY_EMPHASIS,
+  GENERATOR_EMPHASIS_REGIONS,
   isLowCost,
   prioritizeBlockedReason,
   usedSlots,
@@ -62,6 +63,18 @@ import {
 } from '@/services/training/emphasisSelection';
 import { toMesocycleDraft, toRoutineDraft } from '@/services/training/routineMapper';
 import { mesocycleRepository, routineRepository } from '@/services/repositories';
+import {
+  DEFAULT_GENERATOR_EQUIPMENT,
+  DEFAULT_GENERATOR_GOAL,
+  DEFAULT_GENERATOR_LEVEL,
+  DEFAULT_GENERATOR_MINUTES,
+  DEFAULT_GENERATOR_SESSIONS,
+  DEFAULT_GENERATOR_SPLIT,
+} from '@/services/training/generatorDefaults';
+import {
+  FLOATING_TAB_BAR_HEIGHT,
+  floatingTabBarBottom,
+} from '@/components/navigation/tabBarMetrics';
 
 /** Bounds of the two capacity controls. Wide enough to be honest, narrow enough to stay sane. */
 const MIN_SESSIONS = 2;
@@ -93,15 +106,6 @@ const EQUIPMENT = [
   Equipment.BANDS,
 ] as const;
 
-/** Sensible default: a commercial gym. The athlete narrows it if they train at home. */
-const DEFAULT_EQUIPMENT: Equipment[] = [
-  Equipment.BARBELL,
-  Equipment.DUMBBELL,
-  Equipment.MACHINE,
-  Equipment.CABLE,
-  Equipment.BODYWEIGHT,
-];
-
 const GOAL_LABEL: Record<TrainingGoal, string> = {
   [TrainingGoal.HYPERTROPHY]: 'generate.goalHypertrophy',
   [TrainingGoal.STRENGTH]: 'generate.goalStrength',
@@ -115,12 +119,12 @@ export default function GenerateScreen() {
   const { user } = useAuth();
 
   const [name, setName] = useState('');
-  const [goal, setGoal] = useState<TrainingGoal>(TrainingGoal.HYPERTROPHY);
-  const [level, setLevel] = useState<ExperienceLevel>(ExperienceLevel.INTERMEDIATE);
-  const [sessions, setSessions] = useState(4);
-  const [minutes, setMinutes] = useState(60);
-  const [split, setSplit] = useState<SplitStructure>(SplitStructure.AUTO);
-  const [equipment, setEquipment] = useState<Equipment[]>(DEFAULT_EQUIPMENT);
+  const [goal, setGoal] = useState<TrainingGoal>(DEFAULT_GENERATOR_GOAL);
+  const [level, setLevel] = useState<ExperienceLevel>(DEFAULT_GENERATOR_LEVEL);
+  const [sessions, setSessions] = useState(DEFAULT_GENERATOR_SESSIONS);
+  const [minutes, setMinutes] = useState(DEFAULT_GENERATOR_MINUTES);
+  const [split, setSplit] = useState<SplitStructure>(DEFAULT_GENERATOR_SPLIT);
+  const [equipment, setEquipment] = useState<Equipment[]>([...DEFAULT_GENERATOR_EQUIPMENT]);
   const [emphasis, setEmphasis] = useState<EmphasisSelection>(EMPTY_EMPHASIS);
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1_000_000));
   const [plan, setPlan] = useState<MesocyclePlan | null>(null);
@@ -260,7 +264,7 @@ export default function GenerateScreen() {
         contentContainerStyle={{
           paddingTop: insets.top + spacing.lg,
           paddingHorizontal: spacing.lg,
-          paddingBottom: insets.bottom + 140,
+          paddingBottom: spacing.xl,
         }}
         keyboardShouldPersistTaps="handled"
       >
@@ -393,7 +397,7 @@ export default function GenerateScreen() {
           trailingTone={slots >= PRIORITY_SLOT_BUDGET ? 'warning' : 'normal'}
         >
           <ChipRow>
-            {Object.values(VolumeRegion).map((region) => {
+            {GENERATOR_EMPHASIS_REGIONS.map((region) => {
               const choice = choiceOf(emphasis, region);
               const blocked = prioritizeBlockedReason(emphasis, region);
               return (
@@ -491,6 +495,8 @@ export default function GenerateScreen() {
           {
             paddingBottom: insets.bottom + spacing.md,
             paddingHorizontal: spacing.lg,
+            marginBottom:
+              floatingTabBarBottom(insets.bottom) + FLOATING_TAB_BAR_HEIGHT + spacing.sm,
             backgroundColor: colors.bg,
             borderTopColor: colors.surfaceBorder,
           },

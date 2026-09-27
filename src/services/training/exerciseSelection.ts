@@ -27,14 +27,21 @@
  *   tres empujes sin ninguna tracción.
  */
 import {
+  Equipment,
+  ExerciseGenerationTier,
   ExerciseProfile,
   MovementVector,
   MuscleGroup,
   type Exercise,
 } from '@/models';
-import { stimulusQuality } from './exerciseCatalogue';
+import { criteriaOf, stimulusQuality } from './exerciseCatalogue';
 import { attributedVolumePerMinute, ISOLATION_VOLUME_PER_MINUTE } from './trainingCapacity';
-import { totalSetsVerdict, type TotalVolumeVerdict, type VolumePlan } from './volumePlan';
+import {
+  TrainingGoal,
+  totalSetsVerdict,
+  type TotalVolumeVerdict,
+  type VolumePlan,
+} from './volumePlan';
 
 /**
  * COMPOUND PATTERNS THAT ARE NEVER SKIPPED.
@@ -111,6 +118,23 @@ export interface SelectionConfig {
    * de mayor rendimiento por minuto.
    */
   maxExercisesPerMuscleWhenTimeConstrained: number;
+  /**
+   * Maximum compound variants with the same primary muscle and movement vector.
+   * A barbell RDL and a dumbbell RDL are loading variants, not useful variety.
+   */
+  maxCompoundExercisesPerPattern: number;
+  /** Prevents two heavy primary compounds for the same vector across muscles. */
+  maxPrimaryCompoundsPerVector: number;
+  /** Isolation variants are cheaper, but unlimited duplicates still add noise. */
+  maxIsolationExercisesPerPattern: number;
+  /** Only candidates close to the best option for a muscle remain in the draw. */
+  candidateScoreWindow: number;
+  /** Reduces the probability of repeatedly selecting the same equipment family. */
+  equipmentFamilyPenalty: number;
+  /** Boost for a variant that adds new stimulus dimensions for the same muscle. */
+  stimulusNoveltyBonus: number;
+  /** Probability penalty when a candidate repeats already-selected dimensions. */
+  stimulusOverlapPenalty: number;
 }
 
 /**
@@ -131,6 +155,13 @@ export const DEFAULT_SELECTION_CONFIG: SelectionConfig = {
   vectorPenalty: 0.6,
   vectorPenaltyWhenTimeConstrained: 0.15,
   maxExercisesPerMuscleWhenTimeConstrained: 2,
+  maxCompoundExercisesPerPattern: 1,
+  maxPrimaryCompoundsPerVector: 1,
+  maxIsolationExercisesPerPattern: 3,
+  candidateScoreWindow: 0.9,
+  equipmentFamilyPenalty: 0.45,
+  stimulusNoveltyBonus: 1.2,
+  stimulusOverlapPenalty: 0.8,
 };
 
 export interface SelectedExercise {
@@ -237,6 +268,89 @@ function isCompound(exercise: Exercise): boolean {
   return COMPOUND_PROFILES.includes(exercise.profile);
 }
 
+type EquipmentFamily = 'FREE_WEIGHT' | 'GUIDED' | 'BODYWEIGHT' | 'OTHER';
+
+/** Coarse equipment family used for diversity, never as a claim of superiority. */
+export function equipmentFamily(exercise: Exercise): EquipmentFamily {
+  switch (exercise.equipment) {
+    case Equipment.BARBELL:
+    case Equipment.DUMBBELL:
+    case Equipment.KETTLEBELL:
+      return 'FREE_WEIGHT';
+    case Equipment.MACHINE:
+    case Equipment.CABLE:
+    case Equipment.SMITH_MACHINE:
+      return 'GUIDED';
+    case Equipment.BODYWEIGHT:
+      return 'BODYWEIGHT';
+    default:
+      return 'OTHER';
+  }
+}
+
+/**
+ * Goal-specific selection score.
+ *
+ * Hypertrophy keeps the audited stimulus score. Strength gives more weight to
+ * reproducible loading and multi-joint skill practice; high loads improve 1RM
+ * more reliably even though hypertrophy is possible across a broad load range.
+ * This is a transparent programming heuristic, not a universal exercise ranking.
+ */
+export function goalSelectionScore(exercise: Exercise, goal: TrainingGoal): number {
+  if (goal === TrainingGoal.HYPERTROPHY) return stimulusQuality(exercise);
+
+  const criteria = criteriaOf(exercise);
+  const base =
+    criteria.loadProgressability * 0.5 +
+    criteria.rangeOfMotion * 0.15 +
+    criteria.stretchedPositionLoading * 0.15 +
+    criteria.stabilityCost * 0.1 +
+    criteria.resistanceProfileMatch * 0.1;
+  const profileMultiplier =
+    exercise.profile === ExerciseProfile.COMPOUND_PRIMARY
+      ? 1.35
+      : exercise.profile === ExerciseProfile.COMPOUND_SECONDARY
+        ? 1.1
+        : 0.72;
+  const barbellMultiplier = exercise.equipment === Equipment.BARBELL ? 1.15 : 1;
+  return base * profileMultiplier * barbellMultiplier;
+}
+
+/**
+ * Fallback exercises stay available when equipment/vetoes leave no standard
+ * alternative, but never displace a standard option by random chance.
+ */
+function preferStandard(candidates: readonly Exercise[]): Exercise[] {
+  const standard = candidates.filter(
+    (exercise) => exercise.generationTier !== ExerciseGenerationTier.FALLBACK,
+  );
+  return standard.length > 0 ? standard : [...candidates];
+}
+
+/** Removes clearly inferior lottery tickets while preserving meaningful variety. */
+function competitiveCandidates(
+  candidates: readonly Exercise[],
+  goal: TrainingGoal,
+  window: number,
+  scoreOf: (exercise: Exercise) => number = (exercise) => goalSelectionScore(exercise, goal),
+): Exercise[] {
+  const eligible = preferStandard(candidates);
+  const best = eligible.reduce(
+    (maximum, exercise) => Math.max(maximum, scoreOf(exercise)),
+    Number.NEGATIVE_INFINITY,
+  );
+  return eligible.filter((exercise) => scoreOf(exercise) >= best - window);
+}
+
+/**
+ * Exercises in the same family solve the same primary programming problem.
+ * Equipment is deliberately absent: changing the implement does not turn an RDL
+ * into a second movement pattern.
+ */
+function patternKey(exercise: Exercise): string {
+  return `${exercise.primaryMuscle}:${exercise.movementVector}:${isCompound(exercise) ? 'compound' : 'isolation'}`;
+}
+
 export interface SelectionInput {
   /** Plan de volumen. Solo se atienden los músculos con objetivo mayor que cero. */
   volumePlan: VolumePlan;
@@ -286,8 +400,88 @@ export function selectExercises(input: SelectionInput): SelectionResult {
   const vectorCounts = new Map<MovementVector, number>();
   const chosen = new Map<string, SelectedExercise>();
   const countPerMuscle = new Map<MuscleGroup, number>();
+  const countPerPattern = new Map<string, number>();
+  const primaryCompoundsPerVector = new Map<MovementVector, number>();
+  const chosenStimulusVariants = new Set<string>();
+  const countPerEquipmentFamily = new Map<EquipmentFamily, number>();
   /** Músculos para los que ya se agotaron los candidatos o el tope. */
   const closed = new Set<MuscleGroup>();
+
+  const patternHasRoom = (exercise: Exercise): boolean => {
+    const limit = isCompound(exercise)
+      ? config.maxCompoundExercisesPerPattern
+      : config.maxIsolationExercisesPerPattern;
+    if (
+      exercise.profile === ExerciseProfile.COMPOUND_PRIMARY &&
+      (primaryCompoundsPerVector.get(exercise.movementVector) ?? 0) >=
+        config.maxPrimaryCompoundsPerVector
+    ) {
+      return false;
+    }
+    return (countPerPattern.get(patternKey(exercise)) ?? 0) < limit;
+  };
+
+  const stimulusVariantKey = (exercise: Exercise): string | undefined =>
+    exercise.stimulusTags === undefined
+      ? undefined
+      : `${exercise.primaryMuscle}:${[...exercise.stimulusTags].sort().join('|')}`;
+
+  const stimulusVariantHasRoom = (exercise: Exercise): boolean => {
+    const key = stimulusVariantKey(exercise);
+    return key === undefined || !chosenStimulusVariants.has(key);
+  };
+
+  const recordPattern = (exercise: Exercise): void => {
+    const key = patternKey(exercise);
+    countPerPattern.set(key, (countPerPattern.get(key) ?? 0) + 1);
+    if (exercise.profile === ExerciseProfile.COMPOUND_PRIMARY) {
+      primaryCompoundsPerVector.set(
+        exercise.movementVector,
+        (primaryCompoundsPerVector.get(exercise.movementVector) ?? 0) + 1,
+      );
+    }
+    const variant = stimulusVariantKey(exercise);
+    if (variant !== undefined) chosenStimulusVariants.add(variant);
+  };
+
+  const recordEquipmentFamily = (exercise: Exercise): void => {
+    const family = equipmentFamily(exercise);
+    countPerEquipmentFamily.set(family, (countPerEquipmentFamily.get(family) ?? 0) + 1);
+  };
+
+  const stimulusTagsOf = (exercise: Exercise): readonly string[] =>
+    exercise.stimulusTags ?? [`MOVEMENT:${exercise.movementVector}`];
+
+  const chosenTagsFor = (muscle: MuscleGroup): Set<string> =>
+    new Set(
+      [...chosen.values()]
+        .filter((entry) => entry.exercise.primaryMuscle === muscle)
+        .flatMap((entry) => stimulusTagsOf(entry.exercise)),
+    );
+
+  const noveltyAdjustedScore = (exercise: Exercise): number => {
+    const existing = chosenTagsFor(exercise.primaryMuscle);
+    if (existing.size === 0) return goalSelectionScore(exercise, input.volumePlan.goal);
+    const tags = stimulusTagsOf(exercise);
+    const novelFraction = tags.filter((tag) => !existing.has(tag)).length / tags.length;
+    return (
+      goalSelectionScore(exercise, input.volumePlan.goal) +
+      novelFraction * config.stimulusNoveltyBonus
+    );
+  };
+
+  const diversityAdjustedScore = (exercise: Exercise): number => {
+    const used = countPerEquipmentFamily.get(equipmentFamily(exercise)) ?? 0;
+    const existing = chosenTagsFor(exercise.primaryMuscle);
+    const tags = stimulusTagsOf(exercise);
+    const overlapFraction =
+      existing.size === 0 ? 0 : tags.filter((tag) => existing.has(tag)).length / tags.length;
+    return (
+      noveltyAdjustedScore(exercise) /
+      (1 + used * config.equipmentFamilyPenalty) /
+      (1 + overlapFraction * config.stimulusOverlapPenalty)
+    );
+  };
 
   /** Volumen que le falta a un músculo, dado su objetivo. */
   const remainingOf = (muscle: MuscleGroup, target: number): number =>
@@ -314,21 +508,28 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     const trains = muscles.some((muscle) => (targets.get(muscle) ?? 0) > 0);
     if (!trains) return;
 
-    const candidates = input.catalogue.filter(
+    const rawCandidates = input.catalogue.filter(
       (exercise) =>
         exercise.movementVector === vector &&
         isCompound(exercise) &&
         !chosen.has(exercise.id) &&
         targets.has(exercise.primaryMuscle),
     );
-    if (candidates.length === 0) {
+    if (rawCandidates.length === 0) {
       missingFoundationalPatterns.push(vector);
       return;
     }
 
-    const pick = weightedPick(candidates, (exercise) => stimulusQuality(exercise), random)!;
+    const candidates = competitiveCandidates(
+      rawCandidates,
+      input.volumePlan.goal,
+      config.candidateScoreWindow,
+    );
+    const pick = weightedPick(candidates, diversityAdjustedScore, random)!;
     const sets = config.minSetsPerExercise;
     chosen.set(pick.id, { exercise: pick, sets });
+    recordPattern(pick);
+    recordEquipmentFamily(pick);
     countPerMuscle.set(
       pick.primaryMuscle,
       (countPerMuscle.get(pick.primaryMuscle) ?? 0) + 1,
@@ -350,8 +551,24 @@ export function selectExercises(input: SelectionInput): SelectionResult {
       continue;
     }
 
-    const available = input.catalogue.filter(
-      (exercise) => exercise.primaryMuscle === muscle && !chosen.has(exercise.id),
+    const rawAvailable = input.catalogue.filter(
+      (exercise) =>
+        exercise.primaryMuscle === muscle &&
+        !chosen.has(exercise.id) &&
+        patternHasRoom(exercise) &&
+        stimulusVariantHasRoom(exercise),
+    );
+    const rawCompounds = rawAvailable.filter(isCompound);
+    const candidatePool =
+      (input.timeConstrained === true || input.volumePlan.goal === TrainingGoal.STRENGTH) &&
+      rawCompounds.length > 0
+        ? rawCompounds
+        : rawAvailable;
+    const available = competitiveCandidates(
+      candidatePool,
+      input.volumePlan.goal,
+      config.candidateScoreWindow,
+      noveltyAdjustedScore,
     );
     if (available.length === 0) {
       closed.add(muscle);
@@ -365,17 +582,13 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     // para quien entrena tres horas a la semana. Los músculos sin ningún
     // multiarticular en el catálogo (bíceps, deltoides lateral, gemelos, core)
     // reciben su aislamiento igual, porque ahí no hay alternativa.
-    const compoundsAvailable = available.filter(isCompound);
-    const candidates =
-      input.timeConstrained === true && compoundsAvailable.length > 0
-        ? compoundsAvailable
-        : available;
+    const candidates = available;
 
     // `candidates` no está vacío, así que weightedPick siempre devuelve uno.
     const pick = weightedPick(
       candidates,
       (exercise) => {
-        let weight = stimulusQuality(exercise);
+        let weight = diversityAdjustedScore(exercise);
 
         if (input.timeConstrained === true) {
           // Con el tiempo como techo, el criterio es el VOLUMEN POR MINUTO, no un
@@ -404,6 +617,8 @@ export function selectExercises(input: SelectionInput): SelectionResult {
 
     const sets = Math.min(config.minSetsPerExercise, config.maxSetsPerExercise);
     chosen.set(pick.id, { exercise: pick, sets });
+    recordPattern(pick);
+    recordEquipmentFamily(pick);
     countPerMuscle.set(muscle, (countPerMuscle.get(muscle) ?? 0) + 1);
     vectorCounts.set(pick.movementVector, (vectorCounts.get(pick.movementVector) ?? 0) + 1);
     credit(attributed, pick, sets);
@@ -413,7 +628,9 @@ export function selectExercises(input: SelectionInput): SelectionResult {
   // empezando por los de mayor efectividad. Sumar series a un buen ejercicio es
   // preferible a añadir otro ejercicio mediocre.
   const byStimulus = [...chosen.values()].sort(
-    (a, b) => stimulusQuality(b.exercise) - stimulusQuality(a.exercise),
+    (a, b) =>
+      goalSelectionScore(b.exercise, input.volumePlan.goal) -
+      goalSelectionScore(a.exercise, input.volumePlan.goal),
   );
 
   let progressed = true;

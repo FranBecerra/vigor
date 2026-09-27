@@ -183,6 +183,19 @@ export interface ExerciseCriteria {
 }
 
 /**
+ * Whether the automatic generator should normally consider an exercise.
+ *
+ * `FALLBACK` does not mean unsafe or ineffective. It means that, when a standard
+ * alternative for the same programming problem is available, the generator
+ * should prefer the easier-to-progress, easier-to-dose option. The exercise
+ * remains available for manual routines and equipment-constrained plans.
+ */
+export enum ExerciseGenerationTier {
+  STANDARD = 'STANDARD',
+  FALLBACK = 'FALLBACK',
+}
+
+/**
  * Definición de un ejercicio en el catálogo (nativo o personalizado por el usuario).
  * Los ejercicios personalizados (PRD §3.5.3) solo requieren name + primaryMuscle
  * y carecen de mapeo biomecánico profundo (isCustom = true).
@@ -201,6 +214,13 @@ export interface Exercise {
    * neutral profile rather than being assumed good or bad.
    */
   criteria?: ExerciseCriteria;
+  /** Automatic-selection policy; absent custom entries default to STANDARD. */
+  generationTier?: ExerciseGenerationTier;
+  /**
+   * Programming dimensions used to prefer complementary variants (for example
+   * shoulder position, grip and resistance emphasis). Tags use `AXIS:VALUE`.
+   */
+  stimulusTags?: string[];
   /**
    * Ilustraciones del patrón: inicio y final de la fase concéntrica.
    * Opcional a propósito: el catálogo es utilizable sin ellas y se añaden por

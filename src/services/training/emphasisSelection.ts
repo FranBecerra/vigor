@@ -21,7 +21,6 @@
  */
 import {
   LOW_COST_REGIONS,
-  MAX_DEPRIORITIZED_REGIONS,
   MAX_PRIORITY_REGIONS,
   PRIORITY_SLOT_BUDGET,
   prioritySlotsOf,
@@ -37,6 +36,15 @@ export interface EmphasisSelection {
 }
 
 export const EMPTY_EMPHASIS: EmphasisSelection = { priority: [], deprioritized: [] };
+
+/**
+ * Regions exposed by the standard generator. Tibialis remains in the domain
+ * model for custom programming and rehabilitation, but is too granular for the
+ * primary mesocycle-emphasis control.
+ */
+export const GENERATOR_EMPHASIS_REGIONS: readonly VolumeRegion[] = Object.values(
+  VolumeRegion,
+).filter((region) => region !== VolumeRegion.TIBIALIS);
 
 /** Slots the current priorities consume. */
 export function usedSlots(selection: EmphasisSelection): number {
@@ -79,11 +87,10 @@ export function canPrioritize(
 
 /** Whether the region could be deprioritised right now. */
 export function canDeprioritize(
-  selection: EmphasisSelection,
-  region: VolumeRegion,
+  _selection: EmphasisSelection,
+  _region: VolumeRegion,
 ): boolean {
-  if (selection.deprioritized.includes(region)) return true;
-  return selection.deprioritized.length < MAX_DEPRIORITIZED_REGIONS;
+  return true;
 }
 
 /**

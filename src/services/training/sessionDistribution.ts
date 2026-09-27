@@ -32,12 +32,13 @@
  */
 import {
   ExerciseProfile,
+  MovementVector,
   MuscleGroup,
   SplitStructure,
   type Exercise,
 } from '@/models';
 import type { SelectedExercise, SelectionResult } from './exerciseSelection';
-import { MAX_SETS_PER_EXERCISE_APPEARANCE, exerciseMinutes } from './trainingCapacity';
+import { exerciseMinutes } from './trainingCapacity';
 import { fatigueCost } from './exerciseCatalogue';
 
 /** Session label, used by distribution logic and by the future UI. */
@@ -344,6 +345,18 @@ function minutesOf(entries: readonly SessionExercise[]): number {
   return entries.reduce((sum, entry) => sum + exerciseMinutes(entry.exercise, entry.sets), 0);
 }
 
+/** Variants that would feel like repeating the same exercise inside one session. */
+function sameExerciseFamily(left: Exercise, right: Exercise): boolean {
+  const bothCompound =
+    left.profile !== ExerciseProfile.ISOLATION && right.profile !== ExerciseProfile.ISOLATION;
+  if (bothCompound && left.movementVector === right.movementVector) return true;
+  return (
+    left.primaryMuscle === right.primaryMuscle &&
+    left.movementVector === right.movementVector &&
+    left.profile === right.profile
+  );
+}
+
 /**
  * Builds the focus sequence from the work that has to be placed.
  *
@@ -411,28 +424,15 @@ export function buildFocusSequence(
 }
 
 /**
- * Sets per appearance for one exercise, spread as evenly as possible.
+ * Sets for the single appearance of one exercise in a microcycle.
  *
- * Even on purpose: four sets become 2 + 2 rather than 3 + 1, because a single-set
- * appearance costs a full setup for almost no stimulus. This is also what delivers
- * frequency two without a separate rule, since anything above the cap is split.
- *
- * When the athlete has fewer sessions than the prescription needs appearances,
- * exceeding the cap is unavoidable, and the excess is spread across appearances
- * rather than dumped on the last one.
+ * Automatic plans never repeat an exercise across sessions. Muscle frequency is
+ * created with distinct variants, which gives the athlete complementary stimuli
+ * and avoids a weak two-set remainder after splitting a five-set prescription.
  */
 export function appearanceSets(totalSets: number, eligibleSessions: number): number[] {
   if (totalSets <= 0 || eligibleSessions <= 0) return [];
-
-  const appearances = Math.min(
-    eligibleSessions,
-    Math.ceil(totalSets / MAX_SETS_PER_EXERCISE_APPEARANCE),
-  );
-  const base = Math.floor(totalSets / appearances);
-  const withOneMore = totalSets % appearances;
-  return Array.from({ length: appearances }, (_, index) =>
-    index < withOneMore ? base + 1 : base,
-  );
+  return [totalSets];
 }
 
 /** Effective sets a muscle receives in a session: direct 1, secondary 0.5. */
@@ -467,10 +467,20 @@ export function sessionSetCap(
   return Math.min(JUNK_VOLUME_SETS, LARGE_MUSCLE_SESSION_CAP + allowance);
 }
 
-/** Cost of placing work outside its natural focus. High enough to shape the split. */
-const FOCUS_MISMATCH_COST = 40;
-/** Weight of load imbalance, in cost units per minute away from the mean. */
-const IMBALANCE_COST_PER_MINUTE = 1.2;
+/** Cost of placing work outside its natural focus but on the same body section. */
+const SAME_SECTION_MISMATCH_COST = 30;
+/** Crossing upper/lower boundaries is a last resort, not normal balancing. */
+const CROSS_SECTION_MISMATCH_COST = 90;
+/**
+ * Cost of adding work to an already loaded session.
+ *
+ * Applying it to the full projected load, instead of only the portion above the
+ * mean, makes two sessions with the same focus alternate work from the start.
+ * The old one-sided cost treated every under-mean session as equally cheap, so
+ * neighbour risk could pile four leg exercises into one day and leave the other
+ * with a single unrelated exercise.
+ */
+const LOAD_COST_PER_MINUTE = 10;
 /** Extra cost of repeating the same exercise in a session that already has it. */
 const DUPLICATE_EXERCISE_COST = 60;
 /**
@@ -485,6 +495,63 @@ const OVER_CAP_COST_PER_MINUTE = 25;
  * the last sets of a session into junk volume.
  */
 const OVER_MUSCLE_CAP_COST_PER_SET = 45;
+
+function focusMismatchCost(focus: SessionFocus, muscle: MuscleGroup): number {
+  if (matches(focus, muscle)) return 0;
+  const upperFocus = focus === 'UPPER' || focus === 'PUSH' || focus === 'PULL';
+  const sameSection = upperFocus === UPPER_MUSCLES.has(muscle);
+  return sameSection ? SAME_SECTION_MISMATCH_COST : CROSS_SECTION_MISMATCH_COST;
+}
+
+/**
+ * Orders the work the athlete actually performs.
+ *
+ * A compound appearance with at least three sets is the preferred anchor. Within
+ * that group, primary compounds precede guided/secondary compounds, and
+ * single-joint work comes last. This is deliberately separate from placement:
+ * balancing sessions decides WHERE work goes; this function decides WHEN it is
+ * performed after the full session is known.
+ */
+export function orderSessionExercises(
+  entries: readonly SessionExercise[],
+): SessionExercise[] {
+  const group = (entry: SessionExercise): number => {
+    if (isSessionAnchor(entry)) return 0;
+    if (entry.exercise.profile !== ExerciseProfile.ISOLATION) return 1;
+    return 2;
+  };
+  const profile = (entry: SessionExercise): number => {
+    if (entry.exercise.profile === ExerciseProfile.COMPOUND_PRIMARY) return 0;
+    if (entry.exercise.profile === ExerciseProfile.COMPOUND_SECONDARY) return 1;
+    return 2;
+  };
+
+  return [...entries].sort(
+    (a, b) =>
+      group(a) - group(b) ||
+      profile(a) - profile(b) ||
+      b.sets - a.sets ||
+      fatigueCost(b.exercise) - fatigueCost(a.exercise) ||
+      a.exercise.id.localeCompare(b.exercise.id),
+  );
+}
+
+const ANCHOR_VECTORS = new Set<MovementVector>([
+  MovementVector.KNEE_DOMINANT,
+  MovementVector.HIP_DOMINANT,
+  MovementVector.PUSH_HORIZONTAL,
+  MovementVector.PUSH_VERTICAL,
+  MovementVector.PULL_HORIZONTAL,
+  MovementVector.PULL_VERTICAL,
+]);
+
+export function isSessionAnchor(entry: SessionExercise): boolean {
+  return (
+    entry.sets >= 3 &&
+    entry.exercise.profile !== ExerciseProfile.ISOLATION &&
+    ANCHOR_VECTORS.has(entry.exercise.movementVector)
+  );
+}
 
 export function distributeSelection(input: DistributionInput): SessionDistribution {
   const count = Math.max(0, Math.floor(input.sessionsPerMicrocycle));
@@ -534,7 +601,76 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
     );
 
     for (const sets of chunks) {
-      const target = sessions.reduce((best, candidate) => {
+      // Keep work in its intended focus whenever at least one natural session can
+      // still accept it without breaching time or productive per-muscle volume.
+      // A mismatched focus is an overflow valve, not a normal balancing tool.
+      const naturalWithCapacity = naturalSessions.filter((session) => {
+        const projectedMinutes =
+          session.estimatedWorkMinutes + exerciseMinutes(selected.exercise, sets);
+        if (
+          input.maxWorkMinutesPerSession !== undefined &&
+          projectedMinutes > input.maxWorkMinutesPerSession
+        ) {
+          return false;
+        }
+        const projectedEntries = [...session.exercises, { exercise: selected.exercise, sets }];
+        return [...effectiveSetsByMuscle(projectedEntries)].every(
+          ([muscle, effective]) => effective <= sessionSetCap(muscle, projectedEntries),
+        );
+      });
+      const naturalDiverse = naturalWithCapacity.filter(
+        (session) =>
+          !session.exercises.some(
+            (entry) =>
+              entry.exercise.id === selected.exercise.id ||
+              sameExerciseFamily(entry.exercise, selected.exercise),
+          ),
+      );
+      const naturalWithinTime = naturalSessions.filter((session) => {
+        const projectedMinutes =
+          session.estimatedWorkMinutes + exerciseMinutes(selected.exercise, sets);
+        return (
+          input.maxWorkMinutesPerSession === undefined ||
+          projectedMinutes <= input.maxWorkMinutesPerSession
+        );
+      });
+      const naturalWithinTimeDiverse = naturalWithinTime.filter(
+        (session) =>
+          !session.exercises.some(
+            (entry) =>
+              entry.exercise.id === selected.exercise.id ||
+              sameExerciseFamily(entry.exercise, selected.exercise),
+          ),
+      );
+      const nonDuplicateSessions = sessions.filter(
+        (session) =>
+          !session.exercises.some(
+            (entry) =>
+              entry.exercise.id === selected.exercise.id ||
+              sameExerciseFamily(entry.exercise, selected.exercise),
+          ),
+      );
+      const candidates =
+        naturalDiverse.length > 0
+          ? naturalDiverse
+          : naturalWithCapacity.length > 0
+            ? naturalWithCapacity
+            : naturalWithinTimeDiverse.length > 0
+              ? naturalWithinTimeDiverse
+              : naturalWithinTime.length > 0
+                ? naturalWithinTime
+          : nonDuplicateSessions.length > 0
+            ? nonDuplicateSessions
+            : sessions;
+      const lightestLoad = candidates.reduce(
+        (minimum, session) => Math.min(minimum, session.estimatedWorkMinutes),
+        Number.POSITIVE_INFINITY,
+      );
+      const balancedCandidates = candidates.filter(
+        (session) => Math.abs(session.estimatedWorkMinutes - lightestLoad) < 0.01,
+      );
+
+      const target = balancedCandidates.reduce((best, candidate) => {
         const cost = (session: DistributedSession): number => {
           const prior =
             session.index === 0 ? input.previousSession : sessions[session.index - 1]?.exercises;
@@ -549,14 +685,15 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
             0,
           );
           const projected = session.estimatedWorkMinutes + exerciseMinutes(selected.exercise, sets);
-          const imbalance = Math.max(0, projected - meanMinutes) * IMBALANCE_COST_PER_MINUTE;
+          const load = projected * LOAD_COST_PER_MINUTE;
           const overCap =
             input.maxWorkMinutesPerSession === undefined
               ? 0
               : Math.max(0, projected - input.maxWorkMinutesPerSession) * OVER_CAP_COST_PER_MINUTE;
-          const mismatch = matches(session.focus, selected.exercise.primaryMuscle)
-            ? 0
-            : FOCUS_MISMATCH_COST;
+          const mismatch = focusMismatchCost(
+            session.focus,
+            selected.exercise.primaryMuscle,
+          );
           const duplicate = session.exercises.some(
             (entry) => entry.exercise.id === selected.exercise.id,
           )
@@ -573,7 +710,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
             overMuscleCap += Math.max(0, effective - cap) * OVER_MUSCLE_CAP_COST_PER_SET;
           });
 
-          return neighbourRisk + imbalance + overCap + mismatch + duplicate + overMuscleCap;
+          return neighbourRisk + load + overCap + mismatch + duplicate + overMuscleCap;
         };
         return cost(candidate) < cost(best) ? candidate : best;
       });
@@ -588,24 +725,88 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
   // heaviest session that can spare it. Only genuinely impossible when there are
   // fewer appearances than sessions, which is then reported.
   for (const empty of sessions.filter((session) => session.exercises.length === 0)) {
-    const donor = sessions
+    const donors = sessions
       .filter((session) => session.exercises.length > 1)
-      .sort((a, b) => b.estimatedWorkMinutes - a.estimatedWorkMinutes)[0];
+      .sort((a, b) => b.estimatedWorkMinutes - a.estimatedWorkMinutes);
+    const matchingMove = donors
+      .flatMap((donor) =>
+        donor.exercises
+          .filter((entry) => matches(empty.focus, entry.exercise.primaryMuscle))
+          .map((entry) => ({ donor, entry })),
+      )
+      .sort(
+        (a, b) =>
+          exerciseRisk(a.entry.exercise, a.entry.exercise) -
+          exerciseRisk(b.entry.exercise, b.entry.exercise),
+      )[0];
+    const donor = matchingMove?.donor ?? donors[0];
     if (donor === undefined) break;
-    // The least fatiguing appearance moves. No focus-matching preference here on
-    // purpose: this repair only runs when the cost function already left a session
-    // empty, which happens when nothing matches that focus or when there are fewer
-    // appearances than sessions, so a preference would never actually apply.
-    const moved = donor.exercises.reduce((best, entry) =>
-      exerciseRisk(entry.exercise, entry.exercise) < exerciseRisk(best.exercise, best.exercise)
-        ? entry
-        : best,
-    );
+    const moved =
+      matchingMove?.entry ??
+      donor.exercises.reduce((best, entry) =>
+        exerciseRisk(entry.exercise, entry.exercise) < exerciseRisk(best.exercise, best.exercise)
+          ? entry
+          : best,
+      );
     donor.exercises.splice(donor.exercises.indexOf(moved), 1);
     donor.estimatedWorkMinutes = minutesOf(donor.exercises);
     empty.exercises.push(moved);
     empty.estimatedWorkMinutes = minutesOf(empty.exercises);
   }
+
+  // A populated session can still be structurally weak when every entry is an
+  // isolation. Swap in a spare compound from a session that already has two or
+  // more anchors. Moving (rather than cloning) preserves the no-repeat contract;
+  // swapping an isolation back keeps session loads broadly stable.
+  for (const session of sessions.filter(
+    (candidate) => !candidate.exercises.some(isSessionAnchor),
+  )) {
+    const donors = sessions.filter(
+      (candidate) => candidate.exercises.filter(isSessionAnchor).length >= 2,
+    );
+    const moves = donors.flatMap((donor) =>
+      donor.exercises
+        .filter(isSessionAnchor)
+        .map((entry) => ({
+          donor,
+          entry,
+          focusCost: focusMismatchCost(session.focus, entry.exercise.primaryMuscle),
+        })),
+    );
+    const move = moves.sort(
+      (a, b) =>
+        a.focusCost - b.focusCost ||
+        exerciseMinutes(a.entry.exercise, a.entry.sets) -
+          exerciseMinutes(b.entry.exercise, b.entry.sets),
+    )[0];
+    if (move === undefined) continue;
+
+    const swap = [...session.exercises]
+      .filter((entry) => entry.exercise.profile === ExerciseProfile.ISOLATION)
+      .sort(
+        (a, b) =>
+          focusMismatchCost(move.donor.focus, a.exercise.primaryMuscle) -
+            focusMismatchCost(move.donor.focus, b.exercise.primaryMuscle) ||
+          Math.abs(
+            exerciseMinutes(a.exercise, a.sets) -
+              exerciseMinutes(move.entry.exercise, move.entry.sets),
+          ) -
+            Math.abs(
+              exerciseMinutes(b.exercise, b.sets) -
+                exerciseMinutes(move.entry.exercise, move.entry.sets),
+            ),
+      )[0];
+    if (swap === undefined) continue;
+
+    move.donor.exercises.splice(move.donor.exercises.indexOf(move.entry), 1, swap);
+    session.exercises.splice(session.exercises.indexOf(swap), 1, move.entry);
+    move.donor.estimatedWorkMinutes = minutesOf(move.donor.exercises);
+    session.estimatedWorkMinutes = minutesOf(session.exercises);
+  }
+
+  sessions.forEach((session) => {
+    session.exercises = orderSessionExercises(session.exercises);
+  });
 
   const frequencyByMuscle: Partial<Record<MuscleGroup, number>> = {};
   sessions.forEach((session) => {
