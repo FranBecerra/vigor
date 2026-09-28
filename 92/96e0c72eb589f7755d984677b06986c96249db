@@ -1,0 +1,20 @@
+src/components/train/setTypeLabel.ts
+  h_d173179e252590 19
+src/models/routine.ts
+  h_d173179e252590 114-122,150-157
+src/models/training.ts
+  h_d173179e252590 17-21
+src/services/training/trainingCapacity.ts
+  h_d173179e252590 83-93,96
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9296e0c72eb589f7755d984677b06986c96249db",
+  "prompts": {},
+  "humans": {
+    "h_d173179e252590": {
+      "author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
