@@ -16,6 +16,7 @@ const LABELS: Record<SetType, string> = {
   [SetType.MYO_REP]: 'M',
   [SetType.DROP_SET]: 'DS',
   [SetType.REST_PAUSE]: 'RP',
+  [SetType.TOP_SINGLE]: 'S',
 };
 
 /** Sigla del tipo de serie. Para NORMAL devuelve cadena vacía (usa el número). */

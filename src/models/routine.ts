@@ -112,6 +112,15 @@ export interface Routine {
 }
 
 /**
+ * Role an exercise plays in a strength plan (PRD §3.7).
+ *  - MAIN: squat, bench press, deadlift. Fixed, never drawn.
+ *  - VARIANT: a direct variant of a main lift that attacks a sticking point.
+ *  - COMPLEMENTARY: overhead press, heavy row, vertical pull.
+ *  - ACCESSORY: weak-link and injury-prevention work.
+ */
+export type StrengthRole = 'MAIN' | 'VARIANT' | 'COMPLEMENTARY' | 'ACCESSORY';
+
+/**
  * One prescribed set.
  *
  * Reps and RIR are TARGETS. What the athlete actually did is a `WorkoutSet` on the
@@ -138,6 +147,14 @@ export interface PlannedExercise {
   /** Order within the session. */
   order: number;
   sets: PlannedSet[];
+  /**
+   * Prescribed rest between sets. Absent on plans where rest follows the exercise
+   * profile (hypertrophy); a strength plan stores it because the same squat rests
+   * 4 min as a main lift and 2 min as an accessory.
+   */
+  restSeconds?: number;
+  /** Role in a strength plan. Absent on hypertrophy plans. */
+  strengthRole?: StrengthRole;
   /**
    * true when the athlete changed this exercise by hand after generation.
    *

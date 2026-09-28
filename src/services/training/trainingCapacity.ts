@@ -80,12 +80,20 @@ export function appearancesOf(sets: number): number {
   return Math.max(1, Math.ceil(sets / MAX_SETS_PER_EXERCISE_APPEARANCE));
 }
 
-/** Minutos que cuesta un ejercicio con sus series, montaje incluido. */
-export function exerciseMinutes(exercise: Exercise, sets: number): number {
+/**
+ * Minutos que cuesta un ejercicio con sus series, montaje incluido.
+ *
+ * `restSeconds` overrides the profile default when the prescription carries its own
+ * rest, as a strength plan does for its main lifts.
+ */
+export function exerciseMinutes(
+  exercise: Exercise,
+  sets: number,
+  restSeconds: number = restDurationFor(exercise.profile),
+): number {
   if (sets <= 0) return 0;
   const seconds =
-    appearancesOf(sets) * EXERCISE_SETUP_SECONDS +
-    sets * (WORK_SECONDS_PER_SET + restDurationFor(exercise.profile));
+    appearancesOf(sets) * EXERCISE_SETUP_SECONDS + sets * (WORK_SECONDS_PER_SET + restSeconds);
   return seconds / 60;
 }
 

@@ -14,6 +14,11 @@ export enum SetType {
   DROP_SET = 'DROP_SET',
   MYO_REP = 'MYO_REP',
   REST_PAUSE = 'REST_PAUSE',
+  /**
+   * One heavy repetition at RPE 7.5-8 before the working sets of a strength main
+   * lift: exposure to a load close to the maximum without the fatigue of a max.
+   */
+  TOP_SINGLE = 'TOP_SINGLE',
 }
 
 /**
