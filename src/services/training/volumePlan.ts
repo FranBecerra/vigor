@@ -57,7 +57,7 @@ export enum VolumeRegion {
   DELTS_LATERAL = 'DELTS_LATERAL',
   DELTS_REAR = 'DELTS_REAR',
   DELTS_FRONT = 'DELTS_FRONT',
-  TRAPS = 'TRAPS',
+  NECK = 'NECK',
   BICEPS = 'BICEPS',
   TRICEPS = 'TRICEPS',
   QUADS = 'QUADS',
@@ -87,9 +87,8 @@ export interface RegionDefinition {
   muscles: readonly MuscleGroup[];
   /**
    * Reparto del presupuesto entre esos músculos. Suma 1.
-   * Una porción baja no significa "menos importante": significa que ese músculo
-   * ya recibe mucho crédito indirecto. El romboides se lleva poco directo porque
-   * todo remo lo acredita.
+   * A smaller share does not mean "less important": it means that the muscle
+   * already receives substantial secondary credit from compound exercises.
    */
   shares: readonly number[];
   /** Referencias para INTERMEDIO orientado a HIPERTROFIA. Lo demás se escala. */
@@ -114,14 +113,14 @@ export interface RegionDefinition {
  */
 export const VOLUME_REGIONS: Record<VolumeRegion, RegionDefinition> = {
   [VolumeRegion.CHEST]: {
-    muscles: [MuscleGroup.CHEST_MID_LOWER, MuscleGroup.CHEST_UPPER],
-    shares: [0.6, 0.4],
+    muscles: [MuscleGroup.CHEST],
+    shares: [1],
     landmarks: { mv: 4, mev: 10, mav: 16, mrv: 20 },
     trainedByDefault: true,
   },
   [VolumeRegion.BACK]: {
-    muscles: [MuscleGroup.LATS, MuscleGroup.RHOMBOIDS, MuscleGroup.TRAPS_MID_LOWER],
-    shares: [0.55, 0.25, 0.2],
+    muscles: [MuscleGroup.LATS, MuscleGroup.MID_BACK],
+    shares: [0.55, 0.45],
     landmarks: { mv: 6, mev: 12, mav: 18, mrv: 24 },
     trainedByDefault: true,
   },
@@ -143,8 +142,8 @@ export const VOLUME_REGIONS: Record<VolumeRegion, RegionDefinition> = {
     landmarks: { mv: 0, mev: 4, mav: 8, mrv: 12 },
     trainedByDefault: false,
   },
-  [VolumeRegion.TRAPS]: {
-    muscles: [MuscleGroup.TRAPS_UPPER],
+  [VolumeRegion.NECK]: {
+    muscles: [MuscleGroup.NECK],
     shares: [1],
     landmarks: { mv: 0, mev: 4, mav: 10, mrv: 16 },
     trainedByDefault: false,
@@ -414,7 +413,7 @@ export const LOW_COST_REGIONS: readonly VolumeRegion[] = [
   VolumeRegion.DELTS_LATERAL,
   VolumeRegion.DELTS_REAR,
   VolumeRegion.DELTS_FRONT,
-  VolumeRegion.TRAPS,
+  VolumeRegion.NECK,
   VolumeRegion.TIBIALIS,
   VolumeRegion.ADDUCTORS,
   VolumeRegion.CORE,

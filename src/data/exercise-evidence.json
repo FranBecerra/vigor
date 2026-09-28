@@ -1177,6 +1177,113 @@
         "note": "Altísimo desgaste cardiorrespiratorio, compresión espinal global y fatiga de prensión palmar."
       }
     },
+    "flexion-cervical-banda": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "The band can load the cervical flexors through a controlled lengthening phase, but no study directly compares hypertrophy across flexion variants."
+      },
+      "rangeOfMotion": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:34143411"
+        ],
+        "note": "Multidirectional cervical strengthening appears in studied neck programmes; the score describes the usable dynamic arc, not a clinical recommendation."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Band tension rises toward peak flexion, so resistance is lowest in the lengthened position and highest near the end of the repetition."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "A seated, externally anchored setup limits whole-body compensation, although head path still requires deliberate control."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Band colour and lever length provide coarse rather than precisely quantifiable progression."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "External load is small and local, but cervical symptoms require immediate exercise cessation rather than progression through discomfort."
+      }
+    },
+    "extension-cervical-banda": {
+      "stretchedPositionLoading": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:9189733"
+        ],
+        "note": "Specific resisted head extension increased total cervical muscle cross-sectional area after 12 weeks; ordinary compound lifting did not."
+      },
+      "rangeOfMotion": {
+        "confidence": "direct-evidence",
+        "citations": [
+          "PMID:9189733",
+          "PMID:9390988"
+        ],
+        "note": "The intervention and recruitment studies used specific resisted head extension, supporting a controlled dynamic extension pattern."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Band tension rises into extension and underloads the initial lengthened position compared with a cam or cable setup."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "A seated, externally anchored setup reduces trunk movement, but cervical alignment remains user-controlled."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Bands are accessible but provide less reproducible loading increments than a calibrated neck-extension machine."
+      },
+      "systemicFatigueCost": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:9189733"
+        ],
+        "note": "The intervention used local cervical work alongside whole-body training; the systemic demand is low, while local tolerance still limits dosage."
+      }
+    },
+    "flexion-lateral-cervical-banda": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "The exercise can load the contralateral cervical musculature in a lengthened position, but direct hypertrophy evidence for this variant is absent."
+      },
+      "rangeOfMotion": {
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:34143411"
+        ],
+        "note": "Multidirectional neck programmes support training lateral capacity, although protocols and outcomes remain heterogeneous."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "A band gives progressively greater resistance across the lateral-flexion arc rather than a constant external moment."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Avoiding coupled rotation requires more positional control than sagittal flexion or extension."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Resistance can be progressed through bands and lever length, but exact external load is difficult to reproduce."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "The exercise is locally demanding but uses little total muscle mass; pain, dizziness or neurological symptoms are stop criteria."
+      }
+    },
     "encogimientos-inclinado": {
       "stretchedPositionLoading": {
         "confidence": "programming-judgement",

@@ -5,19 +5,20 @@
  */
 
 /**
- * Grupos musculares con taxonomía detallada (PRD §3.5.2):
- * separación de porciones del deltoides y del trapecio.
+ * Exercise-selection muscle groups (PRD §3.5.2).
+ *
+ * Chest is deliberately one group: incline and flat pressing are useful stimulus
+ * variants, not independently budgeted muscles. MID_BACK groups the scapular
+ * retractors used by rows, while NECK covers cervical work and upper trapezius.
  */
 export enum MuscleGroup {
   DELTS_FRONT = 'DELTS_FRONT',
   DELTS_LATERAL = 'DELTS_LATERAL',
   DELTS_REAR = 'DELTS_REAR',
-  TRAPS_UPPER = 'TRAPS_UPPER',
-  TRAPS_MID_LOWER = 'TRAPS_MID_LOWER',
-  CHEST_UPPER = 'CHEST_UPPER',
-  CHEST_MID_LOWER = 'CHEST_MID_LOWER',
+  NECK = 'NECK',
+  MID_BACK = 'MID_BACK',
+  CHEST = 'CHEST',
   LATS = 'LATS',
-  RHOMBOIDS = 'RHOMBOIDS',
   ERECTORS = 'ERECTORS',
   QUADS = 'QUADS',
   HAMSTRINGS = 'HAMSTRINGS',
@@ -71,6 +72,12 @@ export enum MovementVector {
   SHOULDER_EXTENSION = 'SHOULDER_EXTENSION',
   /** Elevación escapular: encogimientos. */
   SCAPULAR_ELEVATION = 'SCAPULAR_ELEVATION',
+  /** Dynamic cervical flexion against external resistance. */
+  CERVICAL_FLEXION = 'CERVICAL_FLEXION',
+  /** Dynamic cervical extension against external resistance. */
+  CERVICAL_EXTENSION = 'CERVICAL_EXTENSION',
+  /** Dynamic lateral cervical flexion against external resistance. */
+  CERVICAL_LATERAL_FLEXION = 'CERVICAL_LATERAL_FLEXION',
 
   // --- Aislamiento: rodilla y cadera --------------------------------------
   KNEE_EXTENSION = 'KNEE_EXTENSION',

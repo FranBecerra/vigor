@@ -15,5 +15,8 @@ export const DEFAULT_GENERATOR_EQUIPMENT: readonly Equipment[] = [
   Equipment.DUMBBELL,
   Equipment.MACHINE,
   Equipment.CABLE,
+  Equipment.SMITH_MACHINE,
   Equipment.BODYWEIGHT,
+  Equipment.KETTLEBELL,
+  Equipment.BANDS,
 ];

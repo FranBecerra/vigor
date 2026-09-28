@@ -80,7 +80,7 @@ describe('VOLUME_REGIONS', () => {
   it('las regiones de trabajo indirecto o aportación marginal están desactivadas', () => {
     [
       VolumeRegion.DELTS_FRONT,
-      VolumeRegion.TRAPS,
+      VolumeRegion.NECK,
       VolumeRegion.ERECTORS,
       VolumeRegion.TIBIALIS,
       VolumeRegion.ADDUCTORS,
@@ -103,11 +103,12 @@ describe('VOLUME_REGIONS', () => {
     });
   });
 
-  it('la ESPALDA se reparte en tres porciones sin multiplicar el presupuesto', () => {
+  it('la ESPALDA se reparte entre dorsal y espalda media sin multiplicar el presupuesto', () => {
     // El defecto que motivó la capa de región: aplicar el rango de la espalda a
     // cada porción daba 43 series donde la referencia dice 12-24.
     const back = VOLUME_REGIONS[VolumeRegion.BACK];
-    expect(back.muscles).toHaveLength(3);
+    expect(back.muscles).toEqual([MuscleGroup.LATS, MuscleGroup.MID_BACK]);
+    expect(back.shares).toEqual([0.55, 0.45]);
     expect(back.landmarks.mrv).toBeLessThanOrEqual(24);
 
     const plan = buildVolumePlan({
@@ -334,7 +335,7 @@ describe('límites de énfasis', () => {
       buildVolumePlan({
         level: ExperienceLevel.INTERMEDIATE,
         goal: TrainingGoal.HYPERTROPHY,
-        priorityMuscles: [MuscleGroup.LATS, MuscleGroup.QUADS, MuscleGroup.CHEST_MID_LOWER],
+        priorityMuscles: [MuscleGroup.LATS, MuscleGroup.QUADS, MuscleGroup.CHEST],
       }),
     ).toThrow(EmphasisLimitError);
   });
@@ -405,7 +406,7 @@ describe('límites de énfasis', () => {
         goal: TrainingGoal.HYPERTROPHY,
         // Ambos son de la región BACK.
         priorityMuscles: [MuscleGroup.LATS],
-        deprioritizedMuscles: [MuscleGroup.RHOMBOIDS],
+        deprioritizedMuscles: [MuscleGroup.MID_BACK],
       }),
     ).toThrow(EmphasisLimitError);
   });
@@ -415,7 +416,7 @@ describe('límites de énfasis', () => {
       buildVolumePlan({
         level: ExperienceLevel.INTERMEDIATE,
         goal: TrainingGoal.HYPERTROPHY,
-        priorityMuscles: [MuscleGroup.LATS, MuscleGroup.RHOMBOIDS, MuscleGroup.TRAPS_MID_LOWER],
+        priorityMuscles: [MuscleGroup.LATS, MuscleGroup.MID_BACK],
       }),
     ).not.toThrow();
     expect(MAX_PRIORITY_REGIONS).toBe(3);
@@ -474,7 +475,7 @@ describe('buildVolumePlan', () => {
     const back = plan.regions.find((r) => r.region === VolumeRegion.BACK)!;
     expect(back.emphasis).toBe(RegionEmphasis.PRIORITY);
     expect(back.meav).toBeGreaterThan(back.landmarks.mav);
-    // Las tres porciones de la espalda comparten la prioridad.
+    // Dorsal and mid back share the regional priority.
     plan.muscles
       .filter((m) => m.region === VolumeRegion.BACK)
       .forEach((m) => expect(m.emphasis).toBe(RegionEmphasis.PRIORITY));

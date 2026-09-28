@@ -14,9 +14,11 @@ import {
   SMALL_MUSCLE_SESSION_CAP,
   appearanceSets,
   buildFocusSequence,
+  canonicalPplFocuses,
   distributeSelection,
   effectiveSetsByMuscle,
   isSessionAnchor,
+  matchingMoveForEmpty,
   orderSessionExercises,
   sessionSetCap,
 } from '@/services/training/sessionDistribution';
@@ -73,7 +75,7 @@ function exercise(overrides: Partial<Exercise> = {}): Exercise {
   return {
     id: 'exercise',
     name: 'Exercise',
-    primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [],
     movementVector: MovementVector.PUSH_HORIZONTAL,
     profile: ExerciseProfile.COMPOUND_PRIMARY,
@@ -100,6 +102,19 @@ function distribute(
 }
 
 describe('distributeSelection — conservation and exercise uniqueness', () => {
+  it('finds a donor exercise that belongs to an empty focus', () => {
+    const donor = {
+      index: 0,
+      focus: 'PUSH' as const,
+      exercises: [{ exercise: exercise({ primaryMuscle: MuscleGroup.CHEST }), sets: 3 }],
+      estimatedWorkMinutes: 10,
+    };
+    expect(matchingMoveForEmpty('PUSH', [donor])).toEqual({
+      donor,
+      entry: donor.exercises[0],
+    });
+  });
+
   it('preserves every set and keeps an exercise in one session', () => {
     const result = distribute(SplitStructure.FULL_BODY, 2);
 
@@ -200,7 +215,7 @@ describe('distributeSelection — split semantics', () => {
   it('PPL+upper adds an upper session and assigns core to legs', () => {
     const result = distribute(SplitStructure.PUSH_PULL_LEGS_UPPER, 4, [
       { exercise: chest, sets: 3 },
-      { exercise: exercise({ id: 'upper-chest', primaryMuscle: MuscleGroup.CHEST_UPPER }), sets: 3 },
+      { exercise: exercise({ id: 'upper-chest', primaryMuscle: MuscleGroup.CHEST }), sets: 3 },
       { exercise: core, sets: 3 },
     ]);
 
@@ -258,9 +273,7 @@ describe('distributeSelection — split semantics', () => {
 });
 
 describe('distributeSelection — AUTO and edge cases', () => {
-  // AUTO picks from structures that work in practice rather than cycling a
-  // pattern: full body up to 3 sessions, upper/lower at 4, PPL + upper at 5
-  // (which the extra-session rule turns into PPLUL), and PPL twice at 6.
+  // AUTO keeps freedom to select and expand the split that best absorbs volume.
   it.each([
     [1, SplitStructure.FULL_BODY],
     [2, SplitStructure.FULL_BODY],
@@ -270,6 +283,57 @@ describe('distributeSelection — AUTO and edge cases', () => {
     [6, SplitStructure.PUSH_PULL_LEGS],
   ])('resolves AUTO with %i sessions', (sessions, expected) => {
     expect(distribute(SplitStructure.AUTO, sessions).resolvedSplit).toBe(expected);
+  });
+
+  it('adapts the fifth focus to the volume instead of enforcing manual PPLUL', () => {
+    const upperHeavy = new Map<MuscleGroup, number>([
+      [MuscleGroup.CHEST, 80],
+      [MuscleGroup.LATS, 70],
+      [MuscleGroup.QUADS, 10],
+    ]);
+    expect(
+      buildFocusSequence(
+        SplitStructure.PUSH_PULL_LEGS_UPPER,
+        5,
+        upperHeavy,
+        false,
+      ),
+    ).toEqual(['PUSH', 'PULL', 'LEGS', 'UPPER', 'PUSH']);
+  });
+
+  it('wires the adaptive focus sequence into AUTO distribution', () => {
+    const result = distributeSelection({
+      selection: {
+        selected: [
+          { exercise: exercise({ id: 'chest' }), sets: 20 },
+          {
+            exercise: exercise({
+              id: 'lats',
+              primaryMuscle: MuscleGroup.LATS,
+              movementVector: MovementVector.PULL_VERTICAL,
+            }),
+            sets: 15,
+          },
+          {
+            exercise: exercise({
+              id: 'quads',
+              primaryMuscle: MuscleGroup.QUADS,
+              movementVector: MovementVector.KNEE_DOMINANT,
+            }),
+            sets: 3,
+          },
+        ],
+      },
+      split: SplitStructure.AUTO,
+      sessionsPerMicrocycle: 5,
+    });
+    expect(result.sessions.map((session) => session.focus)).toEqual([
+      'PUSH',
+      'PULL',
+      'LEGS',
+      'UPPER',
+      'PUSH',
+    ]);
   });
 
   it('does not silently lose work with no sessions: it reports it as unassigned', () => {
@@ -288,20 +352,18 @@ describe('distributeSelection — structure follows volume, not a cycled pattern
     { exercise: exercise({ id: 'squat', primaryMuscle: MuscleGroup.QUADS, movementVector: MovementVector.KNEE_DOMINANT }), sets: 6 },
     { exercise: exercise({ id: 'rdl', primaryMuscle: MuscleGroup.HAMSTRINGS, movementVector: MovementVector.HIP_DOMINANT }), sets: 6 },
     { exercise: exercise({ id: 'hack', primaryMuscle: MuscleGroup.QUADS, movementVector: MovementVector.KNEE_DOMINANT }), sets: 6 },
-    { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 3 },
+    { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST }), sets: 3 },
     { exercise: exercise({ id: 'row', primaryMuscle: MuscleGroup.LATS, movementVector: MovementVector.PULL_HORIZONTAL }), sets: 3 },
   ];
 
-  it('gives a second leg day when leg volume needs one, instead of cycling', () => {
-    // The old modulo pattern gave PUSH:2 PULL:2 LEGS:1 over five sessions, so all
-    // leg work landed in one session and throttled the whole plan.
+  it('keeps the requested canonical focus sequence', () => {
     const focuses = distributeSelection({
       selection: { selected: legHeavy },
       split: SplitStructure.PUSH_PULL_LEGS,
       sessionsPerMicrocycle: 5,
     }).sessions.map((session) => session.focus);
 
-    expect(focuses.filter((focus) => focus === 'LEGS').length).toBeGreaterThanOrEqual(2);
+    expect(focuses).toEqual(['PUSH', 'PULL', 'LEGS', 'UPPER', 'LOWER']);
   });
 
   it('NEVER leaves a session empty', () => {
@@ -361,7 +423,7 @@ describe('distributeSelection — structure follows volume, not a cycled pattern
     const upper = result.sessions.filter((session) => session.focus === 'UPPER');
     upper.forEach((session) =>
       session.exercises.forEach((entry) =>
-        expect([MuscleGroup.CHEST_MID_LOWER, MuscleGroup.LATS]).toContain(
+        expect([MuscleGroup.CHEST, MuscleGroup.LATS]).toContain(
           entry.exercise.primaryMuscle,
         ),
       ),
@@ -375,10 +437,10 @@ describe('distributeSelection — structure follows volume, not a cycled pattern
     const mixed = [
       { exercise: exercise({ id: 'squat', primaryMuscle: MuscleGroup.QUADS, movementVector: MovementVector.KNEE_DOMINANT }), sets: 6 },
       { exercise: exercise({ id: 'rdl', primaryMuscle: MuscleGroup.HAMSTRINGS, movementVector: MovementVector.HIP_DOMINANT }), sets: 6 },
-      { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST_UPPER }), sets: 6 },
+      { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST }), sets: 6 },
       { exercise: exercise({ id: 'curl', primaryMuscle: MuscleGroup.BICEPS, movementVector: MovementVector.ELBOW_FLEXION, profile: ExerciseProfile.ISOLATION }), sets: 6 },
       { exercise: exercise({ id: 'lateral', primaryMuscle: MuscleGroup.DELTS_LATERAL, movementVector: MovementVector.SHOULDER_ABDUCTION, profile: ExerciseProfile.ISOLATION }), sets: 6 },
-      { exercise: exercise({ id: 'fly', primaryMuscle: MuscleGroup.CHEST_MID_LOWER, movementVector: MovementVector.SHOULDER_HORIZONTAL_ADDUCTION, profile: ExerciseProfile.ISOLATION }), sets: 6 },
+      { exercise: exercise({ id: 'fly', primaryMuscle: MuscleGroup.CHEST, movementVector: MovementVector.SHOULDER_HORIZONTAL_ADDUCTION, profile: ExerciseProfile.ISOLATION }), sets: 6 },
       { exercise: exercise({ id: 'triceps', primaryMuscle: MuscleGroup.TRICEPS, movementVector: MovementVector.ELBOW_EXTENSION, profile: ExerciseProfile.ISOLATION }), sets: 6 },
       { exercise: exercise({ id: 'row', primaryMuscle: MuscleGroup.LATS, movementVector: MovementVector.PULL_HORIZONTAL }), sets: 6 },
     ];
@@ -479,8 +541,8 @@ describe('distributeSelection — structure follows volume, not a cycled pattern
 
 describe('distributeSelection — frequency target', () => {
   const fourSetsAcrossVariants = [
-    { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 2 },
-    { exercise: exercise({ id: 'machine-press', primaryMuscle: MuscleGroup.CHEST_MID_LOWER, equipment: Equipment.MACHINE }), sets: 2 },
+    { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST }), sets: 2 },
+    { exercise: exercise({ id: 'machine-press', primaryMuscle: MuscleGroup.CHEST, equipment: Equipment.MACHINE }), sets: 2 },
   ];
 
   it('uses two distinct variants to reach frequency 2', () => {
@@ -490,7 +552,7 @@ describe('distributeSelection — frequency target', () => {
       sessionsPerMicrocycle: 2,
     });
     expect(result.sessions.map((session) => session.exercises[0]?.sets).sort()).toEqual([2, 2]);
-    expect(result.frequencyByMuscle[MuscleGroup.CHEST_MID_LOWER]).toBe(2);
+    expect(result.frequencyByMuscle[MuscleGroup.CHEST]).toBe(2);
     const ids = result.sessions.flatMap((session) => session.exercises.map((entry) => entry.exercise.id));
     expect(new Set(ids).size).toBe(ids.length);
   });
@@ -499,13 +561,13 @@ describe('distributeSelection — frequency target', () => {
     const result = distributeSelection({
       selection: {
         selected: [
-          { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 3 },
+          { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST }), sets: 3 },
         ],
       },
       split: SplitStructure.FULL_BODY,
       sessionsPerMicrocycle: 2,
     });
-    expect(result.frequencyByMuscle[MuscleGroup.CHEST_MID_LOWER]).toBe(1);
+    expect(result.frequencyByMuscle[MuscleGroup.CHEST]).toBe(1);
   });
 
   it('does not warn about a DEPRIORITIZED muscle trained once', () => {
@@ -514,12 +576,12 @@ describe('distributeSelection — frequency target', () => {
     const result = distributeSelection({
       selection: {
         selected: [
-          { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 3 },
+          { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST }), sets: 3 },
         ],
       },
       split: SplitStructure.FULL_BODY,
       sessionsPerMicrocycle: 2,
-      deprioritizedMuscles: [MuscleGroup.CHEST_MID_LOWER],
+      deprioritizedMuscles: [MuscleGroup.CHEST],
     });
     expect(result.structureWarnings.some((warning) => warning.kind === 'single-frequency')).toBe(
       false,
@@ -530,7 +592,7 @@ describe('distributeSelection — frequency target', () => {
     const result = distributeSelection({
       selection: {
         selected: [
-          { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 3 },
+          { exercise: exercise({ id: 'press', primaryMuscle: MuscleGroup.CHEST }), sets: 3 },
         ],
       },
       split: SplitStructure.FULL_BODY,
@@ -539,7 +601,7 @@ describe('distributeSelection — frequency target', () => {
     expect(
       result.structureWarnings.some(
         (warning) =>
-          warning.kind === 'single-frequency' && warning.muscle === MuscleGroup.CHEST_MID_LOWER,
+          warning.kind === 'single-frequency' && warning.muscle === MuscleGroup.CHEST,
       ),
     ).toBe(true);
   });
@@ -594,13 +656,23 @@ describe('buildFocusSequence', () => {
   const legMinutes = new Map<MuscleGroup, number>([
     [MuscleGroup.QUADS, 60],
     [MuscleGroup.HAMSTRINGS, 40],
-    [MuscleGroup.CHEST_MID_LOWER, 20],
+    [MuscleGroup.CHEST, 20],
     [MuscleGroup.LATS, 20],
   ]);
 
-  it('gives the extra session to the focus carrying the most unplaced work', () => {
+  it('uses PPLU for four sessions', () => {
     const sequence = buildFocusSequence(SplitStructure.PUSH_PULL_LEGS, 4, legMinutes);
-    expect(sequence.filter((focus) => focus === 'LEGS').length).toBe(2);
+    expect(sequence).toEqual(['PUSH', 'PULL', 'LEGS', 'UPPER']);
+  });
+
+  it.each([
+    [3, ['PUSH', 'PULL', 'LEGS']],
+    [4, ['PUSH', 'PULL', 'LEGS', 'UPPER']],
+    [5, ['PUSH', 'PULL', 'LEGS', 'UPPER', 'LOWER']],
+    [6, ['PUSH', 'PULL', 'LEGS', 'PUSH', 'PULL', 'LEGS']],
+    [7, ['PUSH', 'PULL', 'LEGS', 'PUSH', 'PULL', 'LEGS', 'PUSH']],
+  ])('returns the canonical PPL sequence for %i sessions', (count, expected) => {
+    expect(canonicalPplFocuses(count)).toEqual(expected);
   });
 
   it('turns PPL + upper over five sessions into the PPLUL structure', () => {
@@ -613,7 +685,7 @@ describe('buildFocusSequence', () => {
     // one focus and adjacency is unavoidable, which is the correct outcome there.
     const balanced = new Map<MuscleGroup, number>([
       [MuscleGroup.QUADS, 50],
-      [MuscleGroup.CHEST_MID_LOWER, 25],
+      [MuscleGroup.CHEST, 25],
       [MuscleGroup.LATS, 25],
     ]);
     const sequence = buildFocusSequence(SplitStructure.UPPER_LOWER, 4, balanced);
@@ -647,12 +719,12 @@ describe('effectiveSetsByMuscle', () => {
   it('counts a direct set as 1 and a secondary credit as 0.5', () => {
     const press = exercise({
       id: 'press',
-      primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+      primaryMuscle: MuscleGroup.CHEST,
       secondaryMuscles: [MuscleGroup.TRICEPS, MuscleGroup.DELTS_FRONT],
     });
     const totals = effectiveSetsByMuscle([{ exercise: press, sets: 4 }]);
 
-    expect(totals.get(MuscleGroup.CHEST_MID_LOWER)).toBe(4);
+    expect(totals.get(MuscleGroup.CHEST)).toBe(4);
     expect(totals.get(MuscleGroup.TRICEPS)).toBe(2);
     expect(totals.get(MuscleGroup.DELTS_FRONT)).toBe(2);
   });
@@ -663,7 +735,7 @@ describe('effectiveSetsByMuscle', () => {
       {
         exercise: exercise({
           id: 'b',
-          primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+          primaryMuscle: MuscleGroup.CHEST,
           secondaryMuscles: [MuscleGroup.TRICEPS],
         }),
         sets: 4,
@@ -767,7 +839,7 @@ describe('distributeSelection — per-session muscle volume cap', () => {
           {
             exercise: exercise({
               id: 'bench',
-              primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+              primaryMuscle: MuscleGroup.CHEST,
               secondaryMuscles: [MuscleGroup.TRICEPS],
             }),
             sets: 6,
@@ -859,13 +931,13 @@ describe('distributeSelection — empty-session repair', () => {
     const result = distributeSelection({
       selection: {
         selected: [
-          { exercise: exercise({ id: 'bench', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 3 },
+          { exercise: exercise({ id: 'bench', primaryMuscle: MuscleGroup.CHEST }), sets: 3 },
           {
             // Lighter than the press, so the repair has a clear least-fatiguing
             // appearance to move rather than an arbitrary tie.
             exercise: exercise({
               id: 'fly',
-              primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+              primaryMuscle: MuscleGroup.CHEST,
               movementVector: MovementVector.SHOULDER_HORIZONTAL_ADDUCTION,
               profile: ExerciseProfile.ISOLATION,
               criteria: {
@@ -899,7 +971,7 @@ describe('distributeSelection — empty-session repair', () => {
     const result = distributeSelection({
       selection: {
         selected: [
-          { exercise: exercise({ id: 'bench', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 3 },
+          { exercise: exercise({ id: 'bench', primaryMuscle: MuscleGroup.CHEST }), sets: 3 },
         ],
       },
       split: SplitStructure.PUSH_PULL_LEGS,
@@ -917,7 +989,7 @@ describe('distributeSelection — fewer appearances than sessions', () => {
     const result = distributeSelection({
       selection: {
         selected: [
-          { exercise: exercise({ id: 'bench', primaryMuscle: MuscleGroup.CHEST_MID_LOWER }), sets: 3 },
+          { exercise: exercise({ id: 'bench', primaryMuscle: MuscleGroup.CHEST }), sets: 3 },
           {
             exercise: exercise({
               id: 'curl',

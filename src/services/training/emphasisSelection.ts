@@ -135,7 +135,6 @@ export function withChoice(
     if (!canPrioritize(selection, region)) return selection;
     return { ...without, priority: [...without.priority, region] };
   }
-  if (!canDeprioritize(selection, region)) return selection;
   return { ...without, deprioritized: [...without.deprioritized, region] };
 }
 

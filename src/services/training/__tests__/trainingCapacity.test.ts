@@ -24,7 +24,7 @@ function exercise(overrides: Partial<Exercise> = {}): Exercise {
   return {
     id: 'ejercicio',
     name: 'Ejercicio',
-    primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [],
     movementVector: MovementVector.PUSH_HORIZONTAL,
     profile: ExerciseProfile.ISOLATION,
@@ -192,7 +192,7 @@ describe('attributedVolumePerMinute', () => {
       secondaryMuscles: [
         MuscleGroup.TRICEPS,
         MuscleGroup.DELTS_FRONT,
-        MuscleGroup.RHOMBOIDS,
+        MuscleGroup.MID_BACK,
         MuscleGroup.BICEPS,
       ],
     });

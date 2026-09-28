@@ -1,4 +1,4 @@
-import { ExerciseProfile, MuscleGroup } from '@/models';
+import { Equipment, ExerciseProfile, MuscleGroup } from '@/models';
 import { ExperienceLevel } from '@/models/athlete';
 import {
   EXERCISE_CATALOGUE,
@@ -25,6 +25,10 @@ const base = {
   catalogue: EXERCISE_CATALOGUE,
   seed: 1,
 };
+
+it('selects every supported equipment type in the generator default', () => {
+  expect(new Set(DEFAULT_GENERATOR_EQUIPMENT)).toEqual(new Set(Object.values(Equipment)));
+});
 
 function capacity(sessions: number, minutes: number): TrainingCapacity {
   return { sessionsPerMicrocycle: sessions, minutesPerSession: minutes };
@@ -80,7 +84,7 @@ describe('squeezedMeav — escalera de dos tramos', () => {
     const plan = buildVolumePlan({
       level: ExperienceLevel.INTERMEDIATE,
       goal: TrainingGoal.HYPERTROPHY,
-      deprioritizedMuscles: [MuscleGroup.CHEST_MID_LOWER],
+      deprioritizedMuscles: [MuscleGroup.CHEST],
     });
     const chest = plan.regions.find((r) => r.region === VolumeRegion.CHEST)!;
     expect(chest.meav).toBeLessThan(chest.landmarks.mev);
@@ -213,7 +217,9 @@ describe('planMesocycle — cuál de los dos techos manda', () => {
       expect(
         result.distribution.maxSessionWorkMinutes -
           result.distribution.minSessionWorkMinutes,
-      ).toBeLessThanOrEqual(25);
+      // Canonical PPLU keeps the movement sequence stable; that hard structure
+      // can be a little less even in minutes than a freely rebalanced split.
+      ).toBeLessThanOrEqual(30);
     });
   });
 
@@ -325,5 +331,70 @@ describe('planMesocycle — distribution wiring', () => {
         ),
       );
     });
+  });
+});
+
+/**
+ * Many short sessions used to CRASH the distributor.
+ *
+ * The anchor-repair pass ran on every session with no anchor, which includes an EMPTY
+ * one, then asserted that such a session had an isolation exercise to trade back. It
+ * did not, so `undefined` was spliced into the donor's list and the next minute count
+ * threw. 15 of 684 level/goal/capacity combinations died this way, `6x45` for an
+ * intermediate among them, which is an ordinary thing for someone to pick.
+ */
+describe('planMesocycle — capacities of many short sessions', () => {
+  const crashing: [ExperienceLevel, TrainingGoal, number, number][] = [
+    [ExperienceLevel.BEGINNER, TrainingGoal.HYPERTROPHY, 5, 30],
+    [ExperienceLevel.BEGINNER, TrainingGoal.HYPERTROPHY, 6, 30],
+    [ExperienceLevel.INTERMEDIATE, TrainingGoal.HYPERTROPHY, 6, 45],
+    [ExperienceLevel.INTERMEDIATE, TrainingGoal.HYPERTROPHY, 7, 40],
+    [ExperienceLevel.INTERMEDIATE, TrainingGoal.STRENGTH, 6, 30],
+    [ExperienceLevel.ADVANCED, TrainingGoal.STRENGTH, 6, 50],
+    [ExperienceLevel.ADVANCED, TrainingGoal.STRENGTH, 7, 35],
+  ];
+
+  it.each(crashing)('plans %s %s at %ix%i without corrupting a session', (
+    level,
+    goal,
+    sessions,
+    minutes,
+  ) => {
+    const plan = planMesocycle({
+      level,
+      goal,
+      catalogue: EXERCISE_CATALOGUE,
+      seed: 7,
+      capacity: capacity(sessions, minutes),
+    });
+    expect(plan.distribution.sessions).toHaveLength(sessions);
+    plan.distribution.sessions.forEach((session) => {
+      expect(session.exercises.every((entry) => entry?.exercise !== undefined)).toBe(true);
+      expect(Number.isFinite(session.estimatedWorkMinutes)).toBe(true);
+      expect(session.estimatedWorkMinutes).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  // The repair may still leave a session empty when the selection has fewer exercise
+  // appearances than sessions. That is reported, not hidden, and must not throw.
+  it('reports an unavoidable empty session instead of crashing', () => {
+    const plan = planMesocycle({
+      level: ExperienceLevel.BEGINNER,
+      goal: TrainingGoal.STRENGTH,
+      catalogue: EXERCISE_CATALOGUE,
+      seed: 3,
+      capacity: capacity(7, 30),
+    });
+    const empty = plan.distribution.sessions.filter(
+      (session) => session.exercises.length === 0,
+    );
+    if (empty.length > 0) {
+      expect(
+        plan.distribution.structureWarnings.some(
+          (warning) => warning.kind === 'empty-session',
+        ),
+      ).toBe(true);
+    }
+    expect(plan.distribution.sessions).toHaveLength(7);
   });
 });

@@ -9,7 +9,14 @@
  * a wide Japanese glyph cannot reflow the grid.
  */
 import { memo, useCallback } from 'react';
-import { View, Text, Pressable, StyleSheet, type ViewStyle } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  type ViewStyle,
+  type StyleProp,
+} from 'react-native';
 import { useTheme } from '@/theme/useTheme';
 
 /** Fixed control heights. Reserved, never measured from content. */
@@ -70,10 +77,16 @@ interface ChipProps {
   label: string;
   /** Secondary line, e.g. the experience hint. Height is reserved either way. */
   sublabel?: string;
+  /** Compact value anchored to the lower-right corner. */
+  cornerBadge?: string;
+  centerLabel?: boolean;
+  raised?: boolean;
   selected: boolean;
   disabled?: boolean;
   /** Overrides the selected tint, used by the three-state emphasis control. */
   tint?: string;
+  style?: StyleProp<ViewStyle>;
+  accessibilityLabel?: string;
   onPress: () => void;
 }
 
@@ -87,9 +100,14 @@ interface ChipProps {
 export const Chip = memo(function Chip({
   label,
   sublabel,
+  cornerBadge,
+  centerLabel = false,
+  raised = false,
   selected,
   disabled = false,
   tint,
+  style,
+  accessibilityLabel,
   onPress,
 }: ChipProps) {
   const { colors, typography, spacing, radius, sectionAccent } = useTheme();
@@ -99,34 +117,81 @@ export const Chip = memo(function Chip({
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ selected, disabled }}
-      style={{
-        minHeight: sublabel === undefined ? CHIP_HEIGHT : CHIP_HEIGHT + 14,
-        justifyContent: 'center',
-        paddingHorizontal: spacing.lg,
-        paddingVertical: spacing.sm,
-        borderRadius: radius.pill,
-        borderWidth: 1,
-        borderColor: selected ? accent : colors.surfaceBorder,
-        backgroundColor: selected ? `${accent}22` : colors.surface,
-        opacity: disabled ? 0.34 : 1,
-      }}
+      style={[
+        {
+          minHeight:
+            cornerBadge !== undefined
+              ? CHIP_HEIGHT + 22
+              : sublabel !== undefined
+                ? CHIP_HEIGHT + 14
+                : CHIP_HEIGHT,
+          justifyContent: 'center',
+          paddingHorizontal: spacing.lg,
+          paddingVertical: spacing.sm,
+          borderRadius: radius.pill,
+          borderWidth: 1,
+          borderColor: selected ? accent : colors.surfaceBorder,
+          backgroundColor: selected ? `${accent}22` : colors.surface,
+          opacity: disabled ? 0.34 : 1,
+          ...(raised
+            ? {
+                shadowColor: '#000000',
+                shadowOpacity: selected ? 0.18 : 0.1,
+                shadowRadius: selected ? 8 : 5,
+                shadowOffset: { width: 0, height: 3 },
+                elevation: selected ? 4 : 2,
+              }
+            : {}),
+        },
+        style,
+      ]}
     >
       <Text
+        numberOfLines={centerLabel ? 2 : 1}
+        ellipsizeMode="tail"
         style={[
           typography.body,
           {
             color: selected ? accent : colors.textPrimary,
             fontWeight: selected ? '600' : '400',
+            textAlign: centerLabel ? 'center' : 'left',
+            ...(centerLabel ? { lineHeight: 18 } : {}),
+            ...(cornerBadge === undefined ? {} : { paddingHorizontal: spacing.md }),
           },
         ]}
       >
         {label}
       </Text>
       {sublabel !== undefined && (
-        <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
+        <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}
+        >
           {sublabel}
         </Text>
+      )}
+      {cornerBadge !== undefined && (
+        <View
+          style={[
+            styles.cornerBadge,
+            {
+              borderColor: selected ? accent : colors.textMuted,
+              backgroundColor: selected ? `${accent}1F` : colors.bgElevated,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.cornerBadgeText,
+              { color: selected ? accent : colors.textSecondary },
+            ]}
+          >
+            {cornerBadge}
+          </Text>
+        </View>
       )}
     </Pressable>
   );
@@ -223,4 +288,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepperValue: { width: 62, alignItems: 'center' },
+  cornerBadge: {
+    position: 'absolute',
+    right: 7,
+    bottom: 6,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cornerBadgeText: { fontSize: 10, lineHeight: 12, fontWeight: '700' },
 });

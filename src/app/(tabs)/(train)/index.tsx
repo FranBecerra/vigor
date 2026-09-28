@@ -13,7 +13,7 @@
  * (lógica pura, 100 % cubierta).
  */
 import { useCallback, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -23,42 +23,56 @@ import { TodayCard } from '@/components/home/TodayCard';
 import { RoutineCard } from '@/components/home/RoutineCard';
 import { SessionPreviewSheet } from '@/components/home/SessionPreviewSheet';
 import { useTheme } from '@/theme/useTheme';
+import { useRoutines } from '@/hooks/useRoutines';
 import {
-  mockRoutines,
-  mockTodaySessionId,
+  defaultExpandedRoutineId,
+  defaultSessionId,
+  type RoutineView,
   type TrainingDomain,
-} from '@/mocks/home';
+} from '@/services/training/routineView';
+
+/** The session with this id in the running microcycle of any routine. */
+function findSession(routines: readonly RoutineView[], sessionId: string) {
+  for (const routine of routines) {
+    const current = routine.microcycles[routine.currentMicrocycleIndex];
+    const found = current?.sessions.find((s) => s.id === sessionId);
+    if (found) return { routine, session: found };
+  }
+  return null;
+}
 
 export default function TrainHomeScreen() {
   const { t, i18n } = useTranslation();
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { status, routines: allRoutines, reload } = useRoutines();
 
   const [domain, setDomain] = useState<TrainingDomain>('STRENGTH');
-  const [selectedSessionId, setSelectedSessionId] = useState(mockTodaySessionId);
-  const [expandedRoutineId, setExpandedRoutineId] = useState(
-    mockRoutines.find((r) => r.isActive)?.id ?? mockRoutines[0]?.id ?? '',
-  );
+  const [selectedSessionId, setSelectedSessionId] = useState('');
+  // null until the athlete touches the accordion, so the default follows the data.
+  const [expandedRoutineId, setExpandedRoutineId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
   /** Traduce una clave de MuscleGroup a su nombre legible. */
   const muscleLabel = useCallback((muscle: string) => t(`muscle.${muscle}`), [t]);
 
   const routines = useMemo(
-    () => mockRoutines.filter((routine) => routine.domain === domain),
-    [domain],
+    () => allRoutines.filter((routine) => routine.domain === domain),
+    [allRoutines, domain],
   );
 
-  /** Sesión seleccionada, buscada en el microciclo en curso de cada rutina. */
-  const selectedSession = useMemo(() => {
-    for (const routine of routines) {
-      const current = routine.microcycles[routine.currentMicrocycleIndex];
-      const found = current?.sessions.find((s) => s.id === selectedSessionId);
-      if (found) return { routine, session: found };
-    }
-    return null;
-  }, [routines, selectedSessionId]);
+  /**
+   * Sesión seleccionada. Falls back to today's default when the selection is not
+   * among the loaded routines: nothing chosen yet, or its routine is gone.
+   */
+  const selectedSession = useMemo(
+    () =>
+      findSession(routines, selectedSessionId) ??
+      findSession(routines, defaultSessionId(routines)),
+    [routines, selectedSessionId],
+  );
+  const expandedId = expandedRoutineId ?? defaultExpandedRoutineId(routines);
 
   const startSession = useCallback(() => {
     setPreviewOpen(false);
@@ -111,12 +125,37 @@ export default function TrainHomeScreen() {
           {t('home.routines')}
         </Text>
 
+        {status === 'loading' ? (
+          <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.textMuted} />
+        ) : null}
+
+        {status === 'error' ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('home.retry')}
+            onPress={reload}
+            style={{ marginTop: spacing.sm }}>
+            <Text style={[styles.empty, { color: colors.textMuted }]}>
+              {t('home.routinesLoadFailed')}
+            </Text>
+            <Text style={[styles.empty, { color: colors.textPrimary, marginTop: 4 }]}>
+              {t('home.retry')}
+            </Text>
+          </Pressable>
+        ) : null}
+
+        {status === 'ready' && routines.length === 0 ? (
+          <Text style={[styles.empty, { color: colors.textMuted, marginTop: spacing.sm }]}>
+            {t('home.noRoutines')}
+          </Text>
+        ) : null}
+
         {routines.map((routine) => (
           <View key={routine.id} style={{ marginTop: spacing.sm }}>
             <RoutineCard
               routine={routine}
-              expanded={routine.id === expandedRoutineId}
-              selectedSessionId={selectedSessionId}
+              expanded={routine.id === expandedId}
+              selectedSessionId={selectedSession?.session.id ?? ''}
               locale={i18n.language}
               muscleLabel={muscleLabel}
               labels={{
@@ -126,7 +165,7 @@ export default function TrainHomeScreen() {
                 microcycleOf: t('home.microcycle'),
               }}
               onToggle={() =>
-                setExpandedRoutineId((current) => (current === routine.id ? '' : routine.id))
+                setExpandedRoutineId(expandedId === routine.id ? '' : routine.id)
               }
               onSelectSession={setSelectedSessionId}
               onPressMesocycle={() => router.push('/mesocycle')}

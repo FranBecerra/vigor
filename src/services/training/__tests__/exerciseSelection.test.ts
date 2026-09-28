@@ -166,18 +166,18 @@ describe('goal-specific selection policy', () => {
   it('uses a fallback only when no standard alternative exists', () => {
     const fallback = exercise({
       id: 'fallback',
-      primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+      primaryMuscle: MuscleGroup.CHEST,
       movementVector: MovementVector.PUSH_HORIZONTAL,
       profile: ExerciseProfile.COMPOUND_PRIMARY,
       generationTier: ExerciseGenerationTier.FALLBACK,
     });
     const standard = exercise({
       id: 'standard',
-      primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+      primaryMuscle: MuscleGroup.CHEST,
       movementVector: MovementVector.PUSH_HORIZONTAL,
       profile: ExerciseProfile.COMPOUND_PRIMARY,
     });
-    const chest = planFor([[MuscleGroup.CHEST_MID_LOWER, 3]]);
+    const chest = planFor([[MuscleGroup.CHEST, 3]]);
 
     expect(
       selectExercises({ volumePlan: chest, catalogue: [fallback, standard], seed: 1 }).selected[0]
@@ -438,10 +438,9 @@ describe('selectExercises — volumen total dentro del rango de referencia', () 
   });
 
   it('sigue dentro del rango con VEINTE semillas', () => {
-    // La aleatoriedad cambia cuántas series EJECUTADAS hacen falta para el mismo
-    // volumen atribuido, porque un plan con más multiarticulares necesita menos.
-    // Con el volumen apuntando al 98 % del techo, seis de cada ocho semillas se
-    // salían: por eso la calibración deja margen.
+    // The selector must remain within the evidence-backed total range even when
+    // the random variant mix changes. The per-exercise 3–4 cap is not permission
+    // to exceed the microcycle ceiling.
     Array.from({ length: 20 }, (_, index) => index + 1).forEach((seed) => {
       const result = selectExercises({ volumePlan: plan, catalogue: EXERCISE_CATALOGUE, seed });
       expect(result.totalVerdict).toBe('within');
@@ -574,11 +573,11 @@ describe('selectExercises — casos límite', () => {
 
   it('un músculo puede quedar cubierto SOLO con crédito indirecto', () => {
     const result = selectExercises({
-      volumePlan: planFor([[MuscleGroup.CHEST_MID_LOWER, 6], [MuscleGroup.TRICEPS, 3]]),
+      volumePlan: planFor([[MuscleGroup.CHEST, 4], [MuscleGroup.TRICEPS, 2]]),
       catalogue: [
         exercise({
           id: 'press',
-          primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+          primaryMuscle: MuscleGroup.CHEST,
           secondaryMuscles: [MuscleGroup.TRICEPS],
           movementVector: MovementVector.PUSH_HORIZONTAL,
           profile: ExerciseProfile.COMPOUND_PRIMARY,
@@ -586,10 +585,10 @@ describe('selectExercises — casos límite', () => {
       ],
       seed: 1,
     });
-    // 6 series de press dan 3 atribuidas al tríceps: objetivo cubierto sin
+    // 4 series de press dan 2 atribuidas al tríceps: objetivo cubierto sin
     // ningún ejercicio de tríceps.
     expect(result.selected).toHaveLength(1);
-    expect(result.attributedByMuscle[MuscleGroup.TRICEPS]).toBe(3);
+    expect(result.attributedByMuscle[MuscleGroup.TRICEPS]).toBe(2);
     expect(result.unmet).toEqual([]);
   });
 

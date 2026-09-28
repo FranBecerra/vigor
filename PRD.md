@@ -83,7 +83,7 @@ El algoritmo forzará una semana de descarga (Volumen -50%, Carga 85-90%, RIR +3
 ### 3.5. Motor de Sustitución en Cascada (Swap)
 Accesible desde un menú contextual (...)[cite: 1]. Las alternativas se ordenan bajo las siguientes reglas algorítmicas descendentes[cite: 1]:
 1. **Vector de Movimiento Exacto:** (Ej. Empuje horizontal libre -> Empuje horizontal en máquina convergente)[cite: 1].
-2. **Grupo Muscular Principal:** Taxonomía detallada (separación de Deltoides Anterior, Lateral y Posterior; diferenciación de porciones del Trapecio)[cite: 1].
+2. **Primary muscle group:** the three deltoid heads remain separate, while chest is one group. Horizontal-row retractors are grouped as `MID_BACK`, and cervical muscles plus upper trapezius are grouped as `NECK`. Exercise angle remains a stimulus tag rather than a separate volume budget.
 3. **Ejercicios Personalizados:** Los inputs creados por el usuario (solo requieren Nombre y Músculo) se apilan al final si carecen de mapeo biomecánico profundo[cite: 1].
 
 ---
@@ -128,17 +128,17 @@ Las lesiones registradas (InjuryTracker) transicionan entre cuatro estados con a
 // 1. Taxonomía de Ejercicios y Biomecánica
 enum MuscleGroup {
   DELTS_FRONT, DELTS_LATERAL, DELTS_REAR,
-  TRAPS_UPPER, TRAPS_MID_LOWER,
-  CHEST_UPPER, CHEST_MID_LOWER,
-  LATS, RHOMBOIDS, ERECTORS,
-  QUADS, HAMSTRINGS, GLUTES, CALVES, TIBIALIS,
+  NECK, MID_BACK,
+  CHEST, LATS, ERECTORS,
+  QUADS, HAMSTRINGS, GLUTES, ADDUCTORS, CALVES, TIBIALIS,
   BICEPS, TRICEPS, CORE
 }
 
 enum MovementVector {
   PUSH_HORIZONTAL, PUSH_VERTICAL,
   PULL_HORIZONTAL, PULL_VERTICAL,
-  KNEE_DOMINANT, HIP_DOMINANT, ISOLATION
+  KNEE_DOMINANT, HIP_DOMINANT,
+  CERVICAL_FLEXION, CERVICAL_EXTENSION, CERVICAL_LATERAL_FLEXION
 }
 
 // 2. Modelo de Sesión de Entrenamiento y Mesociclos
@@ -285,6 +285,15 @@ La pestaña **Entrenamiento** tiene como pantalla de inicio (*home*) esta vista 
 **Previsualización de la sesión sin iniciarla.** La tarjeta de hoy incluye una zona pulsable **independiente del botón verde** (para que nunca se arranque un entreno por error) que abre una **hoja inferior** con: series por grupo muscular en barras, y la lista completa de ejercicios con sus series y repeticiones previstas. Se eligió hoja inferior frente a expandir la tarjeta porque (a) el acordeón de rutinas queda justo debajo y expandir ambos alargaría el scroll hasta perder la orientación, y (b) es la superficie donde vivirán de forma natural el **swap** de ejercicios y la edición previa de la sesión (E6), sin necesidad de rediseño posterior.
 
 **Rutinas con identidad visual.** Cada rutina admite un **color** y un **icono** de un catálogo predefinido, que se usan en su tarjeta del acordeón y en el icono de la tarjeta de sesión. Iconografía: SVG vectoriales custom, nunca librerías de iconos ni emojis.
+
+**Origen de los datos (2026-09-28).** El acordeón y la tarjeta de hoy leen las rutinas guardadas del atleta (`routines` + su `Mesocycle` activo), no datos de ejemplo. `services/training/routineView.ts` es el único punto que une la prescripción persistida (`PlannedSession`, por id de catálogo) con la vista que pintan las tarjetas (nombre, músculos, descanso, rango de repeticiones). La carga se repite **cada vez que la pantalla gana el foco**, porque guardar una rutina vuelve a una E1 ya montada. Reglas:
+- Una rutina sin mesociclo o sin sesiones planificadas (guardado a medias) **no se muestra**: no hay microciclo que pintar.
+- Si el mesociclo no guarda horizonte, se proyectan **6 microciclos** con el último como descarga, el ejemplo del §3.1.
+- Las sesiones con el mismo enfoque se distinguen con letra (`Torso A`, `Torso B`).
+- Orden: la rutina activa primero, después la más reciente.
+- Estados propios de carga, error con reintento y lista vacía.
+
+Pendiente: las sesiones aún no muestran fecha de completado (no se leen `workoutSessions`), y la vista del mesociclo (§8.7) y la sesión en curso siguen con datos de ejemplo.
 
 ### 8.6. Barra de sesión en curso
 
@@ -1153,7 +1162,7 @@ volumen declarado     ─┘
 
 ```bash
 npm run volume
-npm run volume -- --level=beginner --priority=CHEST_MID_LOWER,LATS
+npm run volume -- --level=beginner --priority=CHEST,LATS
 npm run volume -- --declared=BICEPS:24
 npm run volume -- --compare
 ```
@@ -1223,7 +1232,7 @@ npm run catalogue -- --validate    # pásalo tras editar el JSON a mano
 npm run catalogue -- --muscle=LATS # detalle de un músculo
 ```
 
-`npm run catalogue` señaló tres huecos que se rellenaron: trapecio medio/inferior tenía 1 ejercicio, romboides 2 y tibial 2. Ahora ningún músculo baja de 3, que es el mínimo para que la selección tenga variedad real.
+The earlier catalogue audit found gaps in the legacy rhomboid and middle-trapezius buckets. Those buckets were superseded on 2026-09-28 by the functional `MID_BACK` group; catalogue coverage is now validated against the current taxonomy.
 
 **Verificación:** `tsc --noEmit` limpio · **380 tests, 20 suites, 100 % de líneas, ramas, funciones y sentencias** en lógica de negocio y repositorios.
 
@@ -1233,17 +1242,17 @@ npm run catalogue -- --muscle=LATS # detalle de un músculo
 
 El plan anterior prescribía **124 series ejecutadas** por microciclo para un intermedio, cuando el rango de referencia es 40-90. El usuario lo señaló y aportó los rangos de la literatura. Había dos causas independientes, y ninguna era la aleatoriedad.
 
-**Causa 1: aplicar rangos de región a cada submúsculo.** La literatura da los rangos por región ("espalda 12-24 series semanales"), no por la taxonomía fina de esta app. El plan daba LATS 14 + RHOMBOIDS 10 + TRAPS_MID_LOWER 10 + TRAPS_UPPER 9 = **43 series de espalda**. Dividir la espalda en tres porciones es correcto y útil para elegir ejercicios; darle a cada porción el presupuesto de la espalda entera, no.
+**Cause 1: applying regional landmarks to every sub-muscle.** In the legacy taxonomy, lats, rhomboids, middle/lower trapezius and upper trapezius each inherited a full back budget and produced **43 attributed sets**. The current taxonomy prevents that duplication by combining the horizontal-row retractors into `MID_BACK` and moving upper-trapezius/cervical work into the optional `NECK` region.
 
 **Causa 2: prescribir volumen a los diecinueve grupos musculares.** El plan asignaba MEAV a todos, incluidos tibial, aductores, lumbar, trapecio superior y deltoides frontal, que reciben trabajo indirecto suficiente o aportan poco a hipertrofia, fuerza y salud.
 
 #### Capa de región
 
-`VolumeRegion` (16 regiones) es ahora **donde vive el presupuesto**. Cada región declara sus músculos y el **reparto** entre ellos:
+`VolumeRegion` (16 regions) is where the budget lives. Each region declares its muscles and its share:
 
-- `CHEST` → pecho medio-inferior 60 %, superior 40 %
-- `BACK` → dorsal 55 %, romboides 25 %, trapecio medio-inferior 20 %
-- El resto son regiones de un solo músculo.
+- `CHEST` → one chest budget (100 %); press angle is handled as stimulus variety.
+- `BACK` → lats 55 %, mid back 45 %.
+- The remaining regions contain one muscle group each.
 
 Una porción con reparto bajo **no es menos importante**: significa que ya recibe mucho crédito indirecto. El romboides se lleva poco directo porque todo remo lo acredita.
 
@@ -1253,7 +1262,7 @@ Los hombros van en tres regiones separadas y no en una porque sus porciones no c
 
 #### Regiones desactivadas por defecto
 
-`DELTS_FRONT`, `TRAPS`, `ERECTORS`, `TIBIALIS`, `ADDUCTORS` y `CALVES`. Se activan con `trainedRegions` o `--add-regions`. Los gemelos están fuera por criterio explícito del usuario, no por descuido: su aportación no justifica gastar volumen y recuperación de partida. Cuando se activan reciben un rango generoso (hasta 26 series), que es lo que la referencia da a un músculo priorizado y recuperable.
+`DELTS_FRONT`, `NECK`, `ERECTORS`, `TIBIALIS`, `ADDUCTORS` and `CALVES` are disabled by default and can be enabled explicitly. Neck work is not inferred from ordinary compounds: direct cervical exercise and upper-trapezius work share the optional `NECK` budget.
 
 #### Eje de objetivo
 
@@ -1553,12 +1562,12 @@ The mesocycle generator now completes the step between exercise selection and a 
 **Implementation.**
 
 - `AthleteTrainingProfile.splitStructure` persists the athlete's selected structure.
-- `sessionDistribution.ts` supports Full Body, Upper/Lower, Push/Pull/Legs, and PPL+Upper. `AUTO` resolves deterministically from the number of sessions (1 Full Body; 2 Upper/Lower; 3 PPL; 4 PPL+Upper; 5+ repeating PPL).
-- Each exercise appearance is capped at three working sets (`MAX_SETS_PER_EXERCISE_APPEARANCE`). This is now an enforced distribution rule rather than the former `TYPICAL_SETS_PER_APPEARANCE` timing approximation.
+- `sessionDistribution.ts` supports Full Body, Upper/Lower, Push/Pull/Legs, and PPL+Upper. The session-count mapping in this historical entry was superseded on 2026-09-28 by the canonical PPL/PPLU/PPLUL/PPLPPL rule documented below.
+- Each exercise appearance was initially capped at three working sets; the current rule is the 3–4 set cap documented in the 2026-09-28 entry below.
 - The least-loaded compatible session receives the next appearance. This preserves every selected set exactly once, produces stable output for the same input, and reports any unassigned work instead of dropping it silently.
 - `planMesocycle` now validates the real duration of **each** distributed session, including exercise setup, work, and the same rest durations used by the session timer. The bisection squeeze is accepted only when every session fits. Aggregate microcycle minutes are retained for reporting but no longer hide an overloaded individual session.
 
-**Validation.** `tsc --noEmit` clean; 491 tests in 23 suites; 100% statements, branches, functions, and lines for covered business logic. Tests assert volume conservation, the three-set appearance cap, all split mappings, AUTO resolution, deterministic distribution, no silent loss at zero sessions, and per-session time capacity.
+**Validation (historical snapshot).** `tsc --noEmit` clean; 491 tests in 23 suites; 100% statements, branches, functions, and lines for covered business logic. The appearance cap and split mapping were subsequently revised in the 2026-09-28 entry.
 
 ### 2026-09-24 — Biomechanical session sequencing for every split
 
@@ -1572,7 +1581,7 @@ Session distribution now sequences work for **AUTO and every manual split**. The
 - compound-primary work has the highest fatigue cost, compound-secondary follows, and isolation the lowest;
 - sharing the same `MovementVector` adds a specific penalty.
 
-The lowest-risk compatible slot wins; estimated duration breaks ties. Thus a planned barbell squat is placed away from a preceding heavy leg press when another compatible session exists. The same exercise is never duplicated in a session while another compatible slot exists, preserving the three-set appearance cap.
+The lowest-risk compatible slot wins; estimated duration breaks ties. Thus a planned barbell squat is placed away from a preceding heavy leg press when another compatible session exists. The same exercise is never duplicated in a session while another compatible slot exists, preserving the appearance cap (now 3–4 sets).
 
 `DistributionInput.previousSession` and `MesocyclePlanInput.previousSession` accept the previous completed or planned session, allowing the caller that instantiates a later microcycle to carry real prior work into its sequence. The current mock-only UI has no routine instantiation flow yet, so it does not supply that value; the engine explicitly supports it rather than pretending to know execution data it has not received.
 
@@ -1593,9 +1602,9 @@ Dos defectos medidos en el reparto anterior, más un requisito nuevo. El orden d
 
 Ninguno lo detectaba la cobertura, porque son propiedades de calidad y no ramas de código.
 
-**Corrección.** `buildFocusSequence` parte del ciclo base del split para que siga siendo reconocible, y asigna las sesiones restantes al enfoque con **más carga actual por sesión asignada**. La quinta sesión de un plan PPL+Upper se convierte en un segundo día de pierna justo cuando el volumen de pierna lo pide, que es la estructura PPLUL. Después reordena para no dejar dos enfoques iguales seguidos cuando existe un intercambio válido.
+**Historical correction.** `buildFocusSequence` initially assigned extra sessions to the focus with the most current load. That fixed the first throttling defect, but its load-driven PPL variants were superseded on 2026-09-28 by the deterministic movement-family sequence documented below.
 
-`SPLIT_VOCABULARY` recoge las estructuras que funcionan en la práctica y no una teoría general: cuerpo completo hasta 3 sesiones, torso/pierna en 4, PPL+Upper en 5 y PPL doble en 6. `AUTO` elige entre ellas por número de sesiones.
+`SPLIT_VOCABULARY` recoge las estructuras que funcionaban en la primera versión y queda conservado como historial. La regla vigente es la secuencia canónica PPL/PPLU/PPLUL/PPLPPL de la entrada del 2026-09-28.
 
 **Error corregido durante el desarrollo:** la primera fórmula de presión dividía por `asignadas + 1`, que mide la carga *después* de la decisión. Con 100 minutos de pierna y 40 de torso producía `UPPER, LOWER, LOWER, LOWER, LOWER`, donde el cuarto día de pierna cargaba 25 minutos frente a los 40 del de torso. Debe comparar la carga **actual** por sesión.
 
@@ -2007,7 +2016,7 @@ The rule is a programming constraint, not an efficacy ranking. It prevents redun
 
 Distribution now follows this order:
 
-1. Preserve every prescribed set and the three-set appearance cap.
+1. Preserve every prescribed set and the current 3–4 set appearance cap.
 2. Keep an exercise in a matching session focus while a matching session has time and productive per-muscle capacity.
 3. Among valid matching sessions, use the least-loaded session; sequencing risk decides ties.
 4. Keep equivalent exercise variants in different sessions when possible.
@@ -2026,3 +2035,313 @@ Expo Router's JavaScript-tab guidance states that an absolutely positioned tab b
 **Visual verification:** iPhone 18 Pro simulator, iOS 27.0. The 5×65 AUTO case generated **88 sets**, the fixed Generate/Save action rendered fully above the floating tab capsule, and the capsule was centred horizontally.
 
 **Verification:** `tsc --noEmit` clean · **629 tests, 26 suites passing** · **100% statements, branches, functions, and lines** in the measured scope.
+
+### 2026-09-28 — Canonical PPL sequencing, productive set caps, and editable preview
+
+#### Canonical PPL sequence
+
+Manually selected PPL is a deterministic movement-family sequence. The requested
+session count maps to `PPL` (3), `PPLU` (4), `PPLUL` (5), and `PPLPPL` (6). This
+removes the accidental `PPLP` result that placed all direct biceps work in one pull
+session. The labels are a sequencing contract, not a claim that a split is
+physiologically superior.
+
+`AUTO` deliberately does **not** inherit that fixed sequence. It selects a broad
+base by session count (full body up to 3, upper/lower at 4, PPL+upper at 5, PPL at
+6+) and assigns additional focuses according to the minutes of muscle volume that
+still need a home. Session placement then applies time, productive per-muscle
+capacity, and adjacent-session biomechanical-overlap costs. AUTO is therefore free
+to produce structures such as PPLUP or PPLUL when the actual volume requires them.
+
+Push and pull are movement families rather than torso-only buckets: quadriceps work
+is eligible for a push session and hamstring/glute hip-extension work is eligible
+for a pull session. The distributor still prefers a natural movement match, uses
+time and productive per-muscle capacity, and reports unavoidable structural
+warnings instead of deleting work.
+
+#### Exercise-level volume and stimulus variety
+
+Automatic selection now keeps each exercise appearance between **3 and 4 working
+sets** (`maxSetsPerExercise = 4`, `MAX_SETS_PER_EXERCISE_APPEARANCE = 4`). When a
+muscle needs more work, the selector adds a distinct audited variant rather than
+prescribing six hard sets on one exercise. Up to four variants can represent a
+muscle's weekly work when time allows, while the existing movement-family and
+no-repeat rules prevent redundant variants. The total executed-set ceiling is still
+enforced against the level/goal range, so variety cannot silently create excess
+volume.
+
+#### Preview editing before persistence
+
+The generated preview is now a freely editable proposal. Sets and the lower and
+upper repetition bounds use the same numeric input component as the live workout
+screen; values are not restricted to the automatic 3–4 set prescription. Exercise
+replacement opens a searchable modal with every equipment-compatible, unused
+catalogue exercise ranked by the existing swap engine. This modal is the interaction
+pattern intended for the in-session swap flow as well.
+
+Edits are kept in a pure preview layer, marked `isEdited`, and passed to the saved
+mesocycle; a failed save therefore retains exactly what the athlete reviewed. The
+preview recalculates set totals, estimated session minutes, and attributed volume
+per muscle (direct sets = 1, audited secondary exposure = 0.5). Free editing is not
+silently vetoed: it remains saveable, but the screen warns when an edited session
+exceeds the available time or when an uncapped plan moves outside the level/goal
+total-volume reference range.
+
+#### Emphasis and equipment controls
+
+Emphasis controls use a fixed two-column grid. The section header shows the numeric
+priority budget (`used/total`), while every muscle shows only its cost (`1` or `½`).
+Priority and maintenance remain visible through control state and colour, with the
+full state and cost exposed to accessibility labels. Any number of regions can be
+deprioritised; tibialis remains available in the domain model but is not exposed in
+the primary mesocycle emphasis grid.
+
+Every supported equipment type is selected by default, including Smith machine,
+kettlebell, and bands. The athlete can remove unavailable equipment before
+generation, and swaps only show alternatives compatible with the resulting set.
+The generator still refuses to run with an empty equipment selection.
+
+**Verification:** `npx tsc --noEmit` clean · **668 tests, 28 suites passing** ·
+**100% statements, branches, functions, and lines** in the measured business-logic
+scope.
+
+### 2026-09-28 — Functional muscle taxonomy and structured exercise discovery
+
+#### Muscle taxonomy
+
+Chest is one programming group (`CHEST`). Incline, flat and decline work remain
+distinct exercise and stimulus variants, but they no longer receive independent
+volume landmarks or appear as separate emphasis targets. This prevents angle
+variety from being misrepresented as two independently recoverable muscles.
+
+The legacy rhomboid and middle/lower-trapezius buckets are merged into
+`MID_BACK`, the functional group used for horizontal-row and scapular-retraction
+work. Upper-trapezius work and direct cervical work belong to the optional `NECK`
+group. Accordingly, the back-region budget is distributed 55 % to lats and 45 %
+to mid back; neck has its own low-recovery-cost region and remains disabled by
+default.
+
+Three explicit cervical movement vectors and three band exercises were added:
+cervical flexion, extension and lateral flexion. They are `FALLBACK` automatic
+choices because the evidence is not equally strong for every direction or loading
+method. Resisted head extension has direct MRI evidence of cervical hypertrophy
+after specific training (Conley et al., 1997, PMID 9189733), while broader reviews
+find heterogeneous protocols and low-certainty evidence for performance or injury
+outcomes (Elliott et al., 2021, PMID 34143411). Vigor therefore records them as
+optional strength exercises, not treatment or injury-prevention advice.
+
+#### Swap search and result hierarchy
+
+Exercise search normalises case and diacritics and expands domain synonyms across
+Spanish and English. Queries such as `delt`, `hombro`, `espalda`, `romboide`,
+`trapecio`, `cuello`, `chest` and `lat` resolve through the primary and secondary
+muscle mappings rather than requiring those words to appear in the exercise name.
+
+Filtered candidates preserve the biomechanical ranking but render in two explicit
+sections: same primary muscle first, followed by `Other exercises`. This makes the
+recommended substitutions legible without hiding the complete manually available
+catalogue.
+
+#### Generator presentation
+
+Emphasis pills keep their label geometrically centred and place the priority cost
+in a bordered circular badge at the lower-right corner. A subtle elevation and
+state tint adds hierarchy without changing the three-state interaction or its
+accessibility label. The `Another combination` action now has a full section gap
+above it, separating it from the attributed-volume card.
+
+The app follows the system appearance because `userInterfaceStyle` is `automatic`
+and `useTheme` subscribes to React Native's colour scheme. On the iOS Simulator,
+`Command + Shift + A` toggles light/dark appearance while the app is open.
+
+**Verification:** `npx tsc --noEmit` clean · **673 tests, 29 suites passing**.
+
+### 2026-09-28 — Generation flow: two pages instead of one appended scroll
+
+#### The problem the single scroll had
+
+The generated plan was appended to the bottom of the configuration scroll, so the
+primary action produced no visible movement on the one tap that matters most. The
+athlete pressed *Generate plan* and the screen appeared inert.
+
+The original single-scroll argument still holds for the seven **input** groups and
+they still share one page: session count and minutes move the set budget together,
+and splitting them across steps would hide that interaction. The plan is not an
+eighth input group. It is the result of the other seven, so it becomes a page of its
+own.
+
+#### The flow
+
+Two horizontally-paged views inside one route, sliding 260 ms in the direction of
+travel so generating reads as a step forward and returning reads as a step back.
+
+- **Configure → preview:** the primary action generates and advances.
+- **Preview → configure:** the left action of the fixed bar becomes *Back*.
+- **Regeneration is reachable from both pages.** *Another combination* sits directly
+  under each page title, so it needs no scrolling on either side.
+
+Both pages stay mounted. Going back to change a setting therefore keeps the
+athlete's scroll position in the long form and keeps their preview edits.
+
+#### Forward navigation distinguishes looking from changing
+
+`generationPhase.ts` records the settings a plan was generated from and compares
+them with the current ones, which decides what the forward action is:
+
+| State | Primary action |
+|---|---|
+| No plan yet | *Generate plan* |
+| Plan, settings untouched | *View plan* — returns forward, generates nothing |
+| Plan, a setting moved | *Generate again* |
+| On the preview page | *Save routine* |
+
+*View plan* must not regenerate: regeneration resets the preview edit layer, so a
+trip back to re-read a setting would silently discard the athlete's manual changes.
+The configuration page states which case it is in, either the set count waiting on
+the other page or a warning that the settings no longer describe it.
+
+The signature sorts equipment and the two emphasis lists. That is not cosmetic: the
+generator reads all three as membership tests, so two orderings of the same members
+produce the same plan and toggling a chip off and on again must not read as a change.
+
+#### Two smaller consequences
+
+The swipe-back gesture is disabled while the preview is up. It would pop the whole
+route and discard an unsaved plan together with its edits, and the explicit *Back*
+action is in the fixed bar. This is a judgement call to confirm on device.
+
+*Another combination* is a second entry point into the generator, so it is disabled
+when the equipment selection is empty. Previously the disabled primary button was the
+only way in, and an empty catalogue could not be reached.
+
+Also fixed: `muscle.ADDUCTORS` existed in three locales and not in Japanese. Key
+parity is back to 206 keys across `es`, `en`, `fr` and `ja`.
+
+**Verification:** `npx tsc --noEmit` clean · **693 tests, 30 suites passing** ·
+**100 % statements, branches, functions and lines** in the measured business-logic
+scope. The flow itself has not been run on a device.
+
+#### Save failures now name their cause
+
+The save handler swallowed every error behind *could not save, try again*, which hides
+the only distinction that matters: a rejected write needs a rules deployment and a
+lost connection needs a retry. The handler now logs the error and shows its code,
+e.g. `firestore/permission-denied`, under the generic line.
+
+A regression test asserts that neither draft contains `undefined` anywhere in its
+tree. Firestore rejects such a document outright, and the failure surfaces as an
+opaque write error at the exact moment the athlete is saving work.
+
+`firebase.json` was missing, so deploying rules required passing the configuration on
+stdin. Deploying is now `firebase deploy --only firestore:rules --project vigor-5ddda`.
+The `routines` collection has existed in `firestore.rules` since 24 September; under
+the deny-by-default catch-all, every write to it is rejected until that deployment
+happens.
+
+### 2026-09-28 — Recommended capacity, and a crash in the distributor
+
+#### The app decides how much and how often
+
+A beginner who believes more is better sets five or six sessions, and the generator
+obediently spreads a beginner's recoverable volume across six thin days. The volume
+ceiling is set by what the athlete RECOVERS from, not by the time they are willing to
+spend, so past that ceiling extra sessions add commitment and no adaptation. The
+capacity section now has a control that decides both numbers.
+
+`capacityRecommendation.ts` runs the real generator across a grid of capacities
+(2 to 6 sessions × 45, 60 and 75 minutes) and reads its verdicts, instead of modelling
+the engine a second time in a way that could disagree with it.
+
+Three measurements shaped the criterion, and each of them rejected a simpler version:
+
+- **Minimising total weekly minutes alone recommends two 90-minute days,** because the
+  warm-up overhead is paid once per session. Session length is therefore capped at 75
+  minutes for a recommendation; the athlete can still set 90 or 120 by hand.
+- **Minimising structural warnings recommends six sessions,** because spreading volume
+  almost always shaves one off. Warnings are a floor, not a maximum: a structure within
+  one warning of the best available counts as equally sound, and among those the
+  smallest commitment wins. `single-frequency` warnings never reach zero and should
+  not, since a muscle whose weekly volume is three sets belongs in one session.
+- **With a single seed the recommendation was not stable:** the same intermediate got
+  6×60, 5×60 or 4×75 depending on the draw. Each capacity is now scored across a fixed
+  sample of three seeds and ranked on the mean, which also matches what the answer is
+  about: the capacity, not one selection.
+
+A candidate must also deliver the level and goal's minimum recoverable volume.
+`limitedBy === 'recovery'` alone was not enough: a bodyweight-only advanced plan of 37
+sets reports `recovery` too, because the label says which ceiling bound the plan, not
+that it reached the athlete's volume. When nothing qualifies, the equipment is the
+binding constraint and the screen says so rather than presenting a thin plan as the
+right answer.
+
+What it recommends with a full gym:
+
+| | hypertrophy | strength |
+|---|---|---|
+| Beginner | 3×60, 42 sets | 2×60, 26 sets |
+| Intermediate | 4×75, 87 sets | 3×75, 56 sets |
+| Advanced | 6×60, 115 sets | 6×45, 76 sets |
+
+The search takes about 140 ms for 45 plans, so the control shows a busy state and
+defers the work by a frame; otherwise the thread blocks before the spinner paints.
+
+#### A crash in the distributor, found by the search
+
+Scanning 684 level/goal/capacity combinations crashed **15** of them, `6×45` for an
+intermediate among them, which is an ordinary thing for someone to pick.
+
+The anchor-repair pass ran on every session with no anchor, and an EMPTY session has no
+anchor, so it reached a pass whose comment says "a populated session". It then asserted
+with `[0]!` that such a session had an isolation exercise to trade back. An empty one
+does not, so `undefined` was spliced into the donor's exercise list and the next minute
+count threw. `indexOf(undefined)` returning -1 corrupted a second session on the way.
+
+The pass now runs on populated sessions only, and when a session has nothing comparable
+to hand back — every entry a compound too short or too peripheral to anchor it — the
+anchor moves one way instead of trading an entry that does not exist. All 684
+combinations now plan.
+
+#### Saving a routine: the rules, confirmed
+
+The deployed ruleset is from **23 September at 16:53** and the `routines` block entered
+`firestore.rules` on **24 September at 21:03**. Under the deny-by-default catch-all,
+every write to `routines` is rejected until the file is deployed. Anonymous sign-in is
+not the cause: the rules require `request.auth != null` and a matching `userId`, and an
+anonymous user satisfies both.
+
+**Verification:** `npx tsc --noEmit` clean · **710 tests, 31 suites passing** ·
+**100 % statements, branches, functions and lines** in the measured business-logic
+scope. Neither the control nor the two-page flow has been run on a device.
+
+### 2026-09-28 — E1 reads saved routines; strength goal audited against the intermediate guidelines
+
+#### Saved routines were invisible
+
+Saving worked: `generate.tsx` writes the routine and its mesocycle, then pops back. The
+home it pops back to rendered `mockRoutines` and never queried Firestore, so nothing
+the athlete saved could appear. `routineView.ts` now joins each routine with its active
+mesocycle and the catalogue, `useRoutines` reloads on every focus, and E1 renders the
+result (§8.5). The mock types became aliases of the view types, so the cards did not
+change.
+
+#### Strength goal: measured gap (proposal, not implemented)
+
+An intermediate on `STRENGTH` at 3×75 (seed 1) currently receives: front squat 3×3-5
+once, RDL as the only hip hinge, close-grip and incline bench instead of the flat bench,
+no overhead press, and an upright row counted as the vertical pull. Barbell primary
+compounds are **24 %** of the sets. Every main pattern is trained **once** per
+microcycle with 3-4 compound sets; primaries rest 150 s. Isolation work (pec deck,
+lateral raises, cable crunch) follows hypertrophy selection. In short, strength today is
+hypertrophy with lower rep ranges.
+
+Root cause: selection weighs `stimulusQuality`, a hypertrophy criterion, for both goals.
+Strength needs selection by specificity (the main lifts are fixed, not chosen), volume
+counted per movement pattern rather than per muscle, 2-3 exposures per main lift,
+3-5 min rests on main lifts, and a microcycle-by-microcycle RIR ramp.
+
+Data defect found on the way: `remo-al-menton` is classified `PULL_VERTICAL`. An upright
+row does not train the vertical pull, and it currently satisfies the foundational-pattern
+floor for both goals.
+
+The catalogue already holds the six main lifts; it has no specific variants (paused
+squat, paused bench, deficit or block pull).

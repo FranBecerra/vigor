@@ -101,6 +101,12 @@ export interface Routine {
   generation: RoutineGenerationInput;
   /** Id of the mesocycle currently running from this routine, when there is one. */
   activeMesocycleId?: string;
+  /**
+   * The one routine the athlete is following. At most one per athlete: activating a
+   * routine clears the flag on every other. Absent on routines saved before the
+   * flag existed, which therefore start inactive.
+   */
+  isActive?: boolean;
   createdAt: Timestampish;
   updatedAt: Timestampish;
 }

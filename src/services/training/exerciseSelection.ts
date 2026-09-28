@@ -39,6 +39,7 @@ import { attributedVolumePerMinute, ISOLATION_VOLUME_PER_MINUTE } from './traini
 import {
   TrainingGoal,
   totalSetsVerdict,
+  TOTAL_SETS_RANGE,
   type TotalVolumeVerdict,
   type VolumePlan,
 } from './volumePlan';
@@ -66,12 +67,12 @@ export const FOUNDATIONAL_PATTERNS: readonly {
   { vector: MovementVector.HIP_DOMINANT, muscles: [MuscleGroup.HAMSTRINGS, MuscleGroup.GLUTES] },
   {
     vector: MovementVector.PUSH_HORIZONTAL,
-    muscles: [MuscleGroup.CHEST_MID_LOWER, MuscleGroup.CHEST_UPPER],
+    muscles: [MuscleGroup.CHEST],
   },
   { vector: MovementVector.PULL_VERTICAL, muscles: [MuscleGroup.LATS] },
   {
     vector: MovementVector.PULL_HORIZONTAL,
-    muscles: [MuscleGroup.LATS, MuscleGroup.RHOMBOIDS],
+    muscles: [MuscleGroup.LATS, MuscleGroup.MID_BACK],
   },
 ];
 
@@ -148,8 +149,10 @@ export interface SelectionConfig {
  */
 export const DEFAULT_SELECTION_CONFIG: SelectionConfig = {
   minSetsPerExercise: 3,
-  maxSetsPerExercise: 6,
-  maxExercisesPerMuscle: 3,
+  // Keep each appearance in the productive 3–4 set range. More weekly work is
+  // represented by a distinct variant, not by a six-set marathon on one lift.
+  maxSetsPerExercise: 4,
+  maxExercisesPerMuscle: 4,
   compoundBoost: 2.5,
   timeEfficiencyExponent: 2,
   vectorPenalty: 0.6,
@@ -636,7 +639,11 @@ export function selectExercises(input: SelectionInput): SelectionResult {
   let progressed = true;
   while (progressed) {
     progressed = false;
+    const [, totalSetCeiling] = TOTAL_SETS_RANGE[input.volumePlan.goal][input.volumePlan.level];
     targets.forEach((target, muscle) => {
+      if ([...chosen.values()].reduce((sum, entry) => sum + entry.sets, 0) >= totalSetCeiling) {
+        return;
+      }
       if (remainingOf(muscle, target) < 1) return;
       const entry = byStimulus.find(
         (candidate) =>

@@ -151,7 +151,7 @@ const LOAD_IMBALANCE_THRESHOLD = 0.45;
  * Frequency the generator aims for on muscles that are not deprioritised.
  *
  * No separate rule enforces it, because the appearance cap already does: with at
- * most three sets per appearance, any muscle carrying four or more sets is split
+ * most four sets per appearance, any muscle carrying more than four sets is split
  * across two sessions on its own. Below four sets the only way to reach frequency
  * two would be a 2 + 1 split, and a single-set appearance costs a full setup for
  * almost no stimulus. So this constant only defines when frequency 1 is worth
@@ -205,8 +205,7 @@ const SMALL_MUSCLES = new Set<MuscleGroup>([
   MuscleGroup.DELTS_FRONT,
   MuscleGroup.DELTS_LATERAL,
   MuscleGroup.DELTS_REAR,
-  MuscleGroup.TRAPS_UPPER,
-  MuscleGroup.TRAPS_MID_LOWER,
+  MuscleGroup.NECK,
   MuscleGroup.CALVES,
   MuscleGroup.TIBIALIS,
   MuscleGroup.ADDUCTORS,
@@ -215,35 +214,36 @@ const SMALL_MUSCLES = new Set<MuscleGroup>([
 ]);
 
 const UPPER_MUSCLES = new Set<MuscleGroup>([
-  MuscleGroup.CHEST_UPPER,
-  MuscleGroup.CHEST_MID_LOWER,
+  MuscleGroup.CHEST,
   MuscleGroup.LATS,
-  MuscleGroup.RHOMBOIDS,
+  MuscleGroup.MID_BACK,
   MuscleGroup.DELTS_FRONT,
   MuscleGroup.DELTS_LATERAL,
   MuscleGroup.DELTS_REAR,
-  MuscleGroup.TRAPS_UPPER,
-  MuscleGroup.TRAPS_MID_LOWER,
+  MuscleGroup.NECK,
   MuscleGroup.BICEPS,
   MuscleGroup.TRICEPS,
 ]);
 
 const PUSH_MUSCLES = new Set<MuscleGroup>([
-  MuscleGroup.CHEST_UPPER,
-  MuscleGroup.CHEST_MID_LOWER,
+  MuscleGroup.CHEST,
   MuscleGroup.DELTS_FRONT,
   MuscleGroup.DELTS_LATERAL,
   MuscleGroup.TRICEPS,
+  // A push focus is a movement family, not a torso-only day.
+  MuscleGroup.QUADS,
 ]);
 
 const PULL_MUSCLES = new Set<MuscleGroup>([
   MuscleGroup.LATS,
-  MuscleGroup.RHOMBOIDS,
+  MuscleGroup.MID_BACK,
   MuscleGroup.DELTS_REAR,
-  MuscleGroup.TRAPS_UPPER,
-  MuscleGroup.TRAPS_MID_LOWER,
+  MuscleGroup.NECK,
   MuscleGroup.BICEPS,
   MuscleGroup.ERECTORS,
+  // Hip extension work is compatible with a pull focus.
+  MuscleGroup.HAMSTRINGS,
+  MuscleGroup.GLUTES,
 ]);
 
 /** Whether a focus is the natural home of a muscle. */
@@ -255,14 +255,26 @@ function matches(focus: SessionFocus, muscle: MuscleGroup): boolean {
   return PULL_MUSCLES.has(muscle);
 }
 
+/** Finds the first donor exercise that naturally belongs to an empty focus. */
+export function matchingMoveForEmpty(
+  emptyFocus: SessionFocus,
+  donors: readonly DistributedSession[],
+): { donor: DistributedSession; entry: SessionExercise } | undefined {
+  for (const donor of donors) {
+    const entry = donor.exercises.find((candidate) =>
+      matches(emptyFocus, candidate.exercise.primaryMuscle),
+    );
+    if (entry !== undefined) return { donor, entry };
+  }
+  return undefined;
+}
+
 /**
  * Base cycle and the extra focuses each split may use beyond it.
  *
- * These are the structures known to work in practice, not a general theory:
- * upper/lower over 4 sessions, PPL + upper over 4, PPL + upper + lower over 5,
- * PPL twice over 6, full body over 3. Extra sessions are drawn from `extras` in
- * order of the time each focus still has to absorb, so the fifth session of a
- * PPL + upper plan becomes a second leg day exactly when leg volume needs it.
+ * These are the structures known to work in practice, not a general theory.
+ * PPL-based plans use the deterministic 3/4/5/6-day sequence declared below;
+ * focus is a movement family rather than a torso-only prescription.
  */
 const SPLIT_VOCABULARY: Record<
   Exclude<SplitStructure, SplitStructure.AUTO>,
@@ -293,6 +305,21 @@ function resolveSplit(
   if (sessions === 4) return SplitStructure.UPPER_LOWER;
   if (sessions === 5) return SplitStructure.PUSH_PULL_LEGS_UPPER;
   return SplitStructure.PUSH_PULL_LEGS;
+}
+
+/** Canonical movement sequence for PPL-based plans. */
+export function canonicalPplFocuses(sessionCount: number): SessionFocus[] {
+  const count = Math.max(0, Math.floor(sessionCount));
+  const canonical: readonly SessionFocus[] =
+    count <= 3
+      ? ['PUSH', 'PULL', 'LEGS']
+      : count === 4
+        ? ['PUSH', 'PULL', 'LEGS', 'UPPER']
+        : count === 5
+          ? ['PUSH', 'PULL', 'LEGS', 'UPPER', 'LOWER']
+          : ['PUSH', 'PULL', 'LEGS', 'PUSH', 'PULL', 'LEGS'];
+  if (count <= canonical.length) return canonical.slice(0, count);
+  return Array.from({ length: count }, (_, index) => canonical[index % canonical.length]);
 }
 
 function muscleCredits(exercise: Exercise): Map<MuscleGroup, number> {
@@ -370,9 +397,17 @@ export function buildFocusSequence(
   split: Exclude<SplitStructure, SplitStructure.AUTO>,
   sessionCount: number,
   minutesByMuscle: ReadonlyMap<MuscleGroup, number>,
+  enforceCanonicalPpl = true,
 ): SessionFocus[] {
   const count = Math.max(0, Math.floor(sessionCount));
   if (count === 0) return [];
+
+  if (
+    enforceCanonicalPpl &&
+    (split === SplitStructure.PUSH_PULL_LEGS || split === SplitStructure.PUSH_PULL_LEGS_UPPER)
+  ) {
+    return canonicalPplFocuses(count);
+  }
 
   const { base, extras } = SPLIT_VOCABULARY[split];
   const sequence: SessionFocus[] = [];
@@ -395,7 +430,7 @@ export function buildFocusSequence(
       if (matches(focus, muscle)) total += minutes;
     });
     const assigned = sequence.filter((candidate) => candidate === focus).length;
-    return assigned === 0 ? Number.POSITIVE_INFINITY : total / assigned;
+    return assigned === 0 ? total : total / assigned;
   };
 
   while (sequence.length < count) {
@@ -481,8 +516,6 @@ const CROSS_SECTION_MISMATCH_COST = 90;
  * with a single unrelated exercise.
  */
 const LOAD_COST_PER_MINUTE = 10;
-/** Extra cost of repeating the same exercise in a session that already has it. */
-const DUPLICATE_EXERCISE_COST = 60;
 /**
  * Cost per minute of pushing a session past its time budget. Steep on purpose:
  * overflowing a session throttles the entire plan, so paying a focus mismatch
@@ -570,6 +603,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
     resolvedSplit,
     count,
     minutesByMuscle,
+    input.split !== SplitStructure.AUTO,
   ).map((focus, index) => ({ index, focus, exercises: [], estimatedWorkMinutes: 0 }));
 
   const unassigned: SessionExercise[] = [];
@@ -597,7 +631,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
     );
     const chunks = appearanceSets(
       selected.sets,
-      Math.max(1, naturalSessions.length > 0 ? naturalSessions.length : sessions.length),
+      sessions.length,
     );
 
     for (const sets of chunks) {
@@ -694,12 +728,6 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
             session.focus,
             selected.exercise.primaryMuscle,
           );
-          const duplicate = session.exercises.some(
-            (entry) => entry.exercise.id === selected.exercise.id,
-          )
-            ? DUPLICATE_EXERCISE_COST
-            : 0;
-
           // Per-muscle session volume, counting the indirect credit this exercise
           // also adds to its synergists.
           const projectedEntries = [...session.exercises, { exercise: selected.exercise, sets }];
@@ -710,7 +738,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
             overMuscleCap += Math.max(0, effective - cap) * OVER_MUSCLE_CAP_COST_PER_SET;
           });
 
-          return neighbourRisk + load + overCap + mismatch + duplicate + overMuscleCap;
+          return neighbourRisk + load + overCap + mismatch + overMuscleCap;
         };
         return cost(candidate) < cost(best) ? candidate : best;
       });
@@ -728,17 +756,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
     const donors = sessions
       .filter((session) => session.exercises.length > 1)
       .sort((a, b) => b.estimatedWorkMinutes - a.estimatedWorkMinutes);
-    const matchingMove = donors
-      .flatMap((donor) =>
-        donor.exercises
-          .filter((entry) => matches(empty.focus, entry.exercise.primaryMuscle))
-          .map((entry) => ({ donor, entry })),
-      )
-      .sort(
-        (a, b) =>
-          exerciseRisk(a.entry.exercise, a.entry.exercise) -
-          exerciseRisk(b.entry.exercise, b.entry.exercise),
-      )[0];
+    const matchingMove = matchingMoveForEmpty(empty.focus, donors);
     const donor = matchingMove?.donor ?? donors[0];
     if (donor === undefined) break;
     const moved =
@@ -758,8 +776,14 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
   // isolation. Swap in a spare compound from a session that already has two or
   // more anchors. Moving (rather than cloning) preserves the no-repeat contract;
   // swapping an isolation back keeps session loads broadly stable.
+  //
+  // An EMPTY session is deliberately NOT this pass's problem. The repair above
+  // takes what it can and reports `empty-session` when the selection has fewer
+  // appearances than sessions, and an empty session has no isolation to hand back,
+  // so including one here would look for an entry that cannot exist.
   for (const session of sessions.filter(
-    (candidate) => !candidate.exercises.some(isSessionAnchor),
+    (candidate) =>
+      candidate.exercises.length > 0 && !candidate.exercises.some(isSessionAnchor),
   )) {
     const donors = sessions.filter(
       (candidate) => candidate.exercises.filter(isSessionAnchor).length >= 2,
@@ -796,10 +820,17 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
                 exerciseMinutes(move.entry.exercise, move.entry.sets),
             ),
       )[0];
-    if (swap === undefined) continue;
 
-    move.donor.exercises.splice(move.donor.exercises.indexOf(move.entry), 1, swap);
-    session.exercises.splice(session.exercises.indexOf(swap), 1, move.entry);
+    if (swap === undefined) {
+      // Nothing comparable to hand back: every entry here is a compound too short
+      // or too peripheral to anchor the session. It still needs the anchor, so the
+      // move goes one way rather than trading an entry that does not exist.
+      move.donor.exercises.splice(move.donor.exercises.indexOf(move.entry), 1);
+      session.exercises.push(move.entry);
+    } else {
+      move.donor.exercises.splice(move.donor.exercises.indexOf(move.entry), 1, swap);
+      session.exercises.splice(session.exercises.indexOf(swap), 1, move.entry);
+    }
     move.donor.estimatedWorkMinutes = minutesOf(move.donor.exercises);
     session.estimatedWorkMinutes = minutesOf(session.exercises);
   }

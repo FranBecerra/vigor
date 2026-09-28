@@ -5,7 +5,7 @@
     {
       "id": "press-banca",
       "name": "Press de banca",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "TRICEPS",
         "DELTS_FRONT"
@@ -25,7 +25,7 @@
     {
       "id": "press-banca-mancuernas",
       "name": "Press de banca con mancuernas",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "TRICEPS",
         "DELTS_FRONT"
@@ -45,7 +45,7 @@
     {
       "id": "press-banca-declinado",
       "name": "Press declinado",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "TRICEPS"
       ],
@@ -64,7 +64,7 @@
     {
       "id": "press-pecho-maquina",
       "name": "Press de pecho en máquina",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "TRICEPS",
         "DELTS_FRONT"
@@ -84,7 +84,7 @@
     {
       "id": "press-banca-smith",
       "name": "Press de banca en multipower",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "TRICEPS",
         "DELTS_FRONT"
@@ -104,7 +104,7 @@
     {
       "id": "fondos-paralelas",
       "name": "Fondos en paralelas",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "TRICEPS",
         "DELTS_FRONT"
@@ -125,7 +125,7 @@
     {
       "id": "flexiones",
       "name": "Flexiones",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "TRICEPS",
         "DELTS_FRONT"
@@ -145,7 +145,7 @@
     {
       "id": "aperturas-mancuernas",
       "name": "Aperturas con mancuernas",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [],
       "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
       "profile": "ISOLATION",
@@ -162,7 +162,7 @@
     {
       "id": "cruces-polea-media",
       "name": "Cruces en polea a la altura del pecho",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [],
       "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
       "profile": "ISOLATION",
@@ -179,7 +179,7 @@
     {
       "id": "pec-deck",
       "name": "Contractor de pecho",
-      "primaryMuscle": "CHEST_MID_LOWER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [],
       "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
       "profile": "ISOLATION",
@@ -196,7 +196,7 @@
     {
       "id": "press-inclinado-barra",
       "name": "Press inclinado con barra",
-      "primaryMuscle": "CHEST_UPPER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "DELTS_FRONT",
         "TRICEPS"
@@ -216,7 +216,7 @@
     {
       "id": "press-inclinado-mancuernas",
       "name": "Press inclinado con mancuernas",
-      "primaryMuscle": "CHEST_UPPER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "DELTS_FRONT",
         "TRICEPS"
@@ -236,7 +236,7 @@
     {
       "id": "press-inclinado-maquina",
       "name": "Press inclinado en máquina",
-      "primaryMuscle": "CHEST_UPPER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [
         "DELTS_FRONT",
         "TRICEPS"
@@ -256,7 +256,7 @@
     {
       "id": "cruces-polea-baja",
       "name": "Cruces en polea baja",
-      "primaryMuscle": "CHEST_UPPER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [],
       "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
       "profile": "ISOLATION",
@@ -273,7 +273,7 @@
     {
       "id": "aperturas-inclinadas",
       "name": "Aperturas inclinadas",
-      "primaryMuscle": "CHEST_UPPER",
+      "primaryMuscle": "CHEST",
       "secondaryMuscles": [],
       "movementVector": "SHOULDER_HORIZONTAL_ADDUCTION",
       "profile": "ISOLATION",
@@ -293,7 +293,7 @@
       "primaryMuscle": "LATS",
       "secondaryMuscles": [
         "BICEPS",
-        "RHOMBOIDS"
+        "MID_BACK"
       ],
       "movementVector": "PULL_VERTICAL",
       "profile": "COMPOUND_PRIMARY",
@@ -332,7 +332,7 @@
       "primaryMuscle": "LATS",
       "secondaryMuscles": [
         "BICEPS",
-        "RHOMBOIDS"
+        "MID_BACK"
       ],
       "movementVector": "PULL_VERTICAL",
       "profile": "COMPOUND_SECONDARY",
@@ -389,9 +389,8 @@
       "name": "Remo con barra",
       "primaryMuscle": "LATS",
       "secondaryMuscles": [
-        "RHOMBOIDS",
+        "MID_BACK",
         "BICEPS",
-        "TRAPS_MID_LOWER",
         "ERECTORS"
       ],
       "movementVector": "PULL_HORIZONTAL",
@@ -411,7 +410,7 @@
       "name": "Remo con mancuerna",
       "primaryMuscle": "LATS",
       "secondaryMuscles": [
-        "RHOMBOIDS",
+        "MID_BACK",
         "BICEPS"
       ],
       "movementVector": "PULL_HORIZONTAL",
@@ -431,9 +430,8 @@
       "name": "Remo sentado en polea",
       "primaryMuscle": "LATS",
       "secondaryMuscles": [
-        "RHOMBOIDS",
-        "BICEPS",
-        "TRAPS_MID_LOWER"
+        "MID_BACK",
+        "BICEPS"
       ],
       "movementVector": "PULL_HORIZONTAL",
       "profile": "COMPOUND_SECONDARY",
@@ -452,7 +450,7 @@
       "name": "Remo en máquina",
       "primaryMuscle": "LATS",
       "secondaryMuscles": [
-        "RHOMBOIDS",
+        "MID_BACK",
         "BICEPS"
       ],
       "movementVector": "PULL_HORIZONTAL",
@@ -472,9 +470,8 @@
       "name": "Remo en T",
       "primaryMuscle": "LATS",
       "secondaryMuscles": [
-        "RHOMBOIDS",
-        "BICEPS",
-        "TRAPS_MID_LOWER"
+        "MID_BACK",
+        "BICEPS"
       ],
       "movementVector": "PULL_HORIZONTAL",
       "profile": "COMPOUND_SECONDARY",
@@ -510,7 +507,7 @@
       "name": "Pullover con mancuerna",
       "primaryMuscle": "LATS",
       "secondaryMuscles": [
-        "CHEST_MID_LOWER"
+        "CHEST"
       ],
       "movementVector": "SHOULDER_EXTENSION",
       "profile": "ISOLATION",
@@ -544,10 +541,9 @@
     {
       "id": "remo-pecho-apoyado",
       "name": "Remo con pecho apoyado",
-      "primaryMuscle": "RHOMBOIDS",
+      "primaryMuscle": "MID_BACK",
       "secondaryMuscles": [
         "LATS",
-        "TRAPS_MID_LOWER",
         "BICEPS"
       ],
       "movementVector": "PULL_HORIZONTAL",
@@ -565,7 +561,7 @@
     {
       "id": "remo-invertido",
       "name": "Remo invertido",
-      "primaryMuscle": "RHOMBOIDS",
+      "primaryMuscle": "MID_BACK",
       "secondaryMuscles": [
         "LATS",
         "BICEPS"
@@ -585,11 +581,10 @@
     {
       "id": "remo-barra-agarre-supino",
       "name": "Remo con barra agarre supino",
-      "primaryMuscle": "RHOMBOIDS",
+      "primaryMuscle": "MID_BACK",
       "secondaryMuscles": [
         "LATS",
-        "BICEPS",
-        "TRAPS_MID_LOWER"
+        "BICEPS"
       ],
       "movementVector": "PULL_HORIZONTAL",
       "profile": "COMPOUND_PRIMARY",
@@ -606,7 +601,7 @@
     {
       "id": "remo-mancuernas-tumbado",
       "name": "Remo con mancuernas tumbado en banco",
-      "primaryMuscle": "RHOMBOIDS",
+      "primaryMuscle": "MID_BACK",
       "secondaryMuscles": [
         "DELTS_REAR",
         "LATS"
@@ -626,7 +621,7 @@
     {
       "id": "encogimientos-barra",
       "name": "Encogimientos con barra",
-      "primaryMuscle": "TRAPS_UPPER",
+      "primaryMuscle": "NECK",
       "secondaryMuscles": [],
       "movementVector": "SCAPULAR_ELEVATION",
       "profile": "ISOLATION",
@@ -643,7 +638,7 @@
     {
       "id": "encogimientos-mancuernas",
       "name": "Encogimientos con mancuernas",
-      "primaryMuscle": "TRAPS_UPPER",
+      "primaryMuscle": "NECK",
       "secondaryMuscles": [],
       "movementVector": "SCAPULAR_ELEVATION",
       "profile": "ISOLATION",
@@ -660,7 +655,7 @@
     {
       "id": "encogimientos-polea",
       "name": "Encogimientos en polea",
-      "primaryMuscle": "TRAPS_UPPER",
+      "primaryMuscle": "NECK",
       "secondaryMuscles": [],
       "movementVector": "SCAPULAR_ELEVATION",
       "profile": "ISOLATION",
@@ -677,7 +672,7 @@
     {
       "id": "paseo-granjero",
       "name": "Paseo del granjero",
-      "primaryMuscle": "TRAPS_UPPER",
+      "primaryMuscle": "NECK",
       "secondaryMuscles": [
         "CORE",
         "ERECTORS"
@@ -695,12 +690,64 @@
       }
     },
     {
+      "id": "flexion-cervical-banda",
+      "name": "Flexión cervical con banda",
+      "primaryMuscle": "NECK",
+      "secondaryMuscles": [],
+      "movementVector": "CERVICAL_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BANDS",
+      "generationTier": "FALLBACK",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "extension-cervical-banda",
+      "name": "Extensión cervical con banda",
+      "primaryMuscle": "NECK",
+      "secondaryMuscles": [],
+      "movementVector": "CERVICAL_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "BANDS",
+      "generationTier": "FALLBACK",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
+      "id": "flexion-lateral-cervical-banda",
+      "name": "Flexión lateral cervical con banda",
+      "primaryMuscle": "NECK",
+      "secondaryMuscles": [],
+      "movementVector": "CERVICAL_LATERAL_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BANDS",
+      "generationTier": "FALLBACK",
+      "criteria": {
+        "stretchedPositionLoading": 3,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 2,
+        "systemicFatigueCost": 5
+      }
+    },
+    {
       "id": "encogimientos-inclinado",
       "name": "Encogimientos en banco inclinado",
-      "primaryMuscle": "TRAPS_MID_LOWER",
-      "secondaryMuscles": [
-        "RHOMBOIDS"
-      ],
+      "primaryMuscle": "MID_BACK",
+      "secondaryMuscles": [],
       "movementVector": "SCAPULAR_ELEVATION",
       "profile": "ISOLATION",
       "equipment": "DUMBBELL",
@@ -716,7 +763,7 @@
     {
       "id": "y-raise-inclinado",
       "name": "Elevación en Y en banco inclinado",
-      "primaryMuscle": "TRAPS_MID_LOWER",
+      "primaryMuscle": "MID_BACK",
       "secondaryMuscles": [
         "DELTS_REAR"
       ],
@@ -735,10 +782,8 @@
     {
       "id": "retraccion-escapular-polea",
       "name": "Retracción escapular en polea",
-      "primaryMuscle": "TRAPS_MID_LOWER",
-      "secondaryMuscles": [
-        "RHOMBOIDS"
-      ],
+      "primaryMuscle": "MID_BACK",
+      "secondaryMuscles": [],
       "movementVector": "PULL_HORIZONTAL",
       "profile": "ISOLATION",
       "equipment": "CABLE",
@@ -754,10 +799,9 @@
     {
       "id": "remo-alto-polea",
       "name": "Remo alto en polea",
-      "primaryMuscle": "TRAPS_MID_LOWER",
+      "primaryMuscle": "MID_BACK",
       "secondaryMuscles": [
-        "DELTS_REAR",
-        "RHOMBOIDS"
+        "DELTS_REAR"
       ],
       "movementVector": "PULL_HORIZONTAL",
       "profile": "COMPOUND_SECONDARY",
@@ -940,7 +984,7 @@
       "name": "Remo al mentón",
       "primaryMuscle": "DELTS_LATERAL",
       "secondaryMuscles": [
-        "TRAPS_UPPER",
+        "NECK",
         "BICEPS"
       ],
       "movementVector": "PULL_VERTICAL",
@@ -960,7 +1004,7 @@
       "name": "Pájaros con mancuernas",
       "primaryMuscle": "DELTS_REAR",
       "secondaryMuscles": [
-        "RHOMBOIDS"
+        "MID_BACK"
       ],
       "movementVector": "SHOULDER_HORIZONTAL_ABDUCTION",
       "profile": "ISOLATION",
@@ -979,7 +1023,7 @@
       "name": "Pájaros en polea",
       "primaryMuscle": "DELTS_REAR",
       "secondaryMuscles": [
-        "RHOMBOIDS"
+        "MID_BACK"
       ],
       "movementVector": "SHOULDER_HORIZONTAL_ABDUCTION",
       "profile": "ISOLATION",
@@ -998,7 +1042,7 @@
       "name": "Contractor invertido",
       "primaryMuscle": "DELTS_REAR",
       "secondaryMuscles": [
-        "RHOMBOIDS"
+        "MID_BACK"
       ],
       "movementVector": "SHOULDER_HORIZONTAL_ABDUCTION",
       "profile": "ISOLATION",
@@ -1017,8 +1061,7 @@
       "name": "Face pull",
       "primaryMuscle": "DELTS_REAR",
       "secondaryMuscles": [
-        "TRAPS_MID_LOWER",
-        "RHOMBOIDS"
+        "MID_BACK"
       ],
       "movementVector": "SHOULDER_HORIZONTAL_ABDUCTION",
       "profile": "ISOLATION",
@@ -1309,7 +1352,7 @@
       "name": "Press de banca agarre cerrado",
       "primaryMuscle": "TRICEPS",
       "secondaryMuscles": [
-        "CHEST_MID_LOWER",
+        "CHEST",
         "DELTS_FRONT"
       ],
       "movementVector": "PUSH_HORIZONTAL",
@@ -1689,7 +1732,7 @@
       "secondaryMuscles": [
         "HAMSTRINGS",
         "ERECTORS",
-        "TRAPS_MID_LOWER",
+        "MID_BACK",
         "QUADS"
       ],
       "movementVector": "HIP_DOMINANT",

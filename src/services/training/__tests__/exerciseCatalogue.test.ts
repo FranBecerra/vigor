@@ -28,7 +28,7 @@ function rawExercise(overrides: Record<string, unknown> = {}): Record<string, un
   return {
     id: 'press-banca',
     name: 'Press de banca',
-    primaryMuscle: 'CHEST_MID_LOWER',
+    primaryMuscle: 'CHEST',
     secondaryMuscles: ['TRICEPS'],
     movementVector: 'PUSH_HORIZONTAL',
     profile: 'COMPOUND_PRIMARY',
@@ -53,7 +53,7 @@ describe('parseExercise', () => {
     expect(exercise).toEqual({
       id: 'press-banca',
       name: 'Press de banca',
-      primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+      primaryMuscle: MuscleGroup.CHEST,
       secondaryMuscles: [MuscleGroup.TRICEPS],
       movementVector: MovementVector.PUSH_HORIZONTAL,
       profile: ExerciseProfile.COMPOUND_PRIMARY,
@@ -125,7 +125,7 @@ describe('parseExercise', () => {
   it('RECHAZA que el principal aparezca también como secundario', () => {
     // Acreditaría 1,5 series por serie ejecutada, inflando el volumen en silencio.
     expect(() =>
-      parseExercise(rawExercise({ secondaryMuscles: ['CHEST_MID_LOWER'] })),
+      parseExercise(rawExercise({ secondaryMuscles: ['CHEST'] })),
     ).toThrow(CatalogueValidationError);
   });
 

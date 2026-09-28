@@ -110,6 +110,8 @@ export interface RoutineDraftInput {
   icon: Routine['icon'];
   accentColor: string;
   generation: RoutineGenerationInput;
+  /** Whether the new routine becomes the one the athlete follows. */
+  isActive: boolean;
   now: number;
 }
 
@@ -121,10 +123,43 @@ export function toRoutineDraft(input: RoutineDraftInput): Omit<Routine, 'id'> {
     icon: input.icon,
     accentColor: input.accentColor,
     generation: input.generation,
+    isActive: input.isActive,
     createdAt: input.now,
     updatedAt: input.now,
   };
 }
+
+/**
+ * A new routine becomes active only when the athlete follows none. Taking over from
+ * a routine they are in the middle of is a decision, made with the activate button.
+ */
+export function shouldActivateNewRoutine(existing: readonly Pick<Routine, 'isActive'>[]): boolean {
+  return !existing.some((routine) => routine.isActive === true);
+}
+
+/**
+ * The writes that make `routineId` the only active routine: only documents whose
+ * flag actually changes, so activating the active routine writes nothing.
+ */
+export function activationChanges(
+  routines: readonly Pick<Routine, 'id' | 'isActive'>[],
+  routineId: string,
+): { id: string; isActive: boolean }[] {
+  return routines
+    .map((routine) => ({ id: routine.id, isActive: routine.id === routineId }))
+    .filter(
+      (change, index) => change.isActive !== (routines[index].isActive === true),
+    );
+}
+
+/** Trimmed routine name, or null when nothing usable remains. */
+export function normalizeRoutineName(raw: string): string | null {
+  const trimmed = raw.trim().replace(/\s+/g, ' ');
+  return trimmed === '' ? null : trimmed.slice(0, MAX_ROUTINE_NAME_LENGTH);
+}
+
+/** Long enough for a descriptive name, short enough for one line on a card. */
+export const MAX_ROUTINE_NAME_LENGTH = 40;
 
 export interface MesocycleDraftInput {
   userId: string;
@@ -133,6 +168,8 @@ export interface MesocycleDraftInput {
   now: number;
   /** Estimated horizon in microcycles, for the roadmap view (§3.1). */
   projectedMicrocycles?: number;
+  /** Optional edits made in the generation preview. */
+  plannedSessions?: readonly PlannedSession[];
 }
 
 /**
@@ -151,7 +188,15 @@ export function toMesocycleDraft(input: MesocycleDraftInput): Omit<Mesocycle, 'i
     targetVolumePerGroup: toTargetVolumePerGroup(plan.plan),
     currentMicrocycleIndex: 0,
     sessionsPerMicrocycle: plan.distribution.sessions.length,
-    plannedSessions: toPlannedSessions(plan),
+    plannedSessions: input.plannedSessions === undefined
+      ? toPlannedSessions(plan)
+      : input.plannedSessions.map((session) => ({
+          ...session,
+          exercises: session.exercises.map((exercise) => ({
+            ...exercise,
+            sets: exercise.sets.map((set) => ({ ...set })),
+          })),
+        })),
     startedAt: now,
     updatedAt: now,
   };

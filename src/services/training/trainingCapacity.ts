@@ -65,7 +65,7 @@ export const EXERCISE_SETUP_SECONDS = 60;
  * The real session distribution enforces this limit. Capacity calculations keep
  * it to estimate appearances when called before a distribution is available.
  */
-export const MAX_SETS_PER_EXERCISE_APPEARANCE = 6;
+export const MAX_SETS_PER_EXERCISE_APPEARANCE = 4;
 /** Typical generated prescription, used only by the quick capacity hint. */
 export const TYPICAL_SETS_PER_EXERCISE = 3;
 

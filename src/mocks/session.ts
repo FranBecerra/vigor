@@ -21,7 +21,7 @@ export const mockExercises: Exercise[] = [
   {
     id: 'bench',
     name: 'Press banca',
-    primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [MuscleGroup.TRICEPS, MuscleGroup.DELTS_FRONT],
     movementVector: MovementVector.PUSH_HORIZONTAL,
     profile: ExerciseProfile.COMPOUND_PRIMARY,
@@ -31,7 +31,7 @@ export const mockExercises: Exercise[] = [
   {
     id: 'incline-db',
     name: 'Press inclinado con mancuernas',
-    primaryMuscle: MuscleGroup.CHEST_UPPER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [MuscleGroup.DELTS_FRONT],
     movementVector: MovementVector.PUSH_HORIZONTAL,
     profile: ExerciseProfile.COMPOUND_SECONDARY,
@@ -51,7 +51,7 @@ export const mockExercises: Exercise[] = [
   {
     id: 'cable-fly',
     name: 'Cruces en polea',
-    primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [],
     movementVector: MovementVector.SHOULDER_HORIZONTAL_ADDUCTION,
     profile: ExerciseProfile.ISOLATION,

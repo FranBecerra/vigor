@@ -176,6 +176,25 @@ describe('toMesocycleDraft', () => {
     expect(draft.plannedSessions).toHaveLength(plan.distribution.sessions.length);
   });
 
+  it('preserves edits supplied by the generation preview', () => {
+    const planned = draft.plannedSessions!;
+    const edited = planned.map((session) => ({
+      ...session,
+      exercises: session.exercises.map((exercise) => ({
+        ...exercise,
+        isEdited: true,
+      })),
+    }));
+    const mapped = toMesocycleDraft({
+      userId: 'user-1',
+      routineId: 'routine-1',
+      plan,
+      now: NOW,
+      plannedSessions: edited,
+    });
+    expect(mapped.plannedSessions).toEqual(edited);
+  });
+
   it('records the session count from the distribution, not from the request', () => {
     // They can differ: the distribution is what actually got built.
     expect(draft.sessionsPerMicrocycle).toBe(plan.distribution.sessions.length);
@@ -317,5 +336,65 @@ describe('totalPlannedSets and plannedExerciseIds', () => {
     const sessions = toPlannedSessions(generate());
     const ids = plannedExerciseIds(sessions);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+/**
+ * Firestore rejects a document containing `undefined` anywhere in its tree, and the
+ * failure surfaces as an opaque write error at the one moment the athlete is saving
+ * work. Absent optionals must therefore be OMITTED, not set to undefined.
+ */
+describe('drafts carry no undefined value, which Firestore would reject', () => {
+  function undefinedPaths(value: unknown, path = '$'): string[] {
+    if (value === undefined) return [path];
+    if (Array.isArray(value)) {
+      return value.flatMap((entry, index) => undefinedPaths(entry, `${path}[${index}]`));
+    }
+    if (value !== null && typeof value === 'object') {
+      return Object.entries(value).flatMap(([key, entry]) =>
+        undefinedPaths(entry, `${path}.${key}`),
+      );
+    }
+    return [];
+  }
+
+  it('holds for a routine draft', () => {
+    const draft = toRoutineDraft({
+      userId: 'uid-1',
+      name: 'Mi rutina',
+      icon: 'barbell',
+      accentColor: '#C8F751',
+      generation: {
+        goal: TrainingGoal.HYPERTROPHY,
+        experienceLevel: ExperienceLevel.INTERMEDIATE,
+        split: SplitStructure.AUTO,
+        sessionsPerMicrocycle: 4,
+        minutesPerSession: 60,
+        availableEquipment: [Equipment.BARBELL],
+        priorityRegions: [],
+        deprioritizedRegions: [],
+        vetoedExerciseIds: [],
+        seed: 4242,
+      },
+      now: NOW,
+    });
+    expect(undefinedPaths(draft)).toEqual([]);
+  });
+
+  it('holds for a mesocycle draft, with and without preview edits', () => {
+    const plan = generate();
+    const automatic = toMesocycleDraft({ userId: 'uid-1', routineId: 'r1', plan, now: NOW });
+    expect(undefinedPaths(automatic)).toEqual([]);
+    expect(
+      undefinedPaths(
+        toMesocycleDraft({
+          userId: 'uid-1',
+          routineId: 'r1',
+          plan,
+          plannedSessions: automatic.plannedSessions,
+          now: NOW,
+        }),
+      ),
+    ).toEqual([]);
   });
 });

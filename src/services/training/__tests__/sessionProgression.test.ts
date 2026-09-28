@@ -11,7 +11,7 @@ import type { PlannedExercise } from '@/services/training/sessionSummary';
 function exercise(rir: number, count: number): PlannedExercise {
   return {
     exerciseId: `e-${rir}-${count}`,
-    primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [],
     sets: Array.from({ length: count }, () => ({ setType: SetType.NORMAL })),
     restSeconds: 120,

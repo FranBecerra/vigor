@@ -11,6 +11,8 @@
  * Los datos clínicos y biomarcadores viven bajo users/{uid}/... para poder
  * blindarlos con reglas de Firebase (inaccesibles desde el exterior).
  */
+import { writeBatch } from '@react-native-firebase/firestore';
+import { db } from '../firebase';
 import { BaseRepository } from './BaseRepository';
 import type {
   Exercise,
@@ -53,6 +55,19 @@ class RoutineRepository extends BaseRepository<Routine> {
   /** Rutinas del usuario, para el acordeón de la pantalla de inicio. */
   listByUser(userId: string): Promise<Routine[]> {
     return this.listWhere('userId', userId);
+  }
+
+  /**
+   * Applies activation flags in ONE batch. Separate writes could fail halfway and
+   * leave two active routines, or none; the "only one active" rule needs atomicity.
+   */
+  async applyActivation(changes: readonly { id: string; isActive: boolean }[], now: number): Promise<void> {
+    if (changes.length === 0) return;
+    const batch = writeBatch(db);
+    changes.forEach((change) =>
+      batch.update(this.ref(change.id), { isActive: change.isActive, updatedAt: now }),
+    );
+    await batch.commit();
   }
 }
 export const routineRepository = new RoutineRepository();

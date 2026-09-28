@@ -7,67 +7,20 @@
  * Las sesiones completadas guardan su FECHA real; las pendientes no tienen día.
  */
 import { MuscleGroup, SetType } from '@/models';
-import type { RoutineIconKey } from '@/components/icons';
+import type {
+  MicrocycleView,
+  RoutineView,
+  SessionExerciseView,
+  SessionView,
+} from '@/services/training/routineView';
 
-/** Dominio de entrenamiento que se muestra en la pantalla. */
-export type TrainingDomain = 'STRENGTH' | 'CARDIO';
+export type { TrainingDomain } from '@/services/training/routineView';
 
-/** Ejercicio dentro de una sesión planificada. */
-export interface MockPlannedExercise {
-  exerciseId: string;
-  name: string;
-  primaryMuscle: MuscleGroup;
-  secondaryMuscles: MuscleGroup[];
-  sets: { setType: SetType }[];
-  restSeconds: number;
-  /** Rango de repeticiones previsto, para la previsualización. */
-  repRange: string;
-  /** RIR objetivo del ejercicio; el RIR por serie se DERIVA (services/training/setIntensity). */
-  targetRIR: number;
-}
-
-/** Sesión del microciclo. */
-export interface MockSession {
-  id: string;
-  name: string;
-  exercises: MockPlannedExercise[];
-  /**
-   * Fecha de realización en ISO (`2026-09-16`). `undefined` = pendiente.
-   * Las pendientes NO muestran día: el microciclo no está anclado al calendario.
-   */
-  completedOn?: string;
-}
-
-/** Microciclo: conjunto fijo de sesiones, sin duración en días. */
-export interface MockMicrocycle {
-  id: string;
-  /** Posición dentro del mesociclo (1-based para mostrar). */
-  number: number;
-  sessions: MockSession[];
-  /** true si es un microciclo de descarga. */
-  isDeload: boolean;
-  /** true si aún no ha ocurrido: se pinta con transparencia (proyección). */
-  isProjected: boolean;
-  /** Variación de series frente a la sesión base; positivo = más volumen. */
-  volumeAdjustmentSets: number;
-  /** Variación de RIR; negativo = más intensidad. */
-  intensityAdjustmentRIR: number;
-}
-
-/** Rutina registrada (un macrociclo con su identidad visual). */
-export interface MockRoutine {
-  id: string;
-  name: string;
-  objective: string;
-  icon: RoutineIconKey;
-  color: string;
-  domain: TrainingDomain;
-  /** true = rutina activa; el acordeón la muestra expandida. */
-  isActive: boolean;
-  microcycles: MockMicrocycle[];
-  /** Índice (0-based) del microciclo en curso dentro de `microcycles`. */
-  currentMicrocycleIndex: number;
-}
+/** The mocks share the view shape the home renders from persisted routines. */
+export type MockPlannedExercise = SessionExerciseView;
+export type MockSession = SessionView;
+export type MockMicrocycle = MicrocycleView;
+export type MockRoutine = RoutineView;
 
 /** Atajo: n series del tipo dado. */
 function sets(count: number, setType: SetType = SetType.NORMAL) {
@@ -83,7 +36,7 @@ const pushExercises: MockPlannedExercise[] = [
   {
     exerciseId: 'bench',
     name: 'Press banca',
-    primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [MuscleGroup.TRICEPS, MuscleGroup.DELTS_FRONT],
     sets: warmupPlus(3),
     restSeconds: 180,
@@ -93,7 +46,7 @@ const pushExercises: MockPlannedExercise[] = [
   {
     exerciseId: 'incline-db',
     name: 'Press inclinado con mancuernas',
-    primaryMuscle: MuscleGroup.CHEST_UPPER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [MuscleGroup.DELTS_FRONT],
     sets: sets(3),
     restSeconds: 180,
@@ -123,7 +76,7 @@ const pushExercises: MockPlannedExercise[] = [
   {
     exerciseId: 'cable-fly',
     name: 'Cruces en polea',
-    primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [],
     sets: sets(3),
     restSeconds: 120,
@@ -147,7 +100,7 @@ const pullExercises: MockPlannedExercise[] = [
     exerciseId: 'row',
     name: 'Remo con barra',
     primaryMuscle: MuscleGroup.LATS,
-    secondaryMuscles: [MuscleGroup.BICEPS, MuscleGroup.TRAPS_MID_LOWER],
+    secondaryMuscles: [MuscleGroup.BICEPS, MuscleGroup.MID_BACK],
     sets: warmupPlus(3),
     restSeconds: 180,
     repRange: '8-10',
@@ -179,7 +132,7 @@ const upperExercises: MockPlannedExercise[] = [
   {
     exerciseId: 'machine-row',
     name: 'Remo en máquina',
-    primaryMuscle: MuscleGroup.TRAPS_MID_LOWER,
+    primaryMuscle: MuscleGroup.MID_BACK,
     secondaryMuscles: [MuscleGroup.LATS, MuscleGroup.BICEPS],
     sets: warmupPlus(3),
     restSeconds: 180,
@@ -189,7 +142,7 @@ const upperExercises: MockPlannedExercise[] = [
   {
     exerciseId: 'inc-press',
     name: 'Press inclinado en máquina',
-    primaryMuscle: MuscleGroup.CHEST_UPPER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [MuscleGroup.DELTS_FRONT, MuscleGroup.TRICEPS],
     sets: sets(3),
     restSeconds: 180,

@@ -20,7 +20,7 @@ function working(n: number) {
 function exercise(overrides: Partial<PlannedExercise> = {}): PlannedExercise {
   return {
     exerciseId: 'bench',
-    primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
+    primaryMuscle: MuscleGroup.CHEST,
     secondaryMuscles: [MuscleGroup.TRICEPS],
     sets: working(3),
     restSeconds: 180,
@@ -59,14 +59,14 @@ describe('muscleSetVolume', () => {
     const volume = muscleSetVolume([
       exercise({ sets: working(3), secondaryMuscles: [] }),
     ]);
-    expect(volume[MuscleGroup.CHEST_MID_LOWER]).toBe(3);
+    expect(volume[MuscleGroup.CHEST]).toBe(3);
   });
 
   it('atribuye una fracción a cada secundario', () => {
     const volume = muscleSetVolume([
       exercise({ sets: working(4), secondaryMuscles: [MuscleGroup.TRICEPS] }),
     ]);
-    expect(volume[MuscleGroup.CHEST_MID_LOWER]).toBe(4);
+    expect(volume[MuscleGroup.CHEST]).toBe(4);
     expect(volume[MuscleGroup.TRICEPS]).toBe(4 * SECONDARY_MUSCLE_WEIGHT);
   });
 
@@ -97,12 +97,12 @@ describe('muscleSetVolume', () => {
   it('nunca cuenta el principal además como secundario', () => {
     const volume = muscleSetVolume([
       exercise({
-        primaryMuscle: MuscleGroup.CHEST_MID_LOWER,
-        secondaryMuscles: [MuscleGroup.CHEST_MID_LOWER, MuscleGroup.TRICEPS],
+        primaryMuscle: MuscleGroup.CHEST,
+        secondaryMuscles: [MuscleGroup.CHEST, MuscleGroup.TRICEPS],
         sets: working(4),
       }),
     ]);
-    expect(volume[MuscleGroup.CHEST_MID_LOWER]).toBe(4);
+    expect(volume[MuscleGroup.CHEST]).toBe(4);
     expect(volume[MuscleGroup.TRICEPS]).toBe(2);
   });
 
@@ -121,7 +121,7 @@ describe('muscleSetVolume', () => {
     const volume = muscleSetVolume([
       exercise({ sets: [{ setType: SetType.WARMUP }, ...working(3)], secondaryMuscles: [] }),
     ]);
-    expect(volume[MuscleGroup.CHEST_MID_LOWER]).toBe(3);
+    expect(volume[MuscleGroup.CHEST]).toBe(3);
   });
 });
 
@@ -130,7 +130,7 @@ describe('rankedMuscleVolume', () => {
     const ranked = rankedMuscleVolume([
       exercise({ sets: working(4), secondaryMuscles: [MuscleGroup.TRICEPS] }),
     ]);
-    expect(ranked[0]).toEqual({ muscle: MuscleGroup.CHEST_MID_LOWER, sets: 4 });
+    expect(ranked[0]).toEqual({ muscle: MuscleGroup.CHEST, sets: 4 });
     expect(ranked[1]).toEqual({ muscle: MuscleGroup.TRICEPS, sets: 2 });
   });
 
@@ -153,7 +153,7 @@ describe('rankedMuscleVolume', () => {
       1,
     );
     expect(ranked).toHaveLength(1);
-    expect(ranked[0].muscle).toBe(MuscleGroup.CHEST_MID_LOWER);
+    expect(ranked[0].muscle).toBe(MuscleGroup.CHEST);
   });
 
   it('sin límite devuelve todos', () => {
