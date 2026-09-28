@@ -200,6 +200,12 @@ export interface ExerciseCriteria {
 export enum ExerciseGenerationTier {
   STANDARD = 'STANDARD',
   FALLBACK = 'FALLBACK',
+  /**
+   * A specific variant of a strength main lift (paused squat, deficit deadlift).
+   * Prescribed by the strength program by id; never drawn by hypertrophy
+   * selection, where it would only be a harder way to train the same muscle.
+   */
+  STRENGTH_VARIANT = 'STRENGTH_VARIANT',
 }
 
 /**

@@ -9,7 +9,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
-import { mesocycleRepository, routineRepository } from '@/services/repositories';
+import { mesocycleRepository, routineRepository, workoutSessionRepository } from '@/services/repositories';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
 import { TrainingGoal } from '@/services/training/volumePlan';
 import { loadRoutineViews, type RoutineView } from '@/services/training/routineView';
@@ -22,6 +22,7 @@ const EXERCISE_BY_ID = new Map(EXERCISE_CATALOGUE.map((exercise) => [exercise.id
 const SOURCES = {
   listRoutines: (userId: string) => routineRepository.listByUser(userId),
   getMesocycle: (mesocycleId: string) => mesocycleRepository.get(mesocycleId),
+  listWorkoutSessions: (userId: string) => workoutSessionRepository.listByUser(userId),
 };
 
 export function useRoutines(): {
@@ -30,6 +31,7 @@ export function useRoutines(): {
   reload: () => void;
   activate: (routineId: string) => Promise<void>;
   rename: (routineId: string, name: string) => Promise<void>;
+  remove: (routineId: string) => Promise<void>;
 } {
   const { t } = useTranslation();
   const { uid } = useAuth();
@@ -90,5 +92,19 @@ export function useRoutines(): {
     [reload],
   );
 
-  return { status, routines, reload, activate, rename };
+  /** Deletes the routine and every mesocycle generated from it. */
+  const remove = useCallback(
+    async (routineId: string) => {
+      if (uid === null) return;
+      const mesocycles = await mesocycleRepository.listByRoutine(uid, routineId);
+      await routineRepository.deleteWithMesocycles(
+        routineId,
+        mesocycles.map((mesocycle) => mesocycle.id),
+      );
+      reload();
+    },
+    [uid, reload],
+  );
+
+  return { status, routines, reload, activate, rename, remove };
 }

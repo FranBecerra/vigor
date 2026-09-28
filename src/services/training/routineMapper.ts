@@ -39,12 +39,51 @@ import { SetType } from '@/models';
 import type { MesocyclePlan } from './mesocyclePlanner';
 import type { DistributedSession } from './sessionDistribution';
 import { deriveSetRIRs } from './setIntensity';
-import { exercisePrescription } from './exercisePrescription';
+import {
+  exercisePrescription,
+  loadForTarget,
+  STRENGTH_ROLE_REPS,
+  strengthRIR,
+  TOP_SINGLE_RIR,
+} from './exercisePrescription';
+import { DEFAULT_PROJECTED_MICROCYCLES } from './microcyclePrescription';
 import { TrainingGoal } from './volumePlan';
 import { toTargetVolumePerGroup } from './volumePlan';
 
 /** Legacy single-value fallback retained for older callers and migrations. */
 export const DEFAULT_TARGET_REPS = 10;
+
+/** Optional inputs that only some plans have. */
+export interface PlannedSessionOptions {
+  /**
+   * Estimated 1RM per exercise, from the athlete's history. Only then does a
+   * strength set carry a load: without history the first session is where the load
+   * is found, by RIR, and a percentage of an unknown max would be a guess.
+   */
+  e1rmByExerciseId?: ReadonlyMap<string, number>;
+}
+
+/** Sets of a strength entry: the heavy single first when the appearance has one. */
+function strengthSets(
+  strength: NonNullable<DistributedSession['exercises'][number]['strength']>,
+  setCount: number,
+  e1rm: number | undefined,
+): PlannedSet[] {
+  const { role, topSingle } = strength;
+  const reps = STRENGTH_ROLE_REPS[role];
+  const rir = strengthRIR(role, 0, DEFAULT_PROJECTED_MICROCYCLES - 1);
+  const withLoad = (set: PlannedSet): PlannedSet =>
+    e1rm === undefined || role === 'ACCESSORY'
+      ? set
+      : { ...set, targetWeightKg: loadForTarget(e1rm, set.targetReps, set.targetRIR) };
+  const single: PlannedSet[] = topSingle
+    ? [withLoad({ setType: SetType.TOP_SINGLE, targetRepsMin: 1, targetReps: 1, targetRIR: TOP_SINGLE_RIR })]
+    : [];
+  const working = Array.from({ length: Math.max(0, setCount - single.length) }, () =>
+    withLoad({ setType: SetType.NORMAL, targetRepsMin: reps.min, targetReps: reps.max, targetRIR: rir }),
+  );
+  return [...single, ...working];
+}
 
 /**
  * Turns one distributed session into a persistable prescription.
@@ -58,12 +97,29 @@ export function toPlannedSession(
   session: DistributedSession,
   goal: TrainingGoal = TrainingGoal.HYPERTROPHY,
   isFinalMicrocycleBeforeDeload = false,
+  options: PlannedSessionOptions = {},
 ): PlannedSession {
   return {
     index: session.index,
     focus: session.focus as PlannedSessionFocus,
     estimatedWorkMinutes: session.estimatedWorkMinutes,
     exercises: session.exercises.map((entry, order): PlannedExercise => {
+      if (entry.strength !== undefined) {
+        // A strength plan prescribes by ROLE: the ramp across microcycles is derived
+        // later by `prescriptionForMicrocycle`, so this stores the first one.
+        return {
+          exerciseId: entry.exercise.id,
+          order,
+          isEdited: false,
+          restSeconds: entry.strength.restSeconds,
+          strengthRole: entry.strength.role,
+          sets: strengthSets(
+            entry.strength,
+            entry.sets,
+            options.e1rmByExerciseId?.get(entry.exercise.id),
+          ),
+        };
+      }
       // Per-set RIR is DERIVED, never written by hand: the last set reaches the
       // exercise target and earlier ones leave one more rep in reserve. Writing it
       // out would desynchronise from the set count the moment either changes.
@@ -98,9 +154,10 @@ export function toPlannedSession(
 export function toPlannedSessions(
   plan: MesocyclePlan,
   isFinalMicrocycleBeforeDeload = false,
+  options: PlannedSessionOptions = {},
 ): PlannedSession[] {
   return plan.distribution.sessions.map((session) =>
-    toPlannedSession(session, plan.plan.goal, isFinalMicrocycleBeforeDeload),
+    toPlannedSession(session, plan.plan.goal, isFinalMicrocycleBeforeDeload, options),
   );
 }
 
@@ -160,6 +217,26 @@ export function normalizeRoutineName(raw: string): string | null {
 
 /** Long enough for a descriptive name, short enough for one line on a card. */
 export const MAX_ROUTINE_NAME_LENGTH = 40;
+
+export type RoutineNameProblem = 'empty' | 'duplicate';
+
+/**
+ * Why a name cannot be used, or null when it can. A routine has no default name:
+ * three routines all called "My routine" cannot be told apart on the home. Names
+ * compare case-insensitively after normalising, so "Fuerza" and " fuerza " clash.
+ */
+export function routineNameProblem(
+  raw: string,
+  existingNames: readonly string[],
+): RoutineNameProblem | null {
+  const name = normalizeRoutineName(raw);
+  if (name === null) return 'empty';
+  const key = name.toLocaleLowerCase();
+  const taken = existingNames.some(
+    (existing) => normalizeRoutineName(existing)?.toLocaleLowerCase() === key,
+  );
+  return taken ? 'duplicate' : null;
+}
 
 export interface MesocycleDraftInput {
   userId: string;

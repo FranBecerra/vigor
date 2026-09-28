@@ -36,6 +36,7 @@ import {
   MuscleGroup,
   SplitStructure,
   type Exercise,
+  type StrengthRole,
 } from '@/models';
 import type { SelectedExercise, SelectionResult } from './exerciseSelection';
 import { exerciseMinutes } from './trainingCapacity';
@@ -49,6 +50,8 @@ export interface SessionExercise {
   exercise: SelectedExercise['exercise'];
   /** Sets performed in THIS appearance, never more than the appearance cap. */
   sets: number;
+  /** Strength prescription for this appearance; absent in hypertrophy plans. */
+  strength?: { role: StrengthRole; restSeconds: number; topSingle: boolean };
 }
 
 export interface DistributedSession {
@@ -368,8 +371,34 @@ function entriesRisk(
   );
 }
 
+/** Minutes of one entry, at its prescribed rest when it carries one. */
+function entryMinutes(entry: { exercise: Exercise; sets: number; strength?: { restSeconds: number } }): number {
+  return exerciseMinutes(entry.exercise, entry.sets, entry.strength?.restSeconds);
+}
+
 function minutesOf(entries: readonly SessionExercise[]): number {
-  return entries.reduce((sum, entry) => sum + exerciseMinutes(entry.exercise, entry.sets), 0);
+  return entries.reduce((sum, entry) => sum + entryMinutes(entry), 0);
+}
+
+/**
+ * The appearances of a selected exercise. A strength lift declares its own; any
+ * other exercise appears once, with all its sets.
+ */
+function appearancesFor(selected: SelectedExercise, sessionCount: number): SessionExercise[] {
+  if (selected.strength !== undefined) {
+    const { role, restSeconds } = selected.strength;
+    return selected.strength.exposures
+      .slice(0, Math.max(0, sessionCount))
+      .map((exposure) => ({
+        exercise: selected.exercise,
+        sets: exposure.sets,
+        strength: { role, restSeconds, topSingle: exposure.topSingle },
+      }));
+  }
+  return appearanceSets(selected.sets, sessionCount).map((sets) => ({
+    exercise: selected.exercise,
+    sets,
+  }));
 }
 
 /** Variants that would feel like repeating the same exercise inside one session. */
@@ -595,7 +624,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
   const minutesByMuscle = new Map<MuscleGroup, number>();
   input.selection.selected.forEach((selected) => {
     const muscle = selected.exercise.primaryMuscle;
-    const minutes = exerciseMinutes(selected.exercise, selected.sets);
+    const minutes = entryMinutes(selected);
     minutesByMuscle.set(muscle, (minutesByMuscle.get(muscle) ?? 0) + minutes);
   });
 
@@ -609,7 +638,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
   const unassigned: SessionExercise[] = [];
   if (sessions.length === 0) {
     input.selection.selected.forEach((selected) =>
-      unassigned.push({ exercise: selected.exercise, sets: selected.sets }),
+      unassigned.push(...appearancesFor(selected, Number.POSITIVE_INFINITY)),
     );
   }
 
@@ -620,7 +649,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
   // still open, instead of leaving compounds to fill whatever gap remains.
   const ordered = [...input.selection.selected].sort(
     (a, b) =>
-      exerciseMinutes(b.exercise, b.sets) - exerciseMinutes(a.exercise, a.sets) ||
+      entryMinutes(b) - entryMinutes(a) ||
       a.exercise.id.localeCompare(b.exercise.id),
   );
 
@@ -629,18 +658,13 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
     const naturalSessions = sessions.filter((session) =>
       matches(session.focus, selected.exercise.primaryMuscle),
     );
-    const chunks = appearanceSets(
-      selected.sets,
-      sessions.length,
-    );
-
-    for (const sets of chunks) {
+    for (const appearance of appearancesFor(selected, sessions.length)) {
+      const { sets } = appearance;
       // Keep work in its intended focus whenever at least one natural session can
       // still accept it without breaching time or productive per-muscle volume.
       // A mismatched focus is an overflow valve, not a normal balancing tool.
       const naturalWithCapacity = naturalSessions.filter((session) => {
-        const projectedMinutes =
-          session.estimatedWorkMinutes + exerciseMinutes(selected.exercise, sets);
+        const projectedMinutes = session.estimatedWorkMinutes + entryMinutes(appearance);
         if (
           input.maxWorkMinutesPerSession !== undefined &&
           projectedMinutes > input.maxWorkMinutesPerSession
@@ -661,8 +685,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
           ),
       );
       const naturalWithinTime = naturalSessions.filter((session) => {
-        const projectedMinutes =
-          session.estimatedWorkMinutes + exerciseMinutes(selected.exercise, sets);
+        const projectedMinutes = session.estimatedWorkMinutes + entryMinutes(appearance);
         return (
           input.maxWorkMinutesPerSession === undefined ||
           projectedMinutes <= input.maxWorkMinutesPerSession
@@ -684,18 +707,14 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
               sameExerciseFamily(entry.exercise, selected.exercise),
           ),
       );
-      const candidates =
-        naturalDiverse.length > 0
-          ? naturalDiverse
-          : naturalWithCapacity.length > 0
-            ? naturalWithCapacity
-            : naturalWithinTimeDiverse.length > 0
-              ? naturalWithinTimeDiverse
-              : naturalWithinTime.length > 0
-                ? naturalWithinTime
-          : nonDuplicateSessions.length > 0
-            ? nonDuplicateSessions
-            : sessions;
+      // A strength lift's exposures are its frequency: two appearances of the same
+      // lift (or of a lift and its variant) in one session would collapse two
+      // training days into one, so for them any other session beats a duplicate.
+      const preference =
+        appearance.strength !== undefined
+          ? [naturalDiverse, naturalWithinTimeDiverse, nonDuplicateSessions, naturalWithCapacity, naturalWithinTime]
+          : [naturalDiverse, naturalWithCapacity, naturalWithinTimeDiverse, naturalWithinTime, nonDuplicateSessions];
+      const candidates = preference.find((pool) => pool.length > 0) ?? sessions;
       const lightestLoad = candidates.reduce(
         (minimum, session) => Math.min(minimum, session.estimatedWorkMinutes),
         Number.POSITIVE_INFINITY,
@@ -718,7 +737,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
               ) ?? 0),
             0,
           );
-          const projected = session.estimatedWorkMinutes + exerciseMinutes(selected.exercise, sets);
+          const projected = session.estimatedWorkMinutes + entryMinutes(appearance);
           const load = projected * LOAD_COST_PER_MINUTE;
           const overCap =
             input.maxWorkMinutesPerSession === undefined
@@ -743,7 +762,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
         return cost(candidate) < cost(best) ? candidate : best;
       });
 
-      target.exercises.push({ exercise: selected.exercise, sets });
+      target.exercises.push(appearance);
       target.estimatedWorkMinutes = minutesOf(target.exercises);
     }
   }
@@ -800,8 +819,7 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
     const move = moves.sort(
       (a, b) =>
         a.focusCost - b.focusCost ||
-        exerciseMinutes(a.entry.exercise, a.entry.sets) -
-          exerciseMinutes(b.entry.exercise, b.entry.sets),
+        entryMinutes(a.entry) - entryMinutes(b.entry),
     )[0];
     if (move === undefined) continue;
 
@@ -811,14 +829,8 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
         (a, b) =>
           focusMismatchCost(move.donor.focus, a.exercise.primaryMuscle) -
             focusMismatchCost(move.donor.focus, b.exercise.primaryMuscle) ||
-          Math.abs(
-            exerciseMinutes(a.exercise, a.sets) -
-              exerciseMinutes(move.entry.exercise, move.entry.sets),
-          ) -
-            Math.abs(
-              exerciseMinutes(b.exercise, b.sets) -
-                exerciseMinutes(move.entry.exercise, move.entry.sets),
-            ),
+          Math.abs(entryMinutes(a) - entryMinutes(move.entry)) -
+            Math.abs(entryMinutes(b) - entryMinutes(move.entry)),
       )[0];
 
     if (swap === undefined) {

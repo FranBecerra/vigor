@@ -6,9 +6,9 @@
  * para que editar una serie no re-renderice las demás páginas (era la causa de
  * la lentitud percibida al pulsar).
  *
- * Datos: mock (src/mocks/session.ts) hasta conectar los repositorios.
+ * Data: persisted planned sessions and their matching execution document.
  */
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import {
   type NativeScrollEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 
 import { ExercisePage } from '@/components/train/ExercisePage';
@@ -30,13 +31,21 @@ import { SELECTABLE_SET_TYPES, setTypeLabel } from '@/components/train/setTypeLa
 import { useTheme } from '@/theme/useTheme';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionPersistence } from '@/hooks/useSessionPersistence';
-import { SetType, type SetExtension } from '@/models';
+import type { SessionSetsByExercise } from '@/services/training/sessionMapper';
+import { SetType, type Exercise, type PlannedSession, type SetExtension } from '@/models';
 import {
-  mockExercises,
-  mockSetsByExercise,
-  mockSessionName,
   type MockSetRow,
 } from '@/mocks/session';
+import { mesocycleRepository } from '@/services/repositories';
+import {
+  addedSetTargetRIR,
+  exercisesForPlannedSession,
+  initialSetsForPlannedSession,
+  plannedMicrocycleDocumentId,
+  plannedSessionDocumentId,
+} from '@/services/training/plannedSessionRuntime';
+import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
+import { prescriptionForMicrocycle, DEFAULT_PROJECTED_MICROCYCLES } from '@/services/training/microcyclePrescription';
 import { supportsExtensions } from '@/services/training/advancedSets';
 import { targetRIR } from '@/services/training/rirAutoregulation';
 import {
@@ -62,10 +71,21 @@ export default function EntrenamientoScreen() {
   const { width } = useWindowDimensions();
   const accent = sectionAccent.train;
   const pagerRef = useRef<ScrollView>(null);
+  const router = useRouter();
+  const params = useLocalSearchParams<{
+    mesocycleId?: string;
+    goal?: string;
+    microcycleIndex?: string;
+    plannedSessionIndex?: string;
+  }>();
 
   // Escala de intensidad: vendrá de los ajustes del perfil del usuario (§8.7).
   const [scale] = useState<IntensityScale>('RIR');
-  const [setsByExercise, setSetsByExercise] = useState(mockSetsByExercise);
+  const [plannedSession, setPlannedSession] = useState<PlannedSession | null>(null);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [sessionName, setSessionName] = useState('');
+  const [loadError, setLoadError] = useState(false);
+  const [setsByExercise, setSetsByExercise] = useState<SessionSetsByExercise>({});
   const [pageIndex, setPageIndex] = useState(0);
   const [typePickerFor, setTypePickerFor] = useState<{ exerciseId: string; setId: string } | null>(
     null,
@@ -81,7 +101,61 @@ export default function EntrenamientoScreen() {
 
   // --- Persistencia -------------------------------------------------------
   const { uid } = useAuth();
-  const exerciseOrder = useMemo(() => mockExercises.map((exercise) => exercise.id), []);
+  const mesocycleId = typeof params.mesocycleId === 'string' ? params.mesocycleId : '';
+  const goal = typeof params.goal === 'string' ? params.goal : '';
+  const microcycleIndex = Number(params.microcycleIndex);
+  const plannedSessionIndex = Number(params.plannedSessionIndex);
+  const validRoute =
+    mesocycleId !== '' && goal !== '' && Number.isInteger(microcycleIndex) && microcycleIndex >= 0 &&
+    Number.isInteger(plannedSessionIndex) && plannedSessionIndex >= 0;
+  const exerciseOrder = useMemo(() => exercises.map((exercise) => exercise.id), [exercises]);
+  const exerciseById = useMemo(
+    () => new Map(EXERCISE_CATALOGUE.map((exercise) => [exercise.id, exercise])),
+    [],
+  );
+
+  useEffect(() => {
+    if (!validRoute) {
+      setLoadError(true);
+      return;
+    }
+    let cancelled = false;
+    setLoadError(false);
+    mesocycleRepository.get(mesocycleId).then((mesocycle) => {
+      if (cancelled) return;
+      const horizon = mesocycle?.projectedMicrocycles ?? DEFAULT_PROJECTED_MICROCYCLES;
+      const prescribed = mesocycle?.plannedSessions === undefined
+        ? []
+        : prescriptionForMicrocycle(
+            mesocycle.plannedSessions,
+            goal,
+            microcycleIndex,
+            horizon,
+          );
+      // The goal is stored on the routine, not the mesocycle. For strength the
+      // planned session already carries its first prescription; route callers
+      // pass only sessions generated from the active routine, so resolve below.
+      const session = prescribed.find((candidate) => candidate.index === plannedSessionIndex);
+      if (session === undefined) {
+        setLoadError(true);
+        return;
+      }
+      const resolved = exercisesForPlannedSession(session, exerciseById);
+      if (resolved.length === 0) {
+        setLoadError(true);
+        return;
+      }
+      setPlannedSession(session);
+      setExercises(resolved);
+      setSessionName(session.focus);
+      const initial = initialSetsForPlannedSession(session);
+      setsRef.current = initial;
+      setSetsByExercise(initial);
+    }).catch(() => {
+      if (!cancelled) setLoadError(true);
+    });
+    return () => { cancelled = true; };
+  }, [exerciseById, goal, mesocycleId, microcycleIndex, plannedSessionIndex, validRoute]);
 
   /**
    * Contexto de la sesión. Es `null` sin usuario, lo que deja la persistencia
@@ -93,27 +167,26 @@ export default function EntrenamientoScreen() {
   const performedAtRef = useRef(Date.now());
   const sessionContext = useMemo(
     () =>
-      uid === null
+      uid === null || plannedSession === null
         ? null
         : {
-            // Id estable y legible mientras los datos son mock. Con datos reales
-            // vendrá del microciclo, no de una fecha.
-            sessionId: `${uid}-${mockSessionName.toLowerCase()}-mock`,
+            sessionId: plannedSessionDocumentId(mesocycleId, microcycleIndex, plannedSessionIndex),
             userId: uid,
-            mesocycleId: 'mock-meso',
-            microcycleId: 'mock-micro',
-            microcycleIndex: 0,
+            mesocycleId,
+            microcycleId: plannedMicrocycleDocumentId(mesocycleId, microcycleIndex),
+            microcycleIndex,
+            plannedSessionIndex,
             performedAt: performedAtRef.current,
           },
-    [uid],
+    [uid, mesocycleId, microcycleIndex, plannedSession, plannedSessionIndex, validRoute],
   );
 
-  const restoreSets = useCallback((restored: typeof mockSetsByExercise) => {
+  const restoreSets = useCallback((restored: SessionSetsByExercise) => {
     setsRef.current = restored;
     setSetsByExercise(restored);
   }, []);
 
-  const { status: saveStatus } = useSessionPersistence({
+  const { status: saveStatus, flush } = useSessionPersistence({
     context: sessionContext,
     exerciseOrder,
     setsByExercise,
@@ -160,22 +233,22 @@ export default function EntrenamientoScreen() {
       // descanso en curso, y desmarcar nunca lo toca.
       if (patch.isCompleted === true) {
         const order = flattenSessionSets(
-          mockExercises.map((e) => e.id),
+          exercises.map((e) => e.id),
           next,
         );
         if (shouldRestartRest(order, setId)) {
-          const exercise = mockExercises.find((e) => e.id === exerciseId);
+          const exercise = exercises.find((e) => e.id === exerciseId);
           const duration = exercise ? restDurationFor(exercise.profile) : 180;
           setRestTimer(startRest(setId, duration, Date.now()));
         }
       }
     },
-    [],
+    [exercises],
   );
 
   const addSet = useCallback((exerciseId: string) => {
-    const exercise = mockExercises.find((e) => e.id === exerciseId);
-    const rir = exercise ? targetRIR(exercise.profile) : 2;
+    const exercise = exercises.find((e) => e.id === exerciseId);
+    const rir = plannedSession === null ? (exercise ? targetRIR(exercise.profile) : 2) : addedSetTargetRIR(plannedSession, exerciseId);
     const previous = setsRef.current;
     const current = previous[exerciseId] ?? [];
     // Referencia: la última serie NO autorrellenada, para no heredar el peso
@@ -201,7 +274,7 @@ export default function EntrenamientoScreen() {
     // El ref debe seguir espejando el estado: la regla del temporizador lo lee.
     setsRef.current = next;
     setSetsByExercise(next);
-  }, []);
+  }, [exercises, plannedSession]);
 
   const openTypePicker = useCallback((exerciseId: string, setId: string) => {
     setTypePickerFor({ exerciseId, setId });
@@ -226,13 +299,35 @@ export default function EntrenamientoScreen() {
     [typePickerFor, updateSet],
   );
 
+  const finishWorkout = useCallback(async () => {
+    if (sessionContext === null || plannedSession === null) return;
+    const completed = await flush(Date.now());
+    if (!completed) return;
+    router.back();
+  }, [flush, plannedSession, router, sessionContext]);
+
+  if (loadError) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
+        <Text style={[styles.sessionName, { color: colors.textPrimary }]}>{t('train.sessionUnavailable')}</Text>
+        <Pressable onPress={() => router.back()} style={{ marginTop: spacing.md }}>
+          <Text style={{ color: accent }}>{t('generate.back')}</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  if (plannedSession === null) {
+    return <View style={[styles.screen, { backgroundColor: colors.bg }]} />;
+  }
+
   return (
     <IntensityPickerProvider>
       <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
       {/* Cabecera: nombre de la sesión + estado de guardado + cronómetro */}
       <View style={[styles.header, { paddingHorizontal: spacing.lg }]}>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.sessionName, { color: colors.textPrimary }]}>{mockSessionName}</Text>
+          <Text style={[styles.sessionName, { color: colors.textPrimary }]}>{sessionName}</Text>
           {/* Solo se muestra cuando hay algo que decir: un "guardado" permanente
               sería ruido. El error sí es persistente, porque implica riesgo. */}
           {saveStatus === 'saving' ? (
@@ -264,7 +359,7 @@ export default function EntrenamientoScreen() {
             gap: spacing.sm,
             alignItems: 'flex-start',
           }}>
-          {mockExercises.map((exercise, index) => {
+          {exercises.map((exercise, index) => {
             const isActive = index === pageIndex;
             return (
               <Pressable
@@ -337,7 +432,7 @@ export default function EntrenamientoScreen() {
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onPagerScroll}
         style={styles.pager}>
-        {mockExercises.map((exercise) => (
+        {exercises.map((exercise) => (
           <ExercisePage
             key={exercise.id}
             exercise={exercise}
@@ -351,6 +446,15 @@ export default function EntrenamientoScreen() {
           />
         ))}
       </ScrollView>
+
+      <View style={[styles.finishBar, { paddingBottom: insets.bottom + 8, backgroundColor: colors.bg }]}>
+        <Pressable
+          onPress={() => { void finishWorkout(); }}
+          accessibilityRole="button"
+          style={[styles.finishButton, { backgroundColor: accent, borderRadius: radius.md }]}>
+          <Text style={styles.finishText}>{t('train.finishWorkout')}</Text>
+        </Pressable>
+      </View>
 
       {/* Selector de tipo de serie */}
       <Modal
@@ -410,6 +514,9 @@ const styles = StyleSheet.create({
   summaryLabel: { fontSize: 11 },
   summaryValue: { fontSize: 14, fontWeight: '700', fontVariant: ['tabular-nums'] },
   pager: { flex: 1 },
+  finishBar: { paddingHorizontal: 20, paddingTop: 8 },
+  finishButton: { alignItems: 'center', paddingVertical: 13 },
+  finishText: { color: '#16191C', fontSize: 13, fontWeight: '800' },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',

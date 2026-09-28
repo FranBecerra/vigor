@@ -128,6 +128,11 @@ describe('exerciseMinutes', () => {
     expect(exerciseMinutes(exercise(), sets)).toBeCloseTo(expected, 5);
   });
 
+  it('uses a prescribed rest instead of the profile default', () => {
+    const expected = (EXERCISE_SETUP_SECONDS + 3 * (WORK_SECONDS_PER_SET + 240)) / 60;
+    expect(exerciseMinutes(exercise(), 3, 240)).toBeCloseTo(expected, 5);
+  });
+
   it('un multiarticular cuesta MÁS por serie, porque descansa más', () => {
     expect(exerciseMinutes(compound, 3)).toBeGreaterThan(exerciseMinutes(exercise(), 3));
   });

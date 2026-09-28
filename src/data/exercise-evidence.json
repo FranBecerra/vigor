@@ -3867,6 +3867,134 @@
         "citations": [],
         "note": "Fatiga sistémica baja pero ineficiente en tiempo invertido por unidad de tensión hipertrófica."
       }
+    },
+    "sentadilla-pausa": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pausa de 2 s en el fondo: tensión sostenida en la posición de mayor estiramiento del cuádriceps."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mismo recorrido que la sentadilla libre; la pausa elimina el rebote elástico."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Perfil idéntico a la sentadilla libre."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Exige mantener la posición del tronco sin el reflejo de estiramiento; técnica exigente."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresa con barra y microcargas, a cargas un 10-20 % menores que la sentadilla sin pausa."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menos carga absoluta que la sentadilla libre, así que algo menos de fatiga axial."
+      }
+    },
+    "press-banca-pausa": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Pausa en el pecho: tensión en estiramiento sin rebote."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido completo del press de banca."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Perfil del press de banca."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Soporte dorsal del banco; la pausa exige control escapular."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresa con barra, a cargas algo menores que el press sin pausa."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Fatiga y estrés glenohumeral similares al press de banca, a menor carga."
+      }
+    },
+    "peso-muerto-deficit": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Mayor flexión de cadera y rodilla al inicio: más estiramiento de glúteo e isquios que el convencional."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido mayor que el peso muerto convencional por la plataforma de 3-5 cm."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Perfil del peso muerto convencional, con la fase inicial más exigente."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Exige posición de columna estable en una salida más profunda."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Progresa con barra, a cargas menores que el convencional."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Coste sistémico y axial muy alto, igual o superior al convencional."
+      }
+    },
+    "peso-muerto-bloques": {
+      "stretchedPositionLoading": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "La salida desde bloques elimina la parte de mayor estiramiento."
+      },
+      "rangeOfMotion": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Recorrido parcial por diseño: trabaja el bloqueo."
+      },
+      "resistanceProfileMatch": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Carga máxima en el tramo superior, donde se entrena el bloqueo."
+      },
+      "stabilityCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Estabilidad similar al convencional en el tramo que se ejecuta."
+      },
+      "loadProgressability": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Admite cargas supramáximas respecto al convencional; progresión muy fina."
+      },
+      "systemicFatigueCost": {
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Menos recorrido y menos flexión reducen algo la fatiga frente al convencional, pese a más carga."
+      }
     }
   }
 }

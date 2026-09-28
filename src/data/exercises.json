@@ -987,7 +987,7 @@
         "NECK",
         "BICEPS"
       ],
-      "movementVector": "PULL_VERTICAL",
+      "movementVector": "SHOULDER_ABDUCTION",
       "profile": "COMPOUND_SECONDARY",
       "equipment": "BARBELL",
       "criteria": {
@@ -2169,6 +2169,93 @@
         "stabilityCost": 3,
         "loadProgressability": 1,
         "systemicFatigueCost": 4
+      }
+    },
+    {
+      "id": "sentadilla-pausa",
+      "name": "Sentadilla con pausa",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [
+        "GLUTES",
+        "ERECTORS"
+      ],
+      "movementVector": "KNEE_DOMINANT",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "generationTier": "STRENGTH_VARIANT",
+      "criteria": {
+        "stretchedPositionLoading": 5,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 2,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 2
+      }
+    },
+    {
+      "id": "press-banca-pausa",
+      "name": "Press de banca con pausa",
+      "primaryMuscle": "CHEST",
+      "secondaryMuscles": [
+        "TRICEPS",
+        "DELTS_FRONT"
+      ],
+      "movementVector": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "generationTier": "STRENGTH_VARIANT",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 4,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 3
+      }
+    },
+    {
+      "id": "peso-muerto-deficit",
+      "name": "Peso muerto con déficit",
+      "primaryMuscle": "GLUTES",
+      "secondaryMuscles": [
+        "HAMSTRINGS",
+        "ERECTORS",
+        "MID_BACK",
+        "QUADS"
+      ],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "generationTier": "STRENGTH_VARIANT",
+      "criteria": {
+        "stretchedPositionLoading": 4,
+        "rangeOfMotion": 4,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 4,
+        "systemicFatigueCost": 1
+      }
+    },
+    {
+      "id": "peso-muerto-bloques",
+      "name": "Peso muerto desde bloques",
+      "primaryMuscle": "GLUTES",
+      "secondaryMuscles": [
+        "HAMSTRINGS",
+        "ERECTORS",
+        "MID_BACK"
+      ],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_PRIMARY",
+      "equipment": "BARBELL",
+      "generationTier": "STRENGTH_VARIANT",
+      "criteria": {
+        "stretchedPositionLoading": 2,
+        "rangeOfMotion": 2,
+        "resistanceProfileMatch": 3,
+        "stabilityCost": 3,
+        "loadProgressability": 5,
+        "systemicFatigueCost": 2
       }
     }
   ]

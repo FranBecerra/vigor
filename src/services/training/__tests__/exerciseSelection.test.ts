@@ -16,6 +16,7 @@ import {
   equipmentFamily,
   goalSelectionScore,
   selectExercises,
+  summarizeSelection,
   weightedPick,
 } from '@/services/training/exerciseSelection';
 import { planMesocycle } from '@/services/training/mesocyclePlanner';
@@ -675,5 +676,35 @@ describe('selectExercises — foundational patterns are never skipped', () => {
     });
     const result = selectExercises({ volumePlan: plan, catalogue: home, seed: 1 });
     expect(result.missingFoundationalPatterns).not.toContain(MovementVector.KNEE_DOMINANT);
+  });
+});
+
+describe('strength variants are not hypertrophy options', () => {
+  it('never draws a STRENGTH_VARIANT exercise for a hypertrophy plan', () => {
+    const variants = EXERCISE_CATALOGUE.filter(
+      (exercise) => exercise.generationTier === ExerciseGenerationTier.STRENGTH_VARIANT,
+    ).map((exercise) => exercise.id);
+    expect(variants.length).toBeGreaterThan(0);
+    for (let seed = 1; seed <= 20; seed += 1) {
+      const result = selectExercises({
+        volumePlan: buildVolumePlan({ level: ExperienceLevel.ADVANCED, goal: TrainingGoal.HYPERTROPHY }),
+        catalogue: EXERCISE_CATALOGUE,
+        seed,
+      });
+      result.selected.forEach((entry) => expect(variants).not.toContain(entry.exercise.id));
+    }
+  });
+});
+
+describe('summarizeSelection', () => {
+  it('reports the same figures the selector reports for its own selection', () => {
+    const volumePlan = buildVolumePlan({ level: ExperienceLevel.INTERMEDIATE, goal: TrainingGoal.HYPERTROPHY });
+    const result = selectExercises({ volumePlan, catalogue: EXERCISE_CATALOGUE, seed: 3 });
+    const summary = summarizeSelection(result.selected, volumePlan, result.missingFoundationalPatterns);
+    expect(summary.performedSets).toBe(result.performedSets);
+    expect(summary.attributedByMuscle).toEqual(result.attributedByMuscle);
+    expect(summary.vectorCounts).toEqual(result.vectorCounts);
+    expect(summary.unmet).toEqual(result.unmet);
+    expect(summary.totalVerdict).toBe(result.totalVerdict);
   });
 });

@@ -1,4 +1,4 @@
-import { Equipment, SetType, SplitStructure, type Mesocycle, type PlannedSession, type Routine } from '@/models';
+import { Equipment, SetType, SplitStructure, type Mesocycle, type PlannedSession, type Routine, type WorkoutSession } from '@/models';
 import { ExperienceLevel } from '@/models/athlete';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
 import { planMesocycle } from '@/services/training/mesocyclePlanner';
@@ -43,6 +43,7 @@ function routine(id = 'r1', overrides: Partial<Routine> = {}): Routine {
         vetoedExerciseIds: [],
         seed: 1,
       },
+      isActive: true,
       now: NOW,
     }),
     activeMesocycleId: `${id}-m0`,
@@ -157,6 +158,60 @@ describe('toRoutineView', () => {
     expect(rendered.map((e) => e.repRange)).toEqual(['8', '6–10']);
   });
 
+  it('uses the prescribed rest and the working-set effort, not the heavy single', () => {
+    const custom = mesocycle('r1-m0', {
+      plannedSessions: [
+        {
+          index: 0,
+          focus: 'LOWER',
+          estimatedWorkMinutes: 30,
+          exercises: [
+            {
+              exerciseId: 'sentadilla-libre',
+              order: 0,
+              isEdited: false,
+              restSeconds: 240,
+              strengthRole: 'MAIN',
+              sets: [
+                { setType: SetType.TOP_SINGLE, targetRepsMin: 1, targetReps: 1, targetRIR: 2 },
+                { setType: SetType.NORMAL, targetRepsMin: 3, targetReps: 5, targetRIR: 3 },
+              ],
+            },
+            {
+              exerciseId: 'plancha',
+              order: 1,
+              isEdited: false,
+              sets: [{ setType: SetType.TOP_SINGLE, targetReps: 1, targetRIR: 2 }],
+            },
+          ],
+        },
+      ],
+    });
+    const strengthRoutine = routine('r1', {
+      generation: { ...routine().generation, goal: TrainingGoal.STRENGTH },
+    });
+    const result = toRoutineView(strengthRoutine, custom, BY_ID, LABELS) as RoutineView;
+    const [squat, plank] = result.microcycles[0].sessions[0].exercises;
+    expect(squat.restSeconds).toBe(240);
+    expect(squat.targetRIR).toBe(3);
+    expect(squat.repRange).toBe('3–5');
+    expect(squat.sets.map((set) => set.setType)).toEqual([SetType.TOP_SINGLE, SetType.NORMAL]);
+    // A single-only entry falls back to the single's own effort.
+    expect(plank.targetRIR).toBe(2);
+    // The strength ramp reaches RIR 1 in the last accumulation microcycle.
+    expect(result.microcycles[4].sessions[0].exercises[0].targetRIR).toBe(1);
+    expect(result.microcycles[4].intensityAdjustmentRIR).toBeLessThan(0);
+  });
+
+  it('shows the deload with fewer sets than the base microcycle', () => {
+    const deload = view.microcycles[view.microcycles.length - 1];
+    expect(deload.isDeload).toBe(true);
+    expect(deload.volumeAdjustmentSets).toBeLessThan(0);
+    expect(deload.intensityAdjustmentRIR).toBeGreaterThan(0);
+    expect(view.microcycles[0].volumeAdjustmentSets).toBe(0);
+    expect(view.microcycles[0].intensityAdjustmentRIR).toBe(0);
+  });
+
   it('drops exercises the catalogue does not know and exercises with no sets', () => {
     const custom = mesocycle('r1-m0', {
       plannedSessions: [
@@ -196,10 +251,21 @@ describe('toRoutineView', () => {
     expect(result.microcycles.map((m) => m.isDeload)).toEqual([false]);
   });
 
-  it('treats a deloading mesocycle as active and a finished or foreign one as not', () => {
+  it('takes the active flag from the routine, not from the mesocycle', () => {
+    expect(toRoutineView(routine('r1', { isActive: false }), meso, BY_ID, LABELS)?.isActive).toBe(false);
+    expect(toRoutineView(routine('r1', { isActive: undefined }), meso, BY_ID, LABELS)?.isActive).toBe(false);
     expect(toRoutineView(routine(), mesocycle('r1-m0', { status: 'DELOAD' }), BY_ID, LABELS)?.isActive).toBe(true);
-    expect(toRoutineView(routine(), mesocycle('r1-m0', { status: 'COMPLETED' }), BY_ID, LABELS)?.isActive).toBe(false);
-    expect(toRoutineView(routine(), mesocycle('other'), BY_ID, LABELS)?.isActive).toBe(false);
+  });
+
+  it('marks a completed planned session with its real date', () => {
+    const completed: WorkoutSession = {
+      id: 'done', userId: 'u1', mesocycleId: meso.id, microcycleId: `${meso.id}:m0`,
+      microcycleIndex: 0, plannedSessionIndex: 0, performedAt: NOW, completedAt: NOW,
+      exercises: [],
+    };
+    const result = toRoutineView(routine(), meso, BY_ID, LABELS, [completed]) as RoutineView;
+    expect(result.microcycles[0].sessions[0].completedOn).toBe('2027-01-15');
+    expect(result.currentMicrocycleIndex).toBe(0);
   });
 
   it('returns null for a half-finished save with no prescription', () => {
@@ -241,7 +307,7 @@ describe('ordering and defaults', () => {
     expect(defaultSessionId([active])).toBe(active.microcycles[0].sessions[0].id);
   });
 
-  it('skips routines with nothing pending and returns empty when none has', () => {
+  it('takes today only from the active routine, and nothing when it has nothing pending', () => {
     const done = {
       ...active,
       id: 'done',
@@ -251,8 +317,10 @@ describe('ordering and defaults', () => {
       })),
     };
     const outOfRange = { ...active, id: 'broken', currentMicrocycleIndex: 99 };
-    expect(defaultSessionId([done, outOfRange, active])).toBe(active.microcycles[0].sessions[0].id);
+    expect(defaultSessionId([newer, active])).toBe(active.microcycles[0].sessions[0].id);
+    expect(defaultSessionId([newer, newest])).toBe('');
     expect(defaultSessionId([done])).toBe('');
+    expect(defaultSessionId([outOfRange])).toBe('');
   });
 });
 

@@ -31,6 +31,7 @@ const context: SessionContext = {
   mesocycleId: 'meso-1',
   microcycleId: 'micro-1',
   microcycleIndex: 2,
+  plannedSessionIndex: 1,
   performedAt: 1_700_000_000_000,
 };
 
@@ -93,6 +94,7 @@ describe('toWorkoutSession', () => {
     expect(session.id).toBe('session-1');
     expect(session.userId).toBe('user-1');
     expect(session.microcycleIndex).toBe(2);
+    expect(session.plannedSessionIndex).toBe(1);
     expect(session.exercises).toHaveLength(1);
   });
 
@@ -187,8 +189,10 @@ describe('isSessionEmpty', () => {
     expect(isSessionEmpty({ bench: [] })).toBe(true);
   });
 
-  it('es false con al menos una serie', () => {
-    expect(isSessionEmpty({ bench: [setState()] })).toBe(false);
+  it('is true for prescription-only rows and false once actual work is entered', () => {
+    expect(isSessionEmpty({ bench: [setState()] })).toBe(true);
+    expect(isSessionEmpty({ bench: [setState({ actualWeight: 80 })] })).toBe(false);
+    expect(isSessionEmpty({ bench: [setState({ extensions: [{ reps: 3 }] })] })).toBe(false);
   });
 });
 

@@ -34,10 +34,24 @@ interface RoutineCardProps {
   selectedSessionId: string;
   locale: string;
   muscleLabel: (muscle: string) => string;
-  labels: { sessions: string; today: string; viewMesocycle: string; microcycleOf: string };
+  labels: {
+    sessions: string;
+    today: string;
+    viewMesocycle: string;
+    microcycleOf: string;
+    activate: string;
+    rename: string;
+    remove: string;
+    active: string;
+  };
   onToggle: () => void;
-  onSelectSession: (sessionId: string) => void;
+  /** Absent on an inactive routine: its sessions are shown, not started. */
+  onSelectSession?: (sessionId: string) => void;
   onPressMesocycle: () => void;
+  /** Absent on the active routine. */
+  onActivate?: () => void;
+  onRename: () => void;
+  onRemove: () => void;
 }
 
 export function RoutineCard({
@@ -50,8 +64,11 @@ export function RoutineCard({
   onToggle,
   onSelectSession,
   onPressMesocycle,
+  onActivate,
+  onRename,
+  onRemove,
 }: RoutineCardProps) {
-  const { colors, sectionAccent, radius, spacing } = useTheme();
+  const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const RoutineIcon = ROUTINE_ICONS[routine.icon];
   const current = routine.microcycles[routine.currentMicrocycleIndex];
   const accent = sectionAccent.train;
@@ -76,6 +93,7 @@ export function RoutineCard({
         <View style={styles.headerText}>
           <Text style={[styles.routineName, { color: colors.textPrimary }]}>{routine.name}</Text>
           <Text style={[styles.routineMeta, { color: colors.textMuted }]}>
+            {routine.isActive ? `${labels.active} · ` : ''}
             {routine.objective} · {current.sessions.length} {labels.sessions}
           </Text>
         </View>
@@ -105,9 +123,10 @@ export function RoutineCard({
               return (
                 <Pressable
                   key={session.id}
-                  onPress={() => onSelectSession(session.id)}
+                  onPress={onSelectSession === undefined ? undefined : () => onSelectSession(session.id)}
+                  disabled={onSelectSession === undefined}
                   accessibilityRole="button"
-                  accessibilityState={{ selected: isSelected }}
+                  accessibilityState={{ selected: isSelected, disabled: onSelectSession === undefined }}
                   style={[
                     styles.sessionRow,
                     { borderBottomColor: colors.surfaceBorder },
@@ -154,6 +173,33 @@ export function RoutineCard({
               );
             })}
           </View>
+
+          <View style={[styles.actions, { marginTop: spacing.sm }]}>
+            {/* Destructive action kept apart, on the left, away from the primary one. */}
+            <Pressable
+              onPress={onRemove}
+              accessibilityRole="button"
+              accessibilityLabel={labels.remove}
+              style={[styles.actionButton, styles.removeButton, { borderColor: colors.surfaceBorder, borderRadius: radius.sm }]}>
+              <Text style={[styles.actionText, { color: semantic.danger }]}>{labels.remove}</Text>
+            </Pressable>
+            <Pressable
+              onPress={onRename}
+              accessibilityRole="button"
+              accessibilityLabel={labels.rename}
+              style={[styles.actionButton, { borderColor: colors.surfaceBorder, borderRadius: radius.sm }]}>
+              <Text style={[styles.actionText, { color: colors.textSecondary }]}>{labels.rename}</Text>
+            </Pressable>
+            {onActivate !== undefined ? (
+              <Pressable
+                onPress={onActivate}
+                accessibilityRole="button"
+                accessibilityLabel={labels.activate}
+                style={[styles.actionButton, { backgroundColor: accent, borderColor: accent, borderRadius: radius.sm }]}>
+                <Text style={[styles.actionText, { color: '#16191C' }]}>{labels.activate}</Text>
+              </Pressable>
+            ) : null}
+          </View>
         </Animated.View>
       ) : null}
     </View>
@@ -192,4 +238,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkMark: { fontSize: 11, fontWeight: '900', color: '#16191C' },
+  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
+  actionButton: { borderWidth: 1, paddingVertical: 7, paddingHorizontal: 12 },
+  removeButton: { marginRight: 'auto' },
+  actionText: { fontSize: 11.5, fontWeight: '700' },
 });

@@ -1,5 +1,13 @@
-import { MuscleGroup, type Exercise, type PlannedSession } from '@/models';
+import { MuscleGroup, SetType, type Exercise, type PlannedSession, type PlannedSet } from '@/models';
 import { deriveSetRIRs } from './setIntensity';
+
+/**
+ * The set whose range and effort describe an exercise: the last one. The first can
+ * be a heavy single, which describes nothing but itself.
+ */
+export function representativeSet(sets: readonly PlannedSet[]): PlannedSet | undefined {
+  return sets[sets.length - 1];
+}
 
 /** One deliberate edit made before saving a generated mesocycle. */
 export interface PreviewExerciseEdit {
@@ -41,14 +49,20 @@ export function applyPreviewEdits(
       const targetRIRs = deriveSetRIRs(targetRIR, setCount, maxExtraReserve);
       const sets = source === undefined
         ? []
-        : Array.from({ length: setCount }, (_, index) => ({
-            ...(exercise.sets[index] ?? source),
-            targetRIR: targetRIRs[index],
-            ...(edit.targetRepsMin === undefined
-              ? {}
-              : { targetRepsMin: edit.targetRepsMin }),
-            ...(edit.targetReps === undefined ? {} : { targetReps: edit.targetReps }),
-          }));
+        : Array.from({ length: setCount }, (_, index) => {
+            const base = exercise.sets[index] ?? source;
+            // The heavy single is a fixed rep at a fixed effort; editing the working
+            // range must not turn it into another working set.
+            if (base.setType === SetType.TOP_SINGLE) return { ...base };
+            return {
+              ...base,
+              targetRIR: targetRIRs[index],
+              ...(edit.targetRepsMin === undefined
+                ? {}
+                : { targetRepsMin: edit.targetRepsMin }),
+              ...(edit.targetReps === undefined ? {} : { targetReps: edit.targetReps }),
+            };
+          });
       return {
         ...exercise,
         exerciseId: edit.exerciseId ?? exercise.exerciseId,

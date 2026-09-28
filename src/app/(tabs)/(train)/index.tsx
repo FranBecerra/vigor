@@ -13,7 +13,7 @@
  * (lógica pura, 100 % cubierta).
  */
 import { useCallback, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,7 @@ import { DomainPills } from '@/components/home/HomeHeader';
 import { TodayCard } from '@/components/home/TodayCard';
 import { RoutineCard } from '@/components/home/RoutineCard';
 import { SessionPreviewSheet } from '@/components/home/SessionPreviewSheet';
+import { RenameRoutineSheet } from '@/components/home/RenameRoutineSheet';
 import { useTheme } from '@/theme/useTheme';
 import { useRoutines } from '@/hooks/useRoutines';
 import {
@@ -46,7 +47,8 @@ export default function TrainHomeScreen() {
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { status, routines: allRoutines, reload } = useRoutines();
+  const { status, routines: allRoutines, reload, activate, rename, remove } = useRoutines();
+  const [renaming, setRenaming] = useState<RoutineView | null>(null);
 
   const [domain, setDomain] = useState<TrainingDomain>('STRENGTH');
   const [selectedSessionId, setSelectedSessionId] = useState('');
@@ -66,18 +68,85 @@ export default function TrainHomeScreen() {
    * Sesión seleccionada. Falls back to today's default when the selection is not
    * among the loaded routines: nothing chosen yet, or its routine is gone.
    */
-  const selectedSession = useMemo(
-    () =>
-      findSession(routines, selectedSessionId) ??
-      findSession(routines, defaultSessionId(routines)),
-    [routines, selectedSessionId],
+  const selectedSession = useMemo(() => {
+    // Only the active routine supplies today's workout.
+    const active = routines.filter((routine) => routine.isActive);
+    return findSession(active, selectedSessionId) ?? findSession(active, defaultSessionId(active));
+  }, [routines, selectedSessionId]);
+  const orderedRoutines = useMemo(
+    () => [...routines].sort((a, b) => Number(b.isActive) - Number(a.isActive)),
+    [routines],
+  );
+
+  /**
+   * Switching routines ends today's plan for the current one, so it is confirmed.
+   * With nothing active there is nothing to lose, and no question.
+   */
+  const confirmActivate = useCallback(
+    (routine: RoutineView) => {
+      const run = () => {
+        activate(routine.id)
+          .then(() => setExpandedRoutineId(routine.id))
+          .catch((error: unknown) => {
+            console.error('[routines] activate failed', error);
+            Alert.alert(t('home.activateFailed'));
+          });
+      };
+      const current = routines.find((candidate) => candidate.isActive);
+      if (current === undefined) {
+        run();
+        return;
+      }
+      Alert.alert(
+        t('home.activateTitle', { name: routine.name }),
+        t('home.activateMessage', { current: current.name }),
+        [
+          { text: t('generate.cancel'), style: 'cancel' },
+          { text: t('home.activateRoutine'), onPress: run },
+        ],
+      );
+    },
+    [activate, routines, t],
+  );
+
+  /** Deleting is irreversible, so it always asks, and says what goes and what stays. */
+  const confirmRemove = useCallback(
+    (routine: RoutineView) => {
+      Alert.alert(
+        t('home.removeTitle', { name: routine.name }),
+        t(routine.isActive ? 'home.removeMessageActive' : 'home.removeMessage'),
+        [
+          { text: t('generate.cancel'), style: 'cancel' },
+          {
+            text: t('home.removeRoutine'),
+            style: 'destructive',
+            onPress: () => {
+              remove(routine.id).catch((error: unknown) => {
+                console.error('[routines] remove failed', error);
+                Alert.alert(t('home.removeFailed'));
+              });
+            },
+          },
+        ],
+      );
+    },
+    [remove, t],
   );
   const expandedId = expandedRoutineId ?? defaultExpandedRoutineId(routines);
 
   const startSession = useCallback(() => {
+    if (selectedSession === null) return;
     setPreviewOpen(false);
-    router.push('/session');
-  }, [router]);
+    router.push({
+      pathname: '/session',
+      params: {
+        mesocycleId: selectedSession.routine.mesocycleId,
+        goal: selectedSession.routine.generationGoal,
+        microcycleIndex: String(selectedSession.routine.currentMicrocycleIndex),
+        plannedSessionIndex: String(selectedSession.session.plannedSessionIndex),
+      },
+    });
+  }, [router, selectedSession]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
@@ -150,8 +219,15 @@ export default function TrainHomeScreen() {
           </Text>
         ) : null}
 
-        {routines.map((routine) => (
+        {orderedRoutines.map((routine, index) => (
           <View key={routine.id} style={{ marginTop: spacing.sm }}>
+            {/* The one active routine leads; the rest sit under their own label. */}
+            {!routine.isActive && (index === 0 || orderedRoutines[index - 1].isActive) ? (
+              <Text
+                style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.md, marginBottom: spacing.xs }]}>
+                {t('home.otherRoutines')}
+              </Text>
+            ) : null}
             <RoutineCard
               routine={routine}
               expanded={routine.id === expandedId}
@@ -163,12 +239,19 @@ export default function TrainHomeScreen() {
                 today: t('home.today'),
                 viewMesocycle: t('home.viewMesocycle'),
                 microcycleOf: t('home.microcycle'),
+                activate: t('home.activateRoutine'),
+                rename: t('home.renameRoutine'),
+                remove: t('home.removeRoutine'),
+                active: t('home.activeRoutine'),
               }}
               onToggle={() =>
                 setExpandedRoutineId(expandedId === routine.id ? '' : routine.id)
               }
-              onSelectSession={setSelectedSessionId}
-              onPressMesocycle={() => router.push('/mesocycle')}
+              onSelectSession={routine.isActive ? setSelectedSessionId : undefined}
+              onPressMesocycle={() => router.push({ pathname: '/mesocycle', params: { mesocycleId: routine.mesocycleId } })}
+              onActivate={routine.isActive ? undefined : () => confirmActivate(routine)}
+              onRename={() => setRenaming(routine)}
+              onRemove={() => confirmRemove(routine)}
             />
           </View>
         ))}
@@ -199,6 +282,27 @@ export default function TrainHomeScreen() {
         </Pressable>
       </ScrollView>
 
+      <RenameRoutineSheet
+        currentName={renaming?.name ?? null}
+        otherNames={allRoutines.filter((routine) => routine.id !== renaming?.id).map((routine) => routine.name)}
+        labels={{
+          title: t('home.renameRoutine'),
+          save: t('home.renameSave'),
+          cancel: t('generate.cancel'),
+          duplicate: t('generate.nameDuplicate'),
+        }}
+        onClose={() => setRenaming(null)}
+        onSave={(name) => {
+          const target = renaming;
+          setRenaming(null);
+          if (target === null) return;
+          rename(target.id, name).catch((error: unknown) => {
+            console.error('[routines] rename failed', error);
+            Alert.alert(t('home.renameFailed'));
+          });
+        }}
+      />
+
       <SessionPreviewSheet
         session={previewOpen && selectedSession ? selectedSession.session : null}
         muscleLabel={muscleLabel}
@@ -223,7 +327,6 @@ const styles = StyleSheet.create({
   empty: { fontSize: 12 },
   emptyWorkout: {
     borderWidth: 1,
-    borderStyle: 'dashed',
     paddingVertical: 12,
     alignItems: 'center',
   },

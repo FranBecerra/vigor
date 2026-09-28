@@ -27,7 +27,10 @@
     "addExtension": "Añadir tramo",
     "removeExtension": "Eliminar tramo",
     "saving": "Guardando…",
-    "saveError": "Sin guardar · se reintentará"
+    "saveError": "Sin guardar · se reintentará",
+    "finishWorkout": "Finalizar entrenamiento",
+    "sessionUnavailable": "Esta sesión ya no está disponible.",
+    "loadingPlan": "Cargando plan…"
   },
   "setType": {
     "WARMUP": "Calentamiento",
@@ -90,7 +93,21 @@
     "newRoutine": "Nueva rutina",
     "noRoutines": "Aún no tienes rutinas. Crea una para empezar.",
     "routinesLoadFailed": "No se han podido cargar tus rutinas.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "otherRoutines": "OTRAS RUTINAS",
+    "activeRoutine": "Activa",
+    "activateRoutine": "Activar rutina",
+    "activateTitle": "¿Activar «{{name}}»?",
+    "activateMessage": "«{{current}}» dejará de ser tu rutina activa. Su progreso se conserva.",
+    "activateFailed": "No se ha podido activar la rutina. Inténtalo otra vez.",
+    "renameRoutine": "Renombrar",
+    "renameSave": "Guardar",
+    "renameFailed": "No se ha podido cambiar el nombre. Inténtalo otra vez.",
+    "removeRoutine": "Eliminar",
+    "removeTitle": "¿Eliminar «{{name}}»?",
+    "removeMessage": "Se borran la rutina y sus mesociclos. Las sesiones que ya hiciste se conservan en tu historial. No se puede deshacer.",
+    "removeMessageActive": "Es tu rutina activa. Se borran la rutina y sus mesociclos, y te quedarás sin rutina activa hasta que actives otra. Las sesiones que ya hiciste se conservan. No se puede deshacer.",
+    "removeFailed": "No se ha podido eliminar la rutina. Inténtalo otra vez."
   },
   "muscle": {
     "DELTS_FRONT": "Hombro frontal",
@@ -137,7 +154,9 @@
     "title": "Nueva rutina",
     "subtitle": "El plan se genera con lo que le digas aquí. Todo es editable después.",
     "name": "Nombre",
-    "namePlaceholder": "Mi rutina",
+    "namePlaceholder": "Ej.: Fuerza 4 días",
+    "nameRequired": "Ponle un nombre para poder guardarla.",
+    "nameDuplicate": "Ya tienes una rutina con ese nombre.",
     "goal": "Objetivo",
     "goalHypertrophy": "Hipertrofia",
     "goalStrength": "Fuerza",
@@ -222,7 +241,10 @@
     "focusLOWER": "Pierna",
     "focusPUSH": "Empuje",
     "focusPULL": "Tracción",
-    "focusLEGS": "Pierna"
+    "focusLEGS": "Pierna",
+    "strengthNoBarbell": "No has marcado barra. Los básicos de fuerza se han sustituido por la alternativa más cercana; con barra el bloque sería más específico.",
+    "previewTopSingle": "Empieza con un single pesado a RPE 8",
+    "previewRest": "Descanso {{minutes}} min"
   },
   "region": {
     "CHEST": "Pecho",

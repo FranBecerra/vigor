@@ -13,9 +13,11 @@ describe('clampSetRIR', () => {
     expect(clampSetRIR(9)).toBe(MAX_RIR);
   });
 
-  it('redondea a medio punto', () => {
+  it('rounds to whole reps in reserve, halves toward more reserve', () => {
     expect(clampSetRIR(2.24)).toBe(2);
-    expect(clampSetRIR(2.26)).toBe(2.5);
+    expect(clampSetRIR(2.26)).toBe(2);
+    expect(clampSetRIR(2.5)).toBe(3);
+    expect(clampSetRIR(1.6)).toBe(2);
   });
 
   it('trata un valor no finito como el mínimo', () => {
@@ -57,6 +59,13 @@ describe('adjustSetRIRs', () => {
 
   it('no baja de cero', () => {
     expect(adjustSetRIRs([1, 0], -2)).toEqual([0, 0]);
+  });
+
+  it('never returns a fractional RIR, whatever the adjustment', () => {
+    expect(adjustSetRIRs([4, 3, 2], 0.5)).toEqual([5, 4, 3]);
+    expect(adjustSetRIRs([4, 3, 2], -0.5)).toEqual([4, 3, 2]);
+    adjustSetRIRs([4, 3, 2], -1.3).forEach((rir) => expect(Number.isInteger(rir)).toBe(true));
+    deriveSetRIRs(1.5, 3).forEach((rir) => expect(Number.isInteger(rir)).toBe(true));
   });
 });
 

@@ -11,6 +11,7 @@ import {
   applyPreviewEdits,
   previewEditKey,
   previewVolumeByMuscle,
+  representativeSet,
 } from '@/services/training/previewEditing';
 
 const sessions: PlannedSession[] = [
@@ -99,5 +100,49 @@ describe('previewEditing', () => {
       { muscle: MuscleGroup.TRICEPS, sets: 1 },
     ]);
     expect(previewVolumeByMuscle(sessions, new Map())).toEqual([]);
+  });
+});
+
+describe('the heavy single under preview edits', () => {
+  const withSingle: PlannedSession[] = [
+    {
+      index: 0,
+      focus: 'LOWER',
+      estimatedWorkMinutes: 20,
+      exercises: [
+        {
+          exerciseId: 'squat',
+          order: 0,
+          isEdited: false,
+          strengthRole: 'MAIN',
+          restSeconds: 240,
+          sets: [
+            { setType: SetType.TOP_SINGLE, targetRepsMin: 1, targetReps: 1, targetRIR: 2 },
+            { setType: SetType.NORMAL, targetRepsMin: 3, targetReps: 5, targetRIR: 3 },
+            { setType: SetType.NORMAL, targetRepsMin: 3, targetReps: 5, targetRIR: 3 },
+          ],
+        },
+      ],
+    },
+  ];
+
+  it('describes an exercise by its last set, not by the single', () => {
+    expect(representativeSet(withSingle[0].exercises[0].sets)?.targetReps).toBe(5);
+    expect(representativeSet([])).toBeUndefined();
+  });
+
+  it('keeps the single fixed when the range or set count changes', () => {
+    const [session] = applyPreviewEdits(withSingle, {
+      [previewEditKey(0, 0)]: { sets: 4, targetRepsMin: 2, targetReps: 4 },
+    });
+    const sets = session.exercises[0].sets;
+    expect(sets[0]).toEqual(withSingle[0].exercises[0].sets[0]);
+    expect(sets).toHaveLength(4);
+    sets.slice(1).forEach((set) => {
+      expect(set.setType).toBe(SetType.NORMAL);
+      expect(set.targetRepsMin).toBe(2);
+      expect(set.targetReps).toBe(4);
+    });
+    expect(session.exercises[0].restSeconds).toBe(240);
   });
 });

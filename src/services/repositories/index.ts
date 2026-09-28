@@ -11,7 +11,14 @@
  * Los datos clínicos y biomarcadores viven bajo users/{uid}/... para poder
  * blindarlos con reglas de Firebase (inaccesibles desde el exterior).
  */
-import { writeBatch } from '@react-native-firebase/firestore';
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  where,
+  writeBatch,
+} from '@react-native-firebase/firestore';
 import { db } from '../firebase';
 import { BaseRepository } from './BaseRepository';
 import type {
@@ -69,6 +76,18 @@ class RoutineRepository extends BaseRepository<Routine> {
     );
     await batch.commit();
   }
+
+  /**
+   * Deletes a routine and its mesocycles in ONE batch, so a failure cannot leave a
+   * mesocycle pointing at a routine that no longer exists. Executed sessions are
+   * kept: they are the athlete's training history, not part of the plan.
+   */
+  async deleteWithMesocycles(routineId: string, mesocycleIds: readonly string[]): Promise<void> {
+    const batch = writeBatch(db);
+    mesocycleIds.forEach((id) => batch.delete(doc(collection(db, 'mesocycles'), id)));
+    batch.delete(this.ref(routineId));
+    await batch.commit();
+  }
 }
 export const routineRepository = new RoutineRepository();
 
@@ -84,9 +103,17 @@ class MesocycleRepository extends BaseRepository<Mesocycle> {
     return all.find((m) => m.status === 'ACTIVE') ?? null;
   }
 
-  /** Historial de mesociclos de una rutina, para comparar bloques entre sí. */
-  listByRoutine(routineId: string): Promise<Mesocycle[]> {
-    return this.listWhere('routineId', routineId);
+  /**
+   * Historial de mesociclos de una rutina, para comparar bloques entre sí.
+   *
+   * Filters by owner as well: Firestore rejects a query its rules cannot prove is
+   * limited to the caller's documents, and the rules check `userId`.
+   */
+  async listByRoutine(userId: string, routineId: string): Promise<Mesocycle[]> {
+    const snap = await getDocs(
+      query(this.col(), where('userId', '==', userId), where('routineId', '==', routineId)),
+    );
+    return snap.docs.map((d) => ({ ...(d.data() as object), id: d.id }) as Mesocycle);
   }
 }
 export const mesocycleRepository = new MesocycleRepository();

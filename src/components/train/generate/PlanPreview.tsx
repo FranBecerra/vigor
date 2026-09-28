@@ -12,10 +12,10 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { GlassSurface } from '@/components/GlassSurface';
 import { NumericField } from '@/components/train/NumericField';
-import type { Exercise } from '@/models';
+import { SetType, type Exercise } from '@/models';
 import type { PlannedSession } from '@/models';
 import type { LimitingFactor } from '@/services/training/mesocyclePlanner';
-import { previewVolumeByMuscle } from '@/services/training/previewEditing';
+import { previewVolumeByMuscle, representativeSet } from '@/services/training/previewEditing';
 import { REGION_OF_MUSCLE } from '@/services/training/volumePlan';
 
 interface PlanPreviewProps {
@@ -135,7 +135,7 @@ export function PlanPreview({
             </View>
 
             {session.exercises.map((exercise) => {
-              const firstSet = exercise.sets[0];
+              const firstSet = representativeSet(exercise.sets);
               return (
                 <View
                   key={`${exercise.exerciseId}-${exercise.order}`}
@@ -208,6 +208,21 @@ export function PlanPreview({
                       />
                     </View>
                   </View>
+                  {(exercise.restSeconds !== undefined ||
+                    exercise.sets[0]?.setType === SetType.TOP_SINGLE) && (
+                    <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6 }]}>
+                      {[
+                        exercise.sets[0]?.setType === SetType.TOP_SINGLE
+                          ? t('generate.previewTopSingle')
+                          : null,
+                        exercise.restSeconds !== undefined
+                          ? t('generate.previewRest', { minutes: exercise.restSeconds / 60 })
+                          : null,
+                      ]
+                        .filter((part) => part !== null)
+                        .join(' · ')}
+                    </Text>
+                  )}
                 </View>
               );
             })}

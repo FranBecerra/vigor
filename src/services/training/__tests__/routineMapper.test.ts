@@ -3,8 +3,17 @@ import { ExperienceLevel } from '@/models/athlete';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
 import { planMesocycle, type MesocyclePlan } from '@/services/training/mesocyclePlanner';
 import { TrainingGoal, VolumeRegion } from '@/services/training/volumePlan';
-import { exercisePrescription } from '@/services/training/exercisePrescription';
 import {
+  exercisePrescription,
+  loadForTarget,
+  TOP_SINGLE_RIR,
+} from '@/services/training/exercisePrescription';
+import {
+  MAX_ROUTINE_NAME_LENGTH,
+  activationChanges,
+  normalizeRoutineName,
+  routineNameProblem,
+  shouldActivateNewRoutine,
   editedExerciseIds,
   plannedExerciseIds,
   toMesocycleDraft,
@@ -141,19 +150,53 @@ describe('toPlannedSessions — conservation', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('maps a strength plan to lower compound rep ranges and RPE-specific RIR', () => {
+  it('prescribes a strength plan by role: heavy single, main-lift range, prescribed rest', () => {
     const strengthPlan = generate(4, 60, TrainingGoal.STRENGTH);
-    const mapped = toPlannedSessions(strengthPlan);
-    const primary = strengthPlan.distribution.sessions
-      .flatMap((session) => session.exercises)
-      .find((entry) => entry.exercise.profile === 'COMPOUND_PRIMARY');
-    expect(primary).toBeDefined();
-    const prescription = mapped
-      .flatMap((session) => session.exercises)
-      .find((entry) => entry.exerciseId === primary?.exercise.id);
-    expect(prescription?.sets[0].targetRepsMin).toBe(3);
-    expect(prescription?.sets[0].targetReps).toBe(5);
-    expect(prescription?.sets.at(-1)?.targetRIR).toBe(2);
+    const mapped = toPlannedSessions(strengthPlan).flatMap((session) => session.exercises);
+    const squats = mapped.filter((entry) => entry.exerciseId === 'sentadilla-libre');
+    expect(squats.length).toBeGreaterThan(0);
+    const heavy = squats[0];
+    expect(heavy.strengthRole).toBe('MAIN');
+    expect(heavy.restSeconds).toBe(240);
+    expect(heavy.sets[0]).toEqual({
+      setType: SetType.TOP_SINGLE,
+      targetRepsMin: 1,
+      targetReps: 1,
+      targetRIR: TOP_SINGLE_RIR,
+    });
+    heavy.sets.slice(1).forEach((set) => {
+      expect(set).toEqual({ setType: SetType.NORMAL, targetRepsMin: 3, targetReps: 5, targetRIR: 3 });
+    });
+    const accessory = mapped.find((entry) => entry.strengthRole === 'ACCESSORY');
+    expect(accessory?.sets.every((set) => set.targetRepsMin === 6 && set.targetReps === 10)).toBe(true);
+  });
+
+  it('adds loads from an e1RM only to the lifts that have one, never to accessories', () => {
+    const strengthPlan = generate(4, 60, TrainingGoal.STRENGTH);
+    const accessoryId = strengthPlan.selection.selected.find(
+      (entry) => entry.strength?.role === 'ACCESSORY',
+    )!.exercise.id;
+    const e1rm = new Map([
+      ['sentadilla-libre', 150],
+      [accessoryId, 100],
+    ]);
+    const mapped = toPlannedSessions(strengthPlan, false, { e1rmByExerciseId: e1rm }).flatMap(
+      (session) => session.exercises,
+    );
+    const heavy = mapped.find((entry) => entry.exerciseId === 'sentadilla-libre')!;
+    expect(heavy.sets[0].targetWeightKg).toBe(loadForTarget(150, 1, TOP_SINGLE_RIR));
+    expect(heavy.sets[1].targetWeightKg).toBe(loadForTarget(150, 5, 3));
+    expect(mapped.find((entry) => entry.exerciseId === accessoryId)?.sets[0].targetWeightKg).toBeUndefined();
+    expect(mapped.find((entry) => entry.exerciseId === 'press-banca')?.sets[0].targetWeightKg).toBeUndefined();
+  });
+
+  it('leaves hypertrophy plans without role or stored rest', () => {
+    toPlannedSessions(generate()).forEach((session) =>
+      session.exercises.forEach((entry) => {
+        expect('strengthRole' in entry).toBe(false);
+        expect('restSeconds' in entry).toBe(false);
+      }),
+    );
   });
 });
 
@@ -242,6 +285,7 @@ describe('toRoutineDraft', () => {
     icon: 'barbell',
     accentColor: '#9BE317',
     generation: generationInput,
+    isActive: true,
     now: NOW,
   });
 
@@ -364,6 +408,7 @@ describe('drafts carry no undefined value, which Firestore would reject', () => 
       name: 'Mi rutina',
       icon: 'barbell',
       accentColor: '#C8F751',
+      isActive: false,
       generation: {
         goal: TrainingGoal.HYPERTROPHY,
         experienceLevel: ExperienceLevel.INTERMEDIATE,
@@ -396,5 +441,59 @@ describe('drafts carry no undefined value, which Firestore would reject', () => 
         }),
       ),
     ).toEqual([]);
+  });
+});
+
+describe('one active routine', () => {
+  it('activates a new routine only when none is active', () => {
+    expect(shouldActivateNewRoutine([])).toBe(true);
+    expect(shouldActivateNewRoutine([{ isActive: false }, {}])).toBe(true);
+    expect(shouldActivateNewRoutine([{ isActive: false }, { isActive: true }])).toBe(false);
+  });
+
+  it('writes only the flags that change', () => {
+    const routines = [
+      { id: 'a', isActive: true },
+      { id: 'b', isActive: false },
+      { id: 'c' },
+    ];
+    expect(activationChanges(routines, 'b')).toEqual([
+      { id: 'a', isActive: false },
+      { id: 'b', isActive: true },
+    ]);
+    expect(activationChanges(routines, 'a')).toEqual([]);
+  });
+
+  it('repairs a state with two active routines', () => {
+    expect(activationChanges([{ id: 'a', isActive: true }, { id: 'b', isActive: true }], 'a')).toEqual([
+      { id: 'b', isActive: false },
+    ]);
+  });
+});
+
+describe('routineNameProblem', () => {
+  it('requires a name: there is no default', () => {
+    expect(routineNameProblem('', [])).toBe('empty');
+    expect(routineNameProblem('   ', ['Fuerza'])).toBe('empty');
+  });
+
+  it('rejects a name the athlete already uses, ignoring case and spacing', () => {
+    expect(routineNameProblem(' fuerza  4 días', ['Fuerza 4 días'])).toBe('duplicate');
+    expect(routineNameProblem('Fuerza', ['', 'Hipertrofia'])).toBeNull();
+  });
+});
+
+describe('normalizeRoutineName', () => {
+  it('trims and collapses whitespace', () => {
+    expect(normalizeRoutineName('  Fuerza   de  otoño ')).toBe('Fuerza de otoño');
+  });
+
+  it('rejects an empty or blank name', () => {
+    expect(normalizeRoutineName('')).toBeNull();
+    expect(normalizeRoutineName('   ')).toBeNull();
+  });
+
+  it('caps the length to what fits on a card', () => {
+    expect(normalizeRoutineName('x'.repeat(90))).toHaveLength(MAX_ROUTINE_NAME_LENGTH);
   });
 });

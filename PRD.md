@@ -86,6 +86,29 @@ Accesible desde un menú contextual (...)[cite: 1]. Las alternativas se ordenan 
 2. **Primary muscle group:** the three deltoid heads remain separate, while chest is one group. Horizontal-row retractors are grouped as `MID_BACK`, and cervical muscles plus upper trapezius are grouped as `NECK`. Exercise angle remains a stimulus tag rather than a separate volume budget.
 3. **Ejercicios Personalizados:** Los inputs creados por el usuario (solo requieren Nombre y Músculo) se apilan al final si carecen de mapeo biomecánico profundo[cite: 1].
 
+### 3.7. Mesociclo de fuerza
+
+El objetivo de fuerza **no** es hipertrofia con menos repeticiones. Los básicos se **prescriben**, no se sortean: la especificidad es el objetivo. Implementación en `services/training/strengthProgram.ts`; se activa cuando el objetivo es `STRENGTH`.
+
+**Estructura por rol** (`StrengthRole`, persistido en `PlannedExercise.strengthRole`):
+
+| Rol | Ejercicios | Reps | Descanso | RIR µ1 → último |
+|---|---|---|---|---|
+| MAIN | sentadilla trasera, press de banca, peso muerto convencional (fijos por id) | 3-5 | 240 s | 3 → 1 |
+| VARIANT | sentadilla con pausa o frontal, banca con pausa o cerrada, peso muerto con déficit o desde bloques (por semilla) | 3-6 | 240 s | 3 → 1 |
+| COMPLEMENTARY | press militar, remo con apoyo en el pecho, dominadas | 4-6 | 180 s | 3 → 1 |
+| ACCESSORY | bisagra accesoria (rumano, buenos días), core antimovimiento, tríceps, espalda alta, una por región prioritaria | 6-10 | 120 s / 90 s | 2 → 1 |
+
+- **Frecuencia por exposiciones explícitas.** Sentadilla 2 (3 desde 5 sesiones), banca 2 (3 desde 4), peso muerto 1 (2 desde 4, con variante), complementarios 1 (2 desde 5). Un mismo patrón principal nunca se repite en una sesión.
+- **Single pesado** a RPE 8 (`SetType.TOP_SINGLE`) al empezar la primera exposición de cada básico, en intermedio y avanzado. El principiante repite el básico en lugar de una variante y no hace singles.
+- **Regla del 60 %.** Básicos y variantes suman al menos el 60 % de las series; el resto entra por prioridad solo mientras la proporción se mantiene.
+- **Ajuste al tiempo.** Cada exposición es una plaza con prioridad. Se entra de forma voraz: se prueban de mayor a menor prioridad y entra cada una que quepa. Los accesorios caen antes que las variantes y los tres días pesados son lo último. Si ni esos caben, `insufficient-time`.
+- **Sin barra**: los básicos se sustituyen por el multiarticular más cercano del mismo patrón y la previsualización avisa. Convencional por defecto; el sumo queda a un cambio de distancia.
+- **Variantes** marcadas `generationTier: STRENGTH_VARIANT`: la selección de hipertrofia no las elige nunca.
+- **Horizonte**: 5 microciclos de acumulación más descarga. `prescriptionForMicrocycle` deriva la rampa de RIR y la descarga (≈55 % de las series por ejercicio, +2 RIR, carga ×0,9, sin single) desde el primer microciclo almacenado.
+- **Carga (%1RM)**: solo con e1RM (`toPlannedSessions(..., { e1rmByExerciseId })`), invirtiendo Epley sobre `reps + RIR` y redondeando a 2,5 kg hacia abajo. El primer mesociclo va por RIR.
+- **RIR por serie siempre entero** (`clampSetRIR`): una reserva de 2,5 repeticiones no se puede ejecutar.
+
 ---
 
 ## 4. Especificación Funcional: Sistema Clínico de Lesiones y Rehabilitación
@@ -292,6 +315,10 @@ La pestaña **Entrenamiento** tiene como pantalla de inicio (*home*) esta vista 
 - Las sesiones con el mismo enfoque se distinguen con letra (`Torso A`, `Torso B`).
 - Orden: la rutina activa primero, después la más reciente.
 - Estados propios de carga, error con reintento y lista vacía.
+
+**Una sola rutina activa (2026-09-28).** `Routine.isActive` marca la que se sigue; como mucho una por atleta. Solo ella da la sesión de hoy y sus sesiones son seleccionables; las demás aparecen debajo bajo *Otras rutinas*, con **Activar rutina**. Activar escribe todos los cambios de bandera en un único *batch* (`activationChanges`) para que un fallo no deje dos activas o ninguna, y pide confirmación si ya había una activa. Una rutina nueva solo nace activa si no hay ninguna.
+
+**Nombre, renombrado y borrado.** El nombre se pone en la página del plan generado, junto a *Guardar rutina* (hasta 40 caracteres, espacios normalizados), y es **obligatorio y único** por atleta, sin distinguir mayúsculas (`routineNameProblem`): no hay nombre por defecto, porque tres rutinas llamadas igual no se distinguen en Inicio. Se cambia después desde la tarjeta con una hoja propia, con la misma regla. **Eliminar** pide confirmación siempre y borra la rutina y sus mesociclos en un *batch*; las sesiones ejecutadas se conservan como historial. Borrar la activa deja al atleta sin rutina activa hasta que active otra.
 
 Pendiente: las sesiones aún no muestran fecha de completado (no se leen `workoutSessions`), y la vista del mesociclo (§8.7) y la sesión en curso siguen con datos de ejemplo.
 
@@ -1998,6 +2025,34 @@ Firestore rule deployment is infrastructure work and remains subject to the proj
 
 This entry records product intent and sequencing, not a claim that the current generator has scientifically identified individual volume landmarks. Every implementation step remains subject to the project's testing and changelog requirements.
 
+### 2026-09-28 — Persisted execution, real mesocycle view, and history-derived loads
+
+#### A workout execution is now anchored to its prescription
+
+`/session` no longer opens the development mock when reached from the active routine. The home route carries three explicit coordinates: `mesocycleId`, `microcycleIndex`, and `plannedSessionIndex`, plus the routine goal needed to resolve the strength ramp. The runtime derives the exact microcycle prescription through `prescriptionForMicrocycle`, then resolves its catalogue exercises and editable set rows.
+
+The workout document id is deterministic: `{mesocycleId}:m{microcycleIndex}:s{plannedSessionIndex}`. This makes reopening an unfinished workout restore the same document rather than create a duplicate. `WorkoutSession.plannedSessionIndex` is persisted in the mapper, so planned-versus-executed adherence is an explicit relation rather than a date/order guess. The virtual microcycle identity follows the same convention (`{mesocycleId}:m{microcycleIndex}`); it is an execution key, not a claim that a separate Firestore `Microcycle` document must exist.
+
+Ending a workout persists `completedAt`. The persistence hook retains that timestamp through later debounced or unmount writes, preventing the old in-progress write from accidentally erasing completion. The home view joins completed workout sessions by the three coordinates and displays their real completion dates. It derives the first incomplete microcycle from that history, so it advances only after every planned session in the current microcycle is finished; finishing one session cannot skip its remaining sessions.
+
+Opening a prescribed session alone does not create a history document: planned rows are not actual work. Persistence begins only after the athlete enters an actual set value (weight, reps, RIR, or a filled advanced-set segment), preserving the existing no-empty-workout invariant.
+
+#### The mesocycle screen consumes the same real prescription
+
+The mesocycle route now receives `mesocycleId` and reads the saved routine view rather than `mockActiveRoutine`. Its chart, projected microcycles, deload volume, strength RIR ramp, completed-session count, and exercise detail all come from the same persisted plan and completed session history used by Home and execution. The detail view does not apply `intensityAdjustmentRIR` a second time: its exercises are already the resolved microcycle prescription. Applying it twice would incorrectly steepen the strength RIR ramp.
+
+#### e1RM is evidence from completed work, not from a target
+
+Generation loads the athlete's completed `WorkoutSession` history and builds an exercise-specific map from actual weight and repetitions only. The map uses the best Epley estimate per exercise and accepts attempts from 1 to 12 repetitions; incomplete work, zero/invalid values, and higher-repetition extrapolations do not become kg prescriptions. This is a conservative guard against treating a planned value or a very high-rep extrapolation as a reliable max estimate. When no qualifying history exists, the plan remains RIR-led, as before. When it does exist, the existing strength mapper uses it to populate `targetWeightKg` and the microcycle resolver recalculates load as RIR changes or deloads.
+
+This is an estimate for load selection, not a claim to have measured a true 1RM. The user may always edit the live set weight; completed actual work remains the only data eligible for the next estimate.
+
+#### Icon asset
+
+`assets/icon.png` is now an opaque, edge-to-edge 1024×1024 raster asset. It retains the lime V/lightning monogram on a dark textured background but deliberately contains no rounded tile, outer black canvas, or external glow. iOS supplies the app-icon mask itself, eliminating the previous nested-icon appearance. The asset was created with the built-in image-generation workflow using the supplied reference image as a visual reference.
+
+**Verification:** `npx tsc --noEmit` clean · `npm test -- --runInBand`: **812 tests, 36 suites** passing at this point. Added pure-logic coverage for planned-session runtime identities/rows and the e1RM history eligibility rule, and extended session mapping coverage for the prescription link and no-empty planned sessions.
+
 ### 2026-09-27 — Generator parity, exercise-family diversity, session balance, and bottom actions
 
 #### Capacity is permission, not an instruction to add junk volume
@@ -2345,3 +2400,76 @@ floor for both goals.
 
 The catalogue already holds the six main lifts; it has no specific variants (paused
 squat, paused bench, deficit or block pull).
+
+### 2026-09-28 — IMPLEMENTATION: strength program, one active routine, integer RIR
+
+Approved by Fran with four decisions: main lifts plus variants at 60 % or more of the
+sets, frequency 2-3 for the three main lifts and 1-2 for the complementary ones,
+conventional deadlift by default, and a warning (not a block) without a barbell.
+
+**Strength program (§3.7).** `strengthProgram.ts` replaces hypertrophy selection for the
+strength goal. Measured on an intermediate at 4×75, seed 1: 46 sets, 61 % on main lifts
+and variants, squat 2 / bench 3 / deadlift 2 exposures, knee 8, horizontal push 12 and
+hinge 8 sets per microcycle. Across levels × 1-7 sessions × 45-120 min, every plan that
+fits keeps the 60 % share, and no session repeats a main pattern. *Decide for me* now
+recommends 3×60 (32 sets) for an intermediate, 2×75 (24) for a beginner and 5×60 (53)
+for an advanced athlete.
+
+A prefix search over priorities was tried first and rejected: at 3×60 it dropped a
+complementary lift together with the variant that did not fit, although the lift alone
+fitted. The fit is greedy by priority.
+
+**Supporting changes.** `SelectedExercise`/`SessionExercise` carry an optional strength
+prescription (role, rest, explicit exposures); the distributor places each exposure in a
+different session and, for strength entries, prefers a mismatched session over the same
+pattern twice. `exerciseMinutes` takes the prescribed rest. `summarizeSelection` is
+extracted from `selectExercises`. `SetType.TOP_SINGLE` added. `remo-al-menton`
+reclassified to `SHOULDER_ABDUCTION`. Four variants added to the catalogue and its
+evidence file, all `programming-judgement` without citations.
+
+**Home.** One active routine (`Routine.isActive`), activate with confirmation, rename,
+delete with confirmation (§8.5). The name field moved to the preview page. The dashed
+borders on the two creation buttons were removed.
+
+**Integer RIR.** `clampSetRIR` rounded to half points, so a microcycle adjustment of 0.5
+prescribed sets at RIR 2.5 in the mesocycle view. It now rounds to whole numbers, halves
+toward more reserve.
+
+**Fixed on the way.** `MesocycleRepository.listByRoutine` queried by `routineId` alone,
+which the ownership rules reject; it now filters by `userId` too. It had no callers.
+
+**Verification:** `npx tsc --noEmit` clean · **804 tests, 34 suites** · 100 %
+statements, branches, functions and lines in the measured scope. Nothing on this list
+has been run on a device.
+
+### 2026-09-28 — Chest-supported row; routine names required and unique
+
+Fran tested the strength flow on a device and confirmed it works.
+
+**Row.** The complementary horizontal pull is now `remo-pecho-apoyado` instead of the
+barbell row, at Fran's request. The reasoning holds up in a strength block: squat and
+deadlift already spend the erectors' recovery, and a bent-over row is limited by the
+same erectors, so it trains the lower back a third time and the upper back less. With
+the pad, the load is set by the muscles the row is for. Without the machine the program
+falls back to the best available horizontal pull.
+
+**Names.** There is no default name any more. Saving without one scrolls back to the
+field and says why, and a name the athlete already uses is rejected, both at creation
+and when renaming. The placeholder reads as an example, not as a value.
+
+**Verification:** `npx tsc --noEmit` clean · **807 tests, 34 suites** · 100 % in the
+measured scope.
+
+### 2026-09-28 — Apple Sign-In capability pinned off for the free account
+
+Building for Fran's device failed at signing: `Personal development teams do not support
+the Sign in with Apple capability`. The `ios/vigor.entitlements` still declared
+`com.apple.developer.applesignin` — the same block the 2026-09-21 entry removed, back
+because a later `prebuild --clean` regenerated it or it was edited by hand in `ios/`.
+
+Fix: `ios.usesAppleSignIn: false` set EXPLICITLY in `app.json`, so prebuild no longer
+writes the entitlement and it cannot silently return. The auth code (`signInWithApple`,
+`linkWithApple`) is untouched; only the native capability is off. Google, anonymous and
+account linking need no capability and keep working on the free account. Re-enable
+(`usesAppleSignIn: true` + prebuild + rebuild) with a paid Apple Developer account, which
+App Store guideline 4.8 will require to publish alongside Google Sign-In.

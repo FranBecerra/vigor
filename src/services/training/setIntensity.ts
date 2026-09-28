@@ -13,10 +13,14 @@
 export const MIN_RIR = 0;
 export const MAX_RIR = 5;
 
-/** Acota un RIR al rango válido, redondeando a medio punto. */
+/**
+ * Acota un RIR al rango válido, en ENTEROS. A prescribed set asks for a whole
+ * number of reps in reserve; "2.5 in reserve" is not something an athlete can
+ * execute. Halves round up, toward more reserve, which is the safe side.
+ */
 export function clampSetRIR(value: number): number {
   if (!Number.isFinite(value)) return MIN_RIR;
-  const rounded = Math.round(value * 2) / 2;
+  const rounded = Math.round(value);
   return Math.min(MAX_RIR, Math.max(MIN_RIR, rounded));
 }
 

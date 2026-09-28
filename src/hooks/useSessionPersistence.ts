@@ -61,6 +61,9 @@ export function useSessionPersistence({
   latestOrder.current = exerciseOrder;
 
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Once an athlete explicitly ends a session, later unmount/debounce writes must
+  // never erase `completedAt` by replacing the document with an in-progress copy.
+  const completedAtRef = useRef<number | undefined>(undefined);
   const sessionId = context?.sessionId ?? null;
 
   // --- Recuperación: una sola vez por sesión ------------------------------
@@ -92,18 +95,25 @@ export function useSessionPersistence({
   }, [sessionId]);
 
   /** Escribe ya, sin esperar al temporizador. Para cerrar o salir. */
-  const flush = useCallback(async () => {
-    if (context === null) return;
-    if (isSessionEmpty(latestSets.current)) return;
+  const flush = useCallback(async (completedAt?: number): Promise<boolean> => {
+    if (context === null || isSessionEmpty(latestSets.current)) return false;
+    if (completedAt !== undefined) completedAtRef.current = completedAt;
+    const finalCompletedAt = completedAt ?? completedAtRef.current;
 
     setStatus('saving');
     try {
       await workoutSessionRepository.create(
-        toWorkoutSession(context, latestOrder.current, latestSets.current),
+        toWorkoutSession(
+          finalCompletedAt === undefined ? context : { ...context, completedAt: finalCompletedAt },
+          latestOrder.current,
+          latestSets.current,
+        ),
       );
       setStatus('saved');
+      return true;
     } catch {
       setStatus('error');
+      return false;
     }
   }, [context]);
 

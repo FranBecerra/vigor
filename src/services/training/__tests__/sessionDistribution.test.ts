@@ -1012,3 +1012,85 @@ describe('distributeSelection — fewer appearances than sessions', () => {
     expect(result.structureWarnings.some((warning) => warning.kind === 'empty-session')).toBe(true);
   });
 });
+
+describe('distributeSelection — strength exposures', () => {
+  const strength = (restSeconds: number, exposures: { sets: number; topSingle: boolean }[]) => ({
+    role: 'MAIN' as const,
+    restSeconds,
+    exposures,
+  });
+  const squat = exercise({
+    id: 'squat',
+    primaryMuscle: MuscleGroup.QUADS,
+    movementVector: MovementVector.KNEE_DOMINANT,
+  });
+  const pausedSquat = exercise({
+    id: 'paused-squat',
+    primaryMuscle: MuscleGroup.QUADS,
+    movementVector: MovementVector.KNEE_DOMINANT,
+  });
+
+  it('places each exposure in a different session, with its rest in the minutes', () => {
+    const result = distributeSelection({
+      selection: {
+        selected: [
+          { exercise: squat, sets: 8, strength: strength(240, [{ sets: 4, topSingle: true }, { sets: 4, topSingle: false }]) },
+        ],
+      },
+      split: SplitStructure.FULL_BODY,
+      sessionsPerMicrocycle: 3,
+    });
+    const appearances = result.sessions.flatMap((session) =>
+      session.exercises.map((entry) => ({ session: session.index, entry })),
+    );
+    expect(appearances).toHaveLength(2);
+    expect(new Set(appearances.map((item) => item.session)).size).toBe(2);
+    expect(appearances.map((item) => item.entry.strength?.topSingle).sort()).toEqual([false, true]);
+    expect(result.totalWorkMinutes).toBeCloseTo(2 * exerciseMinutes(squat, 4, 240), 5);
+  });
+
+  it('keeps more exposures than sessions only up to the session count', () => {
+    const result = distributeSelection({
+      selection: {
+        selected: [
+          { exercise: squat, sets: 12, strength: strength(240, [{ sets: 4, topSingle: true }, { sets: 4, topSingle: false }, { sets: 4, topSingle: false }]) },
+        ],
+      },
+      split: SplitStructure.FULL_BODY,
+      sessionsPerMicrocycle: 2,
+    });
+    expect(result.sessions.flatMap((session) => session.exercises)).toHaveLength(2);
+  });
+
+  it('prefers a mismatched session over the same pattern twice in one day', () => {
+    // Two LOWER sessions and three squat appearances: the third goes to an UPPER day
+    // rather than doubling up, because frequency is what a strength exposure is for.
+    const result = distributeSelection({
+      selection: {
+        selected: [
+          { exercise: squat, sets: 8, strength: strength(240, [{ sets: 4, topSingle: true }, { sets: 4, topSingle: false }]) },
+          { exercise: pausedSquat, sets: 4, strength: { ...strength(240, [{ sets: 4, topSingle: false }]), role: 'VARIANT' as const } },
+        ],
+      },
+      split: SplitStructure.UPPER_LOWER,
+      sessionsPerMicrocycle: 4,
+    });
+    result.sessions.forEach((session) => {
+      const knee = session.exercises.filter((entry) => entry.exercise.movementVector === MovementVector.KNEE_DOMINANT);
+      expect(knee.length).toBeLessThanOrEqual(1);
+    });
+  });
+
+  it('with no sessions reports every exposure as unassigned', () => {
+    const result = distributeSelection({
+      selection: {
+        selected: [
+          { exercise: squat, sets: 8, strength: strength(240, [{ sets: 4, topSingle: true }, { sets: 4, topSingle: false }]) },
+        ],
+      },
+      split: SplitStructure.FULL_BODY,
+      sessionsPerMicrocycle: 0,
+    });
+    expect(result.unassigned.map((entry) => entry.sets)).toEqual([4, 4]);
+  });
+});

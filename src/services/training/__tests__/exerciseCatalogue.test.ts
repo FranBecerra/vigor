@@ -202,6 +202,22 @@ describe('EXERCISE_CATALOGUE', () => {
     });
   });
 
+  it('classifies the upright row as shoulder abduction, not a vertical pull', () => {
+    // It does not train the lats, and as a vertical pull it satisfied the
+    // foundational-pattern floor on its own.
+    expect(EXERCISE_CATALOGUE.find((exercise) => exercise.id === 'remo-al-menton')?.movementVector).toBe(
+      MovementVector.SHOULDER_ABDUCTION,
+    );
+  });
+
+  it('holds the strength variants the program prescribes, tagged as such', () => {
+    ['sentadilla-pausa', 'press-banca-pausa', 'peso-muerto-deficit', 'peso-muerto-bloques'].forEach((id) => {
+      expect(EXERCISE_CATALOGUE.find((exercise) => exercise.id === id)?.generationTier).toBe(
+        ExerciseGenerationTier.STRENGTH_VARIANT,
+      );
+    });
+  });
+
   it('does NOT credit hamstrings on the back squat', () => {
     // Lombard's paradox: the biarticular hamstrings contract almost isometrically
     // during a squat, so they take no stretch stimulus and do not hypertrophy.

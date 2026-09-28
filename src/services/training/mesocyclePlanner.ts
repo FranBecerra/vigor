@@ -32,6 +32,8 @@ import {
   workMinutesAvailable,
   type TrainingCapacity,
 } from './trainingCapacity';
+import { planStrengthMesocycle, type StrengthProgramReport } from './strengthProgram';
+import { TrainingGoal } from './volumePlan';
 import {
   distributeSelection,
   type SessionDistribution,
@@ -69,6 +71,8 @@ export interface MesocyclePlan {
   maxSessionWorkMinutes: number;
   /** Work capacity of an individual session. */
   availableWorkMinutesPerSession: number;
+  /** Strength goal only: which lifts the program prescribes and how it is balanced. */
+  strength?: StrengthProgramReport;
 }
 
 export interface MesocyclePlanInput extends VolumePlanInput {
@@ -86,6 +90,8 @@ export interface MesocyclePlanInput extends VolumePlanInput {
 const SQUEEZE_SEARCH_STEPS = 10;
 
 export function planMesocycle(input: MesocyclePlanInput): MesocyclePlan {
+  // Strength prescribes its lifts instead of drawing them (§3.7).
+  if (input.goal === TrainingGoal.STRENGTH) return planStrengthMesocycle(input);
   const {
     capacity,
     catalogue,

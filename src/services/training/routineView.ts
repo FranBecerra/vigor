@@ -8,18 +8,27 @@
  * keyed by catalogue id. This module is the one place that joins the two, so the
  * components keep rendering a view and never learn about the catalogue.
  */
-import type {
-  Exercise,
-  Mesocycle,
-  MuscleGroup,
-  PlannedSession,
-  PlannedSessionFocus,
-  Routine,
+import {
   SetType,
+  type Exercise,
+  type Mesocycle,
+  type MuscleGroup,
+  type PlannedSession,
+  type PlannedSessionFocus,
+  type Routine,
+  type Timestampish,
+  type WorkoutSession,
 } from '@/models';
 import type { RoutineIconKey } from '@/models/routine';
 import { formatRepRange } from './exercisePrescription';
+import {
+  DEFAULT_PROJECTED_MICROCYCLES,
+  isDeloadMicrocycle,
+  prescriptionForMicrocycle,
+} from './microcyclePrescription';
 import { restDurationFor } from './restTimer';
+
+export { DEFAULT_PROJECTED_MICROCYCLES };
 
 /** Training domain shown by the home pills. */
 export type TrainingDomain = 'STRENGTH' | 'CARDIO';
@@ -40,6 +49,8 @@ export interface SessionExerciseView {
 
 export interface SessionView {
   id: string;
+  /** The persisted prescription position used to launch and link execution. */
+  plannedSessionIndex: number;
   name: string;
   exercises: SessionExerciseView[];
   /** ISO date it was performed. `undefined` = pending, and pending sessions show no day. */
@@ -63,8 +74,11 @@ export interface MicrocycleView {
 
 export interface RoutineView {
   id: string;
+  mesocycleId: string;
   name: string;
   objective: string;
+  /** Untranslated goal used by the execution runtime. */
+  generationGoal: string;
   icon: RoutineIconKey;
   color: string;
   domain: TrainingDomain;
@@ -75,12 +89,41 @@ export interface RoutineView {
   currentMicrocycleIndex: number;
 }
 
-/**
- * Roadmap horizon when the mesocycle stores none: five accumulation microcycles
- * and a deload, the example the PRD gives for the roadmap (§3.1). It is drawn as a
- * projection, never as a promise.
- */
-export const DEFAULT_PROJECTED_MICROCYCLES = 6;
+function timestampToISODate(timestamp: Timestampish | undefined): string | undefined {
+  if (timestamp === undefined) return undefined;
+  const milliseconds = typeof timestamp === 'number'
+    ? timestamp
+    : timestamp.seconds * 1_000 + Math.floor(timestamp.nanoseconds / 1_000_000);
+  const date = new Date(milliseconds);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString().slice(0, 10);
+}
+
+function completedDatesByPlannedSession(
+  sessions: readonly WorkoutSession[],
+  mesocycleId: string,
+): ReadonlyMap<string, string> {
+  const dates = new Map<string, string>();
+  sessions.forEach((session) => {
+    if (session.mesocycleId !== mesocycleId || session.plannedSessionIndex === undefined) return;
+    const date = timestampToISODate(session.completedAt);
+    if (date !== undefined) {
+      dates.set(`${session.microcycleIndex}:${session.plannedSessionIndex}`, date);
+    }
+  });
+  return dates;
+}
+
+function firstIncompleteMicrocycle(
+  initialIndex: number,
+  horizon: number,
+  planned: readonly PlannedSession[],
+  completed: ReadonlyMap<string, string>,
+): number {
+  for (let index = Math.max(0, initialIndex); index < horizon; index += 1) {
+    if (planned.some((session) => !completed.has(`${index}:${session.index}`))) return index;
+  }
+  return Math.max(0, Math.min(initialIndex, horizon - 1));
+}
 
 export interface RoutineViewLabels {
   focus: (focus: PlannedSessionFocus) => string;
@@ -117,15 +160,18 @@ function toExerciseView(
   const last = planned.sets[planned.sets.length - 1];
   const max = last.targetReps;
   const min = last.targetRepsMin ?? max;
+  // The heavy single has its own effort; the exercise target is its working sets'.
+  const working = planned.sets.filter((set) => set.setType !== SetType.TOP_SINGLE);
+  const effort = working.length > 0 ? working : planned.sets;
   return {
     exerciseId: exercise.id,
     name: exercise.name,
     primaryMuscle: exercise.primaryMuscle,
     secondaryMuscles: [...exercise.secondaryMuscles],
     sets: planned.sets.map((set) => ({ setType: set.setType })),
-    restSeconds: restDurationFor(exercise.profile),
+    restSeconds: planned.restSeconds ?? restDurationFor(exercise.profile),
     repRange: min < max ? formatRepRange({ min, max }) : `${max}`,
-    targetRIR: Math.min(...planned.sets.map((set) => set.targetRIR)),
+    targetRIR: Math.min(...effort.map((set) => set.targetRIR)),
   };
 }
 
@@ -141,37 +187,54 @@ export function toRoutineView(
   mesocycle: Mesocycle | null,
   exerciseById: ReadonlyMap<string, Exercise>,
   labels: RoutineViewLabels,
+  completedSessions: readonly WorkoutSession[] = [],
 ): RoutineView | null {
   const planned = [...(mesocycle?.plannedSessions ?? [])].sort((a, b) => a.index - b.index);
   if (mesocycle === null || planned.length === 0) return null;
 
   const names = sessionNames(planned, labels.focus);
-  const current = mesocycle.currentMicrocycleIndex;
-  const count = Math.max(mesocycle.projectedMicrocycles ?? DEFAULT_PROJECTED_MICROCYCLES, current + 1);
+  const storedCurrent = mesocycle.currentMicrocycleIndex;
+  const count = Math.max(mesocycle.projectedMicrocycles ?? DEFAULT_PROJECTED_MICROCYCLES, storedCurrent + 1);
+  const completed = completedDatesByPlannedSession(completedSessions, mesocycle.id);
+  const current = firstIncompleteMicrocycle(storedCurrent, count, planned, completed);
 
-  // Volume is static within a mesocycle (§3): every microcycle repeats the same
-  // prescription, and only its ids differ so a session can be selected per microcycle.
-  const microcycles = Array.from({ length: count }, (_, index): MicrocycleView => ({
-    id: `${mesocycle.id}:m${index}`,
-    number: index + 1,
-    isDeload: count > 1 && index === count - 1,
-    isProjected: index > current,
-    volumeAdjustmentSets: 0,
-    intensityAdjustmentRIR: 0,
-    sessions: planned.map((session, position) => ({
-      id: `${mesocycle.id}:m${index}:s${session.index}`,
-      name: names[position],
-      exercises: [...session.exercises]
-        .sort((a, b) => a.order - b.order)
-        .map((exercise) => toExerciseView(exercise, exerciseById))
-        .filter((exercise): exercise is SessionExerciseView => exercise !== null),
-    })),
-  }));
+  const setsOf = (sessions: readonly PlannedSession[]) =>
+    sessions.flatMap((session) => session.exercises.flatMap((exercise) => exercise.sets));
+  const base = setsOf(planned);
+  const meanRIR = (sets: readonly { targetRIR: number }[]) =>
+    sets.reduce((sum, set) => sum + set.targetRIR, 0) / Math.max(1, sets.length);
+
+  // Volume is static within a mesocycle (§3); what moves between microcycles, the
+  // strength RIR ramp and the deload, comes from `prescriptionForMicrocycle`.
+  const microcycles = Array.from({ length: count }, (_, index): MicrocycleView => {
+    const sessions = prescriptionForMicrocycle(planned, routine.generation.goal, index, count);
+    const sets = setsOf(sessions);
+    return {
+      id: `${mesocycle.id}:m${index}`,
+      number: index + 1,
+      isDeload: isDeloadMicrocycle(index, count),
+      isProjected: index > current,
+      volumeAdjustmentSets: sets.length - base.length,
+      intensityAdjustmentRIR: meanRIR(sets) - meanRIR(base),
+      sessions: sessions.map((session, position) => ({
+        id: `${mesocycle.id}:m${index}:s${session.index}`,
+        plannedSessionIndex: session.index,
+        name: names[position],
+        completedOn: completed.get(`${index}:${session.index}`),
+        exercises: [...session.exercises]
+          .sort((a, b) => a.order - b.order)
+          .map((exercise) => toExerciseView(exercise, exerciseById))
+          .filter((exercise): exercise is SessionExerciseView => exercise !== null),
+      })),
+    };
+  });
 
   return {
     id: routine.id,
+    mesocycleId: mesocycle.id,
     name: routine.name,
     objective: labels.goal(routine.generation.goal),
+    generationGoal: routine.generation.goal,
     icon: routine.icon,
     color: routine.accentColor,
     domain: 'STRENGTH',
@@ -215,6 +278,8 @@ export function defaultExpandedRoutineId(routines: readonly RoutineView[]): stri
 export interface RoutineViewSources {
   listRoutines: (userId: string) => Promise<Routine[]>;
   getMesocycle: (mesocycleId: string) => Promise<Mesocycle | null>;
+  /** Optional while migrating older callers; production always supplies it. */
+  listWorkoutSessions?: (userId: string) => Promise<WorkoutSession[]>;
 }
 
 /** Loads the athlete's routines with their running mesocycle, ordered for the home. */
@@ -224,7 +289,10 @@ export async function loadRoutineViews(
   exerciseById: ReadonlyMap<string, Exercise>,
   labels: RoutineViewLabels,
 ): Promise<RoutineView[]> {
-  const routines = await sources.listRoutines(userId);
+  const [routines, completedSessions] = await Promise.all([
+    sources.listRoutines(userId),
+    sources.listWorkoutSessions?.(userId) ?? Promise.resolve([]),
+  ]);
   const mesocycles = await Promise.all(
     routines.map((routine) =>
       routine.activeMesocycleId === undefined
@@ -239,7 +307,7 @@ export async function loadRoutineViews(
     ]),
   );
   const views = routines
-    .map((routine, index) => toRoutineView(routine, mesocycles[index], exerciseById, labels))
+    .map((routine, index) => toRoutineView(routine, mesocycles[index], exerciseById, labels, completedSessions))
     .filter((view): view is RoutineView => view !== null);
   return orderRoutineViews(views, createdAt);
 }

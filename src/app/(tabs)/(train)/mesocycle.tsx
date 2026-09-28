@@ -8,17 +8,17 @@
  * No mezcla las series de ejercicios distintos como si fueran una progresión
  * única: esa representación no explicaba nada y se retiró.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { rirColor } from '@/components/train/rirColor';
 import { countWorkingSets } from '@/services/training/sessionSummary';
 import { maxVolume, sessionMicrocycleMetrics } from '@/services/training/sessionProgression';
-import { adjustSetRIRs, deriveSetRIRs } from '@/services/training/setIntensity';
-import { mockActiveRoutine } from '@/mocks/home';
+import { deriveSetRIRs } from '@/services/training/setIntensity';
+import { useRoutines } from '@/hooks/useRoutines';
 
 const PROJECTED_OPACITY = 0.4;
 const COMPLETED_OPACITY = 0.62;
@@ -30,25 +30,44 @@ export default function MesocycleScreen() {
   const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const routine = mockActiveRoutine;
+  const { mesocycleId } = useLocalSearchParams<{ mesocycleId?: string }>();
+  const { routines, status } = useRoutines();
+  const routine = routines.find((candidate) => candidate.mesocycleId === mesocycleId) ?? null;
 
   const [sessionIndex, setSessionIndex] = useState(0);
-  const [selectedIndex, setSelectedIndex] = useState(routine.currentMicrocycleIndex);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const sessionNames = routine.microcycles[0].sessions.map((session) => session.name);
+  useEffect(() => {
+    if (routine !== null) setSelectedIndex(routine.currentMicrocycleIndex);
+  }, [routine]);
+
+  const sessionNames = routine?.microcycles[0]?.sessions.map((session) => session.name) ?? [];
   const metrics = useMemo(
-    () => sessionMicrocycleMetrics(routine.microcycles, sessionIndex),
+    () => routine === null ? [] : sessionMicrocycleMetrics(routine.microcycles, sessionIndex),
     [routine, sessionIndex],
   );
   const volumeCeiling = maxVolume(metrics);
 
-  const selectedMicrocycle = routine.microcycles[selectedIndex];
-  const selectedSession = selectedMicrocycle.sessions[sessionIndex];
+  const selectedMicrocycle = routine?.microcycles[selectedIndex] ?? null;
+  const selectedSession = selectedMicrocycle?.sessions[sessionIndex] ?? null;
 
-  const completedSessions = routine.microcycles
+  const completedSessions = routine?.microcycles
     .flatMap((microcycle) => microcycle.sessions)
-    .filter((session) => session.completedOn !== undefined).length;
-  const totalSessions = routine.microcycles.length * routine.microcycles[0].sessions.length;
+    .filter((session) => session.completedOn !== undefined).length ?? 0;
+  const totalSessions = (routine?.microcycles.length ?? 0) * (routine?.microcycles[0]?.sessions.length ?? 0);
+
+  if (routine === null || selectedMicrocycle === null || selectedSession === null) {
+    return (
+      <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
+        <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backRow}>
+          <Text style={[styles.back, { color: colors.textSecondary }]}>‹ {t('tabs.train')}</Text>
+        </Pressable>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>
+          {status === 'loading' ? t('train.loadingPlan') : t('train.sessionUnavailable')}
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
@@ -203,10 +222,9 @@ export default function MesocycleScreen() {
 
           {selectedSession.exercises.map((exercise) => {
             const workingSets = countWorkingSets(exercise.sets);
-            const setRIRs = adjustSetRIRs(
-              deriveSetRIRs(exercise.targetRIR, workingSets),
-              selectedMicrocycle.intensityAdjustmentRIR,
-            );
+            // `routineView` already resolves this microcycle's prescription;
+            // applying its delta again would make the strength RIR ramp twice as steep.
+            const setRIRs = deriveSetRIRs(exercise.targetRIR, workingSets);
             return (
               <View
                 key={exercise.exerciseId}

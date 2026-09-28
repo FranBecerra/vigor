@@ -33,6 +33,7 @@ import {
   MovementVector,
   MuscleGroup,
   type Exercise,
+  type StrengthRole,
 } from '@/models';
 import { criteriaOf, stimulusQuality } from './exerciseCatalogue';
 import { attributedVolumePerMinute, ISOLATION_VOLUME_PER_MINUTE } from './trainingCapacity';
@@ -167,10 +168,33 @@ export const DEFAULT_SELECTION_CONFIG: SelectionConfig = {
   stimulusOverlapPenalty: 0.8,
 };
 
+/** One appearance of a strength lift in the microcycle. */
+export interface StrengthExposure {
+  /** Sets in this appearance, the top single included when there is one. */
+  sets: number;
+  /** true when the first set is a heavy single (only the main lift's heavy day). */
+  topSingle: boolean;
+}
+
+/**
+ * How a strength plan prescribes an exercise. Absent in hypertrophy plans, whose
+ * rest and repetitions follow the exercise profile.
+ */
+export interface StrengthPrescription {
+  role: StrengthRole;
+  restSeconds: number;
+  /**
+   * Explicit appearances. A main lift trained twice is ONE exercise with two
+   * exposures, so the distributor places it in two different sessions.
+   */
+  exposures: StrengthExposure[];
+}
+
 export interface SelectedExercise {
   exercise: Exercise;
   /** Series EJECUTADAS de este ejercicio por microciclo. */
   sets: number;
+  strength?: StrengthPrescription;
 }
 
 export interface UnmetVolume {
@@ -389,6 +413,9 @@ function credit(
 export function selectExercises(input: SelectionInput): SelectionResult {
   const config = { ...DEFAULT_SELECTION_CONFIG, ...input.config };
   const random = createRandom(input.seed);
+  const pool = input.catalogue.filter(
+    (exercise) => exercise.generationTier !== ExerciseGenerationTier.STRENGTH_VARIANT,
+  );
   const maxExercisesPerMuscle =
     input.timeConstrained === true
       ? Math.min(config.maxExercisesPerMuscle, config.maxExercisesPerMuscleWhenTimeConstrained)
@@ -511,7 +538,7 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     const trains = muscles.some((muscle) => (targets.get(muscle) ?? 0) > 0);
     if (!trains) return;
 
-    const rawCandidates = input.catalogue.filter(
+    const rawCandidates = pool.filter(
       (exercise) =>
         exercise.movementVector === vector &&
         isCompound(exercise) &&
@@ -554,7 +581,7 @@ export function selectExercises(input: SelectionInput): SelectionResult {
       continue;
     }
 
-    const rawAvailable = input.catalogue.filter(
+    const rawAvailable = pool.filter(
       (exercise) =>
         exercise.primaryMuscle === muscle &&
         !chosen.has(exercise.id) &&
@@ -658,6 +685,34 @@ export function selectExercises(input: SelectionInput): SelectionResult {
   }
 
   const selected = [...chosen.values()];
+  return summarizeSelection(selected, input.volumePlan, missingFoundationalPatterns, config.minSetsPerExercise);
+}
+
+/**
+ * The derived figures of a selection: executed and attributed sets, per-muscle
+ * credit, pattern counts, unmet volume and the total-volume verdict. Shared by the
+ * hypertrophy selector and the strength program so both report the same way.
+ */
+export function summarizeSelection(
+  selected: SelectedExercise[],
+  volumePlan: VolumePlan,
+  missingFoundationalPatterns: MovementVector[],
+  minSetsPerExercise: number = DEFAULT_SELECTION_CONFIG.minSetsPerExercise,
+): SelectionResult {
+  const attributed = new Map<MuscleGroup, number>();
+  const vectorCounts = new Map<MovementVector, number>();
+  selected.forEach((entry) => {
+    credit(attributed, entry.exercise, entry.sets);
+    vectorCounts.set(
+      entry.exercise.movementVector,
+      (vectorCounts.get(entry.exercise.movementVector) ?? 0) + 1,
+    );
+  });
+  const targets = new Map<MuscleGroup, number>();
+  volumePlan.muscles.forEach((target) => {
+    if (target.meav > 0) targets.set(target.muscle, target.meav);
+  });
+
   const performedSets = selected.reduce((sum, entry) => sum + entry.sets, 0);
   const attributedSets = selected.reduce(
     (sum, entry) => sum + entry.sets * (1 + entry.exercise.secondaryMuscles.length * SECONDARY_CREDIT),
@@ -675,7 +730,7 @@ export function selectExercises(input: SelectionInput): SelectionResult {
         muscle,
         target,
         attributed: got,
-        uncloseable: deficit < config.minSetsPerExercise,
+        uncloseable: deficit < minSetsPerExercise,
       });
     }
   });
@@ -688,9 +743,9 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     // recuperación por construcción, así que compararlos con él daría siempre
     // 'below' y el veredicto no diría nada de lo que importa.
     totalVerdict:
-      input.volumePlan.isDeload || input.volumePlan.capacityCapped
+      volumePlan.isDeload || volumePlan.capacityCapped
         ? 'not-applicable'
-        : totalSetsVerdict(performedSets, input.volumePlan.goal, input.volumePlan.level),
+        : totalSetsVerdict(performedSets, volumePlan.goal, volumePlan.level),
     attributedByMuscle: Object.fromEntries(attributed) as Partial<Record<MuscleGroup, number>>,
     vectorCounts: Object.fromEntries(vectorCounts) as Partial<Record<MovementVector, number>>,
     missingFoundationalPatterns,

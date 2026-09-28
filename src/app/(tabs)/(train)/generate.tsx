@@ -20,7 +20,7 @@
  *   The generated selection is the thing the athlete is actually agreeing to, and the
  *   editor is a first-class requirement rather than a later repair.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -82,8 +82,11 @@ import {
 import {
   MAX_ROUTINE_NAME_LENGTH,
   normalizeRoutineName,
+  routineNameProblem,
+  type RoutineNameProblem,
   shouldActivateNewRoutine,
   toMesocycleDraft,
+  toPlannedSessions,
   toRoutineDraft,
 } from '@/services/training/routineMapper';
 import {
@@ -98,9 +101,11 @@ import { rankSwapCandidates } from '@/services/training/swapEngine';
 import {
   applyPreviewEdits,
   previewEditKey,
+  representativeSet,
   type PreviewEdits,
 } from '@/services/training/previewEditing';
-import { mesocycleRepository, routineRepository } from '@/services/repositories';
+import { mesocycleRepository, routineRepository, workoutSessionRepository } from '@/services/repositories';
+import { e1RMByExerciseFromHistory } from '@/services/training/e1rmHistory';
 import {
   DEFAULT_GENERATOR_EQUIPMENT,
   DEFAULT_GENERATOR_GOAL,
@@ -236,9 +241,38 @@ export default function GenerateScreen() {
   const [previewEdits, setPreviewEdits] = useState<PreviewEdits>({});
   const [swapTarget, setSwapTarget] = useState<{ sessionIndex: number; order: number } | null>(null);
   const [saving, setSaving] = useState(false);
+  /** Shown only after a save attempt, so an untouched field is not an error yet. */
+  const [nameProblem, setNameProblem] = useState<RoutineNameProblem | null>(null);
+  const previewScrollRef = useRef<ScrollView>(null);
+  /** The name field sits at the top of the plan; a problem with it must be seen. */
+  const reportNameProblem = useCallback((problem: RoutineNameProblem) => {
+    setNameProblem(problem);
+    previewScrollRef.current?.scrollTo({ y: 0, animated: true });
+  }, []);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [recommending, setRecommending] = useState(false);
   const [recommendation, setRecommendation] = useState<CapacityRecommendation | null>(null);
+  const [e1rmByExerciseId, setE1rmByExerciseId] = useState<ReadonlyMap<string, number>>(new Map());
+
+  // Load only completed, actual sets. A generated target is not evidence for a
+  // load; the history map remains empty until the athlete has performed work.
+  useEffect(() => {
+    if (user === null) {
+      setE1rmByExerciseId(new Map());
+      return;
+    }
+    let cancelled = false;
+    workoutSessionRepository.listByUser(user.uid)
+      .then((history) => {
+        if (!cancelled) setE1rmByExerciseId(e1RMByExerciseFromHistory(history));
+      })
+      .catch((error: unknown) => {
+        // Generation remains usable offline: no history means RIR-only targets.
+        console.warn('[generate] e1RM history unavailable', error);
+        if (!cancelled) setE1rmByExerciseId(new Map());
+      });
+    return () => { cancelled = true; };
+  }, [user]);
 
   const settings = useMemo<GenerationSettings>(
     () => ({
@@ -357,22 +391,17 @@ export default function GenerateScreen() {
 
   const plannedSessions = useMemo<PlannedSession[]>(() => {
     if (plan === null) return [];
-    const base = toMesocycleDraft({
-      userId: user?.uid ?? '',
-      routineId: '',
-      plan,
-      now: 0,
-    }).plannedSessions ?? [];
+    const base = toPlannedSessions(plan, false, { e1rmByExerciseId });
     return applyPreviewEdits(base, previewEdits).map((session) => ({
       ...session,
       estimatedWorkMinutes: session.exercises.reduce((total, exercise) => {
         const catalogueExercise = exercisesById.get(exercise.exerciseId);
         return catalogueExercise === undefined
           ? total
-          : total + exerciseMinutes(catalogueExercise, exercise.sets.length);
+          : total + exerciseMinutes(catalogueExercise, exercise.sets.length, exercise.restSeconds);
       }, 0),
     }));
-  }, [exercisesById, plan, previewEdits, user?.uid]);
+  }, [e1rmByExerciseId, exercisesById, plan, previewEdits]);
   const plannedSetCount = useMemo(
     () => plannedSessions.reduce(
       (total, session) => total + session.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0),
@@ -443,7 +472,7 @@ export default function GenerateScreen() {
       const planned = plannedSessions
         .find((session) => session.index === sessionIndex)
         ?.exercises.find((exercise) => exercise.order === order);
-      const firstSet = planned?.sets[0];
+      const firstSet = representativeSet(planned?.sets ?? []);
       if (firstSet === undefined) return;
       const targetRepsMin = Math.max(1, Math.min(100, Math.trunc(value)));
       const targetReps = Math.max(targetRepsMin, firstSet.targetReps);
@@ -462,7 +491,7 @@ export default function GenerateScreen() {
       const planned = plannedSessions
         .find((session) => session.index === sessionIndex)
         ?.exercises.find((exercise) => exercise.order === order);
-      const firstSet = planned?.sets[0];
+      const firstSet = representativeSet(planned?.sets ?? []);
       if (firstSet === undefined) return;
       const targetReps = Math.max(1, Math.min(100, Math.trunc(value)));
       const targetRepsMin = Math.min(firstSet.targetRepsMin ?? firstSet.targetReps, targetReps);
@@ -477,17 +506,27 @@ export default function GenerateScreen() {
 
   const onSave = useCallback(async () => {
     if (plan === null || user === null) return;
+    const chosenName = normalizeRoutineName(name);
+    if (chosenName === null) {
+      reportNameProblem('empty');
+      return;
+    }
     setSaving(true);
     setSaveError(null);
     try {
       const now = Date.now();
       const routineId = `${user.uid}-${now}`;
       const existing = await routineRepository.listByUser(user.uid);
+      const problem = routineNameProblem(chosenName, existing.map((routine) => routine.name));
+      if (problem !== null) {
+        reportNameProblem(problem);
+        return;
+      }
       await routineRepository.create({
         id: routineId,
         ...toRoutineDraft({
           userId: user.uid,
-          name: normalizeRoutineName(name) ?? t('generate.namePlaceholder'),
+          name: chosenName,
           icon: 'barbell',
           accentColor: sectionAccent.train,
           isActive: shouldActivateNewRoutine(existing),
@@ -544,6 +583,7 @@ export default function GenerateScreen() {
     seed,
     plannedSessions,
     router,
+    reportNameProblem,
   ]);
 
   const onCycleRegion = useCallback((region: VolumeRegion) => {
@@ -849,6 +889,7 @@ export default function GenerateScreen() {
         >
           {plan !== null && (
             <ScrollView
+              ref={previewScrollRef}
               contentContainerStyle={{
                 paddingTop: insets.top + spacing.lg,
                 paddingHorizontal: spacing.lg,
@@ -869,17 +910,21 @@ export default function GenerateScreen() {
               <Section title={t('generate.name')}>
                 <TextInput
                   value={name}
-                  onChangeText={setName}
+                  onChangeText={(value) => {
+                    setName(value);
+                    setNameProblem(null);
+                  }}
                   maxLength={MAX_ROUTINE_NAME_LENGTH}
                   placeholder={t('generate.namePlaceholder')}
                   placeholderTextColor={colors.textMuted}
                   returnKeyType="done"
+                  accessibilityHint={t('generate.nameRequired')}
                   style={[
                     typography.body,
                     {
                       color: colors.textPrimary,
                       backgroundColor: colors.surface,
-                      borderColor: colors.surfaceBorder,
+                      borderColor: nameProblem === null ? colors.surfaceBorder : semantic.danger,
                       borderWidth: 1,
                       borderRadius: radius.md,
                       paddingHorizontal: spacing.lg,
@@ -887,6 +932,11 @@ export default function GenerateScreen() {
                     },
                   ]}
                 />
+                {nameProblem !== null && (
+                  <Text style={[typography.caption, { color: semantic.danger, marginTop: spacing.xs }]}>
+                    {t(nameProblem === 'empty' ? 'generate.nameRequired' : 'generate.nameDuplicate')}
+                  </Text>
+                )}
               </Section>
               {plan.strength?.missingBarbell === true && (
                 <Text

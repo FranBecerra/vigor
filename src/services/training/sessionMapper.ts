@@ -73,6 +73,8 @@ export interface SessionContext {
   mesocycleId: string;
   microcycleId: string;
   microcycleIndex: number;
+  /** Exact prescribed session that this execution belongs to, when it has one. */
+  plannedSessionIndex?: number;
   performedAt: number;
   /** Instante de cierre. Ausente mientras la sesión sigue en curso. */
   completedAt?: number;
@@ -93,6 +95,9 @@ export function toWorkoutSession(
     exercises: toWorkoutExercises(exerciseOrder, setsByExercise),
     performedAt: context.performedAt,
   };
+  if (context.plannedSessionIndex !== undefined) {
+    session.plannedSessionIndex = context.plannedSessionIndex;
+  }
   // Se omite la clave en lugar de escribir `undefined`: Firestore rechaza
   // valores undefined, y un campo ausente es la forma correcta de decir
   // "todavía no ha ocurrido".
@@ -141,9 +146,20 @@ export function sessionProgress(setsByExercise: SessionSetsByExercise): {
   };
 }
 
-/** true si la sesión no tiene ningún dato que merezca guardarse. */
+/**
+ * True until the athlete has entered any actual work. Prescribed rows exist as
+ * soon as a planned session opens, but they are not a workout history record.
+ */
 export function isSessionEmpty(setsByExercise: SessionSetsByExercise): boolean {
-  return Object.values(setsByExercise).every((sets) => sets.length === 0);
+  return Object.values(setsByExercise).every((sets) =>
+    sets.every(
+      (set) =>
+        set.actualWeight === undefined &&
+        set.actualReps === undefined &&
+        set.actualRIR === undefined &&
+        !set.extensions?.some((extension) => extension.reps !== undefined || extension.weight !== undefined),
+    ),
+  );
 }
 
 /** Tramos extra normalizados: descarta los que el usuario dejó sin rellenar. */

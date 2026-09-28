@@ -242,24 +242,28 @@ function microcycle(
     sessions: [
       {
         id: `m${number}-push`,
+        plannedSessionIndex: 0,
         name: 'Push',
         exercises: pushExercises,
         completedOn: completed.push,
       },
       {
         id: `m${number}-pull`,
+        plannedSessionIndex: 1,
         name: 'Pull',
         exercises: pullExercises,
         completedOn: completed.pull,
       },
       {
         id: `m${number}-upper`,
+        plannedSessionIndex: 2,
         name: 'Upper',
         exercises: upperExercises,
         completedOn: completed.upper,
       },
       {
         id: `m${number}-lower`,
+        plannedSessionIndex: 3,
         name: 'Lower',
         exercises: lowerExercises,
         completedOn: completed.lower,
@@ -271,8 +275,10 @@ function microcycle(
 export const mockRoutines: MockRoutine[] = [
   {
     id: 'pplu',
+    mesocycleId: 'pplu-m0',
     name: 'Push Pull Legs Upper',
     objective: 'Hipertrofia',
+    generationGoal: 'HYPERTROPHY',
     icon: 'dumbbell',
     color: '#9BE317',
     domain: 'STRENGTH',
@@ -303,8 +309,10 @@ export const mockRoutines: MockRoutine[] = [
   },
   {
     id: 'strength-max',
+    mesocycleId: 'strength-max-m0',
     name: 'Fuerza Máxima',
     objective: 'Fuerza',
+    generationGoal: 'STRENGTH',
     icon: 'barbell',
     color: '#3FE0A9',
     domain: 'STRENGTH',
