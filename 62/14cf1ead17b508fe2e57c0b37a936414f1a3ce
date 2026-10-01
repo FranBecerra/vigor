@@ -1,0 +1,40 @@
+.gitignore
+  h_d173179e252590 55-58
+PRD.md
+  h_d173179e252590 2718-2725
+docs/audits/2026-10-01-triceps-closure.md
+  h_d173179e252590 1-49
+docs/generator-technical-debt.md
+  h_d173179e252590 99-102
+src/app/(tabs)/(train)/generate.tsx
+  h_d173179e252590 656,1109
+src/app/(tabs)/(train)/routine.tsx
+  h_d173179e252590 252,439,446,544
+src/data/exercise-evidence.json
+  h_d173179e252590 2129,2132-2134,2137-2139,2152-2154,2159,2163,2188,2193,2195,2197,2200-2201,2222,2231,2236,2241,2251,2256,2265,2270,2275,2290,2302,2307,2322,2329,2334,2354,2359-2363,2371-2373,2388
+src/data/exercises.json
+  h_d173179e252590 1235,1291,1306,1325,1339,1343,1363
+src/services/training/__tests__/guideExerciseCatalogue.test.ts
+  h_d173179e252590 7,46-47
+src/services/training/__tests__/mesocyclePlanner.test.ts
+  h_d173179e252590 33
+src/services/training/__tests__/tricepsSourceReview.test.ts
+  h_d173179e252590 4-5,7,28-29,54-96
+src/services/training/guideExerciseCatalogue.ts
+  h_d173179e252590 10,287-289,311-312,314,323,328
+src/services/training/mesocyclePlanner.ts
+  h_d173179e252590 211,218,279-284,286-290,292-301,304-315,317-331
+src/services/training/tricepsSourceReview.ts
+  h_d173179e252590 2,79-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6214cf1ead17b508fe2e57c0b37a936414f1a3ce",
+  "prompts": {},
+  "humans": {
+    "h_d173179e252590": {
+      "author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
