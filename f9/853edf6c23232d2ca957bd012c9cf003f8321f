@@ -1,0 +1,701 @@
+src/services/training/__tests__/microcyclePrescription.test.ts
+  s_b6a0f22c32fc5f::t_8f18f1a738fe20 113-122
+  s_b6a0f22c32fc5f::t_3829e199374e76 128-146,148
+  s_b6a0f22c32fc5f::t_be7f0a9894f048 149,151-159
+  s_b6a0f22c32fc5f::t_fa69be02c7db01 160-171
+  s_b6a0f22c32fc5f::t_f589c7f8ce6ab0 150
+src/app/(tabs)/(train)/index.tsx
+  s_b6a0f22c32fc5f::t_ef7ec4822c49c6 258
+  s_b6a0f22c32fc5f::t_5aed93f081ea5c 199
+  s_b6a0f22c32fc5f::t_0c74d0445d7457 253
+  s_b6a0f22c32fc5f::t_ab7c6fe4dfa629 65,68-69,144-152,185-187,259-264
+  s_b6a0f22c32fc5f::t_127a5aaa8491b9 25,197-198
+src/components/train/ScheduleTemplateView.tsx
+  s_b6a0f22c32fc5f::t_9e581d2afe0194 1-30
+src/services/training/__tests__/generatorQuality.test.ts
+  s_b6a0f22c32fc5f::t_555835f13acf48 1-17,21-28,30-47,49-53
+  s_b6a0f22c32fc5f::t_724e35a8be246b 147-157
+  s_b6a0f22c32fc5f::t_6652d8cf12ae99 20
+  s_b6a0f22c32fc5f::t_258b8e3cc5e08c 18-19
+  s_b6a0f22c32fc5f::t_fbc64433902731 48,136-145
+  s_b6a0f22c32fc5f::t_86bcac166d4d8e 117-135,146
+  s_b6a0f22c32fc5f::t_d66e1f25d460cb 29,95-115
+  s_b6a0f22c32fc5f::t_5fbb2c38157e96 54-94,116
+docs/audits/2026-10-01-quality-contract-battery.md
+  s_b6a0f22c32fc5f::t_e4ce6196b97dfc 1-88
+src/services/training/generatorQuality.ts
+  s_b6a0f22c32fc5f::t_17a290b5982be5 70-71,97,104,180
+  s_b6a0f22c32fc5f::t_a66879e3142a90 11,108-110
+  s_b6a0f22c32fc5f::t_53f90fae5af770 8-10,114-115,141,181
+  s_b6a0f22c32fc5f::t_6652d8cf12ae99 183
+  s_b6a0f22c32fc5f::t_abf6ed6d66d4a1 67-69
+  s_b6a0f22c32fc5f::t_4b8968a171af07 150-151
+  s_b6a0f22c32fc5f::t_ba162b455ad4e2 185-187
+  s_b6a0f22c32fc5f::t_4e1d626f8cba5d 137-140
+  s_b6a0f22c32fc5f::t_9a39729731ebe2 1-7,14-21,23-49,56-66,72-73,78-86,89-96,98-103,105-107,111-113,116-136,172,177,179,184,188
+  s_b6a0f22c32fc5f::t_8000596a1145d0 12-13,22,50-55,74-77,87-88,142-149,152-171,173-176,178,182
+src/models/routine.ts
+  s_b6a0f22c32fc5f::t_6652d8cf12ae99 33-35
+  s_b6a0f22c32fc5f::t_8576f4c0b16b68 165-166
+  s_b6a0f22c32fc5f::t_f654a0064bb77b 29-32
+src/app/(tabs)/(train)/mesocycle.tsx
+  s_b6a0f22c32fc5f::t_f5a8efefe42e2f 241,244,283
+  s_b6a0f22c32fc5f::t_db13eecebe4792 57-61
+  s_b6a0f22c32fc5f::t_a907bf3328ab4b 54-56
+  s_b6a0f22c32fc5f::t_6b069c69872669 237-239
+  s_b6a0f22c32fc5f::t_008273cc321012 231
+  s_b6a0f22c32fc5f::t_9721b0a4e2d503 21
+  s_b6a0f22c32fc5f::t_c027ba640beba8 221-222,224,243
+src/services/training/guideExerciseCatalogue.ts
+  s_b6a0f22c32fc5f::t_acac9887eb6a97 216,306-307,311-312,316,320
+  s_b6a0f22c32fc5f::t_d1b9353baffe1c 103-110,112-116,119-131,133-143,145-149,151,155-157,159-161,163,169-170,198-199
+  s_b6a0f22c32fc5f::t_325189b27b05a7 174-175
+  s_b6a0f22c32fc5f::t_ecf6453de99900 1-8,11-102,171-173,176-197,203-207,209-210,213-215,219-242,247,249-250,252-272,274-283,288-305,309-310,313-315,317,324-329
+  s_b6a0f22c32fc5f::t_6be49ca5faa7c0 111,117-118,132,150,152,158,162,165-166,168,200-202,208
+  s_b6a0f22c32fc5f::t_e3d11f5e7499f6 144,153-154,164,167,217-218
+  s_b6a0f22c32fc5f::t_963513ee1254d7 9,243-246,248,251,273
+  s_b6a0f22c32fc5f::t_2b3ad4579277b2 211-212
+  s_b6a0f22c32fc5f::t_8adec1a94e9254 10,308,318-319,321-323
+  s_b6a0f22c32fc5f::t_868ea6a0c899b3 284-287
+src/services/training/exerciseMetadataReview.ts
+  s_b6a0f22c32fc5f::t_8adec1a94e9254 3-4,28-29,36-39
+  s_b6a0f22c32fc5f::t_4cf55c06bcbcae 1-2,5-27,30-35,40-49
+app.json
+  s_b6a0f22c32fc5f::t_7fb7510bec3151 13
+  s_b6a0f22c32fc5f::t_435899e1ce03c7 12
+  s_b6a0f22c32fc5f::t_f208b9bbebbb14 48-49
+src/mocks/home.ts
+  s_b6a0f22c32fc5f::t_207e793ae7e068 9,282,317
+src/services/training/exercisePrescription.ts
+  s_b6a0f22c32fc5f::t_8daa252b2399bf 67-69
+src/models/training.ts
+  s_b6a0f22c32fc5f::t_d5e0ec8011865c 56-61
+  s_b6a0f22c32fc5f::t_f654a0064bb77b 62-63
+  s_b6a0f22c32fc5f::t_6652d8cf12ae99 65
+  s_b6a0f22c32fc5f::t_a79d6fedf920ef 76-78
+  s_b6a0f22c32fc5f::t_53f90fae5af770 64
+src/services/training/sessionDistribution.ts
+  s_b6a0f22c32fc5f::t_cf0103ee9ba6b9 576-594,597-620
+  s_b6a0f22c32fc5f::t_3d30c5bd1b1e6e 927-931,987,991-1000
+  s_b6a0f22c32fc5f::t_23bc9e417836b1 1004-1008,1015
+  s_b6a0f22c32fc5f::t_c4a3406b108dc8 103-104,148-149,152-154,378-400,488-500,502,505-528,575,659,1149-1157,1213-1219
+  s_b6a0f22c32fc5f::t_d005ba4d8da6c0 401-410,501,529-554,557-574
+  s_b6a0f22c32fc5f::t_d529781c361d6d 44,622,627,631,684,1003
+  s_b6a0f22c32fc5f::t_f55e0f1b37fe27 176-179,181-182,192
+  s_b6a0f22c32fc5f::t_17426adcfb1642 433-452,455-466,469-487
+  s_b6a0f22c32fc5f::t_bbe1c417150ac0 411-432,453-454,467-468,503-504,555-556,595-596
+  s_b6a0f22c32fc5f::t_23606fbe2a5627 875
+  s_b6a0f22c32fc5f::t_10e87ba17daaaf 988-990
+  s_b6a0f22c32fc5f::t_028d2abcc35b87 1001-1002
+  s_b6a0f22c32fc5f::t_dc782cf2e8bc2f 621,623-626,628-630,632-658,1221
+  s_b6a0f22c32fc5f::t_b9da0b3dfdd29a 660,1220
+src/services/training/__tests__/exerciseCatalogue.test.ts
+  s_b6a0f22c32fc5f::t_4eb985e5998fed 403-408
+  s_b6a0f22c32fc5f::t_2a7293fc6926b3 462-463,469
+  s_b6a0f22c32fc5f::t_3192b1ec0c206c 195,197-201,248,251-258,261
+  s_b6a0f22c32fc5f::t_a3fc78e96ddd91 259-260
+  s_b6a0f22c32fc5f::t_acac9887eb6a97 249-250
+  s_b6a0f22c32fc5f::t_17aa4b4b924c45 296-298
+  s_b6a0f22c32fc5f::t_d62840f479796b 262-263
+src/services/training/__tests__/tricepsSourceReview.test.ts
+  s_b6a0f22c32fc5f::t_abf6ed6d66d4a1 1-22,26-51
+  s_b6a0f22c32fc5f::t_706c8f4a164f52 23-25
+src/data/exercises.json
+  s_b6a0f22c32fc5f::t_04052ef331abd8 993,1570
+src/services/training/strengthProgram.ts
+  s_b6a0f22c32fc5f::t_27b5b6562bcee7 269-271,280,293,311,331,358
+src/services/training/exerciseFamilies.ts
+  s_b6a0f22c32fc5f::t_d529781c361d6d 1-37
+src/services/training/previewEditing.ts
+  s_b6a0f22c32fc5f::t_9ca1164811e7e9 72,134-135,144-145,148-149
+  s_b6a0f22c32fc5f::t_6e6cb2c378352d 84-88,178-194,200-202,207-209
+  s_b6a0f22c32fc5f::t_97acabf97e5ca9 89-98
+  s_b6a0f22c32fc5f::t_9963dec781b937 113,128-132,136,139,151-153,157
+  s_b6a0f22c32fc5f::t_4fbda3eaae65b8 73,133,138,143
+  s_b6a0f22c32fc5f::t_ed79ada136b0f5 12-22
+  s_b6a0f22c32fc5f::t_4c7e0f20171079 3,140-142,155-156,158-159,161,166
+  s_b6a0f22c32fc5f::t_9721b0a4e2d503 4-11,23-55
+  s_b6a0f22c32fc5f::t_e92fab144633e4 67,164-165
+src/services/training/__tests__/routineView.test.ts
+  s_b6a0f22c32fc5f::t_dc8bab660d55ee 26-47
+  s_b6a0f22c32fc5f::t_df46e5681c0c31 344-360
+  s_b6a0f22c32fc5f::t_ff1f66f0a90e4b 48-59
+docs/audits/2026-10-01-quality-after.md
+  s_58860a6dd107b9::t_44ed1e36d117ec 1-383,395-471,483-559,571-616
+  s_b6a0f22c32fc5f::t_7ce3db9d17af51 384-394,472-482,560-570
+src/services/training/__tests__/sessionSummary.test.ts
+  s_b6a0f22c32fc5f::t_555835f13acf48 198,200,203,205,213,218
+src/services/training/__tests__/guideExerciseCatalogue.test.ts
+  s_b6a0f22c32fc5f::t_ef3fe88a82b3cf 1-2,7-13,25-32,34-38,41-43,50-51,56-60,62-67,102-108
+  s_b6a0f22c32fc5f::t_354a60412a13c0 81-82
+  s_b6a0f22c32fc5f::t_e3d11f5e7499f6 14-24
+  s_b6a0f22c32fc5f::t_3cf1e74d7775d9 3,49,52-55,61,68-69,74,83-99,101
+  s_b6a0f22c32fc5f::t_acac9887eb6a97 33,45-48
+  s_b6a0f22c32fc5f::t_325189b27b05a7 70-71,100
+  s_b6a0f22c32fc5f::t_30e596c718449e 4-6,72-73,75-79
+  s_b6a0f22c32fc5f::t_8adec1a94e9254 44
+  s_b6a0f22c32fc5f::t_b2394e1049007f 80
+  s_b6a0f22c32fc5f::t_92835309467d61 39-40
+src/services/training/__tests__/exerciseMetadataReview.test.ts
+  s_b6a0f22c32fc5f::t_ff1f66f0a90e4b 1-29
+src/services/training/volumePlan.ts
+  s_b6a0f22c32fc5f::t_2212ecb1541498 62,158-163
+  s_b6a0f22c32fc5f::t_a61eaee7ee2b9d 164
+src/i18n/locales/es.json
+  s_b6a0f22c32fc5f::t_b0bcdb63d67560 176-180,182-185,187-188,199
+  s_b6a0f22c32fc5f::t_bb7d7b77d88395 150
+  s_b6a0f22c32fc5f::t_e6c59f08e401aa 241
+  s_b6a0f22c32fc5f::t_61097966ef1bc0 280
+  s_b6a0f22c32fc5f::t_d2292d48ee2875 327
+  s_b6a0f22c32fc5f::t_6168ba5e6db1fa 281-282
+  s_b6a0f22c32fc5f::t_3a933899e1ef24 9-11
+  s_b6a0f22c32fc5f::t_f9d83e1c5f741d 181
+  s_b6a0f22c32fc5f::t_3d0498accada4e 195-196
+  s_b6a0f22c32fc5f::t_a7f5dc68bacd14 197-198
+  s_b6a0f22c32fc5f::t_57d1724b3cc0b1 288
+  s_b6a0f22c32fc5f::t_7af04fb2b5d89b 8
+  s_b6a0f22c32fc5f::t_e92fab144633e4 2,12-23
+  s_b6a0f22c32fc5f::t_76aa02caa7b9e1 283-286
+  s_b6a0f22c32fc5f::t_6c8046bb2cba8d 238-240,247-248
+  s_b6a0f22c32fc5f::t_bb2ec55e02e25b 270
+  s_b6a0f22c32fc5f::t_0c74d0445d7457 186
+  s_b6a0f22c32fc5f::t_dc8bab660d55ee 299
+  s_b6a0f22c32fc5f::t_08bb227bf399bf 189-190
+  s_b6a0f22c32fc5f::t_bcd32a24b385ad 223-224
+  s_b6a0f22c32fc5f::t_07e5a36eacbba5 191-194,271-272
+  s_b6a0f22c32fc5f::t_258b8e3cc5e08c 3-7
+  s_b6a0f22c32fc5f::t_0dc5c2f9ed9350 257-258,274-275
+src/services/training/__tests__/sessionProgression.test.ts
+  s_b6a0f22c32fc5f::t_3829e199374e76 52-59,87,97,101
+src/services/training/restTimer.ts
+  s_b6a0f22c32fc5f::t_f55e0f1b37fe27 56-57
+src/services/training/__tests__/policyPromotion.test.ts
+  s_b6a0f22c32fc5f::t_5f6855108b204e 1,4,50-69
+  s_b6a0f22c32fc5f::t_706c8f4a164f52 2-3,5-49,70
+src/app/(tabs)/(train)/routine.tsx
+  s_b6a0f22c32fc5f::t_e92fab144633e4 232,462-463,466-469
+  s_b6a0f22c32fc5f::t_eda58e1f88c90e 2,4,11-12,61,70,82,85-88,118-120,122-124,127,135,138,146-147,150-157,159,164-167,169-171,173-175,177-178
+  s_b6a0f22c32fc5f::t_7bd6f815085e04 395,402-405
+  s_b6a0f22c32fc5f::t_3f3febe5fb47e9 28,226-231,236-241,439-461,470-532
+  s_b6a0f22c32fc5f::t_9938f82a5842fc 383
+  s_b6a0f22c32fc5f::t_58c6bc59ae33a9 1,5-9,15-17,24,30-37,41-43,45,54-60,62,71-72,77-81,84,89-105,109-115,131-134,142-145,158,160-163,179,225,242-243,249-254,263,277,279,301-302,310,392-394,396-401,406-407,409-410,418-419,438,533-546
+  s_b6a0f22c32fc5f::t_77b7b216d11bf6 3,18-19,25-27,38-40,46-51,73-76,83,121,128
+  s_b6a0f22c32fc5f::t_e66d428479ad55 21,29,52-53,129,200-203,214
+  s_b6a0f22c32fc5f::t_3c2bc2cc0ca976 136-137,255,259-262,278,280-300,303-309,311-319,388-391,437
+  s_b6a0f22c32fc5f::t_c588186687e9be 10,106-108,116-117
+  s_b6a0f22c32fc5f::t_5aed93f081ea5c 381
+  s_b6a0f22c32fc5f::t_4fbda3eaae65b8 13,130,428-436
+  s_b6a0f22c32fc5f::t_127a5aaa8491b9 20,380
+  s_b6a0f22c32fc5f::t_a7f5dc68bacd14 369
+  s_b6a0f22c32fc5f::t_b6b3bb62f50f74 256-258,264-276,320-368,370-379,382
+  s_b6a0f22c32fc5f::t_22081572b58b82 44,63-69,244-248
+  s_b6a0f22c32fc5f::t_44d6c6577ddb66 384-387
+  s_b6a0f22c32fc5f::t_d09368595a6e42 22-23,464-465
+  s_b6a0f22c32fc5f::t_f9d83e1c5f741d 14,139-141,408,411-414,417,420-424,427
+  s_b6a0f22c32fc5f::t_9ca1164811e7e9 233-235,415-416,425-426
+  s_b6a0f22c32fc5f::t_56c23214f96223 125-126,148-149,168,172,176,180-199,204-213,215-224
+src/app/(tabs)/(train)/generate.tsx
+  s_b6a0f22c32fc5f::t_ed79ada136b0f5 58,1028-1029
+  s_b6a0f22c32fc5f::t_21c8bb564ea1d4 867-871
+  s_b6a0f22c32fc5f::t_f6c4d26f83965b 1071
+  s_b6a0f22c32fc5f::t_59c41d26a588b3 106,109,248,250,388,390,405-407,416,424,464-476,1007-1022,1055-1061
+  s_b6a0f22c32fc5f::t_da2b1e23eda41e 145-147,153-154
+  s_b6a0f22c32fc5f::t_7af04fb2b5d89b 539,1089
+  s_b6a0f22c32fc5f::t_bcd32a24b385ad 57,425-430,987-1000
+  s_b6a0f22c32fc5f::t_552d917b653eb3 39,1066,1110
+  s_b6a0f22c32fc5f::t_8dffa62919773f 1062
+docs/audits/2026-09-30-review.md
+  s_b6a0f22c32fc5f::t_f32e36dfe2b917 1-96
+src/services/training/__tests__/sessionCoherence.test.ts
+  s_b6a0f22c32fc5f::t_a66879e3142a90 3-5,29-43
+  s_b6a0f22c32fc5f::t_abf6ed6d66d4a1 1-2,6-28,44
+src/services/training/routineView.ts
+  s_b6a0f22c32fc5f::t_eee39969e08694 45,49,181
+  s_b6a0f22c32fc5f::t_5aed93f081ea5c 54,236-237,302,304-305
+  s_b6a0f22c32fc5f::t_72cbab46df107c 31,62,128,131-133,209-210,221,235,303
+  s_b6a0f22c32fc5f::t_c588186687e9be 14,88,273
+  s_b6a0f22c32fc5f::t_3a933899e1ef24 24-25,81,246-265,267
+src/components/train/generate/GenerateControls.tsx
+  s_b6a0f22c32fc5f::t_21c8bb564ea1d4 171
+src/app/(tabs)/(train)/session.tsx
+  s_b6a0f22c32fc5f::t_72cbab46df107c 48,128
+src/services/training/__tests__/trainingCalendar.test.ts
+  s_b6a0f22c32fc5f::t_555835f13acf48 1-2,4,16-45,59-72,78
+  s_b6a0f22c32fc5f::t_53626aaebf7c16 73-77
+  s_b6a0f22c32fc5f::t_ff1f66f0a90e4b 46-58
+  s_b6a0f22c32fc5f::t_e9dd8f2b175f1c 3,5-15
+scripts/report-triceps-review.ts
+  s_b6a0f22c32fc5f::t_73b0afad2bc9a5 1-64
+src/services/training/exerciseSelection.ts
+  s_b6a0f22c32fc5f::t_43cc3dca6575f1 456
+  s_b6a0f22c32fc5f::t_e4506f7d17fc93 466-468
+  s_b6a0f22c32fc5f::t_e9a7e95a1a0974 370-372
+  s_b6a0f22c32fc5f::t_1e1c0822e5876c 457-465,469-470,664,666,715-717,744
+  s_b6a0f22c32fc5f::t_27b5b6562bcee7 508-509
+  s_b6a0f22c32fc5f::t_d10f3386a27c3e 39,515-516,694-697
+  s_b6a0f22c32fc5f::t_d740912a79ef92 373,484-489,539,789-809
+  s_b6a0f22c32fc5f::t_5a5526fb7e43bb 22-24,322-323,505
+  s_b6a0f22c32fc5f::t_9a236a55971e27 709-713,720
+  s_b6a0f22c32fc5f::t_67c3a74322c62e 440,497-498
+  s_b6a0f22c32fc5f::t_1586b7a881724f 597-599
+  s_b6a0f22c32fc5f::t_a3fc78e96ddd91 663
+  s_b6a0f22c32fc5f::t_d9d2e87e42bf07 36,471-482,745-752
+  s_b6a0f22c32fc5f::t_812f9ad1f63781 348-369,375-393,415-417,601,605,812-817
+  s_b6a0f22c32fc5f::t_da2b1e23eda41e 302-304,313-314
+  s_b6a0f22c32fc5f::t_3f03b0c78b3ac0 733-735
+  s_b6a0f22c32fc5f::t_4d13b62587d85d 524,535-538,540-543,625-628,683,786,836
+  s_b6a0f22c32fc5f::t_f9fbe4185e3157 411,414,441,483,669-670,726,811
+  s_b6a0f22c32fc5f::t_ced9f2b2bf024d 374
+  s_b6a0f22c32fc5f::t_202dc1fdf5442b 753
+src/services/training/sessionDuration.ts
+  s_b6a0f22c32fc5f::t_67c3a74322c62e 1-23,25-26
+  s_b6a0f22c32fc5f::t_ba162b455ad4e2 24
+src/services/training/__tests__/generatorQualityContract.test.ts
+  s_b6a0f22c32fc5f::t_5fbb2c38157e96 1-34
+docs/audits/jm-kaz-catalogue-review.md
+  s_b6a0f22c32fc5f::t_a3fc78e96ddd91 1-2,4-16,18-19
+  s_b6a0f22c32fc5f::t_43cc3dca6575f1 3,17
+src/services/training/__tests__/sessionDistribution.test.ts
+  s_b6a0f22c32fc5f::t_0e9364a88addac 62-65
+docs/audits/2026-10-01-catalogue-review.json
+  s_58860a6dd107b9::t_8ba32476bbe6a2 1-27059
+docs/audits/2026-10-01-triceps-source-review.md
+  s_58860a6dd107b9::t_fce2e207173487 1-66
+docs/audits/2026-09-30-initial-comparison.md
+  s_b6a0f22c32fc5f::t_119acb18441e0e 1-137
+src/services/training/exerciseCatalogue.ts
+  s_b6a0f22c32fc5f::t_61097966ef1bc0 67-70
+  s_b6a0f22c32fc5f::t_8311d51f381b1c 37-38,174-176,182
+  s_b6a0f22c32fc5f::t_7b38383cd0b15a 16-19
+  s_b6a0f22c32fc5f::t_67c3a74322c62e 161
+  s_b6a0f22c32fc5f::t_a3fc78e96ddd91 245-247
+  s_b6a0f22c32fc5f::t_72b00b273a165d 256-257
+  s_b6a0f22c32fc5f::t_2b3ad4579277b2 280-284
+  s_b6a0f22c32fc5f::t_461f91a39e7b23 12,53-55,214,216-217
+  s_b6a0f22c32fc5f::t_eda71217cdbe3e 208-212
+  s_b6a0f22c32fc5f::t_afff85f4b4aa2b 75,218
+src/services/training/guideScoringRubric.ts
+  s_b6a0f22c32fc5f::t_f7f53be5b9e968 43-47
+  s_b6a0f22c32fc5f::t_8a02b366b08fca 1-42,48-58,60-64,66-68
+  s_b6a0f22c32fc5f::t_325189b27b05a7 59,65
+src/services/training/generatorDefaults.ts
+  s_b6a0f22c32fc5f::t_da2b1e23eda41e 15-17,23-24
+scripts/__tests__/generator-audit.test.ts
+  s_b6a0f22c32fc5f::t_96abe40110ae27 4,126-141
+  s_b6a0f22c32fc5f::t_5fbb2c38157e96 1-3,5-125,142
+src/services/training/__tests__/sessionDuration.test.ts
+  s_b6a0f22c32fc5f::t_555835f13acf48 1-12,14-15,17-19
+  s_b6a0f22c32fc5f::t_ba162b455ad4e2 13,16
+package.json
+  s_b6a0f22c32fc5f::t_8af11f4e7ba005 62-63
+docs/generator-technical-debt.md
+  s_b6a0f22c32fc5f::t_f9d59364cc21b6 64-75
+  s_b6a0f22c32fc5f::t_7b38383cd0b15a 76-83
+  s_b6a0f22c32fc5f::t_3fefb9d1bd4766 84-93
+  s_b6a0f22c32fc5f::t_f597a6492ace58 58
+  s_b6a0f22c32fc5f::t_2587ba83eaa38e 1-2,4-28,31-57,59-63,94
+  s_b6a0f22c32fc5f::t_e4ce6196b97dfc 3,29-30,95-98
+src/services/training/trainingCapacity.ts
+  s_b6a0f22c32fc5f::t_e769a779f5f1cd 145
+  s_b6a0f22c32fc5f::t_67c3a74322c62e 28-30,95
+  s_b6a0f22c32fc5f::t_f55e0f1b37fe27 18-20
+  s_b6a0f22c32fc5f::t_9e762d899ddaf4 60,144,146-147
+  s_b6a0f22c32fc5f::t_ac714024619b46 115-118,127-130
+  s_b6a0f22c32fc5f::t_1c619a27d509d5 59
+src/services/training/generatorQualityContract.ts
+  s_b6a0f22c32fc5f::t_8000596a1145d0 1-36,42-76
+  s_b6a0f22c32fc5f::t_d35b3253485581 37-41
+src/services/training/__tests__/previewEditing.test.ts
+  s_b6a0f22c32fc5f::t_b96f112cd617f0 15,192-195
+  s_b6a0f22c32fc5f::t_acac9887eb6a97 45
+  s_b6a0f22c32fc5f::t_c2e4f1c230b06c 17,64-72
+  s_b6a0f22c32fc5f::t_aa23942d33f68f 43-44,46-51,53-56
+  s_b6a0f22c32fc5f::t_dc8bab660d55ee 57-63
+  s_b6a0f22c32fc5f::t_34b5f5945d748f 136-147,204
+  s_b6a0f22c32fc5f::t_fd7f5a5e0b5f8a 18,198-203
+  s_b6a0f22c32fc5f::t_8d7ffa033f595e 115,121
+  s_b6a0f22c32fc5f::t_db4bacc7f402a9 112-114,116-120,123,134-135
+  s_b6a0f22c32fc5f::t_d3da575ee8aa4e 122,124-133
+  s_b6a0f22c32fc5f::t_9ab36d1a1158f2 12,20-21,73-90
+  s_b6a0f22c32fc5f::t_43cc3dca6575f1 52
+src/services/training/catalogueReview.ts
+  s_b6a0f22c32fc5f::t_f40adaf916f68a 1-4,6-47,49-55,57-63,70-75,78
+  s_b6a0f22c32fc5f::t_e3d11f5e7499f6 64-69
+  s_b6a0f22c32fc5f::t_73b0afad2bc9a5 5,48,56,76-77
+src/services/training/__tests__/mesocycleEditing.test.ts
+  s_b6a0f22c32fc5f::t_72e7022dc581f2 1-2,4-5,7-11,13-40,44,59-68,102-103,129-140,153-154
+  s_b6a0f22c32fc5f::t_106ba52906fd7f 104-115
+  s_b6a0f22c32fc5f::t_5eb2303f0694f0 3,12,141-152
+  s_b6a0f22c32fc5f::t_634df785c4d0df 41-43,45-58
+  s_b6a0f22c32fc5f::t_5debd1c5bff275 116-128
+  s_b6a0f22c32fc5f::t_6ed370d1c8b5f5 6,69-101
+docs/audits/2026-10-01-quality-replay.md
+  s_58860a6dd107b9::t_374d2365dd8c8e 1-12
+src/services/training/sessionSummary.ts
+  s_b6a0f22c32fc5f::t_eee39969e08694 36
+  s_b6a0f22c32fc5f::t_67c3a74322c62e 17-18,118-121
+  s_b6a0f22c32fc5f::t_7af04fb2b5d89b 114-115
+src/data/README.md
+  s_b6a0f22c32fc5f::t_7b79bfa9acc755 50,73-75
+  s_b6a0f22c32fc5f::t_f597a6492ace58 77
+  s_b6a0f22c32fc5f::t_72b00b273a165d 54
+  s_b6a0f22c32fc5f::t_203e5b7261f7a6 76,78-80
+src/services/training/__tests__/scheduleTemplate.test.ts
+  s_b6a0f22c32fc5f::t_53f90fae5af770 1-32,38-43
+  s_b6a0f22c32fc5f::t_b8d87d868b0434 33-37
+src/services/repositories/index.ts
+  s_b6a0f22c32fc5f::t_9e581d2afe0194 103-114,128
+  s_b6a0f22c32fc5f::t_fbbaf610da1206 21,115-127
+  s_b6a0f22c32fc5f::t_493835cd50681e 25,102
+  s_b6a0f22c32fc5f::t_b0cbdcd5f6b0e8 129
+src/services/training/alternativeSchedule.ts
+  s_b6a0f22c32fc5f::t_4bc91bb8a3ea75 12,19
+  s_b6a0f22c32fc5f::t_bcd32a24b385ad 1-11,13-18,20-29
+PRD.md
+  s_b6a0f22c32fc5f::t_4f9249f7d13be8 2496
+  s_b6a0f22c32fc5f::t_3989d895569170 2476
+  s_b6a0f22c32fc5f::t_c361be234cda3c 2490-2494
+  s_b6a0f22c32fc5f::t_72b00b273a165d 2509
+  s_b6a0f22c32fc5f::t_98d356752f3b71 2489
+  s_b6a0f22c32fc5f::t_8255694a47fbc4 2482
+  s_b6a0f22c32fc5f::t_6168ba5e6db1fa 2505
+  s_b6a0f22c32fc5f::t_8f77e4d9c34a00 2572-2574,2576-2585,2587-2592,2595
+  s_b6a0f22c32fc5f::t_7b38383cd0b15a 2662-2675
+  s_b6a0f22c32fc5f::t_3fefb9d1bd4766 2676-2694,2717
+  s_b6a0f22c32fc5f::t_9158b4403935e2 2652-2658,2661
+  s_b6a0f22c32fc5f::t_fe656675b6b234 2570-2571
+  s_b6a0f22c32fc5f::t_5f87690802ec1b 2596-2597
+  s_b6a0f22c32fc5f::t_2587ba83eaa38e 2620-2631
+  s_b6a0f22c32fc5f::t_2bc451c02df350 2479-2481,2484-2488
+  s_b6a0f22c32fc5f::t_1a313e2d7bd21b 2510-2569
+  s_b6a0f22c32fc5f::t_7b79bfa9acc755 2502-2504,2507-2508
+  s_b6a0f22c32fc5f::t_ff1722c314face 2634-2635
+  s_b6a0f22c32fc5f::t_eab3c5a8361209 2575
+  s_b6a0f22c32fc5f::t_8898f2e3e99e2e 2483
+  s_b6a0f22c32fc5f::t_7fb7510bec3151 2463,2468
+  s_b6a0f22c32fc5f::t_9fca3afd960124 2586
+  s_b6a0f22c32fc5f::t_7c4eb45004ee7d 2471-2475,2477-2478
+  s_b6a0f22c32fc5f::t_a91b8519cd7864 2593-2594
+  s_b6a0f22c32fc5f::t_a42296ba1c35d6 2659-2660
+  s_b6a0f22c32fc5f::t_0008d32932ba0e 2495
+  s_b6a0f22c32fc5f::t_e4ce6196b97dfc 2695-2710
+  s_b6a0f22c32fc5f::t_f66fb391b85a3c 2497
+  s_b6a0f22c32fc5f::t_db9c892eb94330 2598-2619
+  s_b6a0f22c32fc5f::t_f208b9bbebbb14 2465-2467,2470
+  s_b6a0f22c32fc5f::t_435899e1ce03c7 2469
+  s_b6a0f22c32fc5f::t_6888ba742461fe 2711-2716
+  s_b6a0f22c32fc5f::t_f597a6492ace58 2632-2633
+  s_b6a0f22c32fc5f::t_f9d59364cc21b6 2636-2651
+  s_b6a0f22c32fc5f::t_92ec1069cf4a3b 2498-2501,2506
+  s_b6a0f22c32fc5f::t_b5ec5ad7f04cf1 2464
+src/app/(tabs)/(train)/_layout.tsx
+  s_b6a0f22c32fc5f::t_ef7ec4822c49c6 25
+scripts/evaluate-generator.ts
+  s_b6a0f22c32fc5f::t_cebfaa9eb09fba 22-26,89
+  s_b6a0f22c32fc5f::t_4cf55c06bcbcae 13,44,73,80,83,166
+  s_b6a0f22c32fc5f::t_e92fab144633e4 1
+  s_b6a0f22c32fc5f::t_478660434dd986 125-126
+  s_b6a0f22c32fc5f::t_d09368595a6e42 164-165,170
+  s_b6a0f22c32fc5f::t_d35b3253485581 36
+  s_b6a0f22c32fc5f::t_96abe40110ae27 18,149,162,184-186,193,195
+  s_b6a0f22c32fc5f::t_6c85a9662fd40c 47,124
+  s_b6a0f22c32fc5f::t_f15c8fcb0f4543 39
+  s_b6a0f22c32fc5f::t_4bc91bb8a3ea75 15,118
+  s_b6a0f22c32fc5f::t_d3d4f086fb2807 3,16-17,19,29-35,40,49-67,97-112,115,139,143-145,147-148,150-161,163,172,174,178-180,187-188,190,192,194
+  s_b6a0f22c32fc5f::t_1e1c0822e5876c 37
+  s_b6a0f22c32fc5f::t_8af11f4e7ba005 14,90-95,141,171,173,175,177,181-182,189
+  s_b6a0f22c32fc5f::t_ba8a47181ce891 2,4-5,7-12,20-21,27-28,68-72,74-79,81-82,84-88,96,113-114,116-117,122,128,130-138,140,142,146,167,183
+  s_b6a0f22c32fc5f::t_3f03b0c78b3ac0 41-43
+  s_b6a0f22c32fc5f::t_d66e1f25d460cb 119-121,127,129,191
+  s_b6a0f22c32fc5f::t_17a290b5982be5 6,168-169,176
+  s_b6a0f22c32fc5f::t_43cc3dca6575f1 38
+  s_b6a0f22c32fc5f::t_ae0e64df5d4559 45-46,48,123
+src/services/training/routineMapper.ts
+  s_b6a0f22c32fc5f::t_dafeab0f36f48c 53,287-288
+  s_b6a0f22c32fc5f::t_a66879e3142a90 54,107
+  s_b6a0f22c32fc5f::t_53f90fae5af770 52,286,289
+docs/audits/2026-10-01-quality-full.md
+  s_58860a6dd107b9::t_e6662167eb25e4 1-383,395-471,483-559,571-3586
+  s_b6a0f22c32fc5f::t_8241ef1d287155 384-394,472-482,560-570
+src/components/home/TodayCard.tsx
+  s_b6a0f22c32fc5f::t_5aed93f081ea5c 103
+src/services/training/microcyclePrescription.ts
+  s_b6a0f22c32fc5f::t_302cac302100bd 99-100,102,115-116
+  s_b6a0f22c32fc5f::t_8576f4c0b16b68 126,152,154-155,157-158
+  s_b6a0f22c32fc5f::t_6cb52cfac68460 93-98,101,103-104,108-114,117-125,127,130-141
+  s_b6a0f22c32fc5f::t_739995efb73416 128-129
+  s_b6a0f22c32fc5f::t_8daa252b2399bf 105-107
+src/services/training/sessionCoherence.ts
+  s_b6a0f22c32fc5f::t_abf6ed6d66d4a1 1-3,5-11,22-47
+  s_b6a0f22c32fc5f::t_f474953528a78a 4,12-21
+docs/audits/2026-09-30-accessory-after.md
+  s_58860a6dd107b9::t_39be6849cee9a8 1-613
+src/components/train/ActionMenuSheet.tsx
+  s_b6a0f22c32fc5f::t_3d0498accada4e 26
+  s_b6a0f22c32fc5f::t_a6716e639dec7d 1-25,27-50
+src/services/training/__tests__/exerciseSearch.test.ts
+  s_b6a0f22c32fc5f::t_acac9887eb6a97 38-39
+  s_b6a0f22c32fc5f::t_aa23942d33f68f 13,36-37,40
+src/services/training/exerciseSearch.ts
+  s_b6a0f22c32fc5f::t_f91837456a9703 36
+src/services/training/__tests__/alternativeSchedule.test.ts
+  s_b6a0f22c32fc5f::t_452fb5fc0ed51c 1-4,6-9,23-50
+  s_b6a0f22c32fc5f::t_399205f6cf836f 5,10-22
+scripts/evaluate-exercise-ranking.ts
+  s_b6a0f22c32fc5f::t_4665c6ceafd20a 78-83
+  s_b6a0f22c32fc5f::t_a55c0c1ea33382 1,41-48
+  s_b6a0f22c32fc5f::t_26f442a3035f1f 3-7,9-18,40,49,54-62,64-77,84-97,100
+  s_b6a0f22c32fc5f::t_f8c241320e39e8 2,19-39,51,53,63,98-99,101
+  s_b6a0f22c32fc5f::t_922897e2ea4408 8,102
+  s_b6a0f22c32fc5f::t_e92fab144633e4 50
+  s_b6a0f22c32fc5f::t_9e5253c516d88b 52
+src/services/training/tricepsSourceReview.ts
+  s_b6a0f22c32fc5f::t_e9f639c50cc2b7 1-25,27-36,38-85
+  s_b6a0f22c32fc5f::t_8adec1a94e9254 26,37
+scripts/catalogue-report.ts
+  s_b6a0f22c32fc5f::t_3192b1ec0c206c 62,64-67,92,94-95
+docs/audits/2026-09-30-ordered-batches.md
+  s_b6a0f22c32fc5f::t_f31bc6f5f8786d 1-75
+docs/audits/2026-10-01-source-trace-coherence.md
+  s_b6a0f22c32fc5f::t_5f6855108b204e 1-56
+src/services/training/__tests__/mesocyclePlanner.test.ts
+  s_b6a0f22c32fc5f::t_dc8bab660d55ee 1,30-44
+  s_b6a0f22c32fc5f::t_c2e4f1c230b06c 9,75-128
+  s_b6a0f22c32fc5f::t_0e9364a88addac 129-151
+  s_b6a0f22c32fc5f::t_92835309467d61 377-379
+  s_b6a0f22c32fc5f::t_4eb985e5998fed 61-63
+  s_b6a0f22c32fc5f::t_ff1f66f0a90e4b 46-59
+  s_b6a0f22c32fc5f::t_1b0edd399dabca 152-169
+  s_b6a0f22c32fc5f::t_7124a3f0bb2270 45
+  s_b6a0f22c32fc5f::t_fc683f0c27f5d4 170
+src/services/training/__tests__/exerciseSelection.test.ts
+  s_b6a0f22c32fc5f::t_e4506f7d17fc93 54-55
+  s_b6a0f22c32fc5f::t_4bc91bb8a3ea75 267-270
+  s_b6a0f22c32fc5f::t_3192b1ec0c206c 25-26,44-53,56-59,61-71,82
+  s_b6a0f22c32fc5f::t_0e9364a88addac 192-220
+  s_b6a0f22c32fc5f::t_493835cd50681e 23-24,253,264-266,271-283,285-288,291
+  s_b6a0f22c32fc5f::t_ae07bd114306e8 18-19,221-252,254-263,284,294-295
+  s_b6a0f22c32fc5f::t_acac9887eb6a97 74,78
+  s_b6a0f22c32fc5f::t_3f03b0c78b3ac0 60,72-73,75-77,79-81
+  s_b6a0f22c32fc5f::t_e9dd8f2b175f1c 289-290,292-293
+  s_b6a0f22c32fc5f::t_b569f5590d4309 83-84
+src/components/train/generate/PlanPreview.tsx
+  s_b6a0f22c32fc5f::t_3a933899e1ef24 124,126-128,130-131
+  s_b6a0f22c32fc5f::t_ba162b455ad4e2 125,129
+  s_b6a0f22c32fc5f::t_4fbda3eaae65b8 37-38,66,282-293
+  s_b6a0f22c32fc5f::t_44d6c6577ddb66 44,72,99,146,148-150,323
+  s_b6a0f22c32fc5f::t_6dc16cb194d836 20,185-187
+  s_b6a0f22c32fc5f::t_25591d375ab926 31-32,60-61,176,180-184,188-189,228-234,312-322
+  s_b6a0f22c32fc5f::t_7af04fb2b5d89b 48
+  s_b6a0f22c32fc5f::t_1b13e65147a90d 26,101,103
+  s_b6a0f22c32fc5f::t_8f283d3708619a 33,62,227
+  s_b6a0f22c32fc5f::t_9e581d2afe0194 21-22,134
+  s_b6a0f22c32fc5f::t_6e6cb2c378352d 80
+  s_b6a0f22c32fc5f::t_bb2ec55e02e25b 345-348,355
+  s_b6a0f22c32fc5f::t_9938f82a5842fc 42,70,239,277-281
+  s_b6a0f22c32fc5f::t_97acabf97e5ca9 43,71,91-92,98,190-191,349-354
+  s_b6a0f22c32fc5f::t_ed79ada136b0f5 18,40,68,82-84,111-118,177-179
+  s_b6a0f22c32fc5f::t_f082921cc385f7 135
+  s_b6a0f22c32fc5f::t_032ce8bc202635 235-236
+src/i18n/locales/fr.json
+  s_b6a0f22c32fc5f::t_0c74d0445d7457 186
+  s_b6a0f22c32fc5f::t_a7f5dc68bacd14 195-198
+  s_b6a0f22c32fc5f::t_dc8bab660d55ee 299
+  s_b6a0f22c32fc5f::t_57d1724b3cc0b1 288
+  s_b6a0f22c32fc5f::t_9b3e839e4a5c59 327
+  s_b6a0f22c32fc5f::t_452fb5fc0ed51c 223-224
+  s_b6a0f22c32fc5f::t_b34d89684eecbc 150
+  s_b6a0f22c32fc5f::t_b0bcdb63d67560 176-180,182-185,187-188,199
+  s_b6a0f22c32fc5f::t_6168ba5e6db1fa 281-282
+  s_b6a0f22c32fc5f::t_55a1bf6233204c 238-240,247-248
+  s_b6a0f22c32fc5f::t_258b8e3cc5e08c 3-7
+  s_b6a0f22c32fc5f::t_0dc5c2f9ed9350 257-258,274-275
+  s_b6a0f22c32fc5f::t_ba162b455ad4e2 2,8-23
+  s_b6a0f22c32fc5f::t_07e5a36eacbba5 189-194,271-272
+  s_b6a0f22c32fc5f::t_61097966ef1bc0 280
+  s_b6a0f22c32fc5f::t_76aa02caa7b9e1 283-286
+  s_b6a0f22c32fc5f::t_bb2ec55e02e25b 270
+  s_b6a0f22c32fc5f::t_f9d83e1c5f741d 181
+  s_b6a0f22c32fc5f::t_51af836ebfe02f 241
+src/services/training/__tests__/catalogueReview.test.ts
+  s_b6a0f22c32fc5f::t_f40adaf916f68a 1-21
+  s_b6a0f22c32fc5f::t_01fa2a43c9fbdc 22-31
+src/services/training/scheduleTemplate.ts
+  s_b6a0f22c32fc5f::t_53f90fae5af770 1-2,5-39,42,45-81
+  s_b6a0f22c32fc5f::t_6652d8cf12ae99 3-4
+  s_b6a0f22c32fc5f::t_65d459e29b65b7 40-41,43-44
+plugins/withFreePersonalTeam.js
+  s_b6a0f22c32fc5f::t_f208b9bbebbb14 1-13
+src/app/(tabs)/_layout.tsx
+  s_b6a0f22c32fc5f::t_c89fd3434f3991 1-2,8,11-28
+src/services/training/mesocycleEditing.ts
+  s_b6a0f22c32fc5f::t_5bb9baec91780d 61-62,93-115
+  s_b6a0f22c32fc5f::t_d5e0ec8011865c 1,3,6-21,27-29,32-57,59-60,130
+  s_b6a0f22c32fc5f::t_72877da1ed4d2c 2,4,116-129
+  s_b6a0f22c32fc5f::t_be61d7f34afe7e 5,22-26,30-31,58
+  s_b6a0f22c32fc5f::t_2b4c2003f6642e 63-92
+src/components/train/generate/ExerciseSwapSheet.tsx
+  s_b6a0f22c32fc5f::t_e08e1084b2e84f 72
+  s_b6a0f22c32fc5f::t_bf109b86c7265f 5,71,73
+  s_b6a0f22c32fc5f::t_6168ba5e6db1fa 75-76,84-85
+  s_b6a0f22c32fc5f::t_25591d375ab926 14-15,24-25,37-38,95,110
+  s_b6a0f22c32fc5f::t_5a5526fb7e43bb 77
+  s_b6a0f22c32fc5f::t_76aa02caa7b9e1 6,78-83
+docs/audits/2026-10-01-quality-repeat-proof.json
+  s_b6a0f22c32fc5f::t_e4ce6196b97dfc 1-13
+scripts/volume-harness.ts
+  s_b6a0f22c32fc5f::t_dc782cf2e8bc2f 200
+scripts/review-catalogue.ts
+  s_b6a0f22c32fc5f::t_f40adaf916f68a 1-8,11-14,16-18,21,23-28
+  s_b6a0f22c32fc5f::t_01fa2a43c9fbdc 9-10,15,20,22
+  s_b6a0f22c32fc5f::t_e3d11f5e7499f6 19
+src/i18n/locales/ja.json
+  s_b6a0f22c32fc5f::t_b0bcdb63d67560 176-180,182-185,187-188,199
+  s_b6a0f22c32fc5f::t_6ece0cfcf713c4 150
+  s_b6a0f22c32fc5f::t_ff0361097122bb 241
+  s_b6a0f22c32fc5f::t_dc8bab660d55ee 299
+  s_b6a0f22c32fc5f::t_f9d83e1c5f741d 181
+  s_b6a0f22c32fc5f::t_07e5a36eacbba5 189-194,271-272
+  s_b6a0f22c32fc5f::t_61097966ef1bc0 280
+  s_b6a0f22c32fc5f::t_a7f5dc68bacd14 195-198
+  s_b6a0f22c32fc5f::t_bb2ec55e02e25b 270
+  s_b6a0f22c32fc5f::t_4163ec0e9f51d4 238-240,247-248
+  s_b6a0f22c32fc5f::t_0c74d0445d7457 186
+  s_b6a0f22c32fc5f::t_452fb5fc0ed51c 223-224
+  s_b6a0f22c32fc5f::t_0dc5c2f9ed9350 257-258,274-275
+  s_b6a0f22c32fc5f::t_6168ba5e6db1fa 281-282
+  s_b6a0f22c32fc5f::t_76aa02caa7b9e1 283-286
+  s_b6a0f22c32fc5f::t_57d1724b3cc0b1 288
+  s_b6a0f22c32fc5f::t_258b8e3cc5e08c 3-7
+  s_b6a0f22c32fc5f::t_ba162b455ad4e2 2,8-23
+  s_b6a0f22c32fc5f::t_fe364a28e126b7 327
+src/models/biomechanics.ts
+  s_b6a0f22c32fc5f::t_a66879e3142a90 119-120,176-177
+  s_b6a0f22c32fc5f::t_203e5b7261f7a6 238-240
+  s_b6a0f22c32fc5f::t_2b3ad4579277b2 151-152
+  s_b6a0f22c32fc5f::t_da2b1e23eda41e 154-156,162-163
+  s_b6a0f22c32fc5f::t_61097966ef1bc0 183-185,213,245
+  s_b6a0f22c32fc5f::t_7af04fb2b5d89b 188,198
+  s_b6a0f22c32fc5f::t_8311d51f381b1c 246
+  s_b6a0f22c32fc5f::t_6949f1a54b8156 30,62-65,214
+src/services/training/emphasisSelection.ts
+  s_b6a0f22c32fc5f::t_2212ecb1541498 47
+docs/audits/2026-09-30-coupled-after.md
+  s_58860a6dd107b9::t_62b6a33a159c0e 292-499
+  s_b6a0f22c32fc5f::t_5d3b508416924c 1-291,500-613
+docs/audits/2026-09-30-accessory-policy.md
+  s_b6a0f22c32fc5f::t_54487152ef781c 1-60
+src/services/training/trainingCalendar.ts
+  s_b6a0f22c32fc5f::t_f654a0064bb77b 1-3,5-6,14-38,54-55,57-59,77-83,101-130
+  s_b6a0f22c32fc5f::t_53626aaebf7c16 56,60-76,84-100
+  s_b6a0f22c32fc5f::t_fbbaf610da1206 39-53
+  s_b6a0f22c32fc5f::t_9e581d2afe0194 4,7-13
+src/services/repositories/__tests__/trainingCalendarRepository.test.ts
+  s_b6a0f22c32fc5f::t_e9dd8f2b175f1c 13-31
+  s_b6a0f22c32fc5f::t_fbbaf610da1206 1-12,32-51
+scripts/generator-audit-matrix.ts
+  s_b6a0f22c32fc5f::t_573c714b7f9346 1-34
+src/components/train/TrainingCalendarCard.tsx
+  s_b6a0f22c32fc5f::t_127a5aaa8491b9 1-8,12-14,16-22,24,27-37,41-47,50-57,61-64,74-83,101-105,108-117,119-134
+  s_b6a0f22c32fc5f::t_6652d8cf12ae99 38-40,84-93
+  s_b6a0f22c32fc5f::t_ba162b455ad4e2 99
+  s_b6a0f22c32fc5f::t_9e581d2afe0194 9-11,48-49,65-73,94-97,106-107
+  s_b6a0f22c32fc5f::t_3a933899e1ef24 15,25,98,100
+  s_b6a0f22c32fc5f::t_5aed93f081ea5c 23,26,60
+  s_b6a0f22c32fc5f::t_fbbaf610da1206 58-59,118
+src/services/training/__tests__/exerciseFamilies.test.ts
+  s_b6a0f22c32fc5f::t_d529781c361d6d 1-18,20-29
+  s_b6a0f22c32fc5f::t_12e8516b82e380 19
+src/services/training/sessionProgression.ts
+  s_b6a0f22c32fc5f::t_eee39969e08694 46,48-50,85-86
+  s_b6a0f22c32fc5f::t_6b069c69872669 14,47
+src/components/home/RoutineCard.tsx
+  s_b6a0f22c32fc5f::t_ef7ec4822c49c6 49,67,87,105-106,124,140,153-154
+  s_b6a0f22c32fc5f::t_4e5ab90f206536 103-104
+  s_b6a0f22c32fc5f::t_0c74d0445d7457 46,167
+src/i18n/locales/en.json
+  s_b6a0f22c32fc5f::t_258b8e3cc5e08c 3-7
+  s_b6a0f22c32fc5f::t_e92fab144633e4 2,12-23
+  s_b6a0f22c32fc5f::t_e72f29708cd154 238-240,247-248
+  s_b6a0f22c32fc5f::t_dc8bab660d55ee 299
+  s_b6a0f22c32fc5f::t_3a933899e1ef24 9-11
+  s_b6a0f22c32fc5f::t_a7f5dc68bacd14 195-198
+  s_b6a0f22c32fc5f::t_bb2ec55e02e25b 270
+  s_b6a0f22c32fc5f::t_bcd32a24b385ad 223-224
+  s_b6a0f22c32fc5f::t_57f18fdd34aadd 241
+  s_b6a0f22c32fc5f::t_0dc5c2f9ed9350 257-258,274-275
+  s_b6a0f22c32fc5f::t_76aa02caa7b9e1 283-286
+  s_b6a0f22c32fc5f::t_f9d83e1c5f741d 181
+  s_b6a0f22c32fc5f::t_0c74d0445d7457 186
+  s_b6a0f22c32fc5f::t_7af04fb2b5d89b 8
+  s_b6a0f22c32fc5f::t_07e5a36eacbba5 189-194,271-272
+  s_b6a0f22c32fc5f::t_61097966ef1bc0 280
+  s_b6a0f22c32fc5f::t_535c5ed9a107e7 150
+  s_b6a0f22c32fc5f::t_6168ba5e6db1fa 281-282
+  s_b6a0f22c32fc5f::t_57d1724b3cc0b1 288
+  s_b6a0f22c32fc5f::t_5ae6cde5c5ccae 327
+  s_b6a0f22c32fc5f::t_b0bcdb63d67560 176-180,182-185,187-188,199
+scripts/generator-audit-protocol.ts
+  s_b6a0f22c32fc5f::t_96abe40110ae27 115-126
+  s_b6a0f22c32fc5f::t_86bcac166d4d8e 15
+  s_b6a0f22c32fc5f::t_573c714b7f9346 1-14,16-114
+src/services/training/__tests__/trainingCapacity.test.ts
+  s_b6a0f22c32fc5f::t_47f80721799196 122-127
+  s_b6a0f22c32fc5f::t_c209f57ce35f50 134
+src/data/guide-exercises.json
+  s_b6a0f22c32fc5f::t_a2f46bb8aa0dc8 1-1353
+docs/audits/2026-10-01-catalogue-review.md
+  s_58860a6dd107b9::t_8ba32476bbe6a2 1-387
+src/services/training/mesocyclePlanner.ts
+  s_b6a0f22c32fc5f::t_779b691c6c2d1a 297-314
+  s_b6a0f22c32fc5f::t_f9fbe4185e3157 91,199,217
+  s_b6a0f22c32fc5f::t_f15c8fcb0f4543 29-30,101,105-106,124-128,158-160,167-171,184-186
+  s_b6a0f22c32fc5f::t_7af04fb2b5d89b 49,187-189,191-194,251-252
+  s_b6a0f22c32fc5f::t_6c85a9662fd40c 61-62,107,109,112-119,121-123,137-145,147-157,161-166,172-183
+  s_b6a0f22c32fc5f::t_493835cd50681e 90
+  s_b6a0f22c32fc5f::t_c4a3406b108dc8 42,226
+  s_b6a0f22c32fc5f::t_43cc3dca6575f1 103-104,108
+  s_b6a0f22c32fc5f::t_b8d87d868b0434 38-39,132-136,146
+  s_b6a0f22c32fc5f::t_1e1c0822e5876c 110-111,120
+  s_b6a0f22c32fc5f::t_4bc91bb8a3ea75 129-131
+docs/audits/2026-09-30-accessory-control.md
+  s_b6a0f22c32fc5f::t_86a541a6bdd490 1-613
+docs/audits/2026-09-30-generator-final.md
+  s_b6a0f22c32fc5f::t_0b3a99eb8aaf1d 1-613
+docs/audits/2026-09-30-metadata-experiment.md
+  s_b6a0f22c32fc5f::t_5b134588937278 1-613
+docs/audits/2026-10-01-catalogue-after.md
+  s_b6a0f22c32fc5f::t_09cb16bf9116c2 1-613
+docs/audits/2026-10-01-catalogue-before.md
+  s_b6a0f22c32fc5f::t_cc1fdd366a5b28 1-613
+docs/audits/2026-10-01-coherence-after.md
+  s_b6a0f22c32fc5f::t_4c43df44c12a86 1-613
+docs/audits/2026-10-01-quality-before.md
+  s_b6a0f22c32fc5f::t_a269786b077840 1-613
+docs/audits/2026-10-01-quality-catalogue-experiment.md
+  s_b6a0f22c32fc5f::t_71aa58b05942bc 1-616
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f9853edf6c23232d2ca957bd012c9cf003f8321f",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
