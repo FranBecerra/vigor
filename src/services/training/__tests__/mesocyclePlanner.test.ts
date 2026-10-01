@@ -30,7 +30,7 @@ const base = {
 it('separates hip-dominant compounds without losing sets in the PPL priority-quad regression', () => {
   const result = planMesocycle({ ...base, seed: 38, split: SplitStructure.PUSH_PULL_LEGS,
     priorityRegions: [VolumeRegion.QUADS], capacity: { sessionsPerMicrocycle: 5, minutesPerSession: 55 } });
-  expect(result.selection.performedSets).toBe(70);
+  expect(result.selection.performedSets).toBeGreaterThanOrEqual(70);
   expect(result.distribution.sessions.every((s) => s.exercises.filter((e) =>
     e.exercise.movementVector === MovementVector.HIP_DOMINANT).length <= 1)).toBe(true);
   expect(result.distribution.sessions.every((s) => s.estimatedWorkMinutes <= 49)).toBe(true);

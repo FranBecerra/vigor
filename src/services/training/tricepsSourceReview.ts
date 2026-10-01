@@ -1,5 +1,5 @@
 /** Individually read source descriptions, not a name-based scoring rubric. */
-import { Equipment, ExerciseProfile, MovementVector, type ExerciseCriteria } from '@/models';
+import { Equipment, ExerciseGenerationTier, ExerciseProfile, MovementVector, type ExerciseCriteria } from '@/models';
 
 export interface TricepsSourceReview {
   page: number;
@@ -75,6 +75,62 @@ export function tricepsCriterionBands(entry: TricepsSourceReview):
     systemicFatigueCost: entry.hybrid ? [3, 4] : [4, 5],
   };
 }
+
+export interface TricepsEligibility {
+  tier: ExerciseGenerationTier;
+  reason: string;
+}
+
+const AUTOMATIC = ExerciseGenerationTier.STANDARD;
+const MANUAL = ExerciseGenerationTier.MANUAL_ONLY;
+
+/** Individual automatic-programming decision for every triceps-primary catalogue entry. */
+export const TRICEPS_ELIGIBILITY: Readonly<Record<string, TricepsEligibility>> = {
+  'extension-sobre-cabeza-polea': { tier: AUTOMATIC, reason: 'Overhead cable extension: the lengthened-long-head role tested directly by Maeo et al. 2023.' },
+  'extension-sobre-cabeza-mancuerna': { tier: AUTOMATIC, reason: 'Overhead role without a cable station; coarser dumbbell increments.' },
+  'press-frances': { tier: AUTOMATIC, reason: 'Flexed-shoulder barbell extension; the single-joint arm of Brandao et al. 2020.' },
+  'pushdown-barra': { tier: AUTOMATIC, reason: 'Neutral-shoulder complement with low skill demand and stack increments.' },
+  'pushdown-cuerda': { tier: AUTOMATIC, reason: 'Same neutral-shoulder role as the bar pushdown with another attachment.' },
+  'extension-triceps-maquina': { tier: AUTOMATIC, reason: 'Supported, low-skill extension; the specific machine geometry stays unverified.' },
+  'fondos-banco': { tier: ExerciseGenerationTier.FALLBACK, reason: 'Bodyweight hybrid for equipment-limited plans; coarse loading and end-range shoulder extension.' },
+  'press-banca-cerrado': { tier: AUTOMATIC, reason: 'Triceps-primary press. It currently counts as direct triceps work; that definition is allocator debt.' },
+  'guide-198': { tier: MANUAL, reason: 'Same overhead-cable role as extension-sobre-cabeza-polea, plus a bench.' },
+  'guide-199': { tier: MANUAL, reason: 'Fills the flexed-shoulder dumbbell role, but its promotion experiment was rejected: a near-zero time squeeze then drops 2.5-4 chest sets in dumbbell-only plans.' },
+  'guide-201': { tier: MANUAL, reason: 'Same role as the seated overhead dumbbell entry with less support; source text and figure disagree.' },
+  'guide-202': { tier: MANUAL, reason: 'Near-duplicate of press-frances with a shorter endpoint.' },
+  'guide-203': { tier: MANUAL, reason: 'Hybrid dip classified as a horizontal press; it would fill the chest-press slot before its role is decided.' },
+  'guide-204': { tier: MANUAL, reason: 'Needs two cable stations, which availability does not model.' },
+  'guide-205': { tier: MANUAL, reason: 'Unilateral, doubling time per set, in a role the pushdowns already cover.' },
+  'guide-206': { tier: MANUAL, reason: 'Needs independent cables and a backrest, which availability does not model.' },
+  'guide-207': { tier: MANUAL, reason: 'Unilateral flexed-shoulder role already covered bilaterally.' },
+  'guide-208': { tier: MANUAL, reason: 'Unilateral overhead role already covered bilaterally.' },
+  'guide-209': { tier: MANUAL, reason: 'Needs two low cables and a bench, which availability does not model.' },
+  'guide-210': { tier: MANUAL, reason: 'Technique-dependent press-extension hybrid in the close-grip-bench role; revisit with beginner eligibility.' },
+  'guide-211': { tier: MANUAL, reason: 'Technique-dependent press-extension hybrid in the close-grip-bench role; revisit with beginner eligibility.' },
+  'guide-212': { tier: MANUAL, reason: 'Disputed identity: the text says 90-degree shoulder flexion, the figure looks overhead.' },
+  'guide-214': { tier: MANUAL, reason: 'Coordination-heavy coupled elbow and shoulder extension.' },
+  'guide-215': { tier: MANUAL, reason: 'Hybrid with a pressing component in the pushdown role.' },
+  'guide-216': { tier: MANUAL, reason: 'Needs a cable and a bench; the flexed-shoulder role is already covered.' },
+  'guide-217': { tier: MANUAL, reason: 'Unusual lateral elbow path; guide-199 covers the flexed dumbbell role.' },
+  'guide-218': { tier: MANUAL, reason: 'Unilateral pushdown.' },
+  'guide-219': { tier: MANUAL, reason: 'Unilateral kickback.' },
+  'guide-220': { tier: MANUAL, reason: 'Same supported-machine role as extension-triceps-maquina; manufacturer-specific.' },
+  'guide-221': { tier: MANUAL, reason: 'Needs two cable stations, which availability does not model.' },
+  'guide-222': { tier: MANUAL, reason: 'Needs long or double ropes and a bench at the cable.' },
+  'guide-223': { tier: MANUAL, reason: 'Unilateral pushdown.' },
+  'guide-225': { tier: MANUAL, reason: 'Needs a multigrip plus independent handles in the pushdown role.' },
+  'guide-226': { tier: MANUAL, reason: 'Same overhead dumbbell role as extension-sobre-cabeza-mancuerna.' },
+  'guide-227': { tier: MANUAL, reason: 'Unilateral, and vertical alignment unloads the terminal range.' },
+  'guide-228': { tier: MANUAL, reason: 'Needs a bench at the cable; the neutral role is already covered.' },
+  'guide-229': { tier: MANUAL, reason: 'Needs extra-long ropes.' },
+  'guide-231': { tier: MANUAL, reason: 'Hybrid with substantial shoulder movement; technique-dependent.' },
+};
+
+/** Individually assigned scores for imports, kept apart from the eligibility decision. */
+export const REVIEWED_TRICEPS_CRITERIA: Readonly<Record<number, ExerciseCriteria>> = {
+  199: { stretchedPositionLoading: 4, rangeOfMotion: 4, resistanceProfileMatch: 3,
+    stabilityCost: 3, loadProgressability: 3, systemicFatigueCost: 4 },
+};
 
 export function tricepsSourceClassification(entry: TricepsSourceReview) {
   return { equipment: entry.equipment,

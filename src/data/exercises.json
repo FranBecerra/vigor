@@ -1232,7 +1232,7 @@
       "criteria": {
         "stretchedPositionLoading": 5,
         "rangeOfMotion": 5,
-        "resistanceProfileMatch": 5,
+        "resistanceProfileMatch": 4,
         "stabilityCost": 4,
         "loadProgressability": 4,
         "systemicFatigueCost": 5
@@ -1288,7 +1288,7 @@
         "rangeOfMotion": 4,
         "resistanceProfileMatch": 4,
         "stabilityCost": 4,
-        "loadProgressability": 3,
+        "loadProgressability": 4,
         "systemicFatigueCost": 5
       }
     },
@@ -1303,7 +1303,7 @@
       "stimulusTags": ["SHOULDER:NEUTRAL", "GRIP:PRONATED", "RESISTANCE:SHORTENED"],
       "criteria": {
         "stretchedPositionLoading": 2,
-        "rangeOfMotion": 3,
+        "rangeOfMotion": 4,
         "resistanceProfileMatch": 4,
         "stabilityCost": 4,
         "loadProgressability": 4,
@@ -1322,7 +1322,7 @@
       "criteria": {
         "stretchedPositionLoading": 3,
         "rangeOfMotion": 4,
-        "resistanceProfileMatch": 5,
+        "resistanceProfileMatch": 4,
         "stabilityCost": 5,
         "loadProgressability": 4,
         "systemicFatigueCost": 5
@@ -1336,11 +1336,11 @@
         "DELTS_FRONT"
       ],
       "movementVector": "ELBOW_EXTENSION",
-      "profile": "ISOLATION",
+      "profile": "COMPOUND_SECONDARY",
       "equipment": "BODYWEIGHT",
       "generationTier": "FALLBACK",
       "criteria": {
-        "stretchedPositionLoading": 4,
+        "stretchedPositionLoading": 2,
         "rangeOfMotion": 3,
         "resistanceProfileMatch": 3,
         "stabilityCost": 3,
@@ -1360,7 +1360,7 @@
       "profile": "COMPOUND_SECONDARY",
       "equipment": "BARBELL",
       "criteria": {
-        "stretchedPositionLoading": 4,
+        "stretchedPositionLoading": 2,
         "rangeOfMotion": 4,
         "resistanceProfileMatch": 3,
         "stabilityCost": 4,

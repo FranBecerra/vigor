@@ -4,6 +4,7 @@ import { criteriaOf, EXERCISE_CATALOGUE, fatigueCost, filterCatalogue, stimulusQ
 import { selectExercises } from '@/services/training/exerciseSelection';
 import { TrainingGoal, buildVolumePlan } from '@/services/training/volumePlan';
 import { ExperienceLevel } from '@/models/athlete';
+import { REVIEWED_TRICEPS_CRITERIA, TRICEPS_ELIGIBILITY } from '@/services/training/tricepsSourceReview';
 import {
   GUIDE_EXISTING_IDS,
   buildGuideExercises,
@@ -42,8 +43,8 @@ describe('source guide exercise index', () => {
     expect(imported).toHaveLength(337 - Object.keys(GUIDE_EXISTING_IDS).length);
     imported.forEach((exercise) => {
       if (exercise.guidePage! >= 197 && exercise.guidePage! <= 231) {
-        expect(exercise.criteria).toBeUndefined();
-        expect(exercise.generationTier).toBe(ExerciseGenerationTier.MANUAL_ONLY);
+        expect(exercise.criteria).toEqual(REVIEWED_TRICEPS_CRITERIA[exercise.guidePage!]);
+        expect(exercise.generationTier).toBe(TRICEPS_ELIGIBILITY[exercise.id].tier);
         return;
       }
       expect(exercise.criteria).toBeDefined();

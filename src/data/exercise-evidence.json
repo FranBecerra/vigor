@@ -2126,21 +2126,17 @@
         "citations": [
           "PMID:35819335"
         ],
-        "note": "Resonancia magnética confirmó hipertrofia significativamente mayor en cabeza larga al entrenar en posición sobre la cabeza."
+        "note": "Ensayo de 12 semanas con extensión en polea: con el hombro sobre la cabeza la cabeza larga creció 1,5 veces más que con el brazo junto al tronco."
       },
       "rangeOfMotion": {
-        "confidence": "direct-evidence",
-        "citations": [
-          "PMID:35819335"
-        ],
-        "note": "Permite flexión profunda de codos bajo flexión humeral de 180° continuada."
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Permite flexión profunda del codo detrás de la cabeza. El ensayo de Maeo usó el mismo recorrido de codo (90-0°) en ambas posiciones, así que no respalda esta puntuación."
       },
       "resistanceProfileMatch": {
-        "confidence": "direct-evidence",
-        "citations": [
-          "PMID:35819335"
-        ],
-        "note": "Polea proporciona resistencia constante en el punto de estiramiento donde pesos libres descargan."
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ningún estudio compara su perfil de resistencia con la curva de fuerza del tríceps; la polea baja carga sobre todo la zona elongada. Se baja de 5 a 4: no hay base para situarla por encima del resto de variantes con polea."
       },
       "stabilityCost": {
         "confidence": "programming-judgement",
@@ -2153,20 +2149,18 @@
         "note": "Progresión cuantitativa por placas; permite uso de pasadores auxiliares de 1 kg."
       },
       "systemicFatigueCost": {
-        "confidence": "direct-evidence",
-        "citations": [
-          "PMID:35819335"
-        ],
-        "note": "Menores cargas absolutas reducen el estrés articular produciendo idéntica o mayor hipertrofia."
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Ejercicio de una articulación con poca masa implicada. El ensayo usó cargas absolutas un 34-39 % menores sobre la cabeza, pero no midió estrés articular ni fatiga sistémica."
       }
     },
     "extension-sobre-cabeza-mancuerna": {
       "stretchedPositionLoading": {
-        "confidence": "direct-evidence",
+        "confidence": "indirect-evidence",
         "citations": [
           "PMID:35819335"
         ],
-        "note": "Elonga fuertemente la cabeza larga del tríceps mediante la flexión completa de hombro."
+        "note": "Misma posición de hombro que la extensión sobre la cabeza del ensayo de Maeo, que se hizo con polea; con mancuerna cambia el perfil de resistencia, por eso es evidencia indirecta."
       },
       "rangeOfMotion": {
         "confidence": "programming-judgement",
@@ -2191,23 +2185,20 @@
       "systemicFatigueCost": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Estrés articular elevado en codos; fatiga general moderada a baja por serie."
+        "note": "Ejercicio de una articulación con poca masa implicada; la tolerancia del codo varía entre personas y no está medida aquí."
       }
     },
     "press-frances": {
       "stretchedPositionLoading": {
-        "confidence": "direct-evidence",
+        "confidence": "indirect-evidence",
         "citations": [
-          "PMID:21858666",
-          "PMID:23657165"
+          "PMID:32149887"
         ],
-        "note": "Resonancia magnética evidenció reclutamiento e hipertrofia no uniforme a lo largo del tríceps."
+        "note": "En Brandão 2020 el press francés con barra hizo crecer la cabeza larga más que el press de banca solo. Con el hombro flexionado la cabeza larga queda más elongada que con el brazo junto al tronco, pero menos que sobre la cabeza."
       },
       "rangeOfMotion": {
-        "confidence": "direct-evidence",
-        "citations": [
-          "PMID:23657165"
-        ],
+        "confidence": "programming-judgement",
+        "citations": [],
         "note": "Flexión completa llevando la barra hacia la coronilla o detrás de la cabeza."
       },
       "resistanceProfileMatch": {
@@ -2228,7 +2219,7 @@
       "systemicFatigueCost": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Estrés significativo sobre el tendón tricipital distal; baja fatiga neural general."
+        "note": "Ejercicio de una articulación con poca masa implicada; la carga sobre el codo depende de la técnica y no está medida aquí."
       }
     },
     "pushdown-cuerda": {
@@ -2237,17 +2228,17 @@
         "citations": [
           "PMID:35819335"
         ],
-        "note": "Brazos junto al tronco acortan la cabeza larga del tríceps induciendo menor hipertrofia."
+        "note": "Con el brazo junto al tronco la cabeza larga creció menos que sobre la cabeza en el ensayo de Maeo, hecho con polea."
       },
       "rangeOfMotion": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Permite abrir la cuerda en extensión terminal para lograr máximo acortamiento lateral."
+        "note": "Permite abrir la cuerda en extensión terminal; el recorrido de codo es el mismo que con barra."
       },
       "resistanceProfileMatch": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Cable conserva tensión uniforme hasta la apertura final de muñecas hacia afuera."
+        "note": "La polea mantiene tensión durante el recorrido; su ajuste a la curva de fuerza no está medido."
       },
       "stabilityCost": {
         "confidence": "programming-judgement",
@@ -2257,12 +2248,12 @@
       "loadProgressability": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Progresión limitada por saltos de placas en la torre de poleas comercial."
+        "note": "Misma columna de placas que la extensión con barra; se sube de 3 a 4 para igualarlas, porque la carga absoluta menor no cambia los saltos disponibles."
       },
       "systemicFatigueCost": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Fatiga sistémica prácticamente nula; excelente tolerancia periarticular en muñecas."
+        "note": "Ejercicio de una articulación con poca masa implicada."
       }
     },
     "pushdown-barra": {
@@ -2271,17 +2262,17 @@
         "citations": [
           "PMID:35819335"
         ],
-        "note": "Hombro neutro posiciona la cabeza larga en longitudes más cortas comparado con polea alta."
+        "note": "Con el brazo junto al tronco la cabeza larga creció menos que sobre la cabeza en el ensayo de Maeo, hecho con polea."
       },
       "rangeOfMotion": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Barra rígida colisiona con el torso limitando la extensión y rotación terminal."
+        "note": "El codo recorre desde unos 90-100° de flexión hasta la extensión completa, igual que con cuerda; la barra toca los muslos en el bloqueo, no limita el recorrido. Se sube de 3 a 4."
       },
       "resistanceProfileMatch": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Mantiene resistencia continua eficiente durante el descenso y extensión del antebrazo."
+        "note": "La polea mantiene tensión durante el recorrido; su ajuste a la curva de fuerza no está medido."
       },
       "stabilityCost": {
         "confidence": "programming-judgement",
@@ -2296,7 +2287,7 @@
       "systemicFatigueCost": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Fatiga sistémica mínima; bajo estrés extraarticular fuera del codo."
+        "note": "Ejercicio de una articulación con poca masa implicada."
       }
     },
     "extension-triceps-maquina": {
@@ -2308,12 +2299,12 @@
       "rangeOfMotion": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Arco guiado estricto desde flexión pronunciada hasta extensión articular completa."
+        "note": "Arco guiado desde flexión pronunciada hasta extensión completa; el recorrido real depende del fabricante."
       },
       "resistanceProfileMatch": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Leva compensatoria ajusta la resistencia exactamente a la curva de fuerza muscular."
+        "note": "La leva varía entre fabricantes y ninguna se ha comparado con la curva de fuerza del tríceps. Se baja de 5 a 4: ser máquina no demuestra un ajuste perfecto."
       },
       "stabilityCost": {
         "confidence": "programming-judgement",
@@ -2328,19 +2319,19 @@
       "systemicFatigueCost": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Fatiga sistémica nula; aislamiento mecánico perfecto para acumulación de volumen semanal."
+        "note": "Ejercicio de una articulación con apoyo y poca masa implicada."
       }
     },
     "fondos-banco": {
       "stretchedPositionLoading": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Hiperextensión glenohumeral profunda bajo peso corporal genera estiramiento anterior agresivo."
+        "note": "El hombro queda extendido, lo que acorta la cabeza larga (cruza el hombro), y el codo apenas pasa de 90°. El estiramiento que se nota es de la parte anterior del hombro, no del tríceps. Se baja de 4 a 2."
       },
       "rangeOfMotion": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Descenso excesivo condicionado por compresión acromioclavicular y deslizamiento anterior humeral."
+        "note": "El codo flexiona hasta unos 90°; bajar más lleva el hombro a extensión máxima, que es el límite habitual de tolerancia."
       },
       "resistanceProfileMatch": {
         "confidence": "programming-judgement",
@@ -2360,14 +2351,16 @@
       "systemicFatigueCost": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Elevado estrés ligamentoso capsular en hombro; fatiga general moderada."
+        "note": "Mueve hombro y codo con el peso corporal (por eso pasa a multiarticular secundario). La tolerancia del hombro en extensión es una consideración de programación, no un riesgo clínico medido."
       }
     },
     "press-banca-cerrado": {
       "stretchedPositionLoading": {
-        "confidence": "programming-judgement",
-        "citations": [],
-        "note": "Mayor flexión del codo en la parte inferior genera elongación relevante del tríceps."
+        "confidence": "indirect-evidence",
+        "citations": [
+          "PMID:32149887"
+        ],
+        "note": "Abajo el hombro está en extensión horizontal y el codo cerca de 90°, así que la cabeza larga no se elonga. En Brandão 2020 el press de banca solo no hizo crecer la cabeza larga como el press francés (agarre normal, por eso es indirecta). Se baja de 4 a 2."
       },
       "rangeOfMotion": {
         "confidence": "programming-judgement",
@@ -2375,11 +2368,9 @@
         "note": "Recorrido amplio desde contacto esternal hasta extensión final completa de brazos."
       },
       "resistanceProfileMatch": {
-        "confidence": "indirect-evidence",
-        "citations": [
-          "PMID:32922646"
-        ],
-        "note": "Pico de momento en flexión profunda; curva ascendente al aproximarse al bloqueo."
+        "confidence": "programming-judgement",
+        "citations": [],
+        "note": "Sin estudio que mida su perfil de resistencia para el tríceps. Se retira la cita anterior, que comparaba press plano e inclinado en el pectoral."
       },
       "stabilityCost": {
         "confidence": "programming-judgement",
@@ -2394,7 +2385,7 @@
       "systemicFatigueCost": {
         "confidence": "programming-judgement",
         "citations": [],
-        "note": "Fatiga moderada al involucrar conjuntamente masas musculares de pectoral, deltoides y brazos."
+        "note": "Multiarticular con pectoral, deltoides y tríceps; más demanda por serie que una extensión, estimada, no medida."
       }
     },
     "sentadilla-libre": {

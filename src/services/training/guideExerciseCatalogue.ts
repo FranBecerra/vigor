@@ -7,7 +7,7 @@ import {
   type Exercise,
 } from '@/models';
 import { scoreGuideExercise } from './guideScoringRubric';
-import { tricepsSourceReview, tricepsSourceClassification } from './tricepsSourceReview';
+import { tricepsSourceReview, tricepsSourceClassification, REVIEWED_TRICEPS_CRITERIA, TRICEPS_ELIGIBILITY } from './tricepsSourceReview';
 
 export interface GuideExerciseRecord {
   page: number;
@@ -284,7 +284,9 @@ export function guideExerciseId(record: GuideExerciseRecord): string {
  * Unreviewed imports retain provisional rubric scores. Individually reviewed
  * triceps mechanics override classification and withdraw unsupported point
  * ratings; uncertainty bands are diagnostic only. Neither source inspection nor
- * provisional scoring alone makes an import eligible for automatic programming.
+ * provisional scoring alone makes an import eligible for automatic programming:
+ * only an individual decision in `TRICEPS_ELIGIBILITY` does, and individual
+ * scores in `REVIEWED_TRICEPS_CRITERIA` do not by themselves promote an entry.
  */
 export function buildGuideExercises(
   records: readonly GuideExerciseRecord[],
@@ -306,8 +308,10 @@ export function buildGuideExercises(
     const hybridTriceps = record.page === 210 || record.page === 211;
     const profile = hybridTriceps ? ExerciseProfile.COMPOUND_SECONDARY : sourceProfile(vector, equipment);
     const sourceReview = tricepsSourceReview(record.page);
+    const reviewedCriteria = REVIEWED_TRICEPS_CRITERIA[record.page];
+    const id = guideExerciseId(record);
     return [{
-      id: guideExerciseId(record),
+      id,
       name: record.page === 210 ? 'Kaz Press / JM Press (Smith machine)' : record.page === 211 ? 'JM Press (barbell)'
         : record.name.toLocaleLowerCase('es-ES').replace(/^./, (letter) => letter.toLocaleUpperCase('es-ES')),
       primaryMuscle: muscle,
@@ -316,12 +320,12 @@ export function buildGuideExercises(
       profile,
       equipment,
       // Reviewed mechanics must not retain a generic numeric rating as if verified.
-      criteria: sourceReview ? undefined : scoreGuideExercise({ page: record.page, name: record.name, vector, profile, equipment }),
+      criteria: sourceReview ? reviewedCriteria : scoreGuideExercise({ page: record.page, name: record.name, vector, profile, equipment }),
       ...(hybridTriceps ? { stimulusTags: ['FAMILY:TRICEPS_PRESS_EXTENSION', record.page === 210 ? 'IMPLEMENT:GUIDED_BAR' : 'IMPLEMENT:FREE_BAR'] } : {}),
       ...(sourceReview ? { ...tricepsSourceClassification(sourceReview),
         stimulusTags: [...tricepsSourceClassification(sourceReview).stimulusTags,
           ...(hybridTriceps ? ['FAMILY:TRICEPS_PRESS_EXTENSION'] : [])] } : {}),
-      generationTier: ExerciseGenerationTier.MANUAL_ONLY,
+      generationTier: TRICEPS_ELIGIBILITY[id]?.tier ?? ExerciseGenerationTier.MANUAL_ONLY,
       guidePage: record.page,
       isCustom: false,
     }];

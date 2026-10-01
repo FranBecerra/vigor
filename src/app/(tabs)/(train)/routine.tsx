@@ -249,7 +249,7 @@ export default function RoutineDetailScreen() {
     </View>;
   }
 
-  return <View style={{ flex: 1, backgroundColor: colors.bg }}>
+  return <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, backgroundColor: colors.bg }}>
     <ScrollView contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg,
       paddingBottom: insets.bottom + spacing.xl }}>
       <Pressable onPress={() => {
@@ -436,15 +436,14 @@ export default function RoutineDetailScreen() {
             } }));
           } : undefined} />}
     </ScrollView>
-    {selected !== null && !editing && canStartSelected && <SafeAreaView edges={{ bottom: true }}
-      style={{ backgroundColor: colors.bg }}>
+    {selected !== null && !editing && canStartSelected && <View style={{ backgroundColor: colors.bg }}>
       <Pressable onPress={startSelected} accessibilityRole="button"
         style={{ height: 52, marginHorizontal: spacing.lg, marginVertical: spacing.sm,
           justifyContent: 'center', alignItems: 'center', borderRadius: 14,
           backgroundColor: sectionAccent.train }}>
         <Text style={[typography.title, { color: '#16191C' }]}>{t('routine.startSession')}</Text>
       </Pressable>
-    </SafeAreaView>}
+    </View>}
     <ActionMenuSheet title={menuTitle}
       subtitle={menu === 'skip' ? t('routine.skipConfirm')
         : menu === 'scope' ? t('routine.saveScopeMessage') : undefined}
@@ -542,5 +541,5 @@ export default function RoutineDetailScreen() {
         setAdditions((currentAdditions) => [...currentAdditions, { sessionIndex: addTarget, exerciseId: exercise.id }]);
         setAddTarget(null);
       }} />
-  </View>;
+  </SafeAreaView>;
 }

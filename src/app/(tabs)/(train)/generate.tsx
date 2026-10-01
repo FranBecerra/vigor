@@ -653,7 +653,7 @@ export default function GenerateScreen() {
     recommendation.minutesPerSession === minutes;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg, overflow: 'hidden' }}>
+    <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, backgroundColor: colors.bg, overflow: 'hidden' }}>
       {/* A swipe back from the preview would pop the whole screen and discard an
           unsaved plan with its edits, so while the preview is up the phase owns going
           back and the gesture is off. */}
@@ -1063,7 +1063,6 @@ export default function GenerateScreen() {
 
       {/* Fixed action bar: the form is long and the primary action must not require
           scrolling to the bottom to find. */}
-      <SafeAreaView edges={{ bottom: true }} style={{ backgroundColor: colors.bg }}>
       <View
         style={[
           styles.actionBar,
@@ -1107,8 +1106,7 @@ export default function GenerateScreen() {
           )}
         </Pressable>
       </View>
-      </SafeAreaView>
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -208,14 +208,14 @@ function planWithPolicy(input: MesocyclePlanInput): MesocyclePlan {
     capacity.minutesPerSession - SESSION_OVERHEAD_MINUTES,
   );
 
-  const evaluate = (squeeze: number) => {
+  const evaluate = (squeeze: number, timeConstrained = squeeze > 0) => {
     const plan = squeezePlan(uncappedPlan, squeeze);
     const selection = selectExercises({
       volumePlan: plan,
       catalogue,
       seed,
       rankingPolicy,
-      timeConstrained: squeeze > 0,
+      timeConstrained,
     });
     const distribution = distributeSelection({
       selection,
@@ -276,40 +276,59 @@ function planWithPolicy(input: MesocyclePlanInput): MesocyclePlan {
     };
   }
 
-  // Bisección del recorte MÍNIMO que cabe: se cede el volumen justo y no más.
-  let low = 0;
-  let high = MAX_SQUEEZE;
-  let best = fullySqueezed;
-  let bestSqueeze = MAX_SQUEEZE;
-
-  for (let step = 0; step < SQUEEZE_SEARCH_STEPS; step += 1) {
-    const middle = (low + high) / 2;
-    const candidate = evaluate(middle);
-    if (candidate.fitsCapacity) {
-      best = candidate;
-      bestSqueeze = middle;
-      high = middle;
-    } else {
-      low = middle;
-    }
-  }
-
-  // Exercise identities and integer set counts make feasibility discontinuous.
-  // Bisection alone can skip a feasible pocket; retain its result and inspect
-  // the earlier range without assuming that every larger plan is infeasible.
-  const searchLimit = bestSqueeze;
-  const defects = (candidate: typeof best) => candidate.distribution.structureWarnings.filter(
+  type Evaluation = ReturnType<typeof evaluate>;
+  const defects = (candidate: Evaluation) => candidate.distribution.structureWarnings.filter(
     (warning) => warning.kind === 'empty-session' || warning.kind === 'underfilled-session'
       || warning.kind === 'session-volume-cap',
   ).length;
-  for (let step = 1; step < 16; step += 1) {
-    const squeeze = searchLimit * step / 16;
-    const candidate = evaluate(squeeze);
-    if (!candidate.fitsCapacity || defects(candidate) > defects(best)) continue;
-    if (candidate.selection.performedSets >= best.selection.performedSets && squeeze < bestSqueeze) {
-      best = candidate;
-      bestSqueeze = squeeze;
+
+  // Bisección del recorte MÍNIMO que cabe: se cede el volumen justo y no más.
+  const minimalFit = (fullySqueezedFit: Evaluation, timeConstrained: boolean) => {
+    let low = 0;
+    let high = MAX_SQUEEZE;
+    let best = fullySqueezedFit;
+    let bestSqueeze = MAX_SQUEEZE;
+
+    for (let step = 0; step < SQUEEZE_SEARCH_STEPS; step += 1) {
+      const middle = (low + high) / 2;
+      const candidate = evaluate(middle, timeConstrained);
+      if (candidate.fitsCapacity) {
+        best = candidate;
+        bestSqueeze = middle;
+        high = middle;
+      } else {
+        low = middle;
+      }
     }
+
+    // Exercise identities and integer set counts make feasibility discontinuous.
+    // Bisection alone can skip a feasible pocket; retain its result and inspect
+    // the earlier range without assuming that every larger plan is infeasible.
+    const searchLimit = bestSqueeze;
+    for (let step = 1; step < 16; step += 1) {
+      const squeeze = searchLimit * step / 16;
+      const candidate = evaluate(squeeze, timeConstrained);
+      if (!candidate.fitsCapacity || defects(candidate) > defects(best)) continue;
+      if (candidate.selection.performedSets >= best.selection.performedSets && squeeze < bestSqueeze) {
+        best = candidate;
+        bestSqueeze = squeeze;
+      }
+    }
+    return { best, bestSqueeze };
+  };
+
+  let { best, bestSqueeze } = minimalFit(fullySqueezed, true);
+  // A per-session overshoot of a few minutes is not a shortage of total time.
+  // Time-efficiency selection can then discard far more volume than the
+  // overshoot, so the ordinary selector competes under a minimal target squeeze.
+  const unmet = (candidate: Evaluation) => uncappedPlan.muscles.reduce((sum, m) =>
+    sum + Math.max(0, m.meav - (candidate.selection.attributedByMuscle[m.muscle] ?? 0)), 0);
+  const ordinarySqueezed = evaluate(MAX_SQUEEZE, false);
+  if (ordinarySqueezed.fitsCapacity) {
+    const ordinary = minimalFit(ordinarySqueezed, false);
+    const closer = unmet(ordinary.best) < unmet(best) || (unmet(ordinary.best) === unmet(best)
+      && ordinary.best.selection.performedSets > best.selection.performedSets);
+    if (closer && defects(ordinary.best) <= defects(best)) ({ best, bestSqueeze } = ordinary);
   }
 
   return {

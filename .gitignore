@@ -52,3 +52,7 @@ GoogleService-Info.plist.bak-*
 
 # Kiro
 .kiro/
+
+# Generator audit archives are regenerated on demand; only the paired baseline is versioned
+docs/audits/*.json.gz
+!docs/audits/2026-10-01-quality-after.json.gz
