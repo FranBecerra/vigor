@@ -19,12 +19,9 @@
  *   MEAV se cubre con volumen atribuido, pero lo que cansa al atleta y ocupa la
  *   sesión son las series ejecutadas.
  *
- * SELECCIÓN PONDERADA, NO UNIFORME
- *   El peso de cada candidato combina su efectividad (campo del catálogo), un
- *   refuerzo a los multiarticulares mientras queda mucho volumen por cubrir, y
- *   una penalización a los vectores ya usados. Así los ejercicios de mayor
- *   estímulo salen más a menudo sin que los demás desaparezcan, y no se acumulan
- *   tres empujes sin ninguna tracción.
+ * The production draw remains the audited weighted selector. An opt-in ordinal
+ * comparator is retained for paired evaluation, not enabled by default until it
+ * improves whole-routine outcomes across experience levels.
  */
 import {
   Equipment,
@@ -36,9 +33,10 @@ import {
   type StrengthRole,
 } from '@/models';
 import { criteriaOf, stimulusQuality } from './exerciseCatalogue';
-import { attributedVolumePerMinute, ISOLATION_VOLUME_PER_MINUTE } from './trainingCapacity';
+import { attributedVolumePerMinute, ISOLATION_VOLUME_PER_MINUTE, exerciseMinutes } from './trainingCapacity';
 import {
   TrainingGoal,
+  RegionEmphasis,
   totalSetsVerdict,
   TOTAL_SETS_RANGE,
   type TotalVolumeVerdict,
@@ -301,6 +299,9 @@ type EquipmentFamily = 'FREE_WEIGHT' | 'GUIDED' | 'BODYWEIGHT' | 'OTHER';
 export function equipmentFamily(exercise: Exercise): EquipmentFamily {
   switch (exercise.equipment) {
     case Equipment.BARBELL:
+    case Equipment.SAFETY_BAR:
+    case Equipment.TRAP_BAR:
+    case Equipment.LANDMINE:
     case Equipment.DUMBBELL:
     case Equipment.KETTLEBELL:
       return 'FREE_WEIGHT';
@@ -309,6 +310,8 @@ export function equipmentFamily(exercise: Exercise): EquipmentFamily {
     case Equipment.SMITH_MACHINE:
       return 'GUIDED';
     case Equipment.BODYWEIGHT:
+    case Equipment.ROMAN_CHAIR:
+    case Equipment.STABILITY_BALL:
       return 'BODYWEIGHT';
     default:
       return 'OTHER';
@@ -316,9 +319,8 @@ export function equipmentFamily(exercise: Exercise): EquipmentFamily {
 }
 
 /**
- * Goal-specific selection score.
- *
- * Hypertrophy keeps the audited stimulus score. Strength gives more weight to
+ * Goal-specific production/reporting score. The experimental ordinal policy
+ * uses priority layers first; strength gives more weight to
  * reproducible loading and multi-joint skill practice; high loads improve 1RM
  * more reliably even though hypertrophy is possible across a broad load range.
  * This is a transparent programming heuristic, not a universal exercise ranking.
@@ -344,6 +346,52 @@ export function goalSelectionScore(exercise: Exercise, goal: TrainingGoal): numb
 }
 
 /**
+ * Meaningful ordinal superiority for the same target muscle. A one-point gap
+ * in one criterion remains a tie because most catalogue ratings are expert
+ * judgements. Stability and load progression act as adequacy checks; machine
+ * support alone cannot eliminate a free-weight alternative. Resistance-curve
+ * matching is a weak draw tie-breaker, not a dominance criterion. Recovery cost
+ * is handled by distribution and never enters this comparison.
+ */
+export function hypertrophyDominates(a: Exercise, b: Exercise): boolean {
+  if (a.primaryMuscle !== b.primaryMuscle || a.id === b.id) return false;
+  const left = criteriaOf(a);
+  const right = criteriaOf(b);
+  if (left.stretchedPositionLoading < right.stretchedPositionLoading ||
+      left.rangeOfMotion < right.rangeOfMotion) return false;
+  if (left.stabilityCost < 2 || left.loadProgressability < 2) return false;
+  if (right.stabilityCost >= 2 && left.stabilityCost < 2) return false;
+  if (right.loadProgressability >= 3 && left.loadProgressability < 3) return false;
+  const stretchGain = left.stretchedPositionLoading - right.stretchedPositionLoading;
+  const rangeGain = left.rangeOfMotion - right.rangeOfMotion;
+  const clearPracticalGain =
+    (left.stabilityCost >= 3 && right.stabilityCost <= 1) ||
+    (left.loadProgressability >= 3 && right.loadProgressability <= 2);
+  // Stretch loading and ROM are often correlated descriptions of one movement.
+  // Two adjacent one-point judgements do not provide independent confirmation.
+  return stretchGain >= 2 || rangeGain >= 2 || clearPracticalGain;
+}
+
+/** Non-dominated fronts within each primary-muscle comparison; zero is preferred. */
+export function hypertrophyPriorityLayers(exercises: readonly Exercise[]): Map<string, number> {
+  const layers = new Map<string, number>();
+  let remaining = [...exercises];
+  let layer = 0;
+  while (remaining.length > 0) {
+    const front = remaining.filter(
+      (candidate) => !remaining.some((other) => hypertrophyDominates(other, candidate)),
+    );
+    // A defensive fallback keeps malformed or cyclic custom ratings selectable.
+    const current = front.length > 0 ? front : remaining;
+    current.forEach((exercise) => layers.set(exercise.id, layer));
+    const frontIds = new Set(current.map((exercise) => exercise.id));
+    remaining = remaining.filter((exercise) => !frontIds.has(exercise.id));
+    layer += 1;
+  }
+  return layers;
+}
+
+/**
  * Fallback exercises stay available when equipment/vetoes leave no standard
  * alternative, but never displace a standard option by random chance.
  */
@@ -360,8 +408,13 @@ function competitiveCandidates(
   goal: TrainingGoal,
   window: number,
   scoreOf: (exercise: Exercise) => number = (exercise) => goalSelectionScore(exercise, goal),
+  rankingPolicy: RankingPolicy = 'ordinal',
 ): Exercise[] {
   const eligible = preferStandard(candidates);
+  if (goal === TrainingGoal.HYPERTROPHY && rankingPolicy === 'ordinal') {
+    const layers = hypertrophyPriorityLayers(eligible);
+    return eligible.filter((exercise) => layers.get(exercise.id) === 0);
+  }
   const best = eligible.reduce(
     (maximum, exercise) => Math.max(maximum, scoreOf(exercise)),
     Number.NEGATIVE_INFINITY,
@@ -384,6 +437,8 @@ export interface SelectionInput {
   /** Catálogo YA filtrado por material disponible y vetos. */
   catalogue: readonly Exercise[];
   seed: number;
+  /** Comparison harness only; production defaults to the weighted policy. */
+  rankingPolicy?: RankingPolicy;
   config?: Partial<SelectionConfig>;
   /**
    * true cuando el plan está recortado por falta de TIEMPO, no de recuperación.
@@ -398,6 +453,40 @@ export interface SelectionInput {
   timeConstrained?: boolean;
 }
 
+export type RankingPolicy = 'ordinal' | 'legacy-weighted' | 'volume-aware' | 'accessory-aware' | 'coupled-control';
+
+/** Programming roles, not anatomical size or a universal efficacy ranking. */
+export function prefersTargetedAccessory(muscle: MuscleGroup): boolean {
+  return [MuscleGroup.BICEPS, MuscleGroup.TRICEPS, MuscleGroup.DELTS_FRONT,
+    MuscleGroup.DELTS_LATERAL, MuscleGroup.DELTS_REAR].includes(muscle);
+}
+
+/** Prefer local work after basic coverage; retain compounds when no isolation is available. */
+export function accessoryCandidates(candidates: readonly Exercise[], muscle: MuscleGroup): Exercise[] {
+  const local = candidates.filter((exercise) => !isCompound(exercise)
+    || (exercise.primaryMuscle === muscle && [MovementVector.ELBOW_EXTENSION, MovementVector.ELBOW_FLEXION]
+      .includes(exercise.movementVector)));
+  return prefersTargetedAccessory(muscle) && local.length ? local : [...candidates];
+}
+
+/** Count only credit still needed by the target budget; surplus is not utility. */
+export function remainingVolumeUtility(exercise: Exercise, sets: number,
+  targets: ReadonlyMap<MuscleGroup, number>, attributed: ReadonlyMap<MuscleGroup, number>): number {
+  if (!Number.isFinite(sets) || sets <= 0) return 0;
+  const missing = (muscle: MuscleGroup) => Math.max(0, (targets.get(muscle) ?? 0) - (attributed.get(muscle) ?? 0));
+  let utility = Math.min(sets, missing(exercise.primaryMuscle));
+  for (const muscle of new Set(exercise.secondaryMuscles)) {
+    if (muscle !== exercise.primaryMuscle) utility += Math.min(sets * SECONDARY_CREDIT, missing(muscle));
+  }
+  return utility;
+}
+
+/** Direct arm work floor: explicit programming heuristic, not measured MEV. */
+export function directVolumeFloor(muscle: MuscleGroup, target: number): number {
+  return target >= 6 && (muscle === MuscleGroup.BICEPS || muscle === MuscleGroup.TRICEPS)
+    ? Math.min(8, Math.max(6, Math.ceil(target * 0.6))) : 0;
+}
+
 /** Acumula el crédito de un ejercicio en el mapa de volumen atribuido. */
 function credit(
   attributed: Map<MuscleGroup, number>,
@@ -405,21 +494,26 @@ function credit(
   sets: number,
 ): void {
   attributed.set(exercise.primaryMuscle, (attributed.get(exercise.primaryMuscle) ?? 0) + sets);
-  exercise.secondaryMuscles.forEach((muscle) => {
+  new Set(exercise.secondaryMuscles).forEach((muscle) => {
+    if (muscle === exercise.primaryMuscle) return;
     attributed.set(muscle, (attributed.get(muscle) ?? 0) + sets * SECONDARY_CREDIT);
   });
 }
 
 export function selectExercises(input: SelectionInput): SelectionResult {
   const config = { ...DEFAULT_SELECTION_CONFIG, ...input.config };
+  const rankingPolicy = input.rankingPolicy ?? 'legacy-weighted';
   const random = createRandom(input.seed);
   const pool = input.catalogue.filter(
-    (exercise) => exercise.generationTier !== ExerciseGenerationTier.STRENGTH_VARIANT,
+    (exercise) => exercise.generationTier !== ExerciseGenerationTier.STRENGTH_VARIANT &&
+      exercise.generationTier !== ExerciseGenerationTier.MANUAL_ONLY,
   );
   const maxExercisesPerMuscle =
     input.timeConstrained === true
       ? Math.min(config.maxExercisesPerMuscle, config.maxExercisesPerMuscleWhenTimeConstrained)
       : config.maxExercisesPerMuscle;
+  const priorityMuscles = new Set(input.volumePlan.muscles
+    .filter((muscle) => muscle.emphasis === RegionEmphasis.PRIORITY).map((muscle) => muscle.muscle));
 
   const targets = new Map<MuscleGroup, number>();
   input.volumePlan.muscles.forEach((target) => {
@@ -427,6 +521,7 @@ export function selectExercises(input: SelectionInput): SelectionResult {
   });
 
   const attributed = new Map<MuscleGroup, number>();
+  const direct = new Map<MuscleGroup, number>();
   const vectorCounts = new Map<MovementVector, number>();
   const chosen = new Map<string, SelectedExercise>();
   const countPerMuscle = new Map<MuscleGroup, number>();
@@ -436,6 +531,15 @@ export function selectExercises(input: SelectionInput): SelectionResult {
   const countPerEquipmentFamily = new Map<EquipmentFamily, number>();
   /** Músculos para los que ya se agotaron los candidatos o el tope. */
   const closed = new Set<MuscleGroup>();
+
+  // Fractional indirect credit is useful for total-volume accounting, but it
+  // must not replace all direct elbow-flexor/extensor work. This floor is a
+  // conservative programming choice, not an experimentally validated MEV.
+  const directFloor = (muscle: MuscleGroup, target: number): number =>
+    directVolumeFloor(muscle, target);
+  const recordDirect = (exercise: Exercise, sets: number): void => {
+    direct.set(exercise.primaryMuscle, (direct.get(exercise.primaryMuscle) ?? 0) + sets);
+  };
 
   const patternHasRoom = (exercise: Exercise): boolean => {
     const limit = isCompound(exercise)
@@ -490,12 +594,15 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     );
 
   const noveltyAdjustedScore = (exercise: Exercise): number => {
+    // The ordinal front controls eligibility. The legacy score is retained only
+    // as a draw weight within that front, so near-ties stay selectable.
+    const base = goalSelectionScore(exercise, input.volumePlan.goal);
     const existing = chosenTagsFor(exercise.primaryMuscle);
-    if (existing.size === 0) return goalSelectionScore(exercise, input.volumePlan.goal);
+    if (existing.size === 0) return base;
     const tags = stimulusTagsOf(exercise);
     const novelFraction = tags.filter((tag) => !existing.has(tag)).length / tags.length;
     return (
-      goalSelectionScore(exercise, input.volumePlan.goal) +
+      base +
       novelFraction * config.stimulusNoveltyBonus
     );
   };
@@ -515,7 +622,10 @@ export function selectExercises(input: SelectionInput): SelectionResult {
 
   /** Volumen que le falta a un músculo, dado su objetivo. */
   const remainingOf = (muscle: MuscleGroup, target: number): number =>
-    target - (attributed.get(muscle) ?? 0);
+    Math.max(
+      target - (attributed.get(muscle) ?? 0),
+      directFloor(muscle, target) - (direct.get(muscle) ?? 0),
+    );
 
   /** Músculo con más volumen pendiente que todavía admite otro ejercicio. */
   const neediest = (): { muscle: MuscleGroup; remaining: number } | undefined => {
@@ -550,10 +660,14 @@ export function selectExercises(input: SelectionInput): SelectionResult {
       return;
     }
 
+    const foundationalCandidates = rankingPolicy === 'accessory-aware' && input.volumePlan.goal === TrainingGoal.HYPERTROPHY
+      ? rawCandidates.filter((e) => !prefersTargetedAccessory(e.primaryMuscle)) : rawCandidates;
     const candidates = competitiveCandidates(
-      rawCandidates,
+      foundationalCandidates.length ? foundationalCandidates : rawCandidates,
       input.volumePlan.goal,
       config.candidateScoreWindow,
+      undefined,
+      rankingPolicy,
     );
     const pick = weightedPick(candidates, diversityAdjustedScore, random)!;
     const sets = config.minSetsPerExercise;
@@ -566,6 +680,7 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     );
     vectorCounts.set(vector, (vectorCounts.get(vector) ?? 0) + 1);
     credit(attributed, pick, sets);
+    recordDirect(pick, sets);
   });
 
   // FASE 1 — elegir ejercicios. Cada uno entra con el mínimo de series; el
@@ -576,7 +691,10 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     if (next === undefined) break;
     const { muscle, remaining } = next;
 
-    if ((countPerMuscle.get(muscle) ?? 0) >= maxExercisesPerMuscle) {
+    // A tiny time overflow must not abruptly cap a priority muscle at two
+    // variants. Let capacity search reduce its budget continuously instead.
+    const exerciseLimit = priorityMuscles.has(muscle) ? config.maxExercisesPerMuscle : maxExercisesPerMuscle;
+    if ((countPerMuscle.get(muscle) ?? 0) >= exerciseLimit) {
       closed.add(muscle);
       continue;
     }
@@ -588,30 +706,33 @@ export function selectExercises(input: SelectionInput): SelectionResult {
         patternHasRoom(exercise) &&
         stimulusVariantHasRoom(exercise),
     );
-    const rawCompounds = rawAvailable.filter(isCompound);
+    // A fallback compound is not a reason to discard standard isolations under
+    // time pressure. First establish which suitability tier is available, then
+    // apply the compound preference within that tier.
+    const standardAvailable = preferStandard(rawAvailable);
+    const rawCompounds = standardAvailable.filter(isCompound);
     const candidatePool =
-      (input.timeConstrained === true || input.volumePlan.goal === TrainingGoal.STRENGTH) &&
+      rankingPolicy === 'accessory-aware' && input.volumePlan.goal === TrainingGoal.HYPERTROPHY
+        ? accessoryCandidates(standardAvailable, muscle)
+        : ((input.timeConstrained === true && rankingPolicy !== 'volume-aware') || input.volumePlan.goal === TrainingGoal.STRENGTH) &&
       rawCompounds.length > 0
         ? rawCompounds
-        : rawAvailable;
+        : standardAvailable;
     const available = competitiveCandidates(
       candidatePool,
       input.volumePlan.goal,
       config.candidateScoreWindow,
       noveltyAdjustedScore,
+      rankingPolicy,
     );
     if (available.length === 0) {
       closed.add(muscle);
       continue;
     }
 
-    // Con el TIEMPO como techo, el aislamiento solo entra cuando no queda ningún
-    // multiarticular para ese músculo. Es una regla y no un sesgo a propósito: con
-    // una ponderación probabilística el pecho salía alguna vez con contractor y
-    // cruces como único trabajo y sin ningún press, y eso es un defecto visible
-    // para quien entrena tres horas a la semana. Los músculos sin ningún
-    // multiarticular en el catálogo (bíceps, deltoides lateral, gemelos, core)
-    // reciben su aislamiento igual, porque ahí no hay alternativa.
+    // Legacy controls retain compound-first eligibility. Accessory-aware selection
+    // instead completes arm/delt targets with local work after basic coverage;
+    // a compound can still enter after those alternatives are exhausted.
     const candidates = available;
 
     // `candidates` no está vacío, así que weightedPick siempre devuelve uno.
@@ -619,6 +740,16 @@ export function selectExercises(input: SelectionInput): SelectionResult {
       candidates,
       (exercise) => {
         let weight = diversityAdjustedScore(exercise);
+
+        if (rankingPolicy === 'volume-aware' || rankingPolicy === 'accessory-aware') {
+          const sets = config.minSetsPerExercise;
+          const utility = remainingVolumeUtility(exercise, sets, targets, attributed);
+          // A primary direct-work requirement can remain after indirect credit.
+          const directNeed = Math.min(sets, Math.max(0, directFloor(muscle, targets.get(muscle) ?? 0) - (direct.get(muscle) ?? 0)));
+          const useful = Math.max(utility, directNeed);
+          const systemicDemand = 6 - criteriaOf(exercise).systemicFatigueCost;
+          return weight * useful / Math.max(1, exerciseMinutes(exercise, sets)) / (1 + systemicDemand * 0.1);
+        }
 
         if (input.timeConstrained === true) {
           // Con el tiempo como techo, el criterio es el VOLUMEN POR MINUTO, no un
@@ -652,16 +783,38 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     countPerMuscle.set(muscle, (countPerMuscle.get(muscle) ?? 0) + 1);
     vectorCounts.set(pick.movementVector, (vectorCounts.get(pick.movementVector) ?? 0) + 1);
     credit(attributed, pick, sets);
+    recordDirect(pick, sets);
   }
 
-  // FASE 2 — repartir el volumen que falta entre los ejercicios ya elegidos,
-  // empezando por los de mayor efectividad. Sumar series a un buen ejercicio es
-  // preferible a añadir otro ejercicio mediocre.
-  const byStimulus = [...chosen.values()].sort(
-    (a, b) =>
-      goalSelectionScore(b.exercise, input.volumePlan.goal) -
-      goalSelectionScore(a.exercise, input.volumePlan.goal),
+  return allocateExerciseVolume([...chosen.values()], input, config, rankingPolicy, missingFoundationalPatterns);
+}
+
+/** Dose a fixed exercise roster. Does not add, swap or mutate exercise identities. */
+export function allocateExerciseVolume(
+  candidates: readonly SelectedExercise[],
+  input: Pick<SelectionInput, 'volumePlan'>,
+  config: SelectionConfig = DEFAULT_SELECTION_CONFIG,
+  rankingPolicy: RankingPolicy = 'legacy-weighted',
+  missingFoundationalPatterns: MovementVector[] = [],
+): SelectionResult {
+  const chosen = new Map(candidates.map((entry) => [entry.exercise.id, { ...entry }]));
+  const targets = new Map(input.volumePlan.muscles.filter((m) => m.meav > 0).map((m) => [m.muscle, m.meav]));
+  const attributed = new Map<MuscleGroup, number>();
+  const direct = new Map<MuscleGroup, number>();
+  const recordDirect = (exercise: Exercise, sets: number) => {
+    direct.set(exercise.primaryMuscle, (direct.get(exercise.primaryMuscle) ?? 0) + sets);
+  };
+  chosen.forEach((entry) => { credit(attributed, entry.exercise, entry.sets); recordDirect(entry.exercise, entry.sets); });
+  const remainingOf = (muscle: MuscleGroup, target: number) => Math.max(
+    target - (attributed.get(muscle) ?? 0), directVolumeFloor(muscle, target) - (direct.get(muscle) ?? 0),
   );
+  const chosenLayers = input.volumePlan.goal === TrainingGoal.HYPERTROPHY && rankingPolicy === 'ordinal'
+    ? hypertrophyPriorityLayers([...chosen.values()].map((entry) => entry.exercise))
+    : undefined;
+  const byStimulus = [...chosen.values()].sort((a, b) =>
+    chosenLayers
+      ? (chosenLayers.get(a.exercise.id) ?? 0) - (chosenLayers.get(b.exercise.id) ?? 0)
+      : goalSelectionScore(b.exercise, input.volumePlan.goal) - goalSelectionScore(a.exercise, input.volumePlan.goal));
 
   let progressed = true;
   while (progressed) {
@@ -680,6 +833,7 @@ export function selectExercises(input: SelectionInput): SelectionResult {
       if (entry === undefined) return;
       entry.sets += 1;
       credit(attributed, entry.exercise, 1);
+      recordDirect(entry.exercise, 1);
       progressed = true;
     });
   }

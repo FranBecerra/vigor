@@ -14,6 +14,8 @@
  * pondera la contribución de un ejercicio al progreso.
  */
 import { SetType, type MuscleGroup } from '@/models';
+import { exerciseDurationBreakdown, SESSION_OVERHEAD_MINUTES } from './sessionDuration';
+export { WORK_SECONDS_PER_SET } from './sessionDuration';
 
 /**
  * Fracción de serie que se atribuye a cada músculo SECUNDARIO.
@@ -24,7 +26,6 @@ import { SetType, type MuscleGroup } from '@/models';
 export const SECONDARY_MUSCLE_WEIGHT = 0.5;
 
 /** Segundos de trabajo efectivo estimados por serie (para la duración). */
-export const WORK_SECONDS_PER_SET = 40;
 
 /** Ejercicio planificado, reducido a lo que necesita el resumen. */
 export interface PlannedExercise {
@@ -32,7 +33,7 @@ export interface PlannedExercise {
   primaryMuscle: MuscleGroup;
   secondaryMuscles: readonly MuscleGroup[];
   /** Series de la sesión, en orden. */
-  sets: readonly { setType: SetType }[];
+  sets: readonly { setType: SetType; targetRIR?: number }[];
   /** Descanso prescrito entre series, en segundos. */
   restSeconds: number;
   /** RIR objetivo de la sesión/microciclo, para calcular intensidad media. */
@@ -110,21 +111,14 @@ export function totalWorkingSets(exercises: readonly PlannedExercise[]): number 
 }
 
 /**
- * Duración estimada en minutos: trabajo efectivo más descansos.
- *
- * Se cuenta un descanso por serie EXCEPTO la última de cada ejercicio (tras la
- * última no se descansa: se pasa al siguiente ejercicio). Es una estimación
- * declarada como tal en la interfaz (`~62 min`), no una promesa.
+ * Shared conservative duration: work, rest allowance, setup and warm-up.
+ * Uses the same model as generation so home and preview cannot disagree.
  */
 export function estimateSessionMinutes(exercises: readonly PlannedExercise[]): number {
-  let seconds = 0;
-  for (const exercise of exercises) {
-    const count = exercise.sets.length;
-    if (count === 0) continue;
-    seconds += count * WORK_SECONDS_PER_SET;
-    seconds += (count - 1) * exercise.restSeconds;
-  }
-  return Math.round(seconds / 60);
+  const work = exercises.reduce((sum, exercise) => sum + exerciseDurationBreakdown(
+    exercise.sets.length, exercise.restSeconds, Math.ceil(exercise.sets.length / 4),
+  ).total, 0);
+  return work === 0 ? 0 : Math.round(work + SESSION_OVERHEAD_MINUTES);
 }
 
 /** Formatea un volumen fraccionado: `12` entero, `12.5` con decimal. */

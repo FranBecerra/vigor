@@ -15,24 +15,37 @@ import { NumericField } from '@/components/train/NumericField';
 import { SetType, type Exercise } from '@/models';
 import type { PlannedSession } from '@/models';
 import type { LimitingFactor } from '@/services/training/mesocyclePlanner';
-import { previewVolumeByMuscle, representativeSet } from '@/services/training/previewEditing';
+import { previewVolumeBreakdownByMuscle, representativeSet, underfilledSessionIndexes, visibleVolumeComponents } from '@/services/training/previewEditing';
 import { REGION_OF_MUSCLE } from '@/services/training/volumePlan';
+import { SESSION_OVERHEAD_MINUTES } from '@/services/training/trainingCapacity';
+import { buildScheduleTemplate } from '@/services/training/scheduleTemplate';
+import { ScheduleTemplateView } from '@/components/train/ScheduleTemplateView';
 
 interface PlanPreviewProps {
   sessions: readonly PlannedSession[];
-  limitedBy: LimitingFactor;
+  limitedBy?: LimitingFactor;
   performedSets: number;
   /** Catalogue entries by id, for exercise names. */
   exercisesById: ReadonlyMap<string, Exercise>;
   onSwap?: (sessionIndex: number, order: number) => void;
+  onAdd?: (sessionIndex: number) => void;
+  onRemove?: (sessionIndex: number, order: number) => void;
+  isAdded?: (sessionIndex: number, exerciseId: string) => boolean;
   onChangeSets?: (sessionIndex: number, order: number, value: number | undefined) => void;
   onChangeRepMin?: (sessionIndex: number, order: number, value: number | undefined) => void;
   onChangeRepMax?: (sessionIndex: number, order: number, value: number | undefined) => void;
+  onChangeSetRIR?: (sessionIndex: number, order: number, setIndex: number,
+    value: number | undefined) => void;
   overTimeSessionIndexes?: readonly number[];
+  minimumSessionSets?: number;
   volumeOutsideRange?: boolean;
+  editable?: boolean;
+  onPressSession?: (sessionIndex: number) => void;
+  summaryLabel?: string;
 }
 
 const LIMIT_KEY: Record<LimitingFactor, string> = {
+  catalogue: 'calendar.noEligibleExercises',
   time: 'generate.previewLimitedByTime',
   recovery: 'generate.previewLimitedByRecovery',
   'insufficient-time': 'generate.previewLimitedByInsufficientTime',
@@ -44,11 +57,19 @@ export function PlanPreview({
   performedSets,
   exercisesById,
   onSwap,
+  onAdd,
+  onRemove,
+  isAdded,
   onChangeSets,
   onChangeRepMin,
   onChangeRepMax,
+  onChangeSetRIR,
   overTimeSessionIndexes = [],
+  minimumSessionSets,
   volumeOutsideRange = false,
+  editable = true,
+  onPressSession,
+  summaryLabel,
 }: PlanPreviewProps) {
   const { t } = useTranslation();
   const { colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
@@ -56,30 +77,42 @@ export function PlanPreview({
   // Insufficient time is the only case that is an error rather than information.
   const limitTone =
     limitedBy === 'insufficient-time' ? semantic.danger : colors.textSecondary;
-  const volume = previewVolumeByMuscle(sessions, exercisesById);
+  const volume = previewVolumeBreakdownByMuscle(sessions, exercisesById);
   const maxVolume = volume[0]?.sets ?? 1;
+  const underfilled = minimumSessionSets === undefined
+    ? []
+    : underfilledSessionIndexes(sessions, minimumSessionSets);
 
   return (
     <View>
       <GlassSurface
         style={{
           borderRadius: radius.lg,
-          padding: spacing.lg,
+          paddingVertical: spacing.md,
+          paddingHorizontal: spacing.lg,
           marginBottom: spacing.lg,
           borderWidth: 1,
           borderColor: colors.surfaceBorder,
         }}
       >
-        <Text style={[typography.h2, { color: sectionAccent.train }]}>
-          {t('generate.previewSets', { performed: performedSets })}
+        <Text style={[typography.body, { color: colors.textSecondary, fontWeight: '600' }]}>
+          {summaryLabel ?? t('generate.previewSets', { performed: performedSets })}
         </Text>
-        <Text style={[typography.caption, { color: limitTone, marginTop: spacing.sm }]}>
+        {limitedBy !== undefined && <Text style={[typography.caption, { color: limitTone, marginTop: spacing.sm }]}>
           {t(LIMIT_KEY[limitedBy])}
-        </Text>
+        </Text>}
         {overTimeSessionIndexes.length > 0 && (
           <Text style={[typography.caption, { color: semantic.warning, marginTop: spacing.sm }]}>
             {t('generate.previewOverTime', {
               sessions: overTimeSessionIndexes.map((index) => index + 1).join(', '),
+            })}
+          </Text>
+        )}
+        {underfilled.length > 0 && (
+          <Text style={[typography.caption, { color: semantic.warning, marginTop: spacing.sm }]}>
+            {t('generate.previewUnderfilled', {
+              sessions: underfilled.map((index) => index + 1).join(', '),
+              minimum: minimumSessionSets,
             })}
           </Text>
         )}
@@ -88,7 +121,17 @@ export function PlanPreview({
             {t('generate.previewOutsideVolume')}
           </Text>
         )}
+        {underfilled.length > 0 && minimumSessionSets !== undefined && minimumSessionSets > 0
+          && performedSets >= 2 * minimumSessionSets
+          && performedSets < sessions.length * minimumSessionSets && (
+          <Text style={[typography.caption, { color: colors.textSecondary, marginTop: spacing.sm }]}>
+            {t('calendar.underfilledCapacity', { sets: performedSets, sessions: sessions.length,
+              minimum: minimumSessionSets, suggested: Math.floor(performedSets / minimumSessionSets) })}
+          </Text>
+        )}
       </GlassSurface>
+
+      {sessions.length > 0 && <ScheduleTemplateView template={buildScheduleTemplate(sessions, exercisesById)} />}
 
       {sessions.map((session) => {
         const regions = [
@@ -100,8 +143,11 @@ export function PlanPreview({
           ),
         ];
         return (
-          <View
+          <Pressable
             key={session.index}
+            onPress={onPressSession === undefined ? undefined : () => onPressSession(session.index)}
+            disabled={onPressSession === undefined}
+            accessibilityRole={onPressSession ? 'button' : undefined}
             style={{
               backgroundColor: colors.surface,
               borderRadius: radius.md,
@@ -127,11 +173,22 @@ export function PlanPreview({
                   {regions.map((region) => t(`region.${region}`)).join(' · ')}
                 </Text>
               </View>
-              <Text style={[typography.caption, { color: colors.textMuted }]}>
-                {t('generate.previewMinutes', {
-                  minutes: Math.round(session.estimatedWorkMinutes),
-                })}
-              </Text>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={[typography.caption, {
+                  color: underfilled.includes(session.index) ? semantic.warning : colors.textSecondary,
+                }]}>
+                  {t('generate.previewSetsShort', {
+                    count: session.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0),
+                  })}
+                </Text>
+                <Text style={[typography.caption, { color: colors.textMuted }]}>
+                  {t('generate.previewMinutes', {
+                    minutes: Math.ceil(session.estimatedWorkMinutes + SESSION_OVERHEAD_MINUTES),
+                  })}
+                </Text>
+              </View>
+              {onPressSession !== undefined && <Text style={[typography.body, { color: sectionAccent.train,
+                marginLeft: spacing.sm }]}>›</Text>}
             </View>
 
             {session.exercises.map((exercise) => {
@@ -167,9 +224,19 @@ export function PlanPreview({
                         </Text>
                       </Pressable>
                     )}
+                    {onRemove !== undefined && isAdded?.(session.index, exercise.exerciseId) && (
+                      <Pressable
+                        onPress={() => onRemove(session.index, exercise.order)}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('generate.removeExercise')}
+                        style={[styles.swapButton, { borderColor: colors.surfaceBorder, borderRadius: radius.sm }]}
+                      >
+                        <Text style={[typography.caption, { color: colors.textMuted }]}>×</Text>
+                      </Pressable>
+                    )}
                   </View>
 
-                  <View style={styles.prescriptionRow}>
+                  {editable ? <View style={styles.prescriptionRow}>
                     <View style={styles.numericGroup}>
                       <Text style={[styles.numericLabel, { color: colors.textMuted }]}>
                         {t('generate.previewSetsLabel')}
@@ -207,7 +274,23 @@ export function PlanPreview({
                         accessibilityLabel={t('generate.previewRepMax')}
                       />
                     </View>
-                  </View>
+                  </View> : <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 5 }]}>
+                    {exercise.sets.length} × {firstSet?.targetRepsMin ?? firstSet?.targetReps}
+                    {firstSet?.targetRepsMin !== undefined && firstSet.targetRepsMin !== firstSet.targetReps
+                      ? `–${firstSet.targetReps}` : ''}
+                  </Text>}
+                  {editable && onChangeSetRIR !== undefined && <View
+                    style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md }}>
+                    {exercise.sets.map((set, setIndex) => set.setType === SetType.TOP_SINGLE ? null :
+                      <View key={setIndex} style={{ width: 55, alignItems: 'center' }}>
+                        <Text style={[styles.numericLabel, { color: colors.textMuted }]}>
+                          {setIndex + 1} · RIR
+                        </Text>
+                        <NumericField value={set.targetRIR} accessibilityLabel={`RIR ${setIndex + 1}`}
+                          onChangeValue={(value) => onChangeSetRIR(session.index, exercise.order,
+                            setIndex, value)} />
+                      </View>)}
+                  </View>}
                   {(exercise.restSeconds !== undefined ||
                     exercise.sets[0]?.setType === SetType.TOP_SINGLE) && (
                     <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6 }]}>
@@ -226,7 +309,18 @@ export function PlanPreview({
                 </View>
               );
             })}
-          </View>
+            {onAdd !== undefined && (
+              <Pressable
+                onPress={() => onAdd(session.index)}
+                accessibilityRole="button"
+                style={{ paddingVertical: spacing.md, alignItems: 'center' }}
+              >
+                <Text style={[typography.body, { color: sectionAccent.train }]}>
+                  + {t('generate.addExercise')}
+                </Text>
+              </Pressable>
+            )}
+          </Pressable>
         );
       })}
 
@@ -248,9 +342,17 @@ export function PlanPreview({
         </Text>
         {volume.map((entry) => (
           <View key={entry.muscle} style={styles.volumeRow}>
-            <Text numberOfLines={1} style={[styles.volumeName, { color: colors.textSecondary }]}>
-              {t(`muscle.${entry.muscle}`)}
-            </Text>
+            <View style={{ width: 118 }}>
+              <Text numberOfLines={1} style={[styles.volumeName, { color: colors.textSecondary }]}>
+                {t(`muscle.${entry.muscle}`)}
+              </Text>
+              {visibleVolumeComponents(entry).length > 0 &&
+                <Text numberOfLines={1} style={{ fontSize: 9, color: colors.textMuted }}>
+                  {visibleVolumeComponents(entry).map((part) => part === 'direct'
+                    ? t('generate.previewDirectSets', { count: entry.directSets })
+                    : t('generate.previewIndirectSets', { count: entry.indirectSets })).join(' · ')}
+                </Text>}
+            </View>
             <View style={[styles.volumeTrack, { backgroundColor: colors.bgElevated }]}>
               <View
                 style={[

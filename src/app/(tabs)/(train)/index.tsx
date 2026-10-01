@@ -21,8 +21,8 @@ import { useTranslation } from 'react-i18next';
 import { DomainPills } from '@/components/home/HomeHeader';
 import { TodayCard } from '@/components/home/TodayCard';
 import { RoutineCard } from '@/components/home/RoutineCard';
-import { SessionPreviewSheet } from '@/components/home/SessionPreviewSheet';
 import { RenameRoutineSheet } from '@/components/home/RenameRoutineSheet';
+import { TrainingCalendarCard } from '@/components/train/TrainingCalendarCard';
 import { useTheme } from '@/theme/useTheme';
 import { useRoutines } from '@/hooks/useRoutines';
 import {
@@ -51,10 +51,8 @@ export default function TrainHomeScreen() {
   const [renaming, setRenaming] = useState<RoutineView | null>(null);
 
   const [domain, setDomain] = useState<TrainingDomain>('STRENGTH');
-  const [selectedSessionId, setSelectedSessionId] = useState('');
   // null until the athlete touches the accordion, so the default follows the data.
   const [expandedRoutineId, setExpandedRoutineId] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
 
   /** Traduce una clave de MuscleGroup a su nombre legible. */
   const muscleLabel = useCallback((muscle: string) => t(`muscle.${muscle}`), [t]);
@@ -64,15 +62,11 @@ export default function TrainHomeScreen() {
     [allRoutines, domain],
   );
 
-  /**
-   * Sesión seleccionada. Falls back to today's default when the selection is not
-   * among the loaded routines: nothing chosen yet, or its routine is gone.
-   */
+  /** The first pending session of the active routine is today's workout. */
   const selectedSession = useMemo(() => {
-    // Only the active routine supplies today's workout.
     const active = routines.filter((routine) => routine.isActive);
-    return findSession(active, selectedSessionId) ?? findSession(active, defaultSessionId(active));
-  }, [routines, selectedSessionId]);
+    return findSession(active, defaultSessionId(active));
+  }, [routines]);
   const orderedRoutines = useMemo(
     () => [...routines].sort((a, b) => Number(b.isActive) - Number(a.isActive)),
     [routines],
@@ -136,7 +130,6 @@ export default function TrainHomeScreen() {
 
   const startSession = useCallback(() => {
     if (selectedSession === null) return;
-    setPreviewOpen(false);
     router.push({
       pathname: '/session',
       params: {
@@ -147,6 +140,15 @@ export default function TrainHomeScreen() {
       },
     });
   }, [router, selectedSession]);
+
+  const openSessionDetail = useCallback((routine: RoutineView, plannedSessionIndex: number,
+    microcycleIndex: number) => {
+    router.push({ pathname: '/routine', params: {
+      mesocycleId: routine.mesocycleId,
+      microcycleIndex: String(microcycleIndex),
+      plannedSessionIndex: String(plannedSessionIndex),
+    } });
+  }, [router]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
@@ -180,7 +182,9 @@ export default function TrainHomeScreen() {
                 exercises: t('home.exercises'),
                 sets: t('home.sets'),
               }}
-              onPressPreview={() => setPreviewOpen(true)}
+              onPressPreview={() => openSessionDetail(selectedSession.routine,
+                selectedSession.session.plannedSessionIndex,
+                selectedSession.routine.currentMicrocycleIndex)}
               onPressStart={startSession}
             />
           </View>
@@ -190,6 +194,9 @@ export default function TrainHomeScreen() {
           </View>
         )}
 
+        {orderedRoutines.filter((routine) => routine.isActive).map((routine) =>
+          <TrainingCalendarCard key={routine.id} mesocycleId={routine.mesocycleId}
+            microcycleIndex={routine.currentMicrocycleIndex} goal={routine.generationGoal} durationFeedback={routine.durationFeedback} onChanged={reload} />)}
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.xl }]}>
           {t('home.routines')}
         </Text>
@@ -243,11 +250,18 @@ export default function TrainHomeScreen() {
                 rename: t('home.renameRoutine'),
                 remove: t('home.removeRoutine'),
                 active: t('home.activeRoutine'),
+                skipped: t('routine.skipped'),
               }}
               onToggle={() =>
                 setExpandedRoutineId(expandedId === routine.id ? '' : routine.id)
               }
-              onSelectSession={routine.isActive ? setSelectedSessionId : undefined}
+              onPressDetail={() => router.push({ pathname: '/routine', params: { mesocycleId: routine.mesocycleId } })}
+              onSelectSession={(sessionId) => {
+                const session = routine.microcycles[routine.currentMicrocycleIndex]?.sessions.find(
+                  (entry) => entry.id === sessionId);
+                if (session) openSessionDetail(routine, session.plannedSessionIndex,
+                  routine.currentMicrocycleIndex);
+              }}
               onPressMesocycle={() => router.push({ pathname: '/mesocycle', params: { mesocycleId: routine.mesocycleId } })}
               onActivate={routine.isActive ? undefined : () => confirmActivate(routine)}
               onRename={() => setRenaming(routine)}
@@ -303,19 +317,6 @@ export default function TrainHomeScreen() {
         }}
       />
 
-      <SessionPreviewSheet
-        session={previewOpen && selectedSession ? selectedSession.session : null}
-        muscleLabel={muscleLabel}
-        labels={{
-          volumeByMuscle: t('home.volumeByMuscle'),
-          exercises: t('home.exercises'),
-          sets: t('home.sets'),
-          start: t('home.startWorkout'),
-          close: t('home.close'),
-        }}
-        onClose={() => setPreviewOpen(false)}
-        onStart={startSession}
-      />
     </View>
   );
 }

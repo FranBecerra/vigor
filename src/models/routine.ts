@@ -26,6 +26,13 @@ import type { Timestampish } from './common';
 import type { Equipment } from './biomechanics';
 import type { SetType } from './training';
 
+export type TrainingCalendarEntry =
+  | { kind: 'workout'; date: string; microcycleIndex: number; sessionIndex: number }
+  | { kind: 'rest'; date: string; microcycleIndex: number; checked: boolean };
+
+export type ScheduleSlot = { kind: 'workout'; sessionIndex: number } | { kind: 'rest' };
+export interface ScheduleTemplate { days: number; slots: ScheduleSlot[] }
+
 /**
  * Icon catalogue for a routine. A closed set of own SVGs: no icon library and no
  * emoji (PRD §8). The KEY is what gets persisted, never the drawing, so it lives
@@ -155,6 +162,8 @@ export interface PlannedExercise {
   restSeconds?: number;
   /** Role in a strength plan. Absent on hypertrophy plans. */
   strengthRole?: StrengthRole;
+  /** Set indices whose RIR the athlete explicitly fixed for remaining microcycles. */
+  manualRIRBySet?: Record<number, number>;
   /**
    * true when the athlete changed this exercise by hand after generation.
    *

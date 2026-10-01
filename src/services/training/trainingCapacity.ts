@@ -15,11 +15,9 @@
  *   la recupere sino porque no le da tiempo a acabarla.
  *
  * MODELO DE TIEMPO
- *   Reutiliza `WORK_SECONDS_PER_SET` de `sessionSummary.ts` y `restDurationFor`
- *   de `restTimer.ts` a propósito: son los mismos números con los que la app
- *   cronometra la sesión y estima su duración. Un segundo modelo de tiempo
- *   acabaría contradiciendo al primero, y el atleta vería una estimación en la
- *   pantalla de sesión que no cuadra con la que usó el generador.
+ *   Reuses `WORK_SECONDS_PER_SET` and `restDurationFor`, then applies a
+ *   conservative floor for transitions and ordinary gym delays. The floor is a
+ *   planning preference, not a measured biological requirement.
  *
  *   La estimación tira a LARGO (cuenta descanso tras cada serie, incluida la
  *   última de cada ejercicio). Equivocarse por exceso significa prescribir algo de
@@ -27,7 +25,9 @@
  */
 import { ExerciseProfile, type Exercise } from '@/models';
 import { restDurationFor } from './restTimer';
-import { WORK_SECONDS_PER_SET } from './sessionSummary';
+import { WORK_SECONDS_PER_SET, SESSION_OVERHEAD_MINUTES, EXERCISE_SETUP_SECONDS,
+  MINUTES_PER_WORKING_SET_FLOOR, exerciseDurationBreakdown } from './sessionDuration';
+export { SESSION_OVERHEAD_MINUTES, EXERCISE_SETUP_SECONDS, MINUTES_PER_WORKING_SET_FLOOR } from './sessionDuration';
 
 export interface TrainingCapacity {
   /**
@@ -51,13 +51,13 @@ export interface TrainingCapacity {
  * consumen tiempo, y no contarlos es la forma más fácil de prescribir una sesión
  * que no cabe.
  */
-export const SESSION_OVERHEAD_MINUTES = 6;
 
 /**
  * Segundos de montaje de cada ejercicio dentro de una sesión: buscar el hueco,
  * ajustar la máquina y las series de aproximación propias.
  */
-export const EXERCISE_SETUP_SECONDS = 60;
+
+/** Conservative planning floor; includes transitions and ordinary gym delays. */
 
 /**
  * Maximum work sets for one exercise appearance in a session.
@@ -92,9 +92,7 @@ export function exerciseMinutes(
   restSeconds: number = restDurationFor(exercise.profile),
 ): number {
   if (sets <= 0) return 0;
-  const seconds =
-    appearancesOf(sets) * EXERCISE_SETUP_SECONDS + sets * (WORK_SECONDS_PER_SET + restSeconds);
-  return seconds / 60;
+  return exerciseDurationBreakdown(sets, restSeconds, appearancesOf(sets)).total;
 }
 
 /** Minutos de trabajo que cuesta una selección completa. */
@@ -114,7 +112,10 @@ export function selectionMinutes(
  */
 export function attributedVolumePerMinute(exercise: Exercise): number {
   const attributed = 1 + exercise.secondaryMuscles.length * 0.5;
-  const minutesPerSet = (WORK_SECONDS_PER_SET + restDurationFor(exercise.profile)) / 60;
+  const minutesPerSet = Math.max(
+    (WORK_SECONDS_PER_SET + restDurationFor(exercise.profile)) / 60,
+    MINUTES_PER_WORKING_SET_FLOOR,
+  );
   return attributed / minutesPerSet;
 }
 
@@ -123,7 +124,10 @@ export function attributedVolumePerMinute(exercise: Exercise): number {
  * Es el suelo con el que se comparan los demás.
  */
 export const ISOLATION_VOLUME_PER_MINUTE =
-  1 / ((WORK_SECONDS_PER_SET + restDurationFor(ExerciseProfile.ISOLATION)) / 60);
+  1 / Math.max(
+    (WORK_SECONDS_PER_SET + restDurationFor(ExerciseProfile.ISOLATION)) / 60,
+    MINUTES_PER_WORKING_SET_FLOOR,
+  );
 
 /**
  * Series de trabajo que caben en la capacidad, como referencia rápida.
@@ -137,7 +141,9 @@ export function approximateSetCapacity(capacity: TrainingCapacity): number {
     (restDurationFor(ExerciseProfile.COMPOUND_PRIMARY) +
       restDurationFor(ExerciseProfile.ISOLATION)) /
     2;
-  const perSetSeconds =
-    WORK_SECONDS_PER_SET + averageRest + EXERCISE_SETUP_SECONDS / TYPICAL_SETS_PER_EXERCISE;
+  const perSetSeconds = Math.max(
+    WORK_SECONDS_PER_SET + averageRest + EXERCISE_SETUP_SECONDS / TYPICAL_SETS_PER_EXERCISE,
+    MINUTES_PER_WORKING_SET_FLOOR * 60,
+  );
   return Math.floor((workMinutesAvailable(capacity) * 60) / perSetSeconds);
 }

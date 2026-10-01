@@ -11,6 +11,7 @@
  * Los ejercicios detallados siguen debajo del gráfico; este módulo nunca los
  * aplana visualmente ni les atribuye un significado que no tienen.
  */
+import { SetType } from '@/models';
 import { countWorkingSets, type PlannedExercise } from './sessionSummary';
 
 /** Un microciclo reducido a las decisiones que afectan su prescripción. */
@@ -42,9 +43,11 @@ export function averageTargetRIR(exercises: readonly PlannedExercise[]): number 
   let workingSets = 0;
 
   for (const exercise of exercises) {
-    const count = countWorkingSets(exercise.sets);
-    weightedRIR += exercise.targetRIR * count;
-    workingSets += count;
+    for (const set of exercise.sets) {
+      if (set.setType === SetType.WARMUP) continue;
+      weightedRIR += set.targetRIR ?? exercise.targetRIR;
+      workingSets += 1;
+    }
   }
 
   return workingSets === 0 ? 0 : weightedRIR / workingSets;
@@ -79,8 +82,8 @@ export function sessionMicrocycleMetrics<TSession extends { exercises: readonly 
       number: microcycle.number,
       isDeload: microcycle.isDeload,
       isProjected: microcycle.isProjected,
-      volumeSets: Math.max(0, baseVolume + microcycle.volumeAdjustmentSets),
-      averageRIR: clampRIR(baseRIR + microcycle.intensityAdjustmentRIR),
+      volumeSets: baseVolume,
+      averageRIR: clampRIR(baseRIR),
     };
   });
 }

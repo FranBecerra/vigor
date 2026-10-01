@@ -266,6 +266,9 @@ export function strengthSlots(input: StrengthProgramInput): {
   missingPatterns: MovementVector[];
 } {
   const random = createRandom(input.seed);
+  const eligibleCatalogue = input.catalogue.filter(
+    (exercise) => exercise.generationTier !== ExerciseGenerationTier.MANUAL_ONLY,
+  );
   const sets = STRENGTH_SETS[input.level];
   const topSingles = input.level !== ExperienceLevel.BEGINNER;
   const used = new Set<string>();
@@ -274,7 +277,7 @@ export function strengthSlots(input: StrengthProgramInput): {
   const missingPatterns: MovementVector[] = [];
 
   MAIN_LIFTS.forEach((spec) => {
-    const resolved = resolveLift(spec, input.catalogue, used);
+    const resolved = resolveLift(spec, eligibleCatalogue, used);
     if (resolved === null) {
       missingPatterns.push(spec.vector);
       return;
@@ -287,7 +290,7 @@ export function strengthSlots(input: StrengthProgramInput): {
     const variantPool =
       input.level === ExperienceLevel.BEGINNER
         ? []
-        : input.catalogue.filter((exercise) => spec.variantIds.includes(exercise.id) && !used.has(exercise.id));
+        : eligibleCatalogue.filter((exercise) => spec.variantIds.includes(exercise.id) && !used.has(exercise.id));
     const variant = weightedPick(variantPool, () => 1, random);
     if (variant !== undefined) used.add(variant.id);
 
@@ -305,7 +308,7 @@ export function strengthSlots(input: StrengthProgramInput): {
   });
 
   COMPLEMENTARY_LIFTS.forEach((spec) => {
-    const resolved = resolveLift(spec, input.catalogue, used);
+    const resolved = resolveLift(spec, eligibleCatalogue, used);
     if (resolved === null) {
       missingPatterns.push(spec.vector);
       return;
@@ -325,7 +328,7 @@ export function strengthSlots(input: StrengthProgramInput): {
   });
 
   const addAccessory = (priority: number, matches: (exercise: Exercise) => boolean): void => {
-    const candidates = input.catalogue.filter(
+    const candidates = eligibleCatalogue.filter(
       (exercise) =>
         matches(exercise) &&
         exercise.generationTier !== ExerciseGenerationTier.STRENGTH_VARIANT &&
@@ -352,7 +355,7 @@ export function strengthSlots(input: StrengthProgramInput): {
     slots,
     report: {
       mainLifts,
-      missingBarbell: !input.catalogue.some((exercise) => exercise.equipment === Equipment.BARBELL),
+      missingBarbell: !eligibleCatalogue.some((exercise) => exercise.equipment === Equipment.BARBELL),
     },
     missingPatterns,
   };

@@ -33,6 +33,7 @@ const MUSCLE_SEARCH_ALIASES: Record<MuscleGroup, readonly string[]> = {
   [MuscleGroup.CALVES]: ['gemelo', 'gemelos', 'pantorrilla', 'calf', 'calves'],
   [MuscleGroup.TIBIALIS]: ['tibial', 'tibialis', 'espinilla', 'shin'],
   [MuscleGroup.BICEPS]: ['biceps', 'bíceps', 'brazo', 'curl'],
+  [MuscleGroup.FOREARMS]: ['antebrazo', 'antebrazos', 'forearm', 'forearms', 'muñeca', 'agarre', 'grip'],
   [MuscleGroup.TRICEPS]: ['triceps', 'tríceps', 'brazo', 'extension de codo'],
   [MuscleGroup.CORE]: ['core', 'abdomen', 'abdominal', 'abdominales', 'abs'],
 };

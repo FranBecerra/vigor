@@ -1,0 +1,98 @@
+# Generator technical debt and resolution plan
+
+Updated: 2026-10-01. PRD.md remains the source of truth. This ledger distinguishes implemented diagnostics from unresolved behavior. A proposal here is not evidence that its code has already shipped.
+
+## Accepted design corrections
+
+### Rest structure does not require calendar dates
+
+A plan should specify a repeatable sequence of workout and rest slots independently of a calendar. A dated calendar is an optional placement of those slots. Proposed shape: `scheduleTemplate` containing references to workout session indices and distinct rest slots, with a cycle length in days. Rest may be movable if the resulting placement respects the user's constraints; it is not necessarily interchangeable with every other day.
+
+The generator should report the proposed rest-slot count, adjacent workload and unresolved overlaps without requiring civil dates. With dates it should additionally report actual gaps. Neither a template nor a checkmark measures physiological recovery. Do not infer a universal 48/72-hour requirement.
+
+### Volume targets precede the choice of exercises
+
+The existing engine already starts with `buildVolumePlan`. Retain that principle. Refactor selection and dose into an iterative allocation problem: establish muscle targets and direct-work requirements; select compound candidates with provisional cross-muscle attribution; allocate sets within fatigue/time constraints; use isolation work to address residual targets; reconsider compounds if their collateral volume crowds out priorities. Separate code modules for testing without imposing a strictly frozen roster before allocation.
+
+Do not impose a universal compound/isolation percentage for hypertrophy. Use goal, target muscle, available equipment, athlete tolerance and direct-work coverage. Strength main-lift exposure requirements remain goal-specific. Do not mix units: performed sets, muscle-attributed sets, minutes and ordinal fatigue estimates must remain separate. Stability and systemic demand should not be conflated into a measured CNS-fatigue value.
+
+### Shared hip extension does not make exercises redundant
+
+RDL plus hip thrust can be a reasonable glute-focused pairing if dose, time, technique and recovery fit. A torso-hinge RDL and a supported hip thrust differ in mechanics and demand. The current `sameExerciseFamily` treats compounds sharing a movement vector as duplicates, and the late hinge repair counts all HIP_DOMINANT entries. Both are too coarse. Replace their checks with explicit families and pairwise redundancy/cost assessment. RDL plus dumbbell RDL is a stronger redundancy candidate than RDL plus hip thrust; neither is a universal clinical prohibition.
+
+The previous 40→0 two-hip-pattern metric is not itself a success criterion. Replace it with counts of near-duplicate families and concentrations of high-demand torso hinges. Retain broad pattern tags for coverage and swap compatibility rather than using them as universal same-session bans.
+
+## Point-by-point debt
+
+| Point | Current state and debt | Concrete proposed fix | Acceptance evidence |
+|---|---|---|---|
+| 1. Quality definition | Completed as an evaluation contract, not allocator repair: three independent axes, explained magnitudes, original/adjusted deficits, family-aware demanding-hinge review and malformed-output constraints. | Use these findings to prioritize later repairs; UI display remains separate. No combined optimality grade. | Quality version 2.0.0; axis/edge/hinge tests; 605 unchanged prescriptions; full report linked below. |
+| 2. Reproducible battery | Completed: schema-2 snapshots of inputs/catalogues/source/dependencies/runtime, integrity-checked case replay, per-case experiment classification and separate acceptance rules; both goals crossed with levels/splits/emphasis/material. | Preserve dated references and perform explicit disposition of discovered defects before promoting allocator/catalogue changes. | 3,575-run reference, identical second-run outcome hash, exact case replay and unpromoted catalogue experiment; 967 tests pass. |
+| 3. Metrics and rest | Undated audit says calendar-required. This misses a plan's logical rest structure. | Generate workout/rest templates separately from dates. Report microcycle days, workout/rest slots and seven-day equivalent only once cycle length exists. Support shifting a rest slot and recomputing overlap. | Undated PPL and upper/lower produce rest-aware templates; rest slots never count as sessions or progression; altered cycle lengths change displayed rates, not hidden dose. |
+| 4. Isolated experiments | Several stages were compared, but full isolated artifacts are not all retained in the repository. | Archive stage manifests linking input, engine/catalogue hashes, experimental change, baseline and per-case deltas. | Each promoted change has a reproducible isolated comparison and named regressions. |
+| 5. Catalogue | 378 entries now have a screening ledger. 257 imported entries use a general rubric, 116 compounds lack secondary attribution, and 364 entries lack original stimulus tags. Scores and citation labels are not independently validated. | Review all entries in muscle-family batches with page/figure verification, per-field reasoning, explicit uncertainty, duplicate aliases, required apparatus, secondary credit and programming roles. Verify each citation's actual claim; preserve unresolved attributes explicitly. Promote only reviewed entries. | Every entry has a review record, reasoning and provenance for each field; confirmed faults corrected; unknowns remain explicit; guide import eligibility is justified individually. Screening alone does not close this task. |
+| 6. Selection and dose | Allocation is extracted, but changing the roster still relies on selection heuristics. | Use the volume-first iterative model above. Track compound/isolation contributions per muscle, residual direct targets, and marginal time/fatigue cost. Allow candidate replacement during allocation. | Back/triceps priority reaches justified targets without unnecessary press or elbow-flexion spillover; same budget is conserved; strength lift specificity is preserved. Compare against all 605 cases. |
+| 7. Individual volume | Level/priority/declared-volume priors work, but are not a measured personal tolerable budget. | Add explainable starting targets and observed-response updates based on completed dose, performance, exertion and recovery reports. Require enough comparable exposures; distinguish missing data from stagnation. | Synthetic improvement/stagnation/noise histories produce bounded, explainable changes; no history retains conservative priors; missed workouts do not imply intolerance. |
+| 8. Flexible distribution | Rebalance exists; short-day cases remain. Broad compound-family checks exclude legitimate pairings. | First correct family classification. Then search assignments jointly for time, muscle concentration, workload and overlap. When infeasible, generate a real fewer-training-day alternative with rest slots and explicit trade-offs. | Case S offers a evaluated four-day alternative; no filler volume; RDL + hip thrust can coexist; near-identical RDLs are normally separated; no new hard violations. |
+| 9. Recovery | Optional dates/rest markers exist; proposal is partly even spacing and direct overlap. No undated template or sufficiently individualized recovery model. | Build templates in point 3, then derive dates and use actual completion times plus tolerance reports to update guidance. Allow athlete overrides and preserve history. | Test microcycle boundaries, moved rest days, delayed workouts, DST and non-seven-day cycles. A warning is never phrased as measured failure to recover. |
+| 10. Duration | Shared conservative model and observational feedback exist. Automatic calibration is absent and rest after the final set may be overcounted. | Measure per-exercise execution, between-set rest and station transitions; distinguish completed duration from pauses. Apply a robust personal duration multiplier after sufficient comparable samples, without automatically increasing volume. | Actual and predicted components are observable; long pauses are excluded/flagged; small samples retain baseline; enough comparable history improves held-out timing error. |
+| 11. Individual review | 605 runs have automated findings; only 31 base cases have an individual written review. | Review every serious failure and stratify manual samples by level, priority, equipment, split and change size. Persist per-case judgement and unresolved concerns. | Every severe finding has a disposition; every promoted improvement has manual review of affected cases; no claim that 605 automatic checks equal 605 coaching reviews. |
+| 12. Regression coverage | 873 prior tests plus screening tests cover addressed logic, not all identified issues. | Add behavior tests alongside each fix: equivalent versus complementary patterns, incorrect equipment, direct-arm deficits, offline-independent generation, rest templates and fewer-day alternatives. | Each corrected real failure first reproduces and then passes; full suite and catalogue validation pass. |
+| 13. Sensitivity | Ten seeds and +5 minutes exist; other perturbations are absent. | Add ±5 minutes, ±1 declared set, one equipment exclusion, one emphasis change and ±1 session. Distinguish explainable threshold changes from erratic jumps. | Deltas include the binding constraint and per-muscle effects; unexplained swings trigger review rather than an arbitrary volume-maximization rule. |
+| 14. Scientific validity | Caveats exist, but old evidence notes still assert neural fatigue and generic scores imply unsupported precision. | Audit citation-to-claim links, replace unverified neural claims with observable programming cost, separate unknown from neutral values, and keep tie ranges where comparisons cannot be justified. | No machine-cam match inferred from equipment alone; no unsupported measured CNS-fatigue claim; conclusions distinguish direct trials, biomechanical inference and preference. |
+| 15. Quality gate | Current gate rejects hard regressions but accepted result has 15 more undated overlap warnings and unchanged short-session count. | Add dispositions for worsened soft metrics, profile-specific target/direct-volume checks, redundancy coverage and review sign-off. Evaluate changed-catalogue experiments explicitly. | Passing requires hard compliance plus recorded reasons for soft trade-offs; lower empty-day count cannot conceal direct-volume, redundancy or recovery regressions. |
+
+## Prioritized execution batches
+
+1. **Catalogue facts and family taxonomy (points 5, 8, 14).** Correct explicit source mismatches, distinguish resistance from required apparatus, and replace broad same-vector redundancy. This supplies reliable inputs for subsequent optimization.
+2. **Rest structure without dates (points 3, 9).** Define movable workout/rest templates and connect optional dates to them. Keep session progression separate from calendar progression.
+3. **Volume-first coupled allocation (points 6, 7, 8).** Diagnose compound/isolation contributions, direct-arm coverage and close-grip-bench concentration before adjusting weights. Compare every change with the fixed matrix.
+4. **Evaluated alternative schedules (points 7, 8).** Produce actual fewer-day candidates when workload cannot support the requested frequency, with the same targets and clear compromises.
+5. **Observed personalization (points 7, 9, 10).** Use training history for bounded volume, intensity and duration updates after adequate samples.
+6. **Evaluation completeness (points 1, 2, 4, 11, 12, 13, 15).** Broaden sensitivity, retain isolated artifacts and close each serious finding with regression tests and review.
+
+All batches require PRD synchronization. No batch should be labelled complete merely because it has a diagnostic report.
+
+## Current catalogue findings verified against full source-page descriptions
+
+The per-entry JSON/Markdown screening files cover all 378 current entries. Nine source findings were checked in complete guide-page text: rack-pull attribution (120), shoulder extension incorrectly labelled horizontal abduction (159), fitball omitted (277), dynamic trunk rotation incorrectly labelled anti-movement (283), miniband omitted (305 and 311), GHD support absent (317), bodyweight kneeling extension marked machine (347), and sliding leg curl marked machine (367). Six factual classifications are now corrected: pages 159, 277, 305, 311, 347 and 367. Their existing generic rubric recalculates where implement changes affect it; this does not close individual score validation. All six remain manual-only. Rack-pull attribution, dynamic trunk-rotation taxonomy and GHD apparatus modelling remain open. Slider/support requirements are also still absent from the equipment model.
+
+The 37 neural-fatigue-language findings are claim-review flags, not proof that every referenced source is incorrect. The 116 missing compound secondary-credit flags are missing-model findings, not prescriptions for adding identical 0.5 credit to all those exercises. A default 3 must not be read as a measured average.
+
+Scientific context: a [squat versus hip-thrust trial](https://pubmed.ncbi.nlm.nih.gov/37461495/) demonstrates that different exercises can produce gluteal growth, but does not test the superiority of combining RDL and hip thrust. A [single- versus multi-joint trial](https://pubmed.ncbi.nlm.nih.gov/26446291/) cannot establish a universal compound/isolation ratio across all muscles and trained athletes. The proposed allocation and pairing policies therefore require transparent biomechanical reasoning and outcome testing rather than claims of trial-proven optimality.
+
+## Execution update: approved batches 1–4
+
+The latest implemented behavior and paired review are recorded in `docs/audits/2026-09-30-ordered-batches.md` and the matching PRD entry. This update supersedes stale "no undated template" and "legacy-only selector" descriptions in the point-by-point baseline table above.
+
+- Batch 1 remains **partial**: hip-family classification fixes legitimate RDL/thrust pairing; the complete 378-entry source/score/apparatus review and non-hip taxonomy are not finished.
+- Batch 2 is **implemented with tests**: movable undated workout/rest templates, optional exact date conversion, cyclic recovery guidance and isolated transactional saves. Device interaction remains unverified.
+- Batch 3 is **partial but promoted behind a non-regression guard**: volume-first marginal target utility, protected direct-arm coverage, systemic ordinal-cost distinction, strict baseline fallback. 605 fixed-input comparisons reduce short sessions 435→429, not to zero. A global coupled solver and concentration improvements remain open.
+- Batch 4 is **implemented with tests**: actual optional lower-frequency candidates, full prescriptions in the audit and explicit preview acceptance. 52 qualifying proposals; audited case S preserves 50 sets across four adequate days. Impossible short-budget cases still need transparent infeasibility handling, not filler.
+- Batches 5–6 remain **open**: observed-response personalization, wider perturbation matrix, full severe-case dispositions and completion of the individual evidence audit. Existing history estimates must not be relabelled as measured personal MEV/MRV.
+
+Validation: 892 tests / 47 suites pass; TypeScript and 378-entry catalogue validation pass. No deployment was performed.
+
+## Accessory-role execution update
+
+The next bounded allocator improvement is implemented in `accessory-aware`: localized arm/delt work follows foundational coverage, without a universal small-muscle rule or blanket compound prohibition. The exact-catalogue 605-case comparison reduces short sessions 429→406 and close-grip-bench appearances 418→370. The old guarded incumbent remains the rejection fallback, so concentration is reduced rather than fully solved. Details, evidence limits and twelve base-case reviews are in `docs/audits/2026-09-30-accessory-policy.md`.
+
+JM/Kaz were already guide imports; their IDs are preserved. Pages 210–211 were individually reviewed in text and figures, their local hybrid role corrected and generic scores withdrawn. Manual addition remains available, but automatic promotion requires attribute-specific review. This is two source-reviewed entries, not closure of the 378-entry audit. The catalogue remains 378 unique entries; auto-eligible count remains 115.
+
+900 tests pass. Further priorities: evaluate named fallback reasons for press concentration, beginner technique-demand eligibility, per-session focus consistency, and the outstanding source/score/apparatus ledger. Do not remove a valid compound solely to improve a popularity counter.
+
+## 2026-10-01 source/trace/coherence update
+
+The latest bounded implementation is documented in `audits/2026-10-01-source-trace-coherence.md`. The catalogue now has 379 entries after separating the disputed page-212 alias. All 35 triceps source pages have individual mechanics/setup/contradiction records; 30 manual imports no longer carry unverified generic point ratings. Original numeric ratings and other muscle-family reviews are still open. This is not a completed 379-entry audit.
+
+Whole-policy fallback reasons are implemented without relaxing the incumbent guard; per-exercise shortlist traces remain open. Content-correct presentation labels fix 47 simulated sessions without moving a single prescribed set. Focus/task and beginner-technique review triggers reveal existing concerns; repair of placement and beginner defaults remains open, not fulfilled by diagnostics.
+
+Three archived 605-case matrices isolate these stages. Selection/prescription content is unchanged; underfilled sessions remain 406. Five changed base labels and three additional programming profiles have written dispositions. 923 tests / 50 suites, TypeScript, catalogue validation and diff checks pass. Next concrete work: original triceps role/credit and bounded rating experiment; biceps source batch; support-aware availability; local candidate repair for the seed-12 overlap rejection and G push-without-press profile. No new user input is required for those source/algorithm tasks.
+
+### Deferred deployment scope
+
+The Expo development-build error and standalone/offline installation question were reported during this work. At the user's explicit direction they are deferred; no deployment or offline architecture change is part of this iteration.
+
+## 2026-10-01 quality and reproducibility completion
+
+Checklist points 1 and 2 and all six associated subitems are implemented; see `audits/2026-10-01-quality-contract-battery.md` for the checked list, evidence, rules and reproduction commands. This supersedes their earlier partial statuses. Feasibility is not programming approval and source-reviewed mechanics are not validated numeric scores. The expanded audit exposes 887 short sessions in its larger sampling frame and a deterministic 111→99-set seed span in one advanced PPL back/triceps configuration. These remain allocator debt, not failures to implement the diagnostic contract. The full audit exits 1 for that sensitivity finding; the description-tag experiment exits 2 for review and is not promoted. No prescriptions, UI or infrastructure were changed by this iteration.

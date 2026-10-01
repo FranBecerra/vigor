@@ -53,9 +53,8 @@ export const IDLE_REST_TIMER: RestTimerState = {
  * than a hypertrophy one, and it made the whole time model too conservative: the
  * planner concluded that one hour fits 15-16 sets when 18 is unremarkable.
  *
- * These values are derived from that benchmark rather than guessed. A
- * representative hour of six exercises at three sets each, two per profile, comes
- * to exactly 60 minutes with 18 sets.
+ * These are timer defaults, not a promise of session duration. The capacity
+ * planner adds a conservative floor for transitions and other gym delays.
  *
  * The athlete can always extend a rest from the timer; what matters here is that
  * the planning assumption matches what actually happens in the gym.

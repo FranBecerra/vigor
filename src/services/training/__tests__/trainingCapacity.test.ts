@@ -119,13 +119,19 @@ describe('appearancesOf', () => {
 });
 
 describe('exerciseMinutes', () => {
+  it('budgets at least an hour for eighteen sets across six exercises including session overhead', () => {
+    const work = Array.from({ length: 6 }, (_, index) =>
+      exerciseMinutes(exercise({ id: `e-${index}` }), 3))
+      .reduce((sum, minutes) => sum + minutes, 0);
+    expect(work + SESSION_OVERHEAD_MINUTES).toBeGreaterThanOrEqual(60);
+  });
   it('cuenta montaje, trabajo y descanso', () => {
     const sets = 3;
     const expected =
       (EXERCISE_SETUP_SECONDS +
         sets * (WORK_SECONDS_PER_SET + restDurationFor(ExerciseProfile.ISOLATION))) /
       60;
-    expect(exerciseMinutes(exercise(), sets)).toBeCloseTo(expected, 5);
+    expect(exerciseMinutes(exercise(), sets)).toBe(Math.max(expected, sets * 3));
   });
 
   it('uses a prescribed rest instead of the profile default', () => {

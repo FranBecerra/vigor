@@ -59,7 +59,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "volume": "tsx scripts/volume-harness.ts",
-    "catalogue": "tsx scripts/catalogue-report.ts"
+    "catalogue": "tsx scripts/catalogue-report.ts",
+    "audit:generator": "tsx scripts/evaluate-generator.ts"
   },
   "jest": {
     "preset": "jest-expo",

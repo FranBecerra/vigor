@@ -1,0 +1,13 @@
+{
+  "reference": "docs/audits/2026-10-01-quality-full.json.gz",
+  "repeatedCases": 3575,
+  "sourceFingerprint": "1fe95d87de6256053df8e138d8171533e69bae45ed70f037ff4641de1c10d7b7",
+  "normalization": "Canonical JSON of reports in case order, excluding durationMs only. Root generatedAt and baseline comparisons are not report outcomes.",
+  "originalReportsFingerprint": "966e5eb5ebdf90388ec4e63cbd8d07296af5fbdfb1ce3f3b5cda387ce840a7a7",
+  "repeatReportsFingerprint": "966e5eb5ebdf90388ec4e63cbd8d07296af5fbdfb1ce3f3b5cda387ce840a7a7",
+  "sameSource": true,
+  "sameOutcomes": true,
+  "repeatCommand": "node --import tsx scripts/evaluate-generator.ts --matrix=full --seeds=10 --baseline=docs/audits/2026-10-01-quality-full.json.gz --output=/private/tmp/vigor-quality-repeat.json.gz",
+  "auditExitCode": 1,
+  "reason": "The unchanged advanced PPL back/triceps profile spans 12 sets across seeds, above the retained 10-set sensitivity review threshold. This is an existing programming defect, not nondeterministic replay."
+}

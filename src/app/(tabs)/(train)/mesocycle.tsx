@@ -18,6 +18,7 @@ import { rirColor } from '@/components/train/rirColor';
 import { countWorkingSets } from '@/services/training/sessionSummary';
 import { maxVolume, sessionMicrocycleMetrics } from '@/services/training/sessionProgression';
 import { deriveSetRIRs } from '@/services/training/setIntensity';
+import { SetType } from '@/models';
 import { useRoutines } from '@/hooks/useRoutines';
 
 const PROJECTED_OPACITY = 0.4;
@@ -50,6 +51,14 @@ export default function MesocycleScreen() {
 
   const selectedMicrocycle = routine?.microcycles[selectedIndex] ?? null;
   const selectedSession = selectedMicrocycle?.sessions[sessionIndex] ?? null;
+  const openSelectedSession = () => {
+    if (routine === null || selectedSession === null) return;
+    router.push({ pathname: '/routine', params: {
+      mesocycleId: routine.mesocycleId,
+      microcycleIndex: String(selectedIndex),
+      plannedSessionIndex: String(selectedSession.plannedSessionIndex),
+    } });
+  };
 
   const completedSessions = routine?.microcycles
     .flatMap((microcycle) => microcycle.sessions)
@@ -209,25 +218,30 @@ export default function MesocycleScreen() {
 
         {/* Ejercicios del microciclo SELECCIONADO, con RIR por serie */}
         <View style={{ paddingHorizontal: spacing.lg, marginTop: spacing.xl }}>
-          <View style={styles.listHeader}>
+          <Pressable onPress={openSelectedSession} accessibilityRole="button"
+            style={styles.listHeader}>
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-              {t('home.exercises').toUpperCase()}
+              {selectedSession.name} · {t('home.exercises').toUpperCase()} ›
             </Text>
             <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
               {selectedMicrocycle.isDeload
                 ? t('meso.deload')
                 : `${t('home.microcycle')} ${selectedMicrocycle.number}`}
             </Text>
-          </View>
+          </Pressable>
 
           {selectedSession.exercises.map((exercise) => {
             const workingSets = countWorkingSets(exercise.sets);
             // `routineView` already resolves this microcycle's prescription;
             // applying its delta again would make the strength RIR ramp twice as steep.
-            const setRIRs = deriveSetRIRs(exercise.targetRIR, workingSets);
+            const setRIRs = exercise.sets
+              .filter((set) => set.setType !== SetType.WARMUP)
+              .map((set, index) => set.targetRIR ?? deriveSetRIRs(exercise.targetRIR, workingSets)[index]);
             return (
-              <View
+              <Pressable
                 key={exercise.exerciseId}
+                onPress={openSelectedSession}
+                accessibilityRole="button"
                 style={[
                   styles.exerciseCard,
                   { backgroundColor: colors.bgElevated, borderRadius: radius.md },
@@ -266,7 +280,7 @@ export default function MesocycleScreen() {
                     {t('meso.perSetIntensity')}
                   </Text>
                 </View>
-              </View>
+              </Pressable>
             );
           })}
         </View>

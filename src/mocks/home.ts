@@ -6,7 +6,7 @@
  * definen por sus sesiones, y todos los del mesociclo tienen el mismo número.
  * Las sesiones completadas guardan su FECHA real; las pendientes no tienen día.
  */
-import { MuscleGroup, SetType } from '@/models';
+import { Equipment, MuscleGroup, SetType } from '@/models';
 import type {
   MicrocycleView,
   RoutineView,
@@ -279,6 +279,7 @@ export const mockRoutines: MockRoutine[] = [
     name: 'Push Pull Legs Upper',
     objective: 'Hipertrofia',
     generationGoal: 'HYPERTROPHY',
+    availableEquipment: [Equipment.BARBELL],
     icon: 'dumbbell',
     color: '#9BE317',
     domain: 'STRENGTH',
@@ -313,6 +314,7 @@ export const mockRoutines: MockRoutine[] = [
     name: 'Fuerza Máxima',
     objective: 'Fuerza',
     generationGoal: 'STRENGTH',
+    availableEquipment: [Equipment.BARBELL],
     icon: 'barbell',
     color: '#3FE0A9',
     domain: 'STRENGTH',

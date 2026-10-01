@@ -1,0 +1,1353 @@
+{
+  "source": "Guia_Ejercicios_Hipertrofia-SergioMCoach 6ªEd.pdf",
+  "exercises": [
+    {
+      "page": 32,
+      "name": "PRESS CON MANCUERNAS LIGERA INCLINACIÓN"
+    },
+    {
+      "page": 33,
+      "name": "PRESS INCLINADO CON MANCUERNAS"
+    },
+    {
+      "page": 34,
+      "name": "PRESS PLANO MANCUERNAS"
+    },
+    {
+      "page": 35,
+      "name": "PRESS DECLINADO CON BARRA"
+    },
+    {
+      "page": 36,
+      "name": "PRESS DECLINADO MANCUERNAS"
+    },
+    {
+      "page": 37,
+      "name": "PRESS PLANO EN MULTIPOWER"
+    },
+    {
+      "page": 38,
+      "name": "PRESS LIGERA INCLINACIÓN EN MULTIPOWER"
+    },
+    {
+      "page": 39,
+      "name": "PRESS INCLINADO EN MULTIPOWER"
+    },
+    {
+      "page": 40,
+      "name": "PRESS INCLINADO CON BARRA"
+    },
+    {
+      "page": 41,
+      "name": "PRESS INVERSO EN MULTIPOWER"
+    },
+    {
+      "page": 42,
+      "name": "PRESS ESTRECHO EN MULTIPOWER"
+    },
+    {
+      "page": 43,
+      "name": "PRESS ESTRECHO CON BARRA"
+    },
+    {
+      "page": 44,
+      "name": "PRESS EN MÁQUINA PRONO"
+    },
+    {
+      "page": 45,
+      "name": "CRUCES EN POLEA SENTADO"
+    },
+    {
+      "page": 46,
+      "name": "CRUCES EN POLEA DE PIE"
+    },
+    {
+      "page": 47,
+      "name": "BAYESIAN FLYES"
+    },
+    {
+      "page": 48,
+      "name": "HIGH CABLE CROSSOVER"
+    },
+    {
+      "page": 49,
+      "name": "LOW CABLE FLYES"
+    },
+    {
+      "page": 50,
+      "name": "APERTURAS EN BANCO INCLINADO POLEA BAJA"
+    },
+    {
+      "page": 51,
+      "name": "APERTURAS BANCO INCLINADO CON MANCUERNA"
+    },
+    {
+      "page": 52,
+      "name": "APERTURAS EN BANCO PLANO DESDE POLEA BAJA"
+    },
+    {
+      "page": 53,
+      "name": "APERTURAS BANCO PLANO MANCUERNAS"
+    },
+    {
+      "page": 54,
+      "name": "PEC-FLY"
+    },
+    {
+      "page": 55,
+      "name": "FONDOS EN PARALELAS AGARRE ANCHO"
+    },
+    {
+      "page": 56,
+      "name": "FONDOS MÁQUINA AGARRE ANCHO"
+    },
+    {
+      "page": 57,
+      "name": "HEX PRESS CON MANCUERNAS"
+    },
+    {
+      "page": 58,
+      "name": "HEX PRESS EN MULTIPOWER"
+    },
+    {
+      "page": 59,
+      "name": "APERTURAS CON MANCUERNA EN BANCO DECLINADO"
+    },
+    {
+      "page": 60,
+      "name": "APERTURAS DESDE POLEA BAJA EN BANCO DECLINADO"
+    },
+    {
+      "page": 61,
+      "name": "PRESS DECLINADO EN MULTIPOWER"
+    },
+    {
+      "page": 62,
+      "name": "PRESS BANCA"
+    },
+    {
+      "page": 63,
+      "name": "PRESS LATERAL EN MÁQUINA"
+    },
+    {
+      "page": 64,
+      "name": "PRESS LATERAL EN POLEA"
+    },
+    {
+      "page": 65,
+      "name": "STANDING PRESS EN POLEAS"
+    },
+    {
+      "page": 66,
+      "name": "PRESS DE PECHO EN POLEAS SENTADO"
+    },
+    {
+      "page": 67,
+      "name": "PRESS DECLINADO EN MÁQUINA"
+    },
+    {
+      "page": 68,
+      "name": "PEC DECK"
+    },
+    {
+      "page": 69,
+      "name": "PRESS PLANO EN MÁQUINA DE PALANCAS"
+    },
+    {
+      "page": 70,
+      "name": "DUMBELL TWIST PRESS"
+    },
+    {
+      "page": 71,
+      "name": "CRUCES EN POLEA BANCO A 60º ENFASIS F. INFERIORES"
+    },
+    {
+      "page": 72,
+      "name": "PRESS INCLINADO SENTADO PLATE LOADED"
+    },
+    {
+      "page": 73,
+      "name": "PRESS NEUTRO EN MÁQUINA CONVERGENTE"
+    },
+    {
+      "page": 74,
+      "name": "PRESS PLANO SENTADO PLATE LOADED"
+    },
+    {
+      "page": 75,
+      "name": "PRESS AROUND (COSTAL)"
+    },
+    {
+      "page": 76,
+      "name": "PRESS AROUND (CLAVICULAR)"
+    },
+    {
+      "page": 77,
+      "name": "PRESS EN MÁQUINA INCLINADO"
+    },
+    {
+      "page": 79,
+      "name": "DOMINADAS PRONAS"
+    },
+    {
+      "page": 80,
+      "name": "DOMINADAS SUPINAS"
+    },
+    {
+      "page": 81,
+      "name": "DOMINADAS NEUTRAS"
+    },
+    {
+      "page": 82,
+      "name": "JALÓN AL PECHO PRONO"
+    },
+    {
+      "page": 83,
+      "name": "JALÓN AL PECHO SUPINO"
+    },
+    {
+      "page": 84,
+      "name": "JALÓN AL PECHO NEUTRO"
+    },
+    {
+      "page": 85,
+      "name": "JALÓN AL PECHO EN BANCO INCLINADO"
+    },
+    {
+      "page": 86,
+      "name": "JALÓN UNILATERAL EN BANCO INCLINADO"
+    },
+    {
+      "page": 87,
+      "name": "REMO CON BARRA SUPINO"
+    },
+    {
+      "page": 88,
+      "name": "REMO GIRONDA ALTO"
+    },
+    {
+      "page": 89,
+      "name": "REMO GIRONDA"
+    },
+    {
+      "page": 90,
+      "name": "REMO EN MÁQUINA PRONO"
+    },
+    {
+      "page": 91,
+      "name": "REMO EN MÁQUINA NEUTRO"
+    },
+    {
+      "page": 92,
+      "name": "REMO EN MÁQUINA DE PIE"
+    },
+    {
+      "page": 93,
+      "name": "REMO GIRONDA UNILATERAL"
+    },
+    {
+      "page": 94,
+      "name": "SEAL ROW CON MANCUERNAS EN BANCO INCLINADO"
+    },
+    {
+      "page": 95,
+      "name": "REMO EN POLEA UNILATERAL – BENCH CABLE ROW"
+    },
+    {
+      "page": 96,
+      "name": "PULL OVER UNILATERAL DESDE POLEA ALTA"
+    },
+    {
+      "page": 97,
+      "name": "PULL OVER DE PIE CON CUERDA"
+    },
+    {
+      "page": 98,
+      "name": "REMO CON MANCUERNA UNILATERAL"
+    },
+    {
+      "page": 99,
+      "name": "REMO DESDE POLEA BAJA CON CUERDA EN BANCO INCLINADO"
+    },
+    {
+      "page": 100,
+      "name": "MEADOWS ROW"
+    },
+    {
+      "page": 101,
+      "name": "ADUCCIÓN EN POLEA PARA DORSAL"
+    },
+    {
+      "page": 102,
+      "name": "JALÓN AL PECHO FOCUS ESPALDA ALTA"
+    },
+    {
+      "page": 103,
+      "name": "REMO EN POLEA PLANO TRANSVERSAL"
+    },
+    {
+      "page": 104,
+      "name": "JALÓN UNILATERAL SENTADO"
+    },
+    {
+      "page": 105,
+      "name": "REMO GIRONDA AGARRES INDEPENDIENTES"
+    },
+    {
+      "page": 106,
+      "name": "DANTE ROW"
+    },
+    {
+      "page": 107,
+      "name": "BACK-BOOB PULL DOWN"
+    },
+    {
+      "page": 108,
+      "name": "REMO PENDLAY"
+    },
+    {
+      "page": 109,
+      "name": "REMO EN MULTIPOWER"
+    },
+    {
+      "page": 110,
+      "name": "REMO EN PUNTA"
+    },
+    {
+      "page": 111,
+      "name": "REMO EN T"
+    },
+    {
+      "page": 112,
+      "name": "SINGLE ARM LANDMINE ROW"
+    },
+    {
+      "page": 113,
+      "name": "INCLINE BENCH DUMBELL ROW"
+    },
+    {
+      "page": 114,
+      "name": "REMO CON MANCUERNAS TORSO INCLINADO"
+    },
+    {
+      "page": 115,
+      "name": "JALÓN UNILATERAL EN MÁQUINA"
+    },
+    {
+      "page": 116,
+      "name": "PULL OVER SENTADO EN POLEA"
+    },
+    {
+      "page": 117,
+      "name": "PULL OVER EN MÁQUINA"
+    },
+    {
+      "page": 118,
+      "name": "SEAL ROW CON BARRA"
+    },
+    {
+      "page": 119,
+      "name": "HELMS ROW"
+    },
+    {
+      "page": 120,
+      "name": "RACK PULL"
+    },
+    {
+      "page": 121,
+      "name": "REMO PRONO EN MÁQUINA PLATE LOADED"
+    },
+    {
+      "page": 122,
+      "name": "REMO BAJO - LOW ROW ÉNFASIS EN ESPALDA ALTA"
+    },
+    {
+      "page": 123,
+      "name": "REMO KROC"
+    },
+    {
+      "page": 124,
+      "name": "RETRACCIONES ESCAPULARES EN POLEA"
+    },
+    {
+      "page": 125,
+      "name": "LOW ROW UNILATERAL DE PIE"
+    },
+    {
+      "page": 126,
+      "name": "LOW ROW ÉNFASIS DORSAL ANCHO SENTADO"
+    },
+    {
+      "page": 127,
+      "name": "JALÓN AL PECHO UNILATERAL HALF KNEELING"
+    },
+    {
+      "page": 128,
+      "name": "SINGLE ARM MULTIPOWER ROW"
+    },
+    {
+      "page": 129,
+      "name": "ADUCCIÓN PARA DORSAL EN MÁQUINA"
+    },
+    {
+      "page": 130,
+      "name": "KASSEM PULL DOWN"
+    },
+    {
+      "page": 131,
+      "name": "REMO CON BARRA PRONO – BENT OVER ROW"
+    },
+    {
+      "page": 132,
+      "name": "REMO CON TRAP BAR – TRAP BAR ROW"
+    },
+    {
+      "page": 133,
+      "name": "REMO PENDULAR ÉNFASIS EN DORSAL ANCHO"
+    },
+    {
+      "page": 134,
+      "name": "REMO PENDULAR ÉNFASIS EN ESPALDA ALTA"
+    },
+    {
+      "page": 135,
+      "name": "EXTENSIONES LUMBARES EN MÁQUINA"
+    },
+    {
+      "page": 137,
+      "name": "ENCOGIMIENTOS CON MANCUERNAS"
+    },
+    {
+      "page": 138,
+      "name": "ENCOGIMIENTOS CON BARRA"
+    },
+    {
+      "page": 139,
+      "name": "ENCOGIMIENTOS DESDE POLEA BAJA"
+    },
+    {
+      "page": 140,
+      "name": "ENCOGIMIENTOS EN MÁQUINA DE PRESS"
+    },
+    {
+      "page": 141,
+      "name": "ENCOGIMIENTOS EN BANCO INCLINADO CON MANCUERNAS"
+    },
+    {
+      "page": 142,
+      "name": "ENCOGIMIENTOS APOYADO EN BANCO INCLINADO CON MANCUERNAS"
+    },
+    {
+      "page": 143,
+      "name": "ENCOGIMIENTOS EN MULTIPOWER - WIDE GRIP"
+    },
+    {
+      "page": 144,
+      "name": "ENCOGIMIENTOS CON TRAP BAR"
+    },
+    {
+      "page": 145,
+      "name": "ENCOGIMIENTOS UNILATERALES EN POLEA"
+    },
+    {
+      "page": 146,
+      "name": "FARMER WALKS CON TRAP BAR"
+    },
+    {
+      "page": 149,
+      "name": "PÁJAROS CON MANCUERNAS DE PIE APOYADO EN BANCO"
+    },
+    {
+      "page": 150,
+      "name": "PÁJAROS DESDE POLEA BAJA"
+    },
+    {
+      "page": 151,
+      "name": "PÁJAROS TUMBADO EN BANCO INCLINADO CON MANCUERNAS"
+    },
+    {
+      "page": 152,
+      "name": "REVERSE CABLE CROSS"
+    },
+    {
+      "page": 153,
+      "name": "ABDUCCIÓN UNILATERAL POLEA"
+    },
+    {
+      "page": 154,
+      "name": "CONTRACTORA INVERTIDA – MÁQUINA DELT. POSTERIOR"
+    },
+    {
+      "page": 155,
+      "name": "HANG & SWING CON MANCUERNAS"
+    },
+    {
+      "page": 156,
+      "name": "HANG & SWING EN POLEA CON BANCO INCLINADO"
+    },
+    {
+      "page": 157,
+      "name": "REVERSE CABLE CROSS EN BANCO INCLINADO DESDE POLEA BAJA"
+    },
+    {
+      "page": 158,
+      "name": "PÁJAROS UNILATERALES POLEA BAJA"
+    },
+    {
+      "page": 159,
+      "name": "EXTENSIONES DE HOMBRO CON MANCUERNA EN BANCO INCLINADO"
+    },
+    {
+      "page": 160,
+      "name": "REAR DELT ROW"
+    },
+    {
+      "page": 161,
+      "name": "FACE PULL"
+    },
+    {
+      "page": 163,
+      "name": "ELEVACIONES LATERALES CON MANCUERNAS DE PIE"
+    },
+    {
+      "page": 164,
+      "name": "ELEVACIONES LATERALES CON MANCUERNAS SENTADO"
+    },
+    {
+      "page": 165,
+      "name": "ELEV. LATERALES EN BANCO INCLINADO CON MANCUERNAS"
+    },
+    {
+      "page": 166,
+      "name": "ELEVACIONES LATERALES EN POLEA BAJA UNILATERAL"
+    },
+    {
+      "page": 167,
+      "name": "ELEVACIONES LATERALES EN POLEA BAJA A 2 MANOS"
+    },
+    {
+      "page": 168,
+      "name": "ELEVACIONES LATERALES EN MÁQUINA"
+    },
+    {
+      "page": 169,
+      "name": "ELEVACIONES LATERALES EN POLEA TUMBADO"
+    },
+    {
+      "page": 170,
+      "name": "ELEVACIONES LATERALES Y EN POLEA"
+    },
+    {
+      "page": 171,
+      "name": "REMO AL MENTÓN EN MULTIPOWER"
+    },
+    {
+      "page": 172,
+      "name": "REMO AL MENTÓN CON BARRA"
+    },
+    {
+      "page": 173,
+      "name": "REMO AL MENTÓN DESDE POLEA BAJA"
+    },
+    {
+      "page": 174,
+      "name": "REMO AL MENTÓN CON MANCUERNAS"
+    },
+    {
+      "page": 175,
+      "name": "EVACIONES LATERALES EN POLEA BAJA ESTILO EGIPCIO"
+    },
+    {
+      "page": 176,
+      "name": "BUTTERFLY LATERAL RAISES"
+    },
+    {
+      "page": 177,
+      "name": "ELEVACIONES LATERALES CON TORSO INCLINADO + ROTACIÓN INTERNA"
+    },
+    {
+      "page": 178,
+      "name": "ELEVACIONES LATERALES TUMBADO LATERALMENTE EN BANCO INCLINADO"
+    },
+    {
+      "page": 179,
+      "name": "ELEVACIONES LATERALES - POLEA ALTURA CADERA"
+    },
+    {
+      "page": 180,
+      "name": "ELEVACIONES LATERALES EN POLEA PECHO APOYADO EN BANCO"
+    },
+    {
+      "page": 181,
+      "name": "ELEVACIONES LATERALES EN BANCO A 80º"
+    },
+    {
+      "page": 183,
+      "name": "PRESS MILITAR SENTADO EN MULTIPOWER"
+    },
+    {
+      "page": 184,
+      "name": "PRESS MILITAR CON MANCUERNAS BANCO MUY INCLINADO"
+    },
+    {
+      "page": 185,
+      "name": "HIGH INCLINE MULTIPOWER SHOULDER PRESS"
+    },
+    {
+      "page": 186,
+      "name": "PRESS MILITAR EN MÁQUINA"
+    },
+    {
+      "page": 187,
+      "name": "HALF-KNEELING DUMBBELL SHOULDER PRESS"
+    },
+    {
+      "page": 188,
+      "name": "ELEVACIONES FRONTALES CON BARRA"
+    },
+    {
+      "page": 189,
+      "name": "ELEVACIONES FRONTALES DESDE POLEA BAJA"
+    },
+    {
+      "page": 190,
+      "name": "PRESS MILITAR EN MÁQUINA INVERSO"
+    },
+    {
+      "page": 191,
+      "name": "ELEVACIONES FRONTALES CON BARRA EN BANCO INCLINADO"
+    },
+    {
+      "page": 192,
+      "name": "ELEVACIONES FRONTALES EN BANCO INCLINADO DESDE POLEA BAJA"
+    },
+    {
+      "page": 193,
+      "name": "ELEVACIONES FRONTALES CON BARRA TUMBADO"
+    },
+    {
+      "page": 194,
+      "name": "PRESS MILITAR CON BARRA"
+    },
+    {
+      "page": 195,
+      "name": "LANDMINE SHOULDER PRESS"
+    },
+    {
+      "page": 197,
+      "name": "EXTENSIONES TRASNUCA CON MANCUERNA SENTADO"
+    },
+    {
+      "page": 198,
+      "name": "EXT. TRASNUCA DESDE POLEA BAJA CON CUERDA SENTADO"
+    },
+    {
+      "page": 199,
+      "name": "PRESS FRANCÉS CON MANCUERNAS TUMBADO"
+    },
+    {
+      "page": 200,
+      "name": "PRESS FRANCÉS CON BARRA TUMBADO"
+    },
+    {
+      "page": 201,
+      "name": "PRESS FRANCÉS DE PIE CON MANCUERNAS"
+    },
+    {
+      "page": 202,
+      "name": "ROMPECRANEOS - SKULLCRUSHER CON BARRA"
+    },
+    {
+      "page": 203,
+      "name": "FONDOS EN PARALELAS AGARRE ESTRECHO"
+    },
+    {
+      "page": 204,
+      "name": "EXTENSIONES DESDE POLEA ALTA EN X O CRUZADAS"
+    },
+    {
+      "page": 205,
+      "name": "EXTENSIÓN LATERAL DESDE POLEA ALTA"
+    },
+    {
+      "page": 206,
+      "name": "EXTENSIONES DE CODO SENTADO DESDE POLEA ALTA"
+    },
+    {
+      "page": 207,
+      "name": "EXTENSIÓN UNILATERAL EN POLEA ALTA DE PIE A 90º"
+    },
+    {
+      "page": 208,
+      "name": "EXTENSIONES KATANA"
+    },
+    {
+      "page": 209,
+      "name": "TATE PRESS EN POLEA"
+    },
+    {
+      "page": 210,
+      "name": "KAZ PRESS"
+    },
+    {
+      "page": 211,
+      "name": "JM PRESS"
+    },
+    {
+      "page": 212,
+      "name": "EXTENSIONES TRASNUCA DESDE POLEA ALTA CUERDA/BARRA"
+    },
+    {
+      "page": 213,
+      "name": "EXTENSIONES DESDE POLEA ALTA CON BARRA (V1)"
+    },
+    {
+      "page": 214,
+      "name": "EXTENSIONES DESDE POLEA ALTA CON BARRA V2"
+    },
+    {
+      "page": 215,
+      "name": "EXTENSIONES DESDE POLEA ALTA ALTA CON BARRA V3"
+    },
+    {
+      "page": 216,
+      "name": "PRESS FRANCÉS DESDE POLEA BAJA"
+    },
+    {
+      "page": 217,
+      "name": "TATE PRESS CON MANCUERNAS"
+    },
+    {
+      "page": 218,
+      "name": "EXTENSIÓN UNILATERAL/ PATADA EN POLEA ALTA"
+    },
+    {
+      "page": 219,
+      "name": "PATADA DE TRICEPS DESDE POLEA BAJA"
+    },
+    {
+      "page": 220,
+      "name": "PRESS FRANCÉS EN MÁQUINA"
+    },
+    {
+      "page": 221,
+      "name": "EXTENSIONES DE CODO DESDE PECHO"
+    },
+    {
+      "page": 222,
+      "name": "PATADA DE TRICEPS DESDE POLEA ALTA TUMBADO"
+    },
+    {
+      "page": 223,
+      "name": "PUSH DOWN INVERSO - CABLE DESDE ATRÁS"
+    },
+    {
+      "page": 224,
+      "name": "MÁQUINA EXTENSIÓN DE CODO SENTADO"
+    },
+    {
+      "page": 225,
+      "name": "PUSH DOWN CON SINGLE HANDLES/AGARRES DOBLES"
+    },
+    {
+      "page": 226,
+      "name": "PRESS FRANCÉS CON MANCUERNAS SENTADO"
+    },
+    {
+      "page": 227,
+      "name": "EXTENSIONES KATANA A 1 MANO CON MANCUERNA"
+    },
+    {
+      "page": 228,
+      "name": "EXTENSIONES DE TRICEPS EN BANCO INCLINADO"
+    },
+    {
+      "page": 229,
+      "name": "RAPUNZEL PUSH DOWNS"
+    },
+    {
+      "page": 230,
+      "name": "EXTENSIONES DE CODO CON CUERDA EN POLEA ALTA"
+    },
+    {
+      "page": 231,
+      "name": "PJR PULL OVER"
+    },
+    {
+      "page": 233,
+      "name": "CURL DE BÍCEPS CON BARRA DE PIE"
+    },
+    {
+      "page": 234,
+      "name": "CURL MARTILLO CON MANCUERNAS"
+    },
+    {
+      "page": 235,
+      "name": "CURL CON BARRA ROMANA"
+    },
+    {
+      "page": 236,
+      "name": "CURL DE BÍCEPS MANCUERNAS"
+    },
+    {
+      "page": 237,
+      "name": "DRAG CURL CON BARRA"
+    },
+    {
+      "page": 238,
+      "name": "CURL TUMBADO EN BANCO INCLINADO CON MANCUERNAS"
+    },
+    {
+      "page": 239,
+      "name": "CURL BAYESIAN EN POLEA SENTADO"
+    },
+    {
+      "page": 240,
+      "name": "CURL PREDICADOR CON MANCUERNA UNILATERAL"
+    },
+    {
+      "page": 241,
+      "name": "CURL PREDICADOR EN MÁQUINA"
+    },
+    {
+      "page": 242,
+      "name": "CURL PREDICADOR EN POLEA UNILATERAL"
+    },
+    {
+      "page": 243,
+      "name": "CURL DESDE POLEA BAJA CON BARRA"
+    },
+    {
+      "page": 244,
+      "name": "CURL ARAÑA CON MANCUERNAS"
+    },
+    {
+      "page": 245,
+      "name": "CURL ARAÑA CON BARRA"
+    },
+    {
+      "page": 246,
+      "name": "CURL ARAÑA EN POLEA"
+    },
+    {
+      "page": 247,
+      "name": "CURL EN MÁQUINA SENTADO"
+    },
+    {
+      "page": 248,
+      "name": "CURL PREDICADOR DE PIE DESDE POLEA BAJA"
+    },
+    {
+      "page": 249,
+      "name": "DOBLE BÍCEPS EN POLEA"
+    },
+    {
+      "page": 250,
+      "name": "CURL CONCENTRADO CON MANCUERNA"
+    },
+    {
+      "page": 251,
+      "name": "CURL MARTILLO DESDE POLEA BAJA"
+    },
+    {
+      "page": 252,
+      "name": "GUILLOTINE CURL"
+    },
+    {
+      "page": 253,
+      "name": "CURL PREDICADOR EN POLEA ALTA"
+    },
+    {
+      "page": 254,
+      "name": "CURL PREDICADOR INVERSO EN BANCO SCOTT"
+    },
+    {
+      "page": 255,
+      "name": "CURL PREDICADOR EN BANCO SCOTT CON BARRA"
+    },
+    {
+      "page": 256,
+      "name": "CURL DE BÍCEPS CRUCIFIX EN POLEA"
+    },
+    {
+      "page": 257,
+      "name": "CURL DE BÍCEPS EN POLEA ALTA TUMBADO"
+    },
+    {
+      "page": 258,
+      "name": "CURL DE BÍCEPS TUMBADO DESDE POLEA BAJA"
+    },
+    {
+      "page": 259,
+      "name": "CURL BAYESIAN UNILATERAL DE PIE"
+    },
+    {
+      "page": 260,
+      "name": "SEATED HIGH CURL EN MÁQUINA"
+    },
+    {
+      "page": 262,
+      "name": "EXTENSION DE MUÑECA CON BARRA EN BANCO"
+    },
+    {
+      "page": 263,
+      "name": "EXTENSIÓN DE MUÑECA CON MANCUERNAS EN BANCO"
+    },
+    {
+      "page": 264,
+      "name": "CURL DE MUÑECA CON BARRA EN BANCO"
+    },
+    {
+      "page": 265,
+      "name": "CURL DE MUÑECA CON MANCUERNAS SUPINO EN BANCO"
+    },
+    {
+      "page": 266,
+      "name": "CURL DE MUÑECA DESDE POLEA BAJA DE PIE"
+    },
+    {
+      "page": 267,
+      "name": "ROLLING BARBELL TWIST"
+    },
+    {
+      "page": 268,
+      "name": "CURL DE MUÑECA DESDE POLEA BAJA SENTADO"
+    },
+    {
+      "page": 269,
+      "name": "KETTLEBELL WRIST TURNS"
+    },
+    {
+      "page": 270,
+      "name": "AGARRE EN MÁQUINA SENTADO"
+    },
+    {
+      "page": 271,
+      "name": "EXTENSIONES DE MUÑECA EN MÁQUINA"
+    },
+    {
+      "page": 274,
+      "name": "AB-ROLL OUT/AB-WHEEL"
+    },
+    {
+      "page": 275,
+      "name": "BODY SAW"
+    },
+    {
+      "page": 276,
+      "name": "V-UPS"
+    },
+    {
+      "page": 277,
+      "name": "STIR THE POT"
+    },
+    {
+      "page": 278,
+      "name": "CRUNCH DESDE POLEA ALTA"
+    },
+    {
+      "page": 279,
+      "name": "CRUNCH ABDOMINAL EN MÁQUINA"
+    },
+    {
+      "page": 280,
+      "name": "HANGING LEG RAISES"
+    },
+    {
+      "page": 281,
+      "name": "ENCOGIMIENTOS DE PIERNAS EN BANCO PLANO"
+    },
+    {
+      "page": 282,
+      "name": "CRUNCH ABDOMINAL"
+    },
+    {
+      "page": 283,
+      "name": "WOOD CHOPPER"
+    },
+    {
+      "page": 284,
+      "name": "PRESS PALLOF"
+    },
+    {
+      "page": 285,
+      "name": "CRUNCH INVERSO EN BANCO DECLINADO"
+    },
+    {
+      "page": 286,
+      "name": "SUITCASE CARRY"
+    },
+    {
+      "page": 287,
+      "name": "PIKE"
+    },
+    {
+      "page": 288,
+      "name": "CRUNCH EN MÁQUINA TUMBADO"
+    },
+    {
+      "page": 289,
+      "name": "CRUNCH EN POLEA TUMBADO EN BANCO"
+    },
+    {
+      "page": 291,
+      "name": "HIPTHRUST"
+    },
+    {
+      "page": 292,
+      "name": "SKORCHER HIPTHRUST"
+    },
+    {
+      "page": 293,
+      "name": "GLUTE BRIDGE"
+    },
+    {
+      "page": 294,
+      "name": "HIPTHRUST UNILATERAL CON MANCUERNA"
+    },
+    {
+      "page": 295,
+      "name": "HIPTHRUST UNILATERAL CON BARRA"
+    },
+    {
+      "page": 296,
+      "name": "EXTENSIÓN DE CADERA O HIP THRUST EN MÁQUINA"
+    },
+    {
+      "page": 297,
+      "name": "CABLE PULL THROUGH"
+    },
+    {
+      "page": 298,
+      "name": "CABLE KICK BACK"
+    },
+    {
+      "page": 299,
+      "name": "LEG SWING"
+    },
+    {
+      "page": 300,
+      "name": "ABDUCCIONES EN MÁQUINA"
+    },
+    {
+      "page": 301,
+      "name": "CLAM SHELL 3D"
+    },
+    {
+      "page": 302,
+      "name": "REVERSE GLUTE HYPEREXTENSIONS EN MULTIPOWER"
+    },
+    {
+      "page": 303,
+      "name": "PATADA EN CUADRUPEDIA MULTIPOWER"
+    },
+    {
+      "page": 304,
+      "name": "EXTENSIONES EN BANCO INCLINADO 45º FOCUS GLÚTEO"
+    },
+    {
+      "page": 305,
+      "name": "CLAM SHELL"
+    },
+    {
+      "page": 306,
+      "name": "ABDUCCIONES CON MINIBAND"
+    },
+    {
+      "page": 307,
+      "name": "PATADA DE GLÚTEO EN POLEA BAJA EN CUADRUPEDIA"
+    },
+    {
+      "page": 308,
+      "name": "FROG PUMPS"
+    },
+    {
+      "page": 309,
+      "name": "KICK BACK EN MÁQUINA"
+    },
+    {
+      "page": 310,
+      "name": "REVERSE GLUTE HYPEREXTENSIONS EN MÁQUINA"
+    },
+    {
+      "page": 311,
+      "name": "MONSTER WALKS"
+    },
+    {
+      "page": 312,
+      "name": "GLUTE PRESS DOWN"
+    },
+    {
+      "page": 313,
+      "name": "LEG SWING EN MÁQUINA DE PIE"
+    },
+    {
+      "page": 314,
+      "name": "PRENSA DE PIERNAS ÉNFASIS EN GLÚTEO"
+    },
+    {
+      "page": 315,
+      "name": "SENTADILLA BÚLGARA CON MANCUERNA ÉNFASIS EN GLUTEO"
+    },
+    {
+      "page": 316,
+      "name": "ABDUCCIONES EN MÁQUINA DE PIE"
+    },
+    {
+      "page": 317,
+      "name": "GLUTE HAM RAISE ÉNFASIS GLÚTEO"
+    },
+    {
+      "page": 318,
+      "name": "PATADA EN MÁQUINA DE PIE"
+    },
+    {
+      "page": 319,
+      "name": "HIPTHRUST EN MULTIPOWER"
+    },
+    {
+      "page": 320,
+      "name": "CABLE KICK BACK EN BANCO INCLINADO"
+    },
+    {
+      "page": 322,
+      "name": "SENTADILLA EN MULTIPOWER"
+    },
+    {
+      "page": 323,
+      "name": "SENTADILLA HACK"
+    },
+    {
+      "page": 324,
+      "name": "SPLIT SQUAT EN MULTIPOWER"
+    },
+    {
+      "page": 325,
+      "name": "SPLIT SQUAT LIBRE"
+    },
+    {
+      "page": 326,
+      "name": "PRENSA 45º"
+    },
+    {
+      "page": 327,
+      "name": "PRENSA HORIZONTAL"
+    },
+    {
+      "page": 328,
+      "name": "SENTADILLA BÚLGARA EN MULTIPOWER"
+    },
+    {
+      "page": 329,
+      "name": "SENTADILLA BÚLGARA CON MANCUERNAS + APOYO"
+    },
+    {
+      "page": 330,
+      "name": "LEG EXTENSIONS"
+    },
+    {
+      "page": 331,
+      "name": "ZANCADAS"
+    },
+    {
+      "page": 332,
+      "name": "PENDULUM SQUAT"
+    },
+    {
+      "page": 333,
+      "name": "PRENSA HORIZONTAL PLATE-LOADED"
+    },
+    {
+      "page": 334,
+      "name": "BELT SQUAT"
+    },
+    {
+      "page": 335,
+      "name": "SENTADILLA BÚLGARA CON BARRA LIBRE"
+    },
+    {
+      "page": 336,
+      "name": "SAFETY BAR SQUAT"
+    },
+    {
+      "page": 337,
+      "name": "SENTADILLA BARRA ALTA"
+    },
+    {
+      "page": 338,
+      "name": "HIGH STEP UP"
+    },
+    {
+      "page": 339,
+      "name": "PRENSA VERTICAL"
+    },
+    {
+      "page": 340,
+      "name": "REVERSE V SQUAT"
+    },
+    {
+      "page": 341,
+      "name": "V SQUAT"
+    },
+    {
+      "page": 342,
+      "name": "SISSY SQUAT"
+    },
+    {
+      "page": 343,
+      "name": "HATFIELD SQUAT"
+    },
+    {
+      "page": 344,
+      "name": "SISSY SQUAT EN SILLA ROMANA"
+    },
+    {
+      "page": 345,
+      "name": "PLATZ HACK SQUAT"
+    },
+    {
+      "page": 346,
+      "name": "MULTIPOWER PLATZ SQUAT"
+    },
+    {
+      "page": 347,
+      "name": "KNEELING LEG EXTENSIONS / EXTENSIONES CON PESO CORPORAL"
+    },
+    {
+      "page": 348,
+      "name": "HATFIELD SPLIT SQUAT"
+    },
+    {
+      "page": 349,
+      "name": "SENTADILLA FRONTAL"
+    },
+    {
+      "page": 350,
+      "name": "PRENSA PENDULAR"
+    },
+    {
+      "page": 352,
+      "name": "PESO MUERTO RUMANO - RDL"
+    },
+    {
+      "page": 353,
+      "name": "PESO MUERTO PIERNAS RÍGIDAS – SLDL"
+    },
+    {
+      "page": 354,
+      "name": "PESO MUERTO UNILATERAL CON MANCUERNA"
+    },
+    {
+      "page": 355,
+      "name": "BUENOS DÍAS MULTIPOWER"
+    },
+    {
+      "page": 356,
+      "name": "LEG CURL TUMBADO"
+    },
+    {
+      "page": 357,
+      "name": "LEG CURL SENTADO"
+    },
+    {
+      "page": 358,
+      "name": "LEG CURL CON MANCUERNA TUMBADO"
+    },
+    {
+      "page": 359,
+      "name": "EXTENSIONES EN BANCO INCLINADO FOCUS ISQUIOSURAL"
+    },
+    {
+      "page": 360,
+      "name": "BUENOS DÍAS CON BARRA"
+    },
+    {
+      "page": 361,
+      "name": "PESO MUERTO UNILATERAL CON BARRA"
+    },
+    {
+      "page": 362,
+      "name": "LEG CURL EN POLEA DE PIE"
+    },
+    {
+      "page": 363,
+      "name": "LEG CURL EN MÁQUINA DE PIE"
+    },
+    {
+      "page": 364,
+      "name": "GLUTE HAM RAISE"
+    },
+    {
+      "page": 365,
+      "name": "PESO MUERTO RUMANO CON MANCUERNAS"
+    },
+    {
+      "page": 366,
+      "name": "PESO MUERTO EN MÁQUINA"
+    },
+    {
+      "page": 367,
+      "name": "SLIDE LEG CURL"
+    },
+    {
+      "page": 368,
+      "name": "BUENOS DÍAS CON SAFETY BAR"
+    },
+    {
+      "page": 370,
+      "name": "ELEVACIONES DE TALONES SOBRE STEP EN MULTIPOWER"
+    },
+    {
+      "page": 371,
+      "name": "ELEVACIONES UNILATERALES DE TALONES CON MANCUERNA"
+    },
+    {
+      "page": 372,
+      "name": "SÓLEO SENTADO CON MANCUERNAS"
+    },
+    {
+      "page": 373,
+      "name": "GEMELO EN PRENSA"
+    },
+    {
+      "page": 374,
+      "name": "GEMELO EN MÁQUINA INCLINADA"
+    },
+    {
+      "page": 375,
+      "name": "GEMELO UNILATERAL EN DÉFICIT EN MULTIPOWER"
+    },
+    {
+      "page": 376,
+      "name": "GEMELO EN MÁQUINA DE PIE"
+    },
+    {
+      "page": 377,
+      "name": "SÓLEO SENTADO EN MÁQUINA"
+    },
+    {
+      "page": 378,
+      "name": "SÓLEO SENTADO EN MULTIPOWER"
+    },
+    {
+      "page": 380,
+      "name": "ADUCTOR EN MÁQUINA SENTADO V1"
+    },
+    {
+      "page": 381,
+      "name": "ADUCTOR EN MÁQUINA (V2)"
+    },
+    {
+      "page": 382,
+      "name": "ADUCCIÓN EN POLEA DE PIE"
+    },
+    {
+      "page": 383,
+      "name": "COPENAGHEN ADDUCTIONS"
+    },
+    {
+      "page": 384,
+      "name": "ADUCTOR EN MÁQUINA DE PIE"
+    }
+  ]
+}

@@ -44,7 +44,7 @@ export const EMPTY_EMPHASIS: EmphasisSelection = { priority: [], deprioritized: 
  */
 export const GENERATOR_EMPHASIS_REGIONS: readonly VolumeRegion[] = Object.values(
   VolumeRegion,
-).filter((region) => region !== VolumeRegion.TIBIALIS);
+).filter((region) => region !== VolumeRegion.TIBIALIS && region !== VolumeRegion.FOREARMS);
 
 /** Slots the current priorities consume. */
 export function usedSlots(selection: EmphasisSelection): number {

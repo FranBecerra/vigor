@@ -27,6 +27,7 @@ export enum MuscleGroup {
   CALVES = 'CALVES',
   TIBIALIS = 'TIBIALIS',
   BICEPS = 'BICEPS',
+  FOREARMS = 'FOREARMS',
   TRICEPS = 'TRICEPS',
   CORE = 'CORE',
 }
@@ -58,6 +59,10 @@ export enum MovementVector {
   // --- Aislamiento: codo --------------------------------------------------
   ELBOW_FLEXION = 'ELBOW_FLEXION',
   ELBOW_EXTENSION = 'ELBOW_EXTENSION',
+  WRIST_FLEXION = 'WRIST_FLEXION',
+  WRIST_EXTENSION = 'WRIST_EXTENSION',
+  FOREARM_ROTATION = 'FOREARM_ROTATION',
+  GRIP = 'GRIP',
 
   // --- Aislamiento: hombro ------------------------------------------------
   /** Abducción: elevación lateral. */
@@ -111,9 +116,8 @@ export const COMPOUND_VECTORS: readonly MovementVector[] = [
 ];
 
 /**
- * Pares de patrones ANTAGONISTAS. El generador los usa para no producir sesiones
- * desequilibradas (tres empujes y ninguna tracción), que es una causa conocida de
- * problemas de hombro a medio plazo.
+ * Complementary task pairs used as programming preferences. They are not a
+ * validated causal predictor of shoulder injury or a clinical prescription.
  */
 export const ANTAGONIST_PAIRS: readonly (readonly [MovementVector, MovementVector])[] = [
   [MovementVector.PUSH_HORIZONTAL, MovementVector.PULL_HORIZONTAL],
@@ -144,12 +148,19 @@ export enum ExerciseProfile {
  * hace inservible la propuesta.
  */
 export enum Equipment {
+  /** Source does not specify the implement reliably; do not guess it. */
+  UNSPECIFIED = 'UNSPECIFIED',
   BARBELL = 'BARBELL',
+  SAFETY_BAR = 'SAFETY_BAR',
+  TRAP_BAR = 'TRAP_BAR',
+  LANDMINE = 'LANDMINE',
   DUMBBELL = 'DUMBBELL',
   MACHINE = 'MACHINE',
   CABLE = 'CABLE',
   SMITH_MACHINE = 'SMITH_MACHINE',
   BODYWEIGHT = 'BODYWEIGHT',
+  ROMAN_CHAIR = 'ROMAN_CHAIR',
+  STABILITY_BALL = 'STABILITY_BALL',
   KETTLEBELL = 'KETTLEBELL',
   BANDS = 'BANDS',
 }
@@ -162,20 +173,19 @@ export type CriterionScore = 1 | 2 | 3 | 4 | 5;
  *
  * Replaces the single hand-assigned effectiveness score the catalogue used to
  * carry. One number cannot express both how good an exercise is and how expensive
- * it is: a back squat loads the target muscle at full stretch AND drains central
- * recovery, and an engine that collapses the two prescribes blocks that degrade
- * performance before they end.
+ * it is: a squat can combine lengthened muscle loading with demanding whole-body
+ * work. These are expert programming assessments, not measured central fatigue.
  *
  * Note the direction of the two cost criteria: for `stabilityCost` and
  * `systemicFatigueCost`, 5 is GOOD (stability does not limit force delivery,
  * fatigue is minimal). Every criterion therefore reads "higher is better".
  *
- * Confidence, citations and the reasoning behind each score live in
- * `src/data/exercise-evidence.json`, deliberately outside this type: the algorithm
- * consumes the numbers, the interface consumes the prose.
+ * The original catalogue has per-exercise evidence notes in
+ * `src/data/exercise-evidence.json`. Guide imports use a page-linked, rule-based
+ * rubric; neither source should be interpreted as a measured effect size.
  */
 export interface ExerciseCriteria {
-  /** Mechanical tension resisted at maximum physiological sarcomere elongation. */
+  /** Expert estimate of loading in a lengthened muscle position; not sarcomere measurement. */
   stretchedPositionLoading: CriterionScore;
   /** Angular range over which the target muscle keeps active tension. */
   rangeOfMotion: CriterionScore;
@@ -185,7 +195,7 @@ export interface ExerciseCriteria {
   stabilityCost: CriterionScore;
   /** How finely and reproducibly external load can be increased over time. */
   loadProgressability: CriterionScore;
-  /** 5 = minimal central, axial and joint fatigue per set; 1 = massive. */
+  /** Expert programming estimate: 5 = lower systemic demand, 1 = higher. Not measured CNS fatigue. */
   systemicFatigueCost: CriterionScore;
 }
 
@@ -200,6 +210,8 @@ export interface ExerciseCriteria {
 export enum ExerciseGenerationTier {
   STANDARD = 'STANDARD',
   FALLBACK = 'FALLBACK',
+  /** Indexed for manual use; excluded from automatic programming pending role/credit review. */
+  MANUAL_ONLY = 'MANUAL_ONLY',
   /**
    * A specific variant of a strength main lift (paused squat, deficit deadlift).
    * Prescribed by the strength program by id; never drawn by hypertrophy
@@ -223,12 +235,15 @@ export interface Exercise {
   /** Material necesario, para filtrar por disponibilidad. */
   equipment: Equipment;
   /**
-   * Biomechanical audit. Absent on user-created exercises, which fall back to a
-   * neutral profile rather than being assumed good or bad.
+   * Ordinal programming assessment. Absent on unscored manual-only imports and
+   * user-created exercises. Only custom entries use the calculation fallback;
+   * unscored guide entries must not acquire a fabricated neutral rating.
    */
   criteria?: ExerciseCriteria;
   /** Automatic-selection policy; absent custom entries default to STANDARD. */
   generationTier?: ExerciseGenerationTier;
+  /** Physical page in the source guide; rubric scores are Vigor judgements. */
+  guidePage?: number;
   /**
    * Programming dimensions used to prefer complementary variants (for example
    * shoulder position, grip and resistance emphasis). Tags use `AXIS:VALUE`.

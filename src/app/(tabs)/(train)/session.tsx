@@ -45,7 +45,7 @@ import {
   plannedSessionDocumentId,
 } from '@/services/training/plannedSessionRuntime';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
-import { prescriptionForMicrocycle, DEFAULT_PROJECTED_MICROCYCLES } from '@/services/training/microcyclePrescription';
+import { sessionsForMicrocycle } from '@/services/training/mesocycleEditing';
 import { supportsExtensions } from '@/services/training/advancedSets';
 import { targetRIR } from '@/services/training/rirAutoregulation';
 import {
@@ -123,15 +123,9 @@ export default function EntrenamientoScreen() {
     setLoadError(false);
     mesocycleRepository.get(mesocycleId).then((mesocycle) => {
       if (cancelled) return;
-      const horizon = mesocycle?.projectedMicrocycles ?? DEFAULT_PROJECTED_MICROCYCLES;
       const prescribed = mesocycle?.plannedSessions === undefined
         ? []
-        : prescriptionForMicrocycle(
-            mesocycle.plannedSessions,
-            goal,
-            microcycleIndex,
-            horizon,
-          );
+        : sessionsForMicrocycle(mesocycle, goal, microcycleIndex);
       // The goal is stored on the routine, not the mesocycle. For strength the
       // planned session already carries its first prescription; route callers
       // pass only sessions generated from the active routine, so resolve below.

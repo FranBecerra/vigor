@@ -49,6 +49,9 @@ import {
 import { DEFAULT_PROJECTED_MICROCYCLES } from './microcyclePrescription';
 import { TrainingGoal } from './volumePlan';
 import { toTargetVolumePerGroup } from './volumePlan';
+import { buildScheduleTemplate } from './scheduleTemplate';
+import { EXERCISE_CATALOGUE } from './exerciseCatalogue';
+import { sessionPresentationFocus } from './sessionCoherence';
 
 /** Legacy single-value fallback retained for older callers and migrations. */
 export const DEFAULT_TARGET_REPS = 10;
@@ -101,7 +104,7 @@ export function toPlannedSession(
 ): PlannedSession {
   return {
     index: session.index,
-    focus: session.focus as PlannedSessionFocus,
+    focus: (goal === TrainingGoal.HYPERTROPHY ? sessionPresentationFocus(session) : session.focus) as PlannedSessionFocus,
     estimatedWorkMinutes: session.estimatedWorkMinutes,
     exercises: session.exercises.map((entry, order): PlannedExercise => {
       if (entry.strength !== undefined) {
@@ -280,6 +283,10 @@ export function toMesocycleDraft(input: MesocycleDraftInput): Omit<Mesocycle, 'i
   if (input.projectedMicrocycles !== undefined) {
     draft.projectedMicrocycles = input.projectedMicrocycles;
   }
+  draft.scheduleTemplate = buildScheduleTemplate(draft.plannedSessions ?? [], new Map(
+    [...EXERCISE_CATALOGUE.map((exercise) => [exercise.id, exercise] as const),
+      ...plan.selection.selected.map((entry) => [entry.exercise.id, entry.exercise] as const)],
+  ));
   return draft;
 }
 

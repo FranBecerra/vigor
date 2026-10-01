@@ -59,8 +59,12 @@ if (muscleFilter) {
   const matches = EXERCISE_CATALOGUE.filter((e) => e.primaryMuscle === muscleFilter);
   console.log(`\n${BOLD}${muscleFilter}${RESET}  ${DIM}${matches.length} ejercicios${RESET}\n`);
   [...matches]
-    .sort((a, b) => stimulusQuality(b) - stimulusQuality(a))
+    .sort((a, b) => (b.criteria ? stimulusQuality(b) : -1) - (a.criteria ? stimulusQuality(a) : -1))
     .forEach((e) => {
+      if (!e.criteria) {
+        console.log(`  UNRATED  ${pad(e.name, 44)}${e.movementVector}  ${e.equipment}  MANUAL_ONLY`);
+        return;
+      }
       const scores = CRITERIA_KEYS.map((k) => e.criteria?.[k] ?? 3).join('');
       console.log(
         `  ${LIME}${stimulusQuality(e).toFixed(1)}${RESET} ${DIM}f${fatigueCost(e).toFixed(1)}${RESET} ` +
@@ -85,9 +89,10 @@ const escasos: string[] = [];
 Object.values(MuscleGroup).forEach((muscle) => {
   const matches = EXERCISE_CATALOGUE.filter((e) => e.primaryMuscle === muscle);
   const compounds = matches.filter((e) => e.profile !== 'ISOLATION').length;
+  const scored = matches.filter((e) => e.criteria !== undefined);
   const mean =
-    matches.length > 0
-      ? matches.reduce((sum, e) => sum + stimulusQuality(e), 0) / matches.length
+    scored.length > 0
+      ? scored.reduce((sum, e) => sum + stimulusQuality(e), 0) / scored.length
       : 0;
 
   const countText =

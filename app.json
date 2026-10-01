@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.vigor.app",
+      "bundleIdentifier": "com.franciscobecerra.vigor",
+      "appleTeamId": "LL38NNFGB2",
       "googleServicesFile": "./GoogleService-Info.plist",
       "usesAppleSignIn": false
     },
@@ -44,7 +45,8 @@
         }
       ],
       "@react-native-google-signin/google-signin",
-      "expo-localization"
+      "expo-localization",
+      "./plugins/withFreePersonalTeam"
     ]
   }
 }

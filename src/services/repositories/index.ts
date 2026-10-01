@@ -18,9 +18,11 @@ import {
   query,
   where,
   writeBatch,
+  runTransaction,
 } from '@react-native-firebase/firestore';
 import { db } from '../firebase';
 import { BaseRepository } from './BaseRepository';
+import { validateScheduleTemplate, type ScheduleTemplate } from '../training/scheduleTemplate';
 import type {
   Exercise,
   Mesocycle,
@@ -95,6 +97,34 @@ export const routineRepository = new RoutineRepository();
 class MesocycleRepository extends BaseRepository<Mesocycle> {
   constructor() {
     super('mesocycles');
+  }
+
+  async updateScheduleTemplate(id: string, template: ScheduleTemplate,
+    now: number): Promise<Mesocycle> {
+    const reference = this.ref(id);
+    return runTransaction(db, async (transaction) => {
+      const snapshot = await transaction.get(reference);
+      if (!snapshot.exists()) throw new Error('Missing mesocycle');
+      const current = { ...snapshot.data(), id } as Mesocycle;
+      validateScheduleTemplate(template, (current.plannedSessions ?? []).map((s) => s.index));
+      transaction.update(reference, { scheduleTemplate: template, updatedAt: now });
+      return { ...current, scheduleTemplate: template, updatedAt: now };
+    });
+  }
+
+  /** Retry against fresh data so concurrent calendar edits cannot erase each other. */
+  async updateTrainingCalendar(id: string,
+    transform: (calendar: NonNullable<Mesocycle['trainingCalendar']>) => NonNullable<Mesocycle['trainingCalendar']>,
+    now: number): Promise<Mesocycle> {
+    const reference = this.ref(id);
+    return runTransaction(db, async (transaction) => {
+      const snapshot = await transaction.get(reference);
+      if (!snapshot.exists()) throw new Error('Missing mesocycle');
+      const current = { ...snapshot.data(), id } as Mesocycle;
+      const trainingCalendar = transform(current.trainingCalendar ?? {});
+      transaction.update(reference, { trainingCalendar, updatedAt: now });
+      return { ...current, trainingCalendar, updatedAt: now };
+    });
   }
 
   /** Devuelve el mesociclo ACTIVE del usuario, o null si no hay ninguno. */

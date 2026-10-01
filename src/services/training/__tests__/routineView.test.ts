@@ -23,6 +23,40 @@ const LABELS = {
   goal: (goal: string) => `goal:${goal}`,
 };
 
+it('calibrates duration only from matching completed workout doses', () => {
+  const exercise = EXERCISE_CATALOGUE[0];
+  const planned: PlannedSession = { index: 0, focus: 'PUSH', estimatedWorkMinutes: 9,
+    exercises: [{ exerciseId: exercise.id, order: 0, isEdited: false, restSeconds: 120,
+      sets: Array.from({ length: 3 }, () => ({ setType: SetType.NORMAL, targetReps: 10, targetRIR: 2 })) }] };
+  const meso = mesocycle('r1-m0', { plannedSessions: [planned], sessionsPerMicrocycle: 1 });
+  const history: WorkoutSession[] = Array.from({ length: 5 }, (_, index) => ({
+    id: `workout-${index}`, userId: 'u1', mesocycleId: meso.id, microcycleId: `m${index}`,
+    microcycleIndex: index, plannedSessionIndex: 0, performedAt: NOW, completedAt: NOW + 18 * 60000,
+    exercises: [{ id: exercise.id, exerciseId: exercise.id, order: 0, isSwap: false,
+      sets: planned.exercises[0].sets.map((set, i) => ({ ...set, id: `s${i}`, targetWeight: 20,
+        actualReps: 10, actualWeight: 20, isAutoFilled: false })) }],
+  }));
+  expect(toRoutineView(routine(), meso, BY_ID, LABELS, history)?.durationFeedback)
+    .toMatchObject({ ready: true, sampleCount: 5, observedMultiplier: 1.2 });
+  const incomplete = history.map((session) => ({ ...session, completedAt: undefined }));
+  expect(toRoutineView(routine(), meso, BY_ID, LABELS, incomplete)?.durationFeedback).toBeUndefined();
+  const swapped = history.map((session) => ({ ...session,
+    exercises: session.exercises.map((e) => ({ ...e, exerciseId: 'missing' })) }));
+  expect(toRoutineView(routine(), meso, BY_ID, LABELS, swapped)?.durationFeedback).toBeUndefined();
+});
+
+it('recommends dated pending sessions in calendar order without completing a rest marker', () => {
+  const meso = mesocycle('r1-m0', { trainingCalendar: {
+    '0:0': { kind: 'workout', date: '2026-10-03', microcycleIndex: 0, sessionIndex: 0 },
+    '0:1': { kind: 'workout', date: '2026-10-01', microcycleIndex: 0, sessionIndex: 1 },
+    'rest:2026-10-02': { kind: 'rest', date: '2026-10-02', microcycleIndex: 0, checked: true },
+  } });
+  const view = toRoutineView(routine(), meso, BY_ID, LABELS)!;
+  expect(defaultSessionId([view])).toBe('r1-m0:m0:s1');
+  expect(view.currentMicrocycleIndex).toBe(0);
+  expect(view.microcycles[0].sessions).toHaveLength(4);
+});
+
 function routine(id = 'r1', overrides: Partial<Routine> = {}): Routine {
   return {
     id,
@@ -305,6 +339,23 @@ describe('ordering and defaults', () => {
 
   it("selects the first pending session of the running microcycle as today's", () => {
     expect(defaultSessionId([active])).toBe(active.microcycles[0].sessions[0].id);
+  });
+
+  it('shows a skip without calling it a completed workout and advances past skipped sessions', () => {
+    const baseMeso = mesocycle('skip-m0');
+    const first = toRoutineView(routine('skip'), baseMeso, BY_ID, LABELS) as RoutineView;
+    const keys = first.microcycles[0].sessions.map((session) =>
+      `0:${session.plannedSessionIndex}`);
+    const one = toRoutineView(routine('skip'), {
+      ...baseMeso, skippedSessions: { [keys[0]]: NOW },
+    }, BY_ID, LABELS) as RoutineView;
+    expect(one.microcycles[0].sessions[0].skippedOn).toBeDefined();
+    expect(one.microcycles[0].sessions[0].completedOn).toBeUndefined();
+    expect(defaultSessionId([one])).toBe(one.microcycles[0].sessions[1].id);
+    const all = toRoutineView(routine('skip'), {
+      ...baseMeso, skippedSessions: Object.fromEntries(keys.map((key) => [key, NOW])),
+    }, BY_ID, LABELS) as RoutineView;
+    expect(all.currentMicrocycleIndex).toBe(1);
   });
 
   it('takes today only from the active routine, and nothing when it has nothing pending', () => {

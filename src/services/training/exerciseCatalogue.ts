@@ -9,14 +9,14 @@
  *
  * TWO DERIVED QUANTITIES, NOT ONE SCORE
  *   The catalogue previously carried a single hand-assigned `effectiveness`. The
- *   biomechanical audit replaced it with six measured criteria, and those six
+ *   biomechanical audit replaced it with six ordinal judgements, and those six
  *   collapse into two distinct quantities that the engine uses for different
  *   decisions:
  *
- *     stimulusQuality — how much hypertrophy stimulus the exercise delivers per
- *       set. Drives which exercises get selected.
- *     fatigueCost — how much central and joint fatigue the exercise spends per
- *       set. Drives where the work is placed and how much of it fits.
+ *     stimulusQuality — an ordinal programming preference, not a measured
+ *       hypertrophy effect size. Drives candidate selection.
+ *     fatigueCost — an ordinal sequencing-cost heuristic, not measured central
+ *       fatigue, joint stress or recovery time. Drives placement guidance.
  *
  *   Keeping them separate is the audit's central architectural point. A back squat
  *   scores 5 on stretched-position loading and 1 on systemic fatigue: it is an
@@ -34,6 +34,8 @@ import {
   type ExerciseCriteria,
 } from '@/models';
 import catalogueData from '@/data/exercises.json';
+import guideData from '@/data/guide-exercises.json';
+import { buildGuideExercises } from './guideExerciseCatalogue';
 
 /** The six audited criteria, each scored 1-5. */
 export const CRITERIA_KEYS = [
@@ -48,11 +50,9 @@ export const CRITERIA_KEYS = [
 /**
  * Weights that turn the criteria into a stimulus-quality score.
  *
- * Stretch-mediated hypertrophy is the strongest mechanical driver of sarcomere
- * remodelling, so stretched-position loading carries the most weight, followed by
- * how well the implement's resistance curve matches the joint's force curve. The
- * audit's own rule of thumb is that an exercise scoring 4 or more on BOTH belongs
- * in the top tier.
+ * These weights are a transparent product heuristic, not effect sizes established
+ * by head-to-head hypertrophy trials. In particular, a resistance-profile match
+ * cannot by itself establish a superior long-term hypertrophy outcome.
  *
  * NEITHER cost criterion contributes. Fatigue is not a stimulus, and stability is
  * one of the two things fatigue is built from, so counting it here would both
@@ -64,15 +64,15 @@ export const CRITERIA_KEYS = [
  * stimulus, two to fatigue, none to both.
  */
 export const STIMULUS_WEIGHTS: Record<keyof ExerciseCriteria, number> = {
-  stretchedPositionLoading: 0.4,
-  resistanceProfileMatch: 0.28,
-  rangeOfMotion: 0.22,
-  loadProgressability: 0.1,
+  stretchedPositionLoading: 0.35,
+  resistanceProfileMatch: 0.15,
+  rangeOfMotion: 0.27,
+  loadProgressability: 0.23,
   stabilityCost: 0,
   systemicFatigueCost: 0,
 };
 
-/** Criteria assumed for a user-created exercise, which has no audit. */
+/** Neutral criteria used only for calculations on unscored user-created movements. */
 export const DEFAULT_CRITERIA: ExerciseCriteria = {
   stretchedPositionLoading: 3,
   rangeOfMotion: 3,
@@ -158,7 +158,7 @@ export function parseExercise(raw: unknown): Exercise {
 
   // A muscle listed as both primary and secondary would be credited 1.5 sets per
   // set performed, inflating its volume without anyone noticing.
-  if (secondaryMuscles.includes(primaryMuscle)) {
+  if (secondaryMuscles.includes(primaryMuscle) || new Set(secondaryMuscles).size !== secondaryMuscles.length) {
     throw new CatalogueValidationError(id, 'secondaryMuscles', primaryMuscle);
   }
 
@@ -171,12 +171,15 @@ export function parseExercise(raw: unknown): Exercise {
     movementVector: assertEnum(MovementVector, entry.movementVector, id, 'movementVector'),
     profile: assertEnum(ExerciseProfile, entry.profile, id, 'profile'),
     equipment: assertEnum(Equipment, entry.equipment, id, 'equipment'),
-    criteria: parseCriteria(entry.criteria, id),
+    criteria: entry.generationTier === ExerciseGenerationTier.MANUAL_ONLY && entry.criteria === undefined
+      ? undefined
+      : parseCriteria(entry.criteria, id),
     generationTier:
       entry.generationTier === undefined
         ? ExerciseGenerationTier.STANDARD
         : assertEnum(ExerciseGenerationTier, entry.generationTier, id, 'generationTier'),
     ...(stimulusTags === undefined ? {} : { stimulusTags }),
+    ...(typeof entry.guidePage === 'number' ? { guidePage: entry.guidePage } : {}),
     isCustom: false,
   };
 }
@@ -202,10 +205,17 @@ export function parseCatalogue(raw: unknown): Exercise[] {
  * Loaded catalogue, validated at import time: a broken catalogue must break the
  * build rather than produce a wrong routine.
  */
-export const EXERCISE_CATALOGUE: readonly Exercise[] = parseCatalogue(catalogueData);
+const auditedCatalogue = parseCatalogue(catalogueData);
+const guideCatalogue = parseCatalogue({
+  exercises: buildGuideExercises(guideData.exercises, auditedCatalogue),
+});
+export const EXERCISE_CATALOGUE: readonly Exercise[] = [...auditedCatalogue, ...guideCatalogue];
 
-/** Audited criteria, or the neutral default for a user-created exercise. */
+/** Scored criteria, or a neutral default for user-created entries. */
 export function criteriaOf(exercise: Exercise): ExerciseCriteria {
+  if (exercise.generationTier === ExerciseGenerationTier.MANUAL_ONLY && !exercise.criteria) {
+    throw new Error(`Exercise "${exercise.id}" has no scoring rubric.`);
+  }
   return exercise.criteria ?? DEFAULT_CRITERIA;
 }
 
@@ -232,6 +242,9 @@ export function stimulusQuality(exercise: Exercise): number {
 export const FATIGUE_WEIGHTS = { systemic: 0.75, stability: 0.25 } as const;
 
 export function fatigueCost(exercise: Exercise): number {
+  // Unknown manual movements use the upper planning bound for sequencing only.
+  // This is not an assigned exercise rating or evidence of high physiological fatigue.
+  if (exercise.generationTier === ExerciseGenerationTier.MANUAL_ONLY && !exercise.criteria) return 5;
   const criteria = criteriaOf(exercise);
   return (
     (6 - criteria.systemicFatigueCost) * FATIGUE_WEIGHTS.systemic +
@@ -240,8 +253,8 @@ export function fatigueCost(exercise: Exercise): number {
 }
 
 /**
- * Top-tier exercises by the audit's own rule: 4 or more on BOTH stretched-position
- * loading and resistance-profile match. Exposed so the UI can explain a choice.
+ * Legacy catalogue-report flag: 4 or more on both stretch loading and profile
+ * match. This is a rubric filter, not evidence of superior hypertrophy.
  */
 export function isTopTierStimulus(exercise: Exercise): boolean {
   const criteria = criteriaOf(exercise);
@@ -264,7 +277,11 @@ export function filterCatalogue(
   const equipment = filter.availableEquipment ? new Set(filter.availableEquipment) : undefined;
   return catalogue.filter((exercise) => {
     if (vetoed.has(exercise.id)) return false;
-    if (equipment && !equipment.has(exercise.equipment)) return false;
+    if (
+      equipment &&
+      exercise.equipment !== Equipment.UNSPECIFIED &&
+      !equipment.has(exercise.equipment)
+    ) return false;
     return true;
   });
 }

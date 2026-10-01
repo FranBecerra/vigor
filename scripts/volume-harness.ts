@@ -197,6 +197,7 @@ const EMPHASIS_MARK: Record<RegionEmphasis, string> = {
 /** Línea de CAPACIDAD: qué techo ha limitado el plan y cuánto tiempo cuesta. */
 function printCapacity(result: MesocyclePlan, sessions: number, minutes: number): void {
   const limited = {
+    catalogue: `${AMBER}NO ELIGIBLE EXERCISES${RESET}`,
     recovery: `${LIME}limita la recuperación${RESET}`,
     time: `${AMBER}limita el TIEMPO${RESET}`,
     'insufficient-time': `${AMBER}${BOLD}TIEMPO INSUFICIENTE${RESET}`,

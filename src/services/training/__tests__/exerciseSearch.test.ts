@@ -10,6 +10,7 @@ import {
   MuscleGroup,
   type Exercise,
 } from '@/models';
+import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
 
 function exercise(id: string, name: string, primaryMuscle: MuscleGroup): Exercise {
   return {
@@ -32,6 +33,11 @@ const catalogue = [shoulder, lat, midBack, chest];
 const label = (muscle: MuscleGroup) => muscle;
 
 describe('exercise search', () => {
+  it('finds the added JM variants and the Kaz alias', () => {
+    expect(searchExercises('JM Press', EXERCISE_CATALOGUE, label).map((e) => e.id))
+      .toEqual(expect.arrayContaining(['guide-211', 'guide-210']));
+    expect(searchExercises('Kaz', EXERCISE_CATALOGUE, label).map((e) => e.id)).toContain('guide-210');
+  });
   it('normalizes case and accents', () => {
     expect(normalizeExerciseSearch('  BÍceps  ')).toBe('biceps');
   });

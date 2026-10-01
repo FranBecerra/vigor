@@ -110,15 +110,65 @@ describe('prescriptionForMicrocycle', () => {
     expect(session.exercises[2]).toBe(strengthSession.exercises[2]);
   });
 
+  it('keeps only explicitly edited RIR sets fixed while other strength sets ramp', () => {
+    const customized: PlannedSession = { ...strengthSession, exercises: [
+      { ...strengthSession.exercises[0], manualRIRBySet: { 2: 2 } },
+      ...strengthSession.exercises.slice(1),
+    ] };
+    const [projected] = prescriptionForMicrocycle([customized], TrainingGoal.STRENGTH, 4, horizon);
+    expect(projected.exercises[0].sets.map((set) => set.targetRIR)).toEqual([2, 1, 2, 1]);
+    expect(projected.exercises[0].sets[2].targetWeightKg).toBe(reloadForRIR(117.5, 5, 3, 2));
+  });
+
   it('leaves the first strength microcycle as stored', () => {
     const [session] = prescriptionForMicrocycle([strengthSession], TrainingGoal.STRENGTH, 0, horizon);
     expect(session.exercises[0].sets).toEqual(strengthSession.exercises[0].sets);
   });
 
-  it('leaves hypertrophy accumulation microcycles unchanged', () => {
-    expect(prescriptionForMicrocycle([strengthSession], TrainingGoal.HYPERTROPHY, 3, horizon)).toEqual([
-      strengthSession,
+  it('progresses hypertrophy effort over accumulation while preserving set order', () => {
+    const hypertrophy: PlannedSession = {
+      ...strengthSession,
+      exercises: [{
+        exerciseId: 'curl', order: 0, isEdited: false,
+        sets: [3, 3, 2, 1].map((targetRIR) => ({
+          setType: SetType.NORMAL, targetReps: 12, targetRIR,
+        })),
+      }],
+    };
+    const rir = [0, 1, 2, 3, 4].map((index) =>
+      prescriptionForMicrocycle([hypertrophy], TrainingGoal.HYPERTROPHY, index, horizon)
+        [0].exercises[0].sets.map((set) => set.targetRIR));
+    expect(rir).toEqual([
+      [3, 3, 2, 1],
+      [3, 2, 2, 1],
+      [2, 2, 2, 1],
+      [2, 2, 1, 1],
+      [2, 2, 1, 0],
     ]);
+    expect(hypertrophy.exercises[0].sets.map((set) => set.targetRIR)).toEqual([3, 3, 2, 1]);
+  });
+
+  it('does not spend hypertrophy progression on a manually fixed RIR set', () => {
+    const custom: PlannedSession = { index: 0, focus: 'UPPER', estimatedWorkMinutes: 20,
+      exercises: [{ exerciseId: 'curl', order: 0, isEdited: true, manualRIRBySet: { 1: 2 },
+        sets: [3, 2, 2, 1].map((targetRIR) => ({ setType: SetType.NORMAL,
+          targetReps: 12, targetRIR })) }] };
+    const [projected] = prescriptionForMicrocycle([custom], TrainingGoal.HYPERTROPHY, 4, 6);
+    expect(projected.exercises[0].sets.map((set) => set.targetRIR)).toEqual([2, 2, 1, 0]);
+  });
+
+  it('confines RIR above three to the first exposure of demanding compounds', () => {
+    const base: PlannedSession = {
+      index: 0, focus: 'LOWER', estimatedWorkMinutes: 30,
+      exercises: [{ exerciseId: 'squat', order: 0, isEdited: false,
+        sets: [4, 4, 3, 2].map((targetRIR) => ({
+          setType: SetType.NORMAL, targetReps: 8, targetRIR,
+        })) }],
+    };
+    expect(prescriptionForMicrocycle([base], TrainingGoal.HYPERTROPHY, 0, 6)
+      [0].exercises[0].sets[0].targetRIR).toBe(4);
+    expect(prescriptionForMicrocycle([base], TrainingGoal.HYPERTROPHY, 1, 6)
+      [0].exercises[0].sets.every((set) => set.targetRIR <= 3)).toBe(true);
   });
 
   it('deloads: no heavy single, about half the sets, more reserve, 10 % lighter', () => {

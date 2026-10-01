@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import type { Exercise } from '@/models';
+import { ExerciseGenerationTier, type Exercise } from '@/models';
+import { criteriaOf } from '@/services/training/exerciseCatalogue';
 import { useTheme } from '@/theme/useTheme';
 import {
   partitionSwapCandidates,
@@ -10,6 +11,8 @@ import {
 } from '@/services/training/exerciseSearch';
 
 interface ExerciseSwapSheetProps {
+  open?: boolean;
+  mode?: 'swap' | 'add';
   current: Exercise | null;
   candidates: readonly Exercise[];
   onSelect: (exercise: Exercise) => void;
@@ -18,6 +21,8 @@ interface ExerciseSwapSheetProps {
 
 /** Searchable selector shared conceptually with the in-session swap flow. */
 export function ExerciseSwapSheet({
+  open,
+  mode = 'swap',
   current,
   candidates,
   onSelect,
@@ -29,8 +34,8 @@ export function ExerciseSwapSheet({
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    if (current !== null) setQuery('');
-  }, [current]);
+    if (open ?? current !== null) setQuery('');
+  }, [current, open]);
 
   const visible = useMemo(
     () => searchExercises(query, candidates, (muscle) => t(`muscle.${muscle}`)),
@@ -63,7 +68,21 @@ export function ExerciseSwapSheet({
               <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
                 {t(`muscle.${exercise.primaryMuscle}`)} ·{' '}
                 {t(`generate.equipment${exercise.equipment}`)}
+                {exercise.generationTier === ExerciseGenerationTier.MANUAL_ONLY
+                  ? ` · ${t('generate.guideUnscored')}${exercise.guidePage ? ` · p. ${exercise.guidePage}` : ''}`
+                  : ''}
               </Text>
+              {exercise.criteria && !exercise.isCustom && (
+                <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
+                  {t('generate.systemicCost')}: {t(
+                    criteriaOf(exercise).systemicFatigueCost >= 4
+                      ? 'generate.costLow'
+                      : criteriaOf(exercise).systemicFatigueCost <= 2
+                        ? 'generate.costHigh'
+                        : 'generate.costModerate',
+                  )}
+                </Text>
+              )}
             </View>
             <Text style={[typography.title, { color: sectionAccent.train }]}>›</Text>
           </Pressable>
@@ -73,7 +92,7 @@ export function ExerciseSwapSheet({
   };
 
   return (
-    <Modal visible={current !== null} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={open ?? current !== null} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} />
       <View
         style={[
@@ -88,7 +107,7 @@ export function ExerciseSwapSheet({
       >
         <View style={[styles.grabber, { backgroundColor: colors.surfaceBorder }]} />
         <Text style={[typography.h2, { color: colors.textPrimary }]}>
-          {t('generate.swapTitle')}
+          {t(mode === 'add' ? 'generate.addExercise' : 'generate.swapTitle')}
         </Text>
         {current !== null && (
           <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>

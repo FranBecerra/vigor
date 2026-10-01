@@ -53,6 +53,16 @@ export interface Mesocycle {
    * need a second round trip while offline.
    */
   plannedSessions?: PlannedSession[];
+  /** Whole-plan revisions effective from a microcycle, preserving earlier history. */
+  prescriptionRevisions?: { fromMicrocycleIndex: number; plannedSessions: PlannedSession[] }[];
+  /** One-off session edits, keyed by `microcycleIndex:sessionIndex`. */
+  sessionOverrides?: Record<string, PlannedSession>;
+  /** Explicit skips; a skipped session is not counted as a completed workout. */
+  skippedSessions?: Record<string, number>;
+  /** Optional dated schedule. Rest markers never advance workout progression. */
+  trainingCalendar?: Record<string, import('./routine').TrainingCalendarEntry>;
+  /** Repeatable workout/rest slots independent of civil dates. */
+  scheduleTemplate?: import('./routine').ScheduleTemplate;
   /** MEAV inicial: volumen objetivo por grupo muscular (PRD §3, MuscleGroup -> nº series). */
   targetVolumePerGroup: Record<string, number>;
   /** Índice del microciclo actualmente en curso dentro del mesociclo (0-based). */
@@ -63,9 +73,9 @@ export interface Mesocycle {
    * La estructura es UNIFORME: todos los microciclos tienen SIEMPRE el mismo
    * número de sesiones, y varían solo en intensidad (y ligeramente en volumen).
    *
-   * El microciclo se define por sus sesiones, nunca por el calendario. No hay
-   * duración en días en ningún nivel del modelo: que una sesión se retrase o que
-   * el usuario intercale descansos no se refleja.
+   * Progression is session-based, not date-based. An optional undated rest
+   * template and optional calendar describe scheduling independently; delaying
+   * a workout or checking a rest day never advances the microcycle.
    */
   sessionsPerMicrocycle: number;
   /** Horizonte estimado (no determinista) en nº de microciclos, para el roadmap (PRD §3.1). */

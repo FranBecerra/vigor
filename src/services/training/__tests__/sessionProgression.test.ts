@@ -49,6 +49,14 @@ describe('averageTargetRIR', () => {
     const planned = { ...exercise(3, 1), sets: [{ setType: SetType.WARMUP }] };
     expect(averageTargetRIR([planned])).toBe(0);
   });
+
+  it('uses the actual RIR of each working set, not the final-set target', () => {
+    const planned = {
+      ...exercise(1, 4),
+      sets: [3, 3, 2, 1].map((targetRIR) => ({ setType: SetType.NORMAL, targetRIR })),
+    };
+    expect(averageTargetRIR([planned])).toBe(2.25);
+  });
 });
 
 describe('clampRIR', () => {
@@ -76,7 +84,7 @@ describe('sessionMicrocycleMetrics', () => {
     ], 0);
     expect(metrics).toEqual([
       { id: 'm1', number: 1, isDeload: false, isProjected: false, volumeSets: 4, averageRIR: 2.5 },
-      { id: 'm2', number: 2, isDeload: false, isProjected: true, volumeSets: 6, averageRIR: 2 },
+      { id: 'm2', number: 2, isDeload: false, isProjected: true, volumeSets: 4, averageRIR: 2.5 },
     ]);
   });
 
@@ -86,11 +94,11 @@ describe('sessionMicrocycleMetrics', () => {
     expect(metrics[0].averageRIR).toBe(0);
   });
 
-  it('no permite volumen negativo por una descarga', () => {
+  it('uses the already-resolved deload sets instead of applying a global delta again', () => {
     const metrics = sessionMicrocycleMetrics([
       micro('dl', [{ exercises: [exercise(2, 2)] }], { volumeAdjustmentSets: -20, isDeload: true }),
     ], 0);
-    expect(metrics[0].volumeSets).toBe(0);
+    expect(metrics[0].volumeSets).toBe(2);
     expect(metrics[0].isDeload).toBe(true);
   });
 });

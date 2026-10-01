@@ -1,4 +1,4 @@
-import { Equipment, ExerciseProfile, MuscleGroup } from '@/models';
+import { Equipment, ExerciseGenerationTier, ExerciseProfile, MovementVector, MuscleGroup, SplitStructure } from '@/models';
 import { ExperienceLevel } from '@/models/athlete';
 import {
   EXERCISE_CATALOGUE,
@@ -6,6 +6,7 @@ import {
 } from '@/services/training/exerciseCatalogue';
 import { DEFAULT_GENERATOR_EQUIPMENT } from '@/services/training/generatorDefaults';
 import { planMesocycle } from '@/services/training/mesocyclePlanner';
+import { MIN_HYPERTROPHY_SESSION_SETS } from '@/services/training/sessionDistribution';
 import {
   MAX_SQUEEZE,
   PROTECTED_REGIONS,
@@ -26,8 +27,40 @@ const base = {
   seed: 1,
 };
 
+it('separates hip-dominant compounds without losing sets in the PPL priority-quad regression', () => {
+  const result = planMesocycle({ ...base, seed: 38, split: SplitStructure.PUSH_PULL_LEGS,
+    priorityRegions: [VolumeRegion.QUADS], capacity: { sessionsPerMicrocycle: 5, minutesPerSession: 55 } });
+  expect(result.selection.performedSets).toBe(70);
+  expect(result.distribution.sessions.every((s) => s.exercises.filter((e) =>
+    e.exercise.movementVector === MovementVector.HIP_DOMINANT).length <= 1)).toBe(true);
+  expect(result.distribution.sessions.every((s) => s.estimatedWorkMinutes <= 49)).toBe(true);
+});
+
+it('rejects non-finite inputs explicitly and labels an empty eligible catalogue', () => {
+  expect(() => planMesocycle({ ...base, capacity: { sessionsPerMicrocycle: NaN, minutesPerSession: 60 } })).toThrow(RangeError);
+  expect(() => planMesocycle({ ...base, capacity: { sessionsPerMicrocycle: 4, minutesPerSession: Infinity } })).toThrow(RangeError);
+  expect(() => planMesocycle({ ...base, seed: NaN, capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 60 } })).toThrow(RangeError);
+  expect(planMesocycle({ ...base, catalogue: [], capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 60 } }).limitedBy).toBe('catalogue');
+});
+
+it('retains priority triceps work when a tiny time overflow activates capacity search', () => {
+  const totals: number[] = [];
+  for (let seed = 123; seed < 133; seed += 1) {
+    const result = planMesocycle({ ...base, seed,
+      capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 65 },
+      priorityRegions: [VolumeRegion.BACK, VolumeRegion.TRICEPS],
+      deprioritizedRegions: [VolumeRegion.QUADS, VolumeRegion.CHEST] });
+    totals.push(result.selection.performedSets);
+    expect(result.selection.unmet.some((m) => m.muscle === MuscleGroup.TRICEPS && m.target - m.attributed >= 3)).toBe(false);
+    expect(result.distribution.sessions.every((s) => s.estimatedWorkMinutes <= 59)).toBe(true);
+  }
+  expect(Math.max(...totals) - Math.min(...totals)).toBeLessThanOrEqual(10);
+});
+
 it('selects every supported equipment type in the generator default', () => {
-  expect(new Set(DEFAULT_GENERATOR_EQUIPMENT)).toEqual(new Set(Object.values(Equipment)));
+  expect(new Set(DEFAULT_GENERATOR_EQUIPMENT)).toEqual(
+    new Set(Object.values(Equipment).filter((equipment) => equipment !== Equipment.UNSPECIFIED)),
+  );
 });
 
 function capacity(sessions: number, minutes: number): TrainingCapacity {
@@ -37,6 +70,102 @@ function capacity(sessions: number, minutes: number): TrainingCapacity {
 const uncapped = buildVolumePlan({
   level: ExperienceLevel.INTERMEDIATE,
   goal: TrainingGoal.HYPERTROPHY,
+});
+
+describe('minimum useful session distribution', () => {
+  it('moves compatible upper work onto a lower day when four sessions can each hold 12 sets', () => {
+    const result = planMesocycle({
+      ...base,
+      level: ExperienceLevel.BEGINNER,
+      seed: 51,
+      split: SplitStructure.AUTO,
+      capacity: capacity(4, 70),
+      priorityRegions: [VolumeRegion.HAMSTRINGS],
+    });
+    const counts = result.distribution.sessions.map((session) =>
+      session.exercises.reduce((sum, entry) => sum + entry.sets, 0));
+    expect(counts.every((sets) => sets >= MIN_HYPERTROPHY_SESSION_SETS)).toBe(true);
+    expect(result.distribution.sessions.some((session) =>
+      session.focus === 'LOWER' && session.exercises.some((entry) =>
+        entry.exercise.primaryMuscle === MuscleGroup.CHEST ||
+        entry.exercise.primaryMuscle === MuscleGroup.DELTS_REAR))).toBe(true);
+    expect(counts.reduce((sum, sets) => sum + sets, 0)).toBe(result.selection.performedSets);
+    expect(result.distribution.structureWarnings.some((warning) =>
+      warning.kind === 'underfilled-session')).toBe(false);
+    expect(result.distribution.sessions.every((session) =>
+      session.estimatedWorkMinutes <= result.availableWorkMinutesPerSession)).toBe(true);
+  });
+
+  it('uses whole-exercise swaps to resolve an 11/13 split without duplicating a lift', () => {
+    const result = planMesocycle({
+      ...base,
+      level: ExperienceLevel.BEGINNER,
+      seed: 8,
+      split: SplitStructure.UPPER_LOWER,
+      capacity: capacity(4, 55),
+    });
+    expect(result.distribution.sessions.every((session) =>
+      session.exercises.reduce((sum, entry) => sum + entry.sets, 0) >= 12)).toBe(true);
+    const ids = result.distribution.sessions.flatMap((session) =>
+      session.exercises.map((entry) => entry.exercise.id));
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('reports rather than inventing sets when five beginner sessions cannot each reach 12', () => {
+    const result = planMesocycle({
+      ...base,
+      level: ExperienceLevel.BEGINNER,
+      seed: 74,
+      split: SplitStructure.AUTO,
+      capacity: capacity(5, 50),
+      priorityRegions: [VolumeRegion.GLUTES],
+    });
+    expect(result.selection.performedSets).toBeLessThan(5 * MIN_HYPERTROPHY_SESSION_SETS);
+    expect(result.distribution.structureWarnings.some((warning) =>
+      warning.kind === 'underfilled-session')).toBe(true);
+    expect(result.distribution.sessions.flatMap((session) => session.exercises)
+      .reduce((sum, entry) => sum + entry.sets, 0)).toBe(result.selection.performedSets);
+  });
+
+  it('resolves a 12/11/13 full-body split through a valid exchange', () => {
+    const result = planMesocycle({
+      ...base,
+      seed: 6,
+      split: SplitStructure.FULL_BODY,
+      capacity: capacity(3, 45),
+    });
+    expect(result.selection.performedSets).toBeGreaterThanOrEqual(36);
+    expect(result.distribution.sessions.every((session) =>
+      session.exercises.reduce((sum, entry) => sum + entry.sets, 0) >= 12)).toBe(true);
+  });
+
+  it('does not impose a hypertrophy set floor on the specific strength plan', () => {
+    const result = planMesocycle({
+      ...base,
+      goal: TrainingGoal.STRENGTH,
+      seed: 9,
+      capacity: capacity(4, 75),
+    });
+    expect(result.distribution.structureWarnings.some((warning) =>
+      warning.kind === 'underfilled-session')).toBe(false);
+  });
+});
+
+it('keeps meaningful direct biceps work across sessions when indirect pulls meet the attributed target', () => {
+  for (const seed of [1, 2, 3, 8, 13, 21]) {
+    const result = planMesocycle({
+      ...base, seed, split: SplitStructure.AUTO,
+      capacity: capacity(4, 75),
+      priorityRegions: [VolumeRegion.BACK, VolumeRegion.TRICEPS],
+      deprioritizedRegions: [VolumeRegion.QUADS],
+    });
+    const direct = result.selection.selected
+      .filter((entry) => entry.exercise.primaryMuscle === MuscleGroup.BICEPS);
+    expect(direct.reduce((sum, entry) => sum + entry.sets, 0)).toBeGreaterThanOrEqual(6);
+    expect(direct).toHaveLength(2);
+    expect(result.distribution.frequencyByMuscle[MuscleGroup.BICEPS]).toBeGreaterThanOrEqual(2);
+    expect(result.distribution.frequencyByMuscle[MuscleGroup.HAMSTRINGS]).toBeGreaterThanOrEqual(2);
+  }
 });
 
 describe('squeezedMeav — escalera de dos tramos', () => {
@@ -245,7 +374,9 @@ describe('planMesocycle — efficient compounds come before isolation', () => {
     // already present. This prevents two near-identical compound variants while
     // preserving the stronger rule: isolation never replaces the base pattern.
     const withCompounds = new Set(
-      EXERCISE_CATALOGUE.filter((e) => e.profile !== ExerciseProfile.ISOLATION).map(
+      EXERCISE_CATALOGUE.filter((e) => e.profile !== ExerciseProfile.ISOLATION &&
+        e.generationTier !== ExerciseGenerationTier.MANUAL_ONLY &&
+        e.generationTier !== ExerciseGenerationTier.STRENGTH_VARIANT).map(
         (e) => e.primaryMuscle,
       ),
     );

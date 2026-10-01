@@ -9,10 +9,16 @@ import {
 } from '@/models';
 import {
   applyPreviewEdits,
+  appendPreviewExercises,
   previewEditKey,
   previewVolumeByMuscle,
+  previewVolumeBreakdownByMuscle,
   representativeSet,
+  underfilledSessionIndexes,
+  visibleVolumeComponents,
 } from '@/services/training/previewEditing';
+import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
+import { TrainingGoal } from '@/services/training/volumePlan';
 
 const sessions: PlannedSession[] = [
   {
@@ -34,6 +40,54 @@ const sessions: PlannedSession[] = [
 ];
 
 describe('previewEditing', () => {
+  it('adds unscored JM and Kaz manually with editable prescriptions and no fabricated load', () => {
+    const catalogue = new Map(EXERCISE_CATALOGUE.map((e) => [e.id, e]));
+    const result = appendPreviewExercises(sessions, ['guide-211', 'guide-210'].map((exerciseId) =>
+      ({ sessionIndex: 0, exerciseId })), catalogue, TrainingGoal.HYPERTROPHY);
+    expect(result[0].exercises).toHaveLength(3);
+    for (const added of result[0].exercises.slice(1)) {
+      expect(added.isEdited).toBe(true);
+      expect(added.sets).toHaveLength(3);
+      expect(added.sets.every((set) => set.targetRepsMin! <= set.targetReps && Number.isFinite(set.targetRIR))).toBe(true);
+      expect(added.sets.every((set) => set.targetWeightKg === undefined)).toBe(true);
+    }
+    const volume = previewVolumeBreakdownByMuscle(result, catalogue);
+    expect(volume.find((row) => row.muscle === MuscleGroup.TRICEPS)?.directSets).toBe(6);
+  });
+  it('persists rest changes with bounded seconds while ignoring non-finite input', () => {
+    expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: 180 } })[0].exercises[0].restSeconds).toBe(180);
+    expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: -1 } })[0].exercises[0].restSeconds).toBe(0);
+    expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: 1000 } })[0].exercises[0].restSeconds).toBe(600);
+    expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: NaN } })[0].exercises[0].restSeconds).toBeUndefined();
+    expect(sessions[0].exercises[0].restSeconds).toBeUndefined();
+  });
+  it('rechecks underfilled sessions after manual set edits and ignores invalid floors', () => {
+    const twelve = applyPreviewEdits(sessions, { '0:0': { sets: 12 } });
+    expect(underfilledSessionIndexes(twelve, 12)).toEqual([]);
+    expect(underfilledSessionIndexes(applyPreviewEdits(twelve, { '0:0': { sets: 11 } }), 12))
+      .toEqual([0]);
+    expect(underfilledSessionIndexes(sessions, 0)).toEqual([]);
+    expect(underfilledSessionIndexes([], 12)).toEqual([]);
+  });
+
+  it('adds a chosen exercise with editable goal-specific sets and ignores missing or repeated IDs', () => {
+    const chosen = EXERCISE_CATALOGUE.find((exercise) => exercise.id !== 'press')!;
+    const catalogue = new Map([[chosen.id, chosen]]);
+    const added = appendPreviewExercises(sessions, [
+      { sessionIndex: 0, exerciseId: chosen.id },
+      { sessionIndex: 0, exerciseId: chosen.id },
+      { sessionIndex: 0, exerciseId: 'missing' },
+      { sessionIndex: 8, exerciseId: chosen.id },
+    ], catalogue, TrainingGoal.HYPERTROPHY);
+    expect(added[0].exercises).toHaveLength(2);
+    expect(added[0].exercises[1]).toMatchObject({
+      exerciseId: chosen.id, order: 1, isEdited: true,
+    });
+    expect(added[0].exercises[1].sets).toHaveLength(3);
+    expect(added[0].exercises[1].sets.every((set) => set.targetRepsMin! <= set.targetReps)).toBe(true);
+    expect(sessions[0].exercises).toHaveLength(1);
+    expect(applyPreviewEdits(added, { '0:1': { sets: 4 } })[0].exercises[1].sets).toHaveLength(4);
+  });
   it('uses a stable session/order key', () => {
     expect(previewEditKey(2, 4)).toBe('2:4');
   });
@@ -53,6 +107,42 @@ describe('previewEditing', () => {
       targetReps: 15,
     });
     expect(sessions[0].exercises[0].sets).toHaveLength(2);
+  });
+
+  it('changes only the requested set RIR and recalculates its suggested load', () => {
+    const loaded: PlannedSession[] = [{ ...sessions[0], exercises: [{
+      ...sessions[0].exercises[0], sets: sessions[0].exercises[0].sets.map((set) => ({
+        ...set, targetWeightKg: 120,
+      })),
+    }] }];
+    const edited = applyPreviewEdits(loaded, { '0:0': { rirBySet: { 1: 0 } } });
+    expect(edited[0].exercises[0].sets[0].targetRIR).toBe(2);
+    expect(edited[0].exercises[0].sets[1].targetRIR).toBe(0);
+    expect(edited[0].exercises[0].sets[1].targetWeightKg).toBeGreaterThan(120);
+    expect(edited[0].exercises[0].manualRIRBySet).toEqual({ 1: 0 });
+    expect(loaded[0].exercises[0].sets[1].targetRIR).toBe(1);
+  });
+
+  it('clears manual RIR for removed sets and updates a suggested load when reps change', () => {
+    const loaded: PlannedSession[] = [{ ...sessions[0], exercises: [{
+      ...sessions[0].exercises[0], manualRIRBySet: { 1: 0 },
+      sets: sessions[0].exercises[0].sets.map((set) => ({ ...set, targetWeightKg: 120 })),
+    }] }];
+    const reduced = applyPreviewEdits(loaded, { '0:0': { sets: 1, targetReps: 10 } });
+    expect(reduced[0].exercises[0].manualRIRBySet).toBeUndefined();
+    expect(reduced[0].exercises[0].sets[0].targetWeightKg).toBeGreaterThan(120);
+  });
+
+  it('never carries a previous exercise load or RIR override into a swap', () => {
+    const loaded: PlannedSession[] = [{ ...sessions[0], exercises: [{
+      ...sessions[0].exercises[0], manualRIRBySet: { 1: 0 },
+      sets: sessions[0].exercises[0].sets.map((set) => ({ ...set, targetWeightKg: 120 })),
+    }] }];
+    const swapped = applyPreviewEdits(loaded, { '0:0': { exerciseId: 'machine-press' } })
+      [0].exercises[0];
+    expect(swapped.exerciseId).toBe('machine-press');
+    expect(swapped.sets.every((set) => set.targetWeightKg === undefined)).toBe(true);
+    expect(swapped.manualRIRBySet).toBeUndefined();
   });
 
   it('leaves untouched exercises referentially unchanged', () => {
@@ -99,7 +189,18 @@ describe('previewEditing', () => {
       { muscle: MuscleGroup.BICEPS, sets: 1 },
       { muscle: MuscleGroup.TRICEPS, sets: 1 },
     ]);
+    expect(previewVolumeBreakdownByMuscle(sessions, new Map([[press.id, press]]))
+      .find((entry) => entry.muscle === MuscleGroup.BICEPS)).toMatchObject({
+        directSets: 0, indirectSets: 1, sets: 1,
+      });
     expect(previewVolumeByMuscle(sessions, new Map())).toEqual([]);
+  });
+
+  it('hides zero-valued direct or indirect breakdown labels', () => {
+    expect(visibleVolumeComponents({ directSets: 3, indirectSets: 0 })).toEqual(['direct']);
+    expect(visibleVolumeComponents({ directSets: 0, indirectSets: 1.5 })).toEqual(['indirect']);
+    expect(visibleVolumeComponents({ directSets: 3, indirectSets: 1 })).toEqual(['direct', 'indirect']);
+    expect(visibleVolumeComponents({ directSets: 0, indirectSets: 0 })).toEqual([]);
   });
 });
 

@@ -100,6 +100,7 @@ export function TodayCard({
               {session.name}
             </Text>
             <Text style={[styles.routineName, { color: colors.textMuted }]}>{routineName}</Text>
+            {session.scheduledOn && <Text style={[styles.routineName, { color: colors.textMuted }]}>{session.scheduledOn}</Text>}
           </View>
         </View>
       </Pressable>

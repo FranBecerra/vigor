@@ -43,8 +43,10 @@ interface RoutineCardProps {
     rename: string;
     remove: string;
     active: string;
+    skipped: string;
   };
   onToggle: () => void;
+  onPressDetail: () => void;
   /** Absent on an inactive routine: its sessions are shown, not started. */
   onSelectSession?: (sessionId: string) => void;
   onPressMesocycle: () => void;
@@ -62,6 +64,7 @@ export function RoutineCard({
   muscleLabel,
   labels,
   onToggle,
+  onPressDetail,
   onSelectSession,
   onPressMesocycle,
   onActivate,
@@ -81,7 +84,7 @@ export function RoutineCard({
         !expanded && styles.collapsed,
       ]}>
       <Pressable
-        onPress={onToggle}
+        onPress={onPressDetail}
         accessibilityRole="button"
         accessibilityState={{ expanded }}
         accessibilityLabel={routine.name}
@@ -97,7 +100,10 @@ export function RoutineCard({
             {routine.objective} · {current.sessions.length} {labels.sessions}
           </Text>
         </View>
-        <Text style={[styles.chevron, { color: colors.textMuted }]}>{expanded ? '▲' : '▼'}</Text>
+        <Pressable onPress={(event) => { event.stopPropagation(); onToggle(); }}
+          accessibilityRole="button" accessibilityLabel={labels.sessions}>
+          <Text style={[styles.chevron, { color: colors.textMuted, padding: 12 }]}>{expanded ? '▲' : '▼'}</Text>
+        </Pressable>
       </Pressable>
 
       {expanded ? (
@@ -115,6 +121,7 @@ export function RoutineCard({
           <View style={[styles.sessionList, { borderTopColor: colors.surfaceBorder }]}>
             {current.sessions.map((session) => {
               const isCompleted = session.completedOn !== undefined;
+              const isSkipped = session.skippedOn !== undefined;
               const isSelected = session.id === selectedSessionId;
               const muscles = rankedMuscleVolume(session.exercises, 3)
                 .map((entry) => muscleLabel(entry.muscle))
@@ -130,7 +137,7 @@ export function RoutineCard({
                   style={[
                     styles.sessionRow,
                     { borderBottomColor: colors.surfaceBorder },
-                    isCompleted && styles.sessionCompleted,
+                    (isCompleted || isSkipped) && styles.sessionCompleted,
                     isSelected && { backgroundColor: 'rgba(155,227,23,0.08)' },
                   ]}>
                   {/* Fecha real, o nada si está pendiente */}
@@ -143,6 +150,8 @@ export function RoutineCard({
                       ? labels.today
                       : isCompleted
                         ? formatSessionDate(session.completedOn as string, locale)
+                        : isSkipped
+                          ? '—'
                         : '—'}
                   </Text>
 
@@ -155,7 +164,7 @@ export function RoutineCard({
                       {session.name}
                     </Text>
                     <Text style={[styles.sessionMuscles, { color: colors.textMuted }]}>
-                      {muscles}
+                    {isSkipped ? labels.skipped : muscles}
                     </Text>
                   </View>
 

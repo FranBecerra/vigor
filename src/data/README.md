@@ -47,11 +47,11 @@ Sustituyen a la puntuación única de efectividad que el catálogo llevaba antes
 
 `exerciseCatalogue.ts` deriva ambas; no se guardan en el JSON para que no puedan desincronizarse.
 
-**`stimulusQuality`** — estímulo hipertrófico por serie, en escala 1-5. Es el peso con el que el generador elige. Pondera el estiramiento por encima de todo (0,35), luego el perfil de resistencia (0,25), el recorrido (0,20) y, con poco peso, progresión y estabilidad (0,10 cada uno). **La fatiga sistémica no entra**: un coste no es un estímulo.
+**`stimulusQuality`** — an ordinal selection heuristic on a 1–5 scale, not a measured hypertrophy effect size. Current weights are stretch loading 0.35, range of motion 0.27, load progression 0.23 and resistance-profile match 0.15. Stability and systemic fatigue are excluded from this score. The lower resistance-profile weight reflects uncertainty about its independent effect on long-term hypertrophy; the weights themselves are not trial-derived.
 
 **`fatigueCost`** — fatiga gastada por serie, escala 1-5 donde más es peor. Sale de `systemicFatigueCost` (0,75) y `stabilityCost` (0,25), invertidos. Gobierna dónde se coloca el trabajo y cuánto cabe, no si se elige.
 
-`isTopTierStimulus` aplica la regla de la propia auditoría: 4 o más en estiramiento **y** en perfil de resistencia. Son 38 de los 113.
+`isTopTierStimulus` is a legacy catalogue-report flag for scores of at least 4 on both stretch loading and resistance-profile match. It is not evidence that those exercises are clinically superior, and it is not used to override exercise fit or availability.
 
 ## Qué NO va aquí
 
@@ -70,3 +70,11 @@ df.groupby('primaryMuscle')['criteria.stretchedPositionLoading'].mean().sort_val
 `json_normalize` aplana `criteria` en columnas `criteria.stretchedPositionLoading`, así que el fichero sigue siendo tabular.
 
 Si añades o cambias ejercicios, pasa `npm run catalogue -- --validate` antes de dar el cambio por bueno. Y si cambias un criterio, actualiza su entrada en `exercise-evidence.json`: una puntuación sin respaldo declarado es exactamente lo que la auditoría vino a eliminar.
+
+## Sixth-edition guide import
+
+`guide-exercises.json` indexes 337 numbered source pages. Seventy-nine pages link to existing catalogue IDs; 258 additional exercises are classified by `guideExerciseCatalogue.ts`. The disputed 90-degree/high-cable description on page 212 is no longer silently aliased to the original fully-overhead extension. The catalogue contains 379 unique entries. Imports remain `MANUAL_ONLY` until muscle credits, attributes and automatic-programming suitability have been checked individually.
+
+The provisional rubric in `guideScoringRubric.ts` still applies to unreviewed imports; its neutral 3 is not evidence. The 30 imported entries in the individually inspected triceps section (pages 197-231) no longer carry those generic point ratings. `tricepsSourceReview.ts` records described geometry, default implement, support, laterality, hybrid roles and contradictions. Broad five-dimension uncertainty bands are diagnostic hypotheses, not production scores. Resistance-profile matching remains unknown; original alias ratings are retained but not validated by this source-mechanics pass. Generate the detailed ledger with `node --import tsx scripts/report-triceps-review.ts`.
+
+The refreshed screening ledger is generated with `node --import tsx scripts/review-catalogue.ts --output-prefix=docs/audits/2026-10-01-catalogue-review`. The default output is `catalogue-review-latest`, preventing silently overwriting a dated historical artifact. It lists all entries, criterion provenance and unresolved biomechanical checks; screening is not completed scientific verification. Full source descriptions established six earlier corrected classifications: shoulder extension on page 159, fitball on 277, bands on 305/311, and bodyweight on 347/367. Required apparatus and surfaces are not fully represented by the single implement field; GHD, sliding surfaces, independent cable stations and attachment modelling remain open.

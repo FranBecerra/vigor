@@ -15,9 +15,15 @@ import {
   createRandom,
   equipmentFamily,
   goalSelectionScore,
+  hypertrophyDominates,
+  hypertrophyPriorityLayers,
   selectExercises,
   summarizeSelection,
   weightedPick,
+  remainingVolumeUtility,
+  directVolumeFloor,
+  accessoryCandidates,
+  prefersTargetedAccessory,
 } from '@/services/training/exerciseSelection';
 import { planMesocycle } from '@/services/training/mesocyclePlanner';
 import {
@@ -33,6 +39,47 @@ import {
 const plan = buildVolumePlan({
   level: ExperienceLevel.INTERMEDIATE,
   goal: TrainingGoal.HYPERTROPHY,
+});
+
+describe('targeted accessory roles', () => {
+  const close = EXERCISE_CATALOGUE.find((e) => e.id === 'press-banca-cerrado')!;
+  const overhead = EXERCISE_CATALOGUE.find((e) => e.id === 'extension-sobre-cabeza-polea')!;
+  it('prefers local arm work but retains compound-only and empty catalogues', () => {
+    expect(accessoryCandidates([close, overhead], MuscleGroup.TRICEPS)).toEqual([overhead]);
+    expect(accessoryCandidates([close], MuscleGroup.TRICEPS)).toEqual([close]);
+    expect(accessoryCandidates([], MuscleGroup.BICEPS)).toEqual([]);
+    expect(accessoryCandidates([close, overhead], MuscleGroup.CHEST)).toEqual([close, overhead]);
+    expect(prefersTargetedAccessory(MuscleGroup.DELTS_LATERAL)).toBe(true);
+    expect(prefersTargetedAccessory(MuscleGroup.QUADS)).toBe(false);
+    const jm = EXERCISE_CATALOGUE.find((e) => e.id === 'guide-211')!;
+    expect(accessoryCandidates([close, jm], MuscleGroup.TRICEPS)).toEqual([jm]);
+  });
+  it('does not force a compound for a triceps deficit under time pressure', () => {
+    const result = selectExercises({ volumePlan: planFor([[MuscleGroup.TRICEPS, 9]]),
+      catalogue: [close, overhead], seed: 2, timeConstrained: true, rankingPolicy: 'accessory-aware' });
+    expect(result.selected[0].exercise.id).toBe(overhead.id);
+    expect(result.attributedByMuscle[MuscleGroup.TRICEPS]).toBeGreaterThanOrEqual(6);
+  });
+  it('keeps compound alternatives when local equipment is missing', () => {
+    const result = selectExercises({ volumePlan: planFor([[MuscleGroup.TRICEPS, 9]]),
+      catalogue: [close], seed: 2, timeConstrained: true, rankingPolicy: 'accessory-aware' });
+    expect(result.selected.map((e) => e.exercise.id)).toEqual([close.id]);
+  });
+  it('leaves explicit strength specificity intact', () => {
+    const result = selectExercises({ volumePlan: { ...planFor([[MuscleGroup.TRICEPS, 9]]), goal: TrainingGoal.STRENGTH },
+      catalogue: [close, overhead], seed: 2, rankingPolicy: 'accessory-aware' });
+    expect(result.selected[0].exercise.id).toBe(close.id);
+  });
+  it('excludes unrated JM/Kaz from automatic draws and accepts them as previous manual work', () => {
+    const jm = EXERCISE_CATALOGUE.find((e) => e.id === 'guide-211')!;
+    const input = { level: ExperienceLevel.INTERMEDIATE, goal: TrainingGoal.HYPERTROPHY,
+      capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 70 }, catalogue: EXERCISE_CATALOGUE, seed: 31 };
+    const result = planMesocycle({ ...input, previousSession: [{ exercise: jm, sets: 3 }] });
+    expect(result.selection.selected.some((e) => ['guide-211', 'guide-210'].includes(e.exercise.id))).toBe(false);
+    expect(() => planMesocycle(input)).not.toThrow();
+    expect(planMesocycle({ ...input, catalogue: EXERCISE_CATALOGUE.filter((e) => e.criteria) }).selection.selected)
+      .toEqual(planMesocycle(input).selection.selected);
+  });
 });
 
 /** Plan mínimo de un solo músculo, para aislar un caso límite. */
@@ -142,6 +189,110 @@ describe('weightedPick', () => {
 });
 
 describe('goal-specific selection policy', () => {
+  it('does not let a fallback compound displace a standard isolation when time is tight', () => {
+    const standard = exercise({ id: 'standard', generationTier: ExerciseGenerationTier.STANDARD });
+    const fallback = exercise({
+      id: 'fallback',
+      profile: ExerciseProfile.COMPOUND_SECONDARY,
+      generationTier: ExerciseGenerationTier.FALLBACK,
+    });
+    const result = selectExercises({
+      volumePlan: planFor([[MuscleGroup.BICEPS, 3]]),
+      catalogue: [fallback, standard],
+      seed: 1,
+      timeConstrained: true,
+    });
+    expect(result.selected.map((entry) => entry.exercise.id)).toEqual(['standard']);
+  });
+
+  it('keeps upright row and sissy squat available manually but out of automatic plans', () => {
+    for (const id of ['remo-al-menton', 'sentadilla-sissy']) {
+      expect(EXERCISE_CATALOGUE.find((entry) => entry.id === id)?.generationTier)
+        .toBe(ExerciseGenerationTier.MANUAL_ONLY);
+    }
+    for (const seed of [1, 7, 19, 51]) {
+      const result = selectExercises({ volumePlan: plan, catalogue: EXERCISE_CATALOGUE, seed });
+      expect(result.selected.some((entry) =>
+        entry.exercise.id === 'remo-al-menton' || entry.exercise.id === 'sentadilla-sissy'))
+        .toBe(false);
+    }
+  });
+
+  it('keeps adjacent ordinal judgements tied rather than claiming a precise winner', () => {
+    const baseline = exercise({ id: 'baseline' });
+    const adjacent = exercise({
+      id: 'adjacent',
+      criteria: { ...baseline.criteria!, stretchedPositionLoading: 4, rangeOfMotion: 4 },
+    });
+    expect(hypertrophyDominates(adjacent, baseline)).toBe(false);
+    expect(hypertrophyDominates(baseline, adjacent)).toBe(false);
+    expect([...hypertrophyPriorityLayers([baseline, adjacent]).values()]).toEqual([0, 0]);
+  });
+
+  it('recognizes a clear stretch advantage but never compares different target muscles', () => {
+    const baseline = exercise({ id: 'baseline' });
+    const clear = exercise({
+      id: 'clear',
+      criteria: { ...baseline.criteria!, stretchedPositionLoading: 5 },
+    });
+    expect(hypertrophyDominates(clear, baseline)).toBe(true);
+    expect(hypertrophyDominates(clear, exercise({ id: 'other', primaryMuscle: MuscleGroup.TRICEPS }))).toBe(false);
+    expect(hypertrophyPriorityLayers([]).size).toBe(0);
+  });
+
+  it('leaves recovery cost outside the efficacy comparison', () => {
+    const baseline = exercise({ id: 'baseline' });
+    const costly = exercise({
+      id: 'costly',
+      criteria: { ...baseline.criteria!, systemicFatigueCost: 1 },
+    });
+    expect(hypertrophyDominates(costly, baseline)).toBe(false);
+    expect(hypertrophyDominates(baseline, costly)).toBe(false);
+  });
+
+  it('promotes coupled allocation only without worsening baseline constraints at every level', () => {
+    for (const level of Object.values(ExperienceLevel)) {
+      const input = {
+        level,
+        goal: TrainingGoal.HYPERTROPHY,
+        capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 70 },
+        catalogue: EXERCISE_CATALOGUE,
+        seed: 31,
+      };
+      const implicit = planMesocycle(input);
+      const explicit = planMesocycle({ ...input, rankingPolicy: 'legacy-weighted' });
+      const short = (p: typeof implicit) => p.distribution.sessions.filter((s) =>
+        s.exercises.reduce((n, e) => n + e.sets, 0) < 12).length;
+      expect(short(implicit)).toBeLessThanOrEqual(short(explicit));
+      const loads = (p: typeof implicit) => p.distribution.sessions.map((s) => s.exercises.reduce((n, e) => n + e.sets, 0));
+      expect(Math.min(...loads(implicit))).toBeGreaterThanOrEqual(Math.min(...loads(explicit)));
+      expect(Math.max(...loads(implicit)) - Math.min(...loads(implicit)))
+        .toBeLessThanOrEqual(Math.max(...loads(explicit)) - Math.min(...loads(explicit)));
+      expect(implicit.selection.performedSets).toBeGreaterThanOrEqual(explicit.selection.performedSets);
+      expect(implicit.distribution.unassigned).toHaveLength(0);
+      for (const session of implicit.distribution.sessions) {
+        expect(session.exercises.length).toBeGreaterThan(0);
+        expect(session.estimatedWorkMinutes).toBeLessThanOrEqual(implicit.availableWorkMinutesPerSession + 0.01);
+      }
+      for (const m of explicit.uncappedPlan.muscles) {
+        const direct = (p: typeof implicit) => p.selection.selected.filter((e) =>
+          e.exercise.primaryMuscle === m.muscle).reduce((n, e) => n + e.sets, 0);
+        expect(implicit.selection.attributedByMuscle[m.muscle] ?? 0)
+          .toBeGreaterThanOrEqual(Math.min(explicit.selection.attributedByMuscle[m.muscle] ?? 0, m.meav) - 1);
+        expect(direct(implicit)).toBeGreaterThanOrEqual(Math.min(direct(explicit), directVolumeFloor(m.muscle, m.meav)));
+      }
+    }
+  });
+
+  it('credits only outstanding volume, deduplicates indirect muscles and rejects invalid dose', () => {
+    const e = exercise({ secondaryMuscles: [MuscleGroup.TRICEPS, MuscleGroup.TRICEPS] });
+    const targets = new Map([[MuscleGroup.BICEPS, 4], [MuscleGroup.TRICEPS, 3]]);
+    expect(remainingVolumeUtility(e, 3, targets, new Map([[MuscleGroup.BICEPS, 3]]))).toBe(2.5);
+    expect(remainingVolumeUtility(e, 3, targets, targets)).toBe(0);
+    expect(remainingVolumeUtility(e, 0, targets, new Map())).toBe(0);
+    expect(remainingVolumeUtility(e, NaN, targets, new Map())).toBe(0);
+  });
+
   it('strength rewards a loadable compound more than an otherwise equal isolation', () => {
     const compound = exercise({
       id: 'compound',

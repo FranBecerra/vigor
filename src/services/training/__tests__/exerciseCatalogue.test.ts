@@ -192,8 +192,13 @@ describe('EXERCISE_CATALOGUE', () => {
     expect(EXERCISE_CATALOGUE.length).toBeGreaterThan(50);
   });
 
-  it('every catalogue exercise carries the full audit', () => {
+  it('all automatic entries carry criteria; explicitly unscored entries remain manual-only', () => {
     EXERCISE_CATALOGUE.forEach((exercise) => {
+      if (!exercise.criteria) {
+        expect(exercise.generationTier).toBe(ExerciseGenerationTier.MANUAL_ONLY);
+        expect(() => criteriaOf(exercise)).toThrow('no scoring rubric');
+        return;
+      }
       expect(exercise.criteria).toBeDefined();
       CRITERIA_KEYS.forEach((key) => {
         expect(exercise.criteria?.[key]).toBeGreaterThanOrEqual(1);
@@ -240,6 +245,22 @@ describe('EXERCISE_CATALOGUE', () => {
   });
 });
 
+it('adds distinct JM and Kaz implements without invented ratings or collateral muscle credit', () => {
+  const jm = EXERCISE_CATALOGUE.find((e) => e.id === 'guide-211')!;
+  const kaz = EXERCISE_CATALOGUE.find((e) => e.id === 'guide-210')!;
+  expect(jm.equipment).toBe(Equipment.BARBELL);
+  expect(kaz.equipment).toBe(Equipment.SMITH_MACHINE);
+  for (const exercise of [jm, kaz]) {
+    expect(exercise.primaryMuscle).toBe(MuscleGroup.TRICEPS);
+    expect(exercise.movementVector).toBe(MovementVector.ELBOW_EXTENSION);
+    expect(exercise.criteria).toBeUndefined();
+    expect(exercise.secondaryMuscles).toEqual([]);
+    expect(exercise.generationTier).toBe(ExerciseGenerationTier.MANUAL_ONLY);
+    expect(fatigueCost(exercise)).toBe(5);
+    expect(() => stimulusQuality(exercise)).toThrow('no scoring rubric');
+  }
+});
+
 describe('criteriaOf', () => {
   it('returns the audited criteria when present', () => {
     expect(criteriaOf(parseExercise(rawExercise()))).not.toEqual(DEFAULT_CRITERIA);
@@ -272,7 +293,9 @@ describe('stimulusQuality', () => {
   }
 
   it('stays on the 1-5 scale of the criteria it comes from', () => {
-    EXERCISE_CATALOGUE.forEach((exercise) => {
+    EXERCISE_CATALOGUE.filter(
+      (exercise) => exercise.generationTier !== ExerciseGenerationTier.MANUAL_ONLY,
+    ).forEach((exercise) => {
       expect(stimulusQuality(exercise)).toBeGreaterThanOrEqual(1);
       expect(stimulusQuality(exercise)).toBeLessThanOrEqual(5);
     });
@@ -377,7 +400,12 @@ describe('filterCatalogue', () => {
       availableEquipment: [Equipment.BODYWEIGHT],
     });
     expect(filtered.length).toBeGreaterThan(0);
-    filtered.forEach((e) => expect(e.equipment).toBe(Equipment.BODYWEIGHT));
+    filtered.forEach((e) => {
+      expect(
+        e.equipment === Equipment.BODYWEIGHT ||
+          (e.generationTier === ExerciseGenerationTier.MANUAL_ONLY && e.equipment === Equipment.UNSPECIFIED),
+      ).toBe(true);
+    });
   });
 
   it('combina material y vetos', () => {
@@ -431,14 +459,14 @@ describe('fatigue never influences selection', () => {
 
   it('no longer penalises the barbell squat for being expensive', () => {
     // The failure the athlete named: always inserting quad extensions because they
-    // are cheaper. With cost removed from the score the two tie on stimulus, and
-    // the counterfactual shows what cost was doing: counting stability would put
+    // are cheaper. With cost removed from the score the squat is not suppressed,
+    // and the counterfactual shows what cost was doing: counting stability would put
     // the squat below the machine on a hypertrophy score, which is not a
     // hypertrophy claim at all.
     const find = (id: string) => EXERCISE_CATALOGUE.find((e) => e.id === id)!;
     const squat = find('sentadilla-libre');
     const extension = find('extension-cuadriceps');
-    expect(stimulusQuality(squat)).toBeCloseTo(stimulusQuality(extension), 5);
+    expect(stimulusQuality(squat)).toBeGreaterThan(stimulusQuality(extension));
 
     const withStability = (id: string) => {
       const criteria = EXERCISE_CATALOGUE.find((e) => e.id === id)!.criteria!;

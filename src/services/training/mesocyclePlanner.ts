@@ -26,7 +26,8 @@ import {
   type VolumePlan,
   type VolumePlanInput,
 } from './volumePlan';
-import { selectExercises, type SelectionResult } from './exerciseSelection';
+import { selectExercises, directVolumeFloor, type RankingPolicy, type SelectionResult } from './exerciseSelection';
+import { criteriaOf } from './exerciseCatalogue';
 import {
   SESSION_OVERHEAD_MINUTES,
   workMinutesAvailable,
@@ -34,14 +35,18 @@ import {
 } from './trainingCapacity';
 import { planStrengthMesocycle, type StrengthProgramReport } from './strengthProgram';
 import { TrainingGoal } from './volumePlan';
+import { toPlannedSessions } from './routineMapper';
+import { buildScheduleTemplate, templateRecovery } from './scheduleTemplate';
 import {
   distributeSelection,
+  MIN_HYPERTROPHY_SESSION_SETS,
   type SessionDistribution,
   type SessionExercise,
 } from './sessionDistribution';
 
 /** Qué techo ha limitado el volumen del plan. */
 export type LimitingFactor =
+  | 'catalogue'
   /** El plan cabe en el tiempo disponible: limita lo que el atleta recupera. */
   | 'recovery'
   /** El plan se ha recortado para caber en el tiempo disponible. */
@@ -53,6 +58,8 @@ export type LimitingFactor =
   | 'insufficient-time';
 
 export interface MesocyclePlan {
+  /** Diagnostic only; not persisted prescriptions or a biological explanation. */
+  policyTrace?: PolicyPromotionDecision[];
   /** Plan de volumen ya ajustado a la capacidad. */
   plan: VolumePlan;
   /** Plan antes de recortar, para poder mostrar cuánto se ha cedido. */
@@ -80,6 +87,8 @@ export interface MesocyclePlanInput extends VolumePlanInput {
   /** Catálogo YA filtrado por material disponible y vetos. */
   catalogue: readonly Exercise[];
   seed: number;
+  /** Reproducible comparison override; production uses guarded coupled allocation. */
+  rankingPolicy?: RankingPolicy;
   /** Athlete-selected structure; AUTO resolves from their session count. */
   split?: SplitStructure;
   /** Optional last completed/planned session, used to avoid immediate overlap. */
@@ -89,13 +98,105 @@ export interface MesocyclePlanInput extends VolumePlanInput {
 /** Pasos de la bisección. Diez dan una precisión de recorte de 0,002. */
 const SQUEEZE_SEARCH_STEPS = 10;
 
+/** Promote the coupled candidate only when it preserves the baseline constraints. */
 export function planMesocycle(input: MesocyclePlanInput): MesocyclePlan {
+  if ((input.rankingPolicy !== undefined && input.rankingPolicy !== 'coupled-control')
+    || input.goal !== TrainingGoal.HYPERTROPHY) return planWithPolicy(input);
+  const baseline = planWithPolicy({ ...input, rankingPolicy: 'legacy-weighted' });
+  const candidate = planWithPolicy({ ...input, rankingPolicy: 'volume-aware' });
+  const incumbent = promoteCandidate(input, baseline, candidate, 'volume-aware');
+  if (input.rankingPolicy === 'coupled-control') return incumbent;
+  return promoteCandidate(input, incumbent, planWithPolicy({ ...input, rankingPolicy: 'accessory-aware' }), 'accessory-aware');
+}
+
+export interface PolicyPromotionDecision {
+  candidatePolicy: RankingPolicy;
+  accepted: boolean;
+  reasons: { code: string; subject?: string; before?: number; after?: number; limit?: number }[];
+  metrics: { targetShortfallBefore: number; targetShortfallAfter: number;
+    ordinalCostBefore: number; ordinalCostAfter: number };
+}
+
+/** Preserve the incumbent's feasibility before considering another programming policy. */
+export function evaluatePolicyPromotion(input: MesocyclePlanInput, baseline: MesocyclePlan,
+  candidate: MesocyclePlan, candidatePolicy: RankingPolicy): PolicyPromotionDecision {
+  const reasons: PolicyPromotionDecision['reasons'] = [];
+  const short = (plan: MesocyclePlan) => plan.distribution.sessions.filter((s) =>
+    s.exercises.reduce((sum, e) => sum + e.sets, 0) < MIN_HYPERTROPHY_SESSION_SETS).length;
+  const direct = (plan: MesocyclePlan, muscle: import('@/models').MuscleGroup) => plan.selection.selected
+    .filter((e) => e.exercise.primaryMuscle === muscle).reduce((sum, e) => sum + e.sets, 0);
+  const budget = baseline.availableWorkMinutesPerSession;
+  const loads = (plan: MesocyclePlan) => plan.distribution.sessions.map((s) =>
+    s.exercises.reduce((sum, e) => sum + e.sets, 0));
+  const beforeLoads = loads(baseline), afterLoads = loads(candidate);
+  const catalogue = new Map(input.catalogue.map((e) => [e.id, e]));
+  const recoveryWarnings = (plan: MesocyclePlan) => {
+    const sessions = toPlannedSessions(plan);
+    return templateRecovery(buildScheduleTemplate(sessions, catalogue), sessions, catalogue)
+      .filter((pair) => pair.reviewSuggested).length;
+  };
+  if (candidate.distribution.unassigned.length) reasons.push({ code: 'unassigned-work' });
+  for (const session of candidate.distribution.sessions) {
+    if (!session.exercises.length) reasons.push({ code: 'empty-session', subject: String(session.index) });
+    if (session.estimatedWorkMinutes > budget + 0.01) reasons.push({ code: 'session-time',
+      subject: String(session.index), after: session.estimatedWorkMinutes, limit: budget });
+  }
+  const compare = (code: string, before: number, after: number, worsened: boolean) => {
+    if (worsened) reasons.push({ code, before, after });
+  };
+  compare('underfilled-count', short(baseline), short(candidate), short(candidate) > short(baseline));
+  compare('minimum-session-load', Math.min(...beforeLoads), Math.min(...afterLoads), Math.min(...afterLoads) < Math.min(...beforeLoads));
+  const spread = (values: number[]) => Math.max(...values) - Math.min(...values);
+  compare('session-load-spread', spread(beforeLoads), spread(afterLoads), spread(afterLoads) > spread(beforeLoads));
+  const recoveryBefore = recoveryWarnings(baseline), recoveryAfter = recoveryWarnings(candidate);
+  compare('template-overlap-count', recoveryBefore, recoveryAfter, recoveryAfter > recoveryBefore);
+  compare('performed-volume', baseline.selection.performedSets, candidate.selection.performedSets,
+    candidate.selection.performedSets < baseline.selection.performedSets);
+  compare('foundational-coverage', baseline.selection.missingFoundationalPatterns.length,
+    candidate.selection.missingFoundationalPatterns.length,
+    candidate.selection.missingFoundationalPatterns.length > baseline.selection.missingFoundationalPatterns.length);
+  for (const muscle of baseline.uncappedPlan.muscles) {
+    const before = baseline.selection.attributedByMuscle[muscle.muscle] ?? 0;
+    const after = candidate.selection.attributedByMuscle[muscle.muscle] ?? 0;
+    const attributionLimit = Math.min(before, muscle.meav) - 1;
+    if (after < attributionLimit) reasons.push({ code: 'muscle-attribution', subject: muscle.muscle,
+      before, after, limit: attributionLimit });
+    const directLimit = Math.min(direct(baseline, muscle.muscle), directVolumeFloor(muscle.muscle, muscle.meav));
+    if (direct(candidate, muscle.muscle) < directLimit) reasons.push({ code: 'direct-accessory-floor',
+      subject: muscle.muscle, before: direct(baseline, muscle.muscle), after: direct(candidate, muscle.muscle), limit: directLimit });
+  }
+  const unmet = (plan: MesocyclePlan) => baseline.uncappedPlan.muscles.reduce((sum, m) =>
+    sum + Math.max(0, m.meav - (plan.selection.attributedByMuscle[m.muscle] ?? 0)), 0);
+  const cost = (plan: MesocyclePlan) => plan.selection.selected.reduce((sum, e) =>
+    sum + e.sets * (6 - criteriaOf(e.exercise).systemicFatigueCost), 0);
+  const metrics = { targetShortfallBefore: unmet(baseline), targetShortfallAfter: unmet(candidate),
+    ordinalCostBefore: cost(baseline), ordinalCostAfter: cost(candidate) };
+  const improved = metrics.targetShortfallAfter < metrics.targetShortfallBefore - 0.5
+    || (metrics.targetShortfallAfter <= metrics.targetShortfallBefore && metrics.ordinalCostAfter < metrics.ordinalCostBefore);
+  if (!improved) reasons.push({ code: 'no-objective-improvement' });
+  return { candidatePolicy, accepted: reasons.length === 0, reasons, metrics };
+}
+
+function promoteCandidate(input: MesocyclePlanInput, baseline: MesocyclePlan, candidate: MesocyclePlan,
+  policy: RankingPolicy): MesocyclePlan {
+  const decision = evaluatePolicyPromotion(input, baseline, candidate, policy);
+  return { ...(decision.accepted ? candidate : baseline), policyTrace: [...(baseline.policyTrace ?? []), decision] };
+}
+
+function planWithPolicy(input: MesocyclePlanInput): MesocyclePlan {
+  if (!Number.isInteger(input.capacity.sessionsPerMicrocycle) || input.capacity.sessionsPerMicrocycle < 0
+    || !Number.isFinite(input.capacity.minutesPerSession) || input.capacity.minutesPerSession < 0
+    || !Number.isFinite(input.seed)) throw new RangeError('Invalid training capacity or seed');
   // Strength prescribes its lifts instead of drawing them (§3.7).
-  if (input.goal === TrainingGoal.STRENGTH) return planStrengthMesocycle(input);
+  if (input.goal === TrainingGoal.STRENGTH) {
+    const result = planStrengthMesocycle(input);
+    return result.selection.performedSets === 0 ? { ...result, limitedBy: 'catalogue' } : result;
+  }
   const {
     capacity,
     catalogue,
     seed,
+    rankingPolicy,
     split = SplitStructure.AUTO,
     previousSession,
     ...planInput
@@ -113,6 +214,7 @@ export function planMesocycle(input: MesocyclePlanInput): MesocyclePlan {
       volumePlan: plan,
       catalogue,
       seed,
+      rankingPolicy,
       timeConstrained: squeeze > 0,
     });
     const distribution = distributeSelection({
@@ -121,6 +223,7 @@ export function planMesocycle(input: MesocyclePlanInput): MesocyclePlan {
       sessionsPerMicrocycle: capacity.sessionsPerMicrocycle,
       previousSession,
       maxWorkMinutesPerSession: availableWorkMinutesPerSession,
+      minimumSessionSets: MIN_HYPERTROPHY_SESSION_SETS,
       // Deprioritized muscles are exempt from the frequency-2 target: splitting
       // maintenance volume over two sessions buys almost no stimulus and costs a
       // second setup.
@@ -145,7 +248,8 @@ export function planMesocycle(input: MesocyclePlanInput): MesocyclePlan {
       uncappedPlan,
       selection: unsqueezed.selection,
       distribution: unsqueezed.distribution,
-      limitedBy: 'recovery',
+      limitedBy: unsqueezed.selection.performedSets === 0 && uncappedPlan.muscles.some((m) => m.meav > 0)
+        ? 'catalogue' : 'recovery',
       squeeze: 0,
       estimatedWorkMinutes: unsqueezed.distribution.totalWorkMinutes,
       availableWorkMinutes,
@@ -187,6 +291,24 @@ export function planMesocycle(input: MesocyclePlanInput): MesocyclePlan {
       high = middle;
     } else {
       low = middle;
+    }
+  }
+
+  // Exercise identities and integer set counts make feasibility discontinuous.
+  // Bisection alone can skip a feasible pocket; retain its result and inspect
+  // the earlier range without assuming that every larger plan is infeasible.
+  const searchLimit = bestSqueeze;
+  const defects = (candidate: typeof best) => candidate.distribution.structureWarnings.filter(
+    (warning) => warning.kind === 'empty-session' || warning.kind === 'underfilled-session'
+      || warning.kind === 'session-volume-cap',
+  ).length;
+  for (let step = 1; step < 16; step += 1) {
+    const squeeze = searchLimit * step / 16;
+    const candidate = evaluate(squeeze);
+    if (!candidate.fitsCapacity || defects(candidate) > defects(best)) continue;
+    if (candidate.selection.performedSets >= best.selection.performedSets && squeeze < bestSqueeze) {
+      best = candidate;
+      bestSqueeze = squeeze;
     }
   }
 

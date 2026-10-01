@@ -59,6 +59,10 @@ describe('orderSessionExercises', () => {
         sets: 3,
       }),
     ).toBe(true);
+    expect(isSessionAnchor({
+      exercise: exercise({ movementVector: MovementVector.UNILATERAL_KNEE }),
+      sets: 3,
+    })).toBe(true);
   });
 
   it('prefers primary compounds, then more sets, then higher fatigue and a stable id', () => {

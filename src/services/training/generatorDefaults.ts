@@ -12,11 +12,16 @@ export const DEFAULT_GENERATOR_SPLIT = SplitStructure.AUTO;
 /** The commercial-gym preset shown as selected on the generation screen. */
 export const DEFAULT_GENERATOR_EQUIPMENT: readonly Equipment[] = [
   Equipment.BARBELL,
+  Equipment.SAFETY_BAR,
+  Equipment.TRAP_BAR,
+  Equipment.LANDMINE,
   Equipment.DUMBBELL,
   Equipment.MACHINE,
   Equipment.CABLE,
   Equipment.SMITH_MACHINE,
   Equipment.BODYWEIGHT,
+  Equipment.ROMAN_CHAIR,
+  Equipment.STABILITY_BALL,
   Equipment.KETTLEBELL,
   Equipment.BANDS,
 ];

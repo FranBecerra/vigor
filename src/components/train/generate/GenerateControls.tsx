@@ -168,7 +168,7 @@ export const Chip = memo(function Chip({
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
-          style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}
+          style={[typography.caption, { color: selected ? accent : colors.textMuted, marginTop: 2, textAlign: centerLabel ? 'center' : 'left' }]}
         >
           {sublabel}
         </Text>

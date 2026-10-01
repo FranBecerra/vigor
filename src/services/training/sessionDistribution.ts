@@ -41,6 +41,7 @@ import {
 import type { SelectedExercise, SelectionResult } from './exerciseSelection';
 import { exerciseMinutes } from './trainingCapacity';
 import { fatigueCost } from './exerciseCatalogue';
+import { isDemandingTorsoHinge, redundantSessionPair } from './exerciseFamilies';
 
 /** Session label, used by distribution logic and by the future UI. */
 export type SessionFocus = 'FULL_BODY' | 'UPPER' | 'LOWER' | 'PUSH' | 'PULL' | 'LEGS';
@@ -99,6 +100,8 @@ export interface StructureWarning {
   kind:
     /** A session ended up with no work. Should never happen; reported if it does. */
     | 'empty-session'
+    /** Fewer working sets than the user-facing hypertrophy session floor. */
+    | 'underfilled-session'
     /** Session load is far from even, and the split leaves no way to even it out. */
     | 'unbalanced-load'
     /**
@@ -142,7 +145,12 @@ export interface DistributionInput {
    * is the better trade: some leg work on a push day beats halving the plan.
    */
   maxWorkMinutesPerSession?: number;
+  /** Optional user-facing session floor. Omit for strength and low-volume tests. */
+  minimumSessionSets?: number;
 }
+
+/** Product-quality floor for generated hypertrophy sessions, not a physiological minimum. */
+export const MIN_HYPERTROPHY_SESSION_SETS = 12;
 
 /** A score at or above this is worth surfacing in the UI. */
 const SEQUENCING_WARNING_THRESHOLD = 4;
@@ -165,26 +173,13 @@ export const TARGET_MUSCLE_FREQUENCY = 2;
 /**
  * PER-SESSION VOLUME CAP PER MUSCLE.
  *
- * Within one session the hypertrophy response follows a concave
- * diminishing-returns curve: roughly 1-4 effective sets already capture most of
- * the available stimulus, 6-10 capture practically all of the productive
- * adaptation, and 10-12 is the productive ceiling for a natural athlete. Past
- * that, central fatigue reduces high-threshold motor unit recruitment despite
- * equal perceived effort and disproportionate muscle damage redirects protein
- * synthesis toward repair instead of supercompensation, which extends recovery
- * beyond 72-96 h and wrecks the weekly frequency the plan depends on.
+ * A conservative guardrail against concentrating too much weekly volume in a
+ * single session, not a validated physiological threshold. Volume-equated
+ * research does not establish that frequency two always outperforms one; here
+ * spreading volume is chiefly a feasibility and recovery-management choice.
  *
- * So the cap is not a comfort setting: exceeding it costs volume elsewhere in the
- * microcycle. When weekly volume needs more than one session can absorb, the
- * right answer is frequency 2 or 3 (two sessions of 8 rather than one of 16), and
- * that is exactly what the cost function produces by making the overflow
- * expensive enough to push work into another session.
- *
- * INDIRECT WORK COUNTS. Heavy compound pressing already gives the triceps and
- * front delts half a set of stimulus per set performed, which reduces how many
- * DIRECT sets they can still tolerate in the same session. The budget is therefore
- * measured in EFFECTIVE sets (a direct set counts 1, a secondary credit 0.5), so
- * one number expresses both rules.
+ * INDIRECT WORK COUNTS FRACTIONALLY. The 0.5 weight is an accounting model, not
+ * a guarantee that indirect work substitutes for direct work one-for-two.
  */
 export const SMALL_MUSCLE_SESSION_CAP = 8;
 export const LARGE_MUSCLE_SESSION_CAP = 10;
@@ -194,7 +189,7 @@ export const LARGE_MUSCLE_SESSION_CAP = 10;
  * row for the back. Pattern variety is what makes the upper end tolerable.
  */
 export const MULTI_PATTERN_ALLOWANCE = 2;
-/** Absolute ceiling. Above this the work is junk volume and is never scheduled. */
+/** Conservative per-session guardrail, not a universal junk-volume boundary. */
 export const JUNK_VOLUME_SETS = 12;
 
 /**
@@ -380,6 +375,289 @@ function minutesOf(entries: readonly SessionExercise[]): number {
   return entries.reduce((sum, entry) => sum + entryMinutes(entry), 0);
 }
 
+function setsOf(entries: readonly SessionExercise[]): number {
+  return entries.reduce((sum, entry) => sum + entry.sets, 0);
+}
+
+/**
+ * A late repair can cross split labels when the initial natural-focus placement
+ * leaves a nearly empty session. No work is cloned or split into repeated lifts.
+ * A move must preserve the donor's target, its compound anchor, the recipient's
+ * time budget, and per-muscle session caps. Recovery risk remains a cost, not an
+ * invented calendar-day prohibition.
+ */
+function rebalanceShortSessions(
+  sessions: DistributedSession[],
+  minimumSets: number,
+  maxMinutes?: number,
+  previousSession?: readonly SessionExercise[],
+): void {
+  if (sessions.length < 2 || minimumSets <= 0) return;
+  const totalSets = sessions.reduce((sum, session) => sum + setsOf(session.exercises), 0);
+  const targetSets = Math.min(minimumSets, Math.floor(totalSets / sessions.length));
+  if (targetSets <= 0) return;
+
+  const countEntries = sessions.reduce((sum, session) => sum + session.exercises.length, 0);
+  const canHold = (session: DistributedSession, entries: SessionExercise[]): boolean =>
+    (maxMinutes === undefined || minutesOf(entries) <= maxMinutes) &&
+    [...effectiveSetsByMuscle(entries)].every(
+      ([muscle, effective]) => effective <= sessionSetCap(muscle, entries),
+    ) &&
+    (!session.exercises.some(isSessionAnchor) || entries.some(isSessionAnchor));
+  const uniqueFamily = (entries: readonly SessionExercise[], incoming: SessionExercise): boolean =>
+    !entries.some((entry) =>
+      entry.exercise.id === incoming.exercise.id ||
+      sameExerciseFamily(entry.exercise, incoming.exercise));
+  const directSetsByMuscle = new Map<MuscleGroup, number>();
+  sessions.forEach((session) => session.exercises.forEach((entry) =>
+    directSetsByMuscle.set(entry.exercise.primaryMuscle,
+      (directSetsByMuscle.get(entry.exercise.primaryMuscle) ?? 0) + entry.sets)));
+  const preservesFrequency = (
+    left: DistributedSession, leftEntries: SessionExercise[],
+    right: DistributedSession, rightEntries: SessionExercise[],
+  ): boolean => {
+    const affected = new Set([...left.exercises, ...right.exercises]
+      .map((entry) => entry.exercise.primaryMuscle));
+    for (const muscle of affected) {
+      if ((directSetsByMuscle.get(muscle) ?? 0) < 6) continue;
+      const before = sessions.filter((session) => session.exercises.some((entry) =>
+        entry.exercise.primaryMuscle === muscle)).length;
+      if (before < 2) continue;
+      const after = sessions.filter((session) =>
+        (session === left ? leftEntries : session === right ? rightEntries : session.exercises)
+          .some((entry) => entry.exercise.primaryMuscle === muscle)).length;
+      if (after < 2) return false;
+    }
+    return true;
+  };
+
+  // The initial placement may miss the time cap by one setup minute. Before the
+  // mesocycle planner squeezes every muscle's volume, try a whole-exercise move
+  // or exchange between sessions with spare time.
+  if (maxMinutes !== undefined) {
+    for (let attempt = 0; attempt < countEntries; attempt += 1) {
+      const overloaded = sessions.find((session) => session.estimatedWorkMinutes > maxMinutes);
+      if (overloaded === undefined) break;
+      let best: {
+        other: DistributedSession; outgoing: SessionExercise;
+        incoming?: SessionExercise; cost: number;
+      } | undefined;
+      for (const other of sessions) {
+        if (other === overloaded) continue;
+        for (const outgoing of overloaded.exercises) {
+          const donorRemaining = overloaded.exercises.filter((entry) => entry !== outgoing);
+          if (setsOf(donorRemaining) >= targetSets &&
+              canHold(overloaded, donorRemaining) &&
+              uniqueFamily(other.exercises, outgoing)) {
+            const otherAdded = [...other.exercises, outgoing];
+            if (canHold(other, otherAdded) &&
+                preservesFrequency(overloaded, donorRemaining, other, otherAdded)) {
+              const cost = focusMismatchCost(other.focus, outgoing.exercise.primaryMuscle) +
+                Math.abs(minutesOf(otherAdded) - minutesOf(donorRemaining));
+              if (best === undefined || cost < best.cost) best = { other, outgoing, cost };
+            }
+          }
+          for (const incoming of other.exercises) {
+            const otherRemaining = other.exercises.filter((entry) => entry !== incoming);
+            if (!uniqueFamily(donorRemaining, incoming) ||
+                !uniqueFamily(otherRemaining, outgoing)) continue;
+            const donorAdded = [...donorRemaining, incoming];
+            const otherAdded = [...otherRemaining, outgoing];
+            if (setsOf(donorAdded) < targetSets || setsOf(otherAdded) < targetSets ||
+                !canHold(overloaded, donorAdded) || !canHold(other, otherAdded) ||
+                !preservesFrequency(overloaded, donorAdded, other, otherAdded)) continue;
+            const cost = focusMismatchCost(other.focus, outgoing.exercise.primaryMuscle) +
+              focusMismatchCost(overloaded.focus, incoming.exercise.primaryMuscle) +
+              Math.abs(minutesOf(otherAdded) - minutesOf(donorAdded));
+            if (best === undefined || cost < best.cost) best = { other, outgoing, incoming, cost };
+          }
+        }
+      }
+      if (best === undefined) break;
+      overloaded.exercises.splice(overloaded.exercises.indexOf(best.outgoing), 1);
+      if (best.incoming !== undefined) {
+        best.other.exercises.splice(best.other.exercises.indexOf(best.incoming), 1, best.outgoing);
+        overloaded.exercises.push(best.incoming);
+      } else {
+        best.other.exercises.push(best.outgoing);
+      }
+      overloaded.estimatedWorkMinutes = minutesOf(overloaded.exercises);
+      best.other.estimatedWorkMinutes = minutesOf(best.other.exercises);
+    }
+  }
+  for (let attempt = 0; attempt < countEntries; attempt += 1) {
+    const recipients = sessions
+      .filter((session) => setsOf(session.exercises) < targetSets)
+      .sort((a, b) => setsOf(a.exercises) - setsOf(b.exercises) || a.index - b.index);
+    if (recipients.length === 0) break;
+
+    let best: { donor: DistributedSession; recipient: DistributedSession; entry: SessionExercise; cost: number } | undefined;
+    for (const recipient of recipients) {
+      for (const donor of sessions) {
+        if (donor === recipient || donor.exercises.length < 2) continue;
+        for (const entry of donor.exercises) {
+          if (setsOf(donor.exercises) - entry.sets < targetSets) continue;
+          const remaining = donor.exercises.filter((candidate) => candidate !== entry);
+          if (!canHold(donor, remaining) || !uniqueFamily(recipient.exercises, entry)) continue;
+          const incoming = [...recipient.exercises, entry];
+          if (!canHold(recipient, incoming) ||
+              !preservesFrequency(donor, remaining, recipient, incoming)) continue;
+
+          const previous = recipient.index === 0
+            ? previousSession ?? []
+            : sessions[recipient.index - 1].exercises;
+          const next = sessions[recipient.index + 1]?.exercises ?? [];
+          const addedRisk = entriesRisk([entry], previous) + entriesRisk([entry], next);
+          const mismatch = focusMismatchCost(recipient.focus, entry.exercise.primaryMuscle);
+          const gapAfter = Math.max(0, targetSets - setsOf(incoming));
+          const surplus = Math.max(0, setsOf(incoming) - targetSets);
+          const anchorBonus = !recipient.exercises.some(isSessionAnchor) && isSessionAnchor(entry) ? -30 : 0;
+          const cost = gapAfter * 200 + surplus * 20 + mismatch + addedRisk * 8 + anchorBonus;
+          if (best === undefined || cost < best.cost) {
+            best = { donor, recipient, entry, cost };
+          }
+        }
+      }
+      // Serve the emptiest feasible session first; otherwise try the next one.
+      if (best !== undefined) break;
+    }
+    if (best === undefined) break;
+    best.donor.exercises.splice(best.donor.exercises.indexOf(best.entry), 1);
+    best.recipient.exercises.push(best.entry);
+    best.donor.estimatedWorkMinutes = minutesOf(best.donor.exercises);
+    best.recipient.estimatedWorkMinutes = minutesOf(best.recipient.exercises);
+  }
+
+  // Whole-exercise granularity can leave 11 versus 13 sets: neither side may
+  // donate a three-set entry, but exchanging a three-set and four-set entry
+  // reaches 12/12 without splitting an exercise across the microcycle.
+  for (let attempt = 0; attempt < countEntries; attempt += 1) {
+    const recipients = sessions
+      .filter((session) => setsOf(session.exercises) < targetSets)
+      .sort((a, b) => setsOf(a.exercises) - setsOf(b.exercises) || a.index - b.index);
+    if (recipients.length === 0) break;
+    let best: {
+      donor: DistributedSession; recipient: DistributedSession;
+      outgoing: SessionExercise; incoming: SessionExercise; cost: number;
+    } | undefined;
+    for (const recipient of recipients) {
+      for (const donor of sessions) {
+        if (donor === recipient || setsOf(donor.exercises) <= targetSets) continue;
+        for (const outgoing of recipient.exercises) {
+          for (const incoming of donor.exercises) {
+            if (incoming.sets <= outgoing.sets) continue;
+            const nextRecipient = recipient.exercises.filter((entry) => entry !== outgoing);
+            const nextDonor = donor.exercises.filter((entry) => entry !== incoming);
+            if (!uniqueFamily(nextRecipient, incoming) || !uniqueFamily(nextDonor, outgoing)) continue;
+            nextRecipient.push(incoming);
+            nextDonor.push(outgoing);
+            if (setsOf(nextDonor) < targetSets ||
+                !canHold(recipient, nextRecipient) || !canHold(donor, nextDonor) ||
+                !preservesFrequency(recipient, nextRecipient, donor, nextDonor)) continue;
+            const gapAfter = Math.max(0, targetSets - setsOf(nextRecipient));
+            const mismatch = focusMismatchCost(recipient.focus, incoming.exercise.primaryMuscle) +
+              focusMismatchCost(donor.focus, outgoing.exercise.primaryMuscle);
+            const cost = gapAfter * 200 + mismatch +
+              Math.abs(setsOf(nextRecipient) - targetSets) * 20;
+            if (best === undefined || cost < best.cost) {
+              best = { donor, recipient, outgoing, incoming, cost };
+            }
+          }
+        }
+      }
+      if (best !== undefined) break;
+    }
+    if (best === undefined) break;
+    best.recipient.exercises.splice(best.recipient.exercises.indexOf(best.outgoing), 1, best.incoming);
+    best.donor.exercises.splice(best.donor.exercises.indexOf(best.incoming), 1, best.outgoing);
+    best.recipient.estimatedWorkMinutes = minutesOf(best.recipient.exercises);
+    best.donor.estimatedWorkMinutes = minutesOf(best.donor.exercises);
+  }
+
+  // Reaching the floor is not enough when one session still has almost twice
+  // another's work. Move a whole appearance only when it narrows the global set
+  // spread and does not materially worsen the spread in workout minutes.
+  for (let attempt = 0; attempt < countEntries; attempt += 1) {
+    const currentSets = sessions.map((session) => setsOf(session.exercises));
+    const currentMinutes = sessions.map((session) => session.estimatedWorkMinutes);
+    const setSpread = Math.max(...currentSets) - Math.min(...currentSets);
+    const minuteSpread = Math.max(...currentMinutes) - Math.min(...currentMinutes);
+    if (setSpread < 6) break;
+    let best: { donor: DistributedSession; recipient: DistributedSession; entry: SessionExercise; cost: number } | undefined;
+    for (const donor of sessions) {
+      for (const recipient of sessions) {
+        if (donor === recipient || setsOf(donor.exercises) <= setsOf(recipient.exercises)) continue;
+        for (const entry of donor.exercises) {
+          const remaining = donor.exercises.filter((candidate) => candidate !== entry);
+          const incoming = [...recipient.exercises, entry];
+          if (setsOf(remaining) < targetSets ||
+              !uniqueFamily(recipient.exercises, entry) ||
+              !canHold(donor, remaining) || !canHold(recipient, incoming) ||
+              !preservesFrequency(donor, remaining, recipient, incoming)) continue;
+          const nextSets = sessions.map((session) => session === donor
+            ? setsOf(remaining) : session === recipient ? setsOf(incoming) : setsOf(session.exercises));
+          const nextSpread = Math.max(...nextSets) - Math.min(...nextSets);
+          if (nextSpread >= setSpread) continue;
+          const nextMinutes = sessions.map((session) => session === donor
+            ? minutesOf(remaining) : session === recipient ? minutesOf(incoming) : session.estimatedWorkMinutes);
+          const nextMinuteSpread = Math.max(...nextMinutes) - Math.min(...nextMinutes);
+          if (nextMinuteSpread > minuteSpread + 6) continue;
+          const previous = recipient.index === 0
+            ? previousSession ?? [] : sessions[recipient.index - 1].exercises;
+          const next = sessions[recipient.index + 1]?.exercises ?? [];
+          const cost = nextSpread * 200 + nextMinuteSpread * 2 +
+            focusMismatchCost(recipient.focus, entry.exercise.primaryMuscle) +
+            (entriesRisk([entry], previous) + entriesRisk([entry], next)) * 8;
+          if (best === undefined || cost < best.cost) best = { donor, recipient, entry, cost };
+        }
+      }
+    }
+    if (best === undefined) break;
+    best.donor.exercises.splice(best.donor.exercises.indexOf(best.entry), 1);
+    best.recipient.exercises.push(best.entry);
+    best.donor.estimatedWorkMinutes = minutesOf(best.donor.exercises);
+    best.recipient.estimatedWorkMinutes = minutesOf(best.recipient.exercises);
+  }
+
+  // Prefer separating two demanding torso hinges, not all hip-extension work.
+  // Exchange whole appearances after capacity repair; preserve dose, anchors,
+  // frequency and time. This also works when a simple move would underfill a day.
+  for (let attempt = 0; attempt < countEntries; attempt += 1) {
+    const crowded = sessions.filter((session) => session.exercises.filter((entry) =>
+      isDemandingTorsoHinge(entry.exercise)).length > 1);
+    let best: { left: DistributedSession; right: DistributedSession;
+      outgoing: SessionExercise; incoming: SessionExercise; cost: number } | undefined;
+    for (const left of crowded) for (const outgoing of left.exercises) {
+      if (!isDemandingTorsoHinge(outgoing.exercise)) continue;
+      for (const right of sessions) {
+        if (right === left) continue;
+        for (const incoming of right.exercises) {
+          const nextLeft = left.exercises.filter((e) => e !== outgoing);
+          const nextRight = right.exercises.filter((e) => e !== incoming);
+          if (!uniqueFamily(nextLeft, incoming) || !uniqueFamily(nextRight, outgoing)) continue;
+          nextLeft.push(incoming); nextRight.push(outgoing);
+          if (setsOf(nextLeft) < targetSets || setsOf(nextRight) < targetSets
+            || !canHold(left, nextLeft) || !canHold(right, nextRight)
+            || !preservesFrequency(left, nextLeft, right, nextRight)) continue;
+          const neighbours = (session: DistributedSession, entries: SessionExercise[]) =>
+            entriesRisk(entries, session.index === 0 ? previousSession ?? [] : sessions[session.index - 1].exercises)
+              + entriesRisk(entries, sessions[session.index + 1]?.exercises ?? []);
+          const cost = focusMismatchCost(left.focus, incoming.exercise.primaryMuscle)
+            + focusMismatchCost(right.focus, outgoing.exercise.primaryMuscle)
+            + Math.abs(minutesOf(nextLeft) - minutesOf(nextRight))
+            + neighbours(left, nextLeft) + neighbours(right, nextRight);
+          if (!best || cost < best.cost) best = { left, right, incoming, outgoing, cost };
+        }
+      }
+    }
+    if (!best) break;
+    best.left.exercises.splice(best.left.exercises.indexOf(best.outgoing), 1, best.incoming);
+    best.right.exercises.splice(best.right.exercises.indexOf(best.incoming), 1, best.outgoing);
+    best.left.estimatedWorkMinutes = minutesOf(best.left.exercises);
+    best.right.estimatedWorkMinutes = minutesOf(best.right.exercises);
+  }
+}
+
 /**
  * The appearances of a selected exercise. A strength lift declares its own; any
  * other exercise appears once, with all its sets.
@@ -403,14 +681,7 @@ function appearancesFor(selected: SelectedExercise, sessionCount: number): Sessi
 
 /** Variants that would feel like repeating the same exercise inside one session. */
 function sameExerciseFamily(left: Exercise, right: Exercise): boolean {
-  const bothCompound =
-    left.profile !== ExerciseProfile.ISOLATION && right.profile !== ExerciseProfile.ISOLATION;
-  if (bothCompound && left.movementVector === right.movementVector) return true;
-  return (
-    left.primaryMuscle === right.primaryMuscle &&
-    left.movementVector === right.movementVector &&
-    left.profile === right.profile
-  );
+  return redundantSessionPair(left, right);
 }
 
 /**
@@ -601,6 +872,7 @@ export function orderSessionExercises(
 const ANCHOR_VECTORS = new Set<MovementVector>([
   MovementVector.KNEE_DOMINANT,
   MovementVector.HIP_DOMINANT,
+  MovementVector.UNILATERAL_KNEE,
   MovementVector.PUSH_HORIZONTAL,
   MovementVector.PUSH_VERTICAL,
   MovementVector.PULL_HORIZONTAL,
@@ -652,6 +924,11 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
       entryMinutes(b) - entryMinutes(a) ||
       a.exercise.id.localeCompare(b.exercise.id),
   );
+  const selectedDirectSets = new Map<MuscleGroup, number>();
+  input.selection.selected.forEach((entry) => selectedDirectSets.set(
+    entry.exercise.primaryMuscle,
+    (selectedDirectSets.get(entry.exercise.primaryMuscle) ?? 0) + entry.sets,
+  ));
 
   for (const selected of ordered) {
     if (sessions.length === 0) break;
@@ -707,13 +984,35 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
               sameExerciseFamily(entry.exercise, selected.exercise),
           ),
       );
+      const primary = selected.exercise.primaryMuscle;
+      const directFrequency = sessions.filter((session) => session.exercises.some(
+        (entry) => entry.exercise.primaryMuscle === primary)).length;
+      const spreadCandidates = directFrequency > 0 && directFrequency < TARGET_MUSCLE_FREQUENCY && count >= 4 &&
+        (selectedDirectSets.get(primary) ?? 0) >= 6 && !deprioritized.has(primary)
+        ? nonDuplicateSessions.filter((session) => {
+          if (session.exercises.some((entry) => entry.exercise.primaryMuscle === primary)) return false;
+          const projectedMinutes = session.estimatedWorkMinutes + entryMinutes(appearance);
+          if (input.maxWorkMinutesPerSession !== undefined &&
+              projectedMinutes > input.maxWorkMinutesPerSession) return false;
+          const projectedEntries = [...session.exercises, { exercise: selected.exercise, sets }];
+          return [...effectiveSetsByMuscle(projectedEntries)].every(
+            ([muscle, effective]) => effective <= sessionSetCap(muscle, projectedEntries));
+        }) : [];
+      const naturalSpread = spreadCandidates.filter((session) =>
+        matches(session.focus, primary));
+      const hingeAlternatives = isDemandingTorsoHinge(selected.exercise)
+        ? nonDuplicateSessions.filter((session) => {
+          const entries = [...session.exercises, appearance];
+          return (input.maxWorkMinutesPerSession === undefined || minutesOf(entries) <= input.maxWorkMinutesPerSession)
+            && [...effectiveSetsByMuscle(entries)].every(([muscle, count]) => count <= sessionSetCap(muscle, entries));
+        }) : [];
       // A strength lift's exposures are its frequency: two appearances of the same
       // lift (or of a lift and its variant) in one session would collapse two
       // training days into one, so for them any other session beats a duplicate.
       const preference =
         appearance.strength !== undefined
           ? [naturalDiverse, naturalWithinTimeDiverse, nonDuplicateSessions, naturalWithCapacity, naturalWithinTime]
-          : [naturalDiverse, naturalWithCapacity, naturalWithinTimeDiverse, naturalWithinTime, nonDuplicateSessions];
+          : [naturalSpread, spreadCandidates, naturalDiverse, hingeAlternatives, naturalWithCapacity, naturalWithinTimeDiverse, naturalWithinTime, nonDuplicateSessions];
       const candidates = preference.find((pool) => pool.length > 0) ?? sessions;
       const lightestLoad = candidates.reduce(
         (minimum, session) => Math.min(minimum, session.estimatedWorkMinutes),
@@ -847,6 +1146,15 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
     session.estimatedWorkMinutes = minutesOf(session.exercises);
   }
 
+  if (input.minimumSessionSets !== undefined) {
+    rebalanceShortSessions(
+      sessions,
+      input.minimumSessionSets,
+      input.maxWorkMinutesPerSession,
+      input.previousSession,
+    );
+  }
+
   sessions.forEach((session) => {
     session.exercises = orderSessionExercises(session.exercises);
   });
@@ -900,6 +1208,15 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
         kind: 'empty-session',
         sessionIndex: session.index,
         detail: `Session ${session.index} (${session.focus}) has no work assigned.`,
+      });
+    }
+    if (input.minimumSessionSets !== undefined &&
+        setsOf(session.exercises) < input.minimumSessionSets) {
+      structureWarnings.push({
+        kind: 'underfilled-session',
+        sessionIndex: session.index,
+        detail: `Session ${session.index} has ${setsOf(session.exercises)} working sets, ` +
+          `below the ${input.minimumSessionSets}-set product-quality floor.`,
       });
     }
   });

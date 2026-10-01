@@ -195,15 +195,14 @@ describe('totalSets / totalWorkingSets', () => {
 });
 
 describe('estimateSessionMinutes', () => {
-  it('cuenta trabajo más descansos, sin descanso tras la última serie', () => {
-    // 3 series × 40 s + 2 descansos × 180 s = 120 + 360 = 480 s = 8 min
+  it('includes warm-up, setup and the same rest allowance as the generator', () => {
     const plans = [exercise({ sets: working(3), restSeconds: 180 })];
-    expect(estimateSessionMinutes(plans)).toBe(8);
+    expect(estimateSessionMinutes(plans)).toBe(18);
   });
 
-  it('una sola serie no acumula ningún descanso', () => {
+  it('retains setup and warm-up for a single-set session', () => {
     const plans = [exercise({ sets: working(1), restSeconds: 180 })];
-    expect(estimateSessionMinutes(plans)).toBe(Math.round(WORK_SECONDS_PER_SET / 60));
+    expect(estimateSessionMinutes(plans)).toBe(11);
   });
 
   it('suma varios ejercicios con descansos distintos', () => {
@@ -211,12 +210,12 @@ describe('estimateSessionMinutes', () => {
       exercise({ sets: working(3), restSeconds: 180 }), // 480 s
       exercise({ exerciseId: 'b', sets: working(3), restSeconds: 120 }), // 120 + 240 = 360 s
     ];
-    expect(estimateSessionMinutes(plans)).toBe(Math.round(840 / 60));
+    expect(estimateSessionMinutes(plans)).toBe(27);
   });
 
   it('ignora los ejercicios sin series', () => {
     const plans = [exercise({ sets: [] }), exercise({ exerciseId: 'b', sets: working(3) })];
-    expect(estimateSessionMinutes(plans)).toBe(8);
+    expect(estimateSessionMinutes(plans)).toBe(18);
   });
 
   it('es 0 sin ejercicios', () => {

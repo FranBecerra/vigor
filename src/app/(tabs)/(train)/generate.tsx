@@ -36,6 +36,7 @@ import {
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-screens/experimental';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { Equipment, ExperienceLevel, SplitStructure, type Exercise, type PlannedSession } from '@/models';
@@ -53,6 +54,8 @@ import {
   filterCatalogue,
 } from '@/services/training/exerciseCatalogue';
 import { planMesocycle, type MesocyclePlan } from '@/services/training/mesocyclePlanner';
+import { findAlternativeSchedule } from '@/services/training/alternativeSchedule';
+import { MIN_HYPERTROPHY_SESSION_SETS } from '@/services/training/sessionDistribution';
 import {
   recommendCapacity,
   type CapacityRecommendation,
@@ -100,8 +103,10 @@ import {
 import { rankSwapCandidates } from '@/services/training/swapEngine';
 import {
   applyPreviewEdits,
+  appendPreviewExercises,
   previewEditKey,
   representativeSet,
+  type PreviewAddition,
   type PreviewEdits,
 } from '@/services/training/previewEditing';
 import { mesocycleRepository, routineRepository, workoutSessionRepository } from '@/services/repositories';
@@ -114,10 +119,6 @@ import {
   DEFAULT_GENERATOR_SESSIONS,
   DEFAULT_GENERATOR_SPLIT,
 } from '@/services/training/generatorDefaults';
-import {
-  FLOATING_TAB_BAR_HEIGHT,
-  floatingTabBarBottom,
-} from '@/components/navigation/tabBarMetrics';
 
 /** Bounds of the two capacity controls. Wide enough to be honest, narrow enough to stay sane. */
 const MIN_SESSIONS = 2;
@@ -141,11 +142,16 @@ const SPLITS = [
 ] as const;
 const EQUIPMENT = [
   Equipment.BARBELL,
+  Equipment.SAFETY_BAR,
+  Equipment.TRAP_BAR,
+  Equipment.LANDMINE,
   Equipment.DUMBBELL,
   Equipment.MACHINE,
   Equipment.CABLE,
   Equipment.SMITH_MACHINE,
   Equipment.BODYWEIGHT,
+  Equipment.ROMAN_CHAIR,
+  Equipment.STABILITY_BALL,
   Equipment.KETTLEBELL,
   Equipment.BANDS,
 ] as const;
@@ -239,7 +245,9 @@ export default function GenerateScreen() {
   // told apart from changing one.
   const [planSignature, setPlanSignature] = useState<string | null>(null);
   const [previewEdits, setPreviewEdits] = useState<PreviewEdits>({});
+  const [previewAdditions, setPreviewAdditions] = useState<PreviewAddition[]>([]);
   const [swapTarget, setSwapTarget] = useState<{ sessionIndex: number; order: number } | null>(null);
+  const [addTarget, setAddTarget] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   /** Shown only after a save attempt, so an untouched field is not an error yet. */
   const [nameProblem, setNameProblem] = useState<RoutineNameProblem | null>(null);
@@ -377,7 +385,9 @@ export default function GenerateScreen() {
       );
       setPlanSignature(settingsSignature(settings));
       setPreviewEdits({});
+      setPreviewAdditions([]);
       setSwapTarget(null);
+      setAddTarget(null);
       setPhase('preview');
     },
     [equipment, level, goal, split, emphasis, sessions, minutes, settings],
@@ -392,7 +402,9 @@ export default function GenerateScreen() {
   const plannedSessions = useMemo<PlannedSession[]>(() => {
     if (plan === null) return [];
     const base = toPlannedSessions(plan, false, { e1rmByExerciseId });
-    return applyPreviewEdits(base, previewEdits).map((session) => ({
+    return applyPreviewEdits(
+      appendPreviewExercises(base, previewAdditions, exercisesById, goal), previewEdits,
+    ).map((session) => ({
       ...session,
       estimatedWorkMinutes: session.exercises.reduce((total, exercise) => {
         const catalogueExercise = exercisesById.get(exercise.exerciseId);
@@ -401,7 +413,7 @@ export default function GenerateScreen() {
           : total + exerciseMinutes(catalogueExercise, exercise.sets.length, exercise.restSeconds);
       }, 0),
     }));
-  }, [e1rmByExerciseId, exercisesById, plan, previewEdits]);
+  }, [e1rmByExerciseId, exercisesById, goal, plan, previewAdditions, previewEdits]);
   const plannedSetCount = useMemo(
     () => plannedSessions.reduce(
       (total, session) => total + session.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0),
@@ -409,7 +421,13 @@ export default function GenerateScreen() {
     ),
     [plannedSessions],
   );
-  const hasPreviewEdits = Object.keys(previewEdits).length > 0;
+  const hasPreviewEdits = Object.keys(previewEdits).length > 0 || previewAdditions.length > 0;
+  const alternative = useMemo(() => {
+    if (!plan || stale || hasPreviewEdits) return null;
+    return findAlternativeSchedule({ level, goal, split, seed, catalogue: availableCatalogue,
+      priorityRegions: emphasis.priority, deprioritizedRegions: emphasis.deprioritized,
+      capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes } }, plan);
+  }, [plan, stale, hasPreviewEdits, level, goal, split, seed, availableCatalogue, emphasis, sessions, minutes]);
   const overTimeSessionIndexes = useMemo(() => {
     if (!hasPreviewEdits) return [];
     const workBudget = Math.max(0, minutes - SESSION_OVERHEAD_MINUTES);
@@ -442,6 +460,19 @@ export default function GenerateScreen() {
       (exercise) => !used.has(exercise.id),
     );
   }, [availableCatalogue, plannedSessions, swapCurrent]);
+
+  const addCandidates = useMemo(() => {
+    if (addTarget === null) return [];
+    const used = new Set(plannedSessions.flatMap((session) =>
+      session.exercises.map((exercise) => exercise.exerciseId)));
+    return availableCatalogue.filter((exercise) => !used.has(exercise.id));
+  }, [addTarget, availableCatalogue, plannedSessions]);
+
+  const onSelectAdd = useCallback((exercise: Exercise) => {
+    if (addTarget === null) return;
+    setPreviewAdditions((current) => [...current, { sessionIndex: addTarget, exerciseId: exercise.id }]);
+    setAddTarget(null);
+  }, [addTarget]);
 
   const onSelectSwap = useCallback(
     (exercise: Exercise) => {
@@ -505,7 +536,7 @@ export default function GenerateScreen() {
   );
 
   const onSave = useCallback(async () => {
-    if (plan === null || user === null) return;
+    if (plan === null || user === null || plannedSessions.every((session) => session.exercises.length === 0)) return;
     const chosenName = normalizeRoutineName(name);
     if (chosenName === null) {
       reportNameProblem('empty');
@@ -833,6 +864,11 @@ export default function GenerateScreen() {
                     <Chip
                       key={region}
                       label={t(`region.${region}`)}
+                      sublabel={t(choice === 'PRIORITY'
+                        ? 'generate.emphasisPrioritizeVerb'
+                        : choice === 'DEPRIORITIZED'
+                          ? 'generate.emphasisDeprioritizeVerb'
+                          : 'generate.emphasisBase')}
                       style={styles.emphasisChip}
                       cornerBadge={isLowCost(region) ? '½' : '1'}
                       centerLabel
@@ -948,17 +984,49 @@ export default function GenerateScreen() {
                   {t('generate.strengthNoBarbell')}
                 </Text>
               )}
+              {alternative && <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
+                <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                  {t('generate.alternativeHint', { sessions: alternative.input.capacity.sessionsPerMicrocycle,
+                    sets: alternative.plan.selection.performedSets })}
+                </Text>
+                <Pressable accessibilityRole="button" onPress={() => {
+                  const count = alternative.input.capacity.sessionsPerMicrocycle;
+                  setSessions(count); setPlan(alternative.plan);
+                  setPlanSignature(settingsSignature({ ...settings, sessionsPerMicrocycle: count }));
+                  setRecommendation(null);
+                }} style={{ padding: spacing.md, borderWidth: 1, borderColor: colors.surfaceBorder, borderRadius: 12 }}>
+                  <Text style={[typography.body, { color: colors.textPrimary }]}>{t('generate.alternativePreview')}</Text>
+                </Pressable>
+              </View>}
               <PlanPreview
                 sessions={plannedSessions}
                 limitedBy={plan.limitedBy}
                 performedSets={plannedSetCount}
                 exercisesById={exercisesById}
                 onSwap={(sessionIndex, order) => setSwapTarget({ sessionIndex, order })}
+                onAdd={setAddTarget}
+                isAdded={(sessionIndex, exerciseId) => previewAdditions.some(
+                  (entry) => entry.sessionIndex === sessionIndex && entry.exerciseId === exerciseId,
+                )}
+                onRemove={(sessionIndex, order) => {
+                  const entry = plannedSessions.find((session) => session.index === sessionIndex)
+                    ?.exercises.find((exercise) => exercise.order === order);
+                  if (entry === undefined) return;
+                  setPreviewAdditions((current) => current.filter((addition) =>
+                    addition.sessionIndex !== sessionIndex || addition.exerciseId !== entry.exerciseId));
+                  setPreviewEdits((current) => {
+                    const next = { ...current };
+                    delete next[previewEditKey(sessionIndex, order)];
+                    return next;
+                  });
+                }}
                 onChangeSets={onChangePreviewSets}
                 onChangeRepMin={onChangePreviewRepMin}
                 onChangeRepMax={onChangePreviewRepMax}
                 overTimeSessionIndexes={overTimeSessionIndexes}
                 volumeOutsideRange={volumeOutsideRange}
+                minimumSessionSets={goal === TrainingGoal.HYPERTROPHY
+                  ? MIN_HYPERTROPHY_SESSION_SETS : undefined}
               />
               {saveError !== null && (
                 <View style={{ marginTop: spacing.md }}>
@@ -984,17 +1052,24 @@ export default function GenerateScreen() {
         onSelect={onSelectSwap}
         onClose={() => setSwapTarget(null)}
       />
+      <ExerciseSwapSheet
+        open={addTarget !== null}
+        mode="add"
+        current={null}
+        candidates={addCandidates}
+        onSelect={onSelectAdd}
+        onClose={() => setAddTarget(null)}
+      />
 
       {/* Fixed action bar: the form is long and the primary action must not require
           scrolling to the bottom to find. */}
+      <SafeAreaView edges={{ bottom: true }} style={{ backgroundColor: colors.bg }}>
       <View
         style={[
           styles.actionBar,
           {
-            paddingBottom: insets.bottom + spacing.md,
+            paddingBottom: spacing.md,
             paddingHorizontal: spacing.lg,
-            marginBottom:
-              floatingTabBarBottom(insets.bottom) + FLOATING_TAB_BAR_HEIGHT + spacing.sm,
             backgroundColor: colors.bg,
             borderTopColor: colors.surfaceBorder,
           },
@@ -1011,7 +1086,7 @@ export default function GenerateScreen() {
         </Pressable>
         <Pressable
           onPress={onPrimary}
-          disabled={!canGenerate || saving}
+          disabled={!canGenerate || saving || (primary === 'save' && plannedSetCount === 0)}
           accessibilityRole="button"
           style={{
             flex: 1,
@@ -1032,6 +1107,7 @@ export default function GenerateScreen() {
           )}
         </Pressable>
       </View>
+      </SafeAreaView>
     </View>
   );
 }

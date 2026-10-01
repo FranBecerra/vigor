@@ -59,6 +59,7 @@ export enum VolumeRegion {
   DELTS_FRONT = 'DELTS_FRONT',
   NECK = 'NECK',
   BICEPS = 'BICEPS',
+  FOREARMS = 'FOREARMS',
   TRICEPS = 'TRICEPS',
   QUADS = 'QUADS',
   HAMSTRINGS = 'HAMSTRINGS',
@@ -153,6 +154,13 @@ export const VOLUME_REGIONS: Record<VolumeRegion, RegionDefinition> = {
     shares: [1],
     landmarks: { mv: 4, mev: 10, mav: 14, mrv: 20 },
     trainedByDefault: true,
+  },
+  [VolumeRegion.FOREARMS]: {
+    muscles: [MuscleGroup.FOREARMS],
+    shares: [1],
+    // No defensible individual volume landmarks have been established here.
+    landmarks: { mv: 0, mev: 0, mav: 0, mrv: 0 },
+    trainedByDefault: false,
   },
   [VolumeRegion.TRICEPS]: {
     muscles: [MuscleGroup.TRICEPS],

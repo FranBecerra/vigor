@@ -990,6 +990,7 @@
       "movementVector": "SHOULDER_ABDUCTION",
       "profile": "COMPOUND_SECONDARY",
       "equipment": "BARBELL",
+      "generationTier": "MANUAL_ONLY",
       "criteria": {
         "stretchedPositionLoading": 3,
         "rangeOfMotion": 4,
@@ -1566,6 +1567,7 @@
       "movementVector": "KNEE_EXTENSION",
       "profile": "ISOLATION",
       "equipment": "BODYWEIGHT",
+      "generationTier": "MANUAL_ONLY",
       "criteria": {
         "stretchedPositionLoading": 5,
         "rangeOfMotion": 4,

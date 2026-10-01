@@ -22,6 +22,7 @@ export default function TrainStackLayout() {
       <Stack.Screen name="session" />
       <Stack.Screen name="mesocycle" />
       <Stack.Screen name="generate" />
+      <Stack.Screen name="routine" />
     </Stack>
   );
 }

@@ -64,7 +64,9 @@ export function exercisePrescription(
       profile === ExerciseProfile.ISOLATION && !isFinalMicrocycleBeforeDeload
         ? 1
         : targetRIR(profile, isFinalMicrocycleBeforeDeload),
-    maxExtraReserve: 2,
+    // One extra rep of reserve is enough for machine and isolation work; the
+    // second extra point is reserved for taxing free-weight compounds.
+    maxExtraReserve: profile === ExerciseProfile.COMPOUND_PRIMARY ? 2 : 1,
   };
 }
 

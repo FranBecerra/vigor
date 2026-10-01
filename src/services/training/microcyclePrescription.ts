@@ -90,7 +90,55 @@ export function prescriptionForMicrocycle(
     });
   }
 
-  if (goal !== TrainingGoal.STRENGTH) return sessions.map((session) => ({ ...session }));
+  if (goal !== TrainingGoal.STRENGTH) {
+    const accumulation = Math.max(1, horizon - 1);
+    return sessions.map((session) => ({
+      ...session,
+      exercises: session.exercises.map((exercise) => {
+        const working = exercise.sets.filter((set) => set.setType !== SetType.TOP_SINGLE);
+        const workingIndexes = exercise.sets.flatMap((set, setIndex) =>
+          set.setType === SetType.TOP_SINGLE ? [] : [setIndex]);
+        const reductions = Math.min(
+          workingIndexes.filter((setIndex) => exercise.manualRIRBySet?.[setIndex] === undefined).length,
+          Math.ceil((Math.max(0, index) * working.length) / Math.max(1, accumulation - 1)),
+        );
+        // RIR 4-5 is a cautious first exposure for demanding compounds, not
+        // the default for an entire block. Keep later working sets within 0-3.
+        const rir = working.map((set) => index > 0 ? Math.min(3, set.targetRIR) : set.targetRIR);
+        const reduced = new Set<number>();
+        for (let step = 0; step < reductions; step += 1) {
+          // Lower the latest of the highest-RIR sets first. This preserves the
+          // within-exercise effort ramp instead of making an early set harder
+          // than the set after it.
+          let candidate = -1;
+          for (let position = 0; position < rir.length; position += 1) {
+            if (reduced.has(position) || rir[position] <= 0 ||
+              exercise.manualRIRBySet?.[workingIndexes[position]] !== undefined) continue;
+            if (candidate < 0 || rir[position] >= rir[candidate]) candidate = position;
+          }
+          if (candidate < 0) break;
+          rir[candidate] -= 1;
+          reduced.add(candidate);
+        }
+        let position = 0;
+        return {
+          ...exercise,
+          sets: exercise.sets.map((set, setIndex): PlannedSet => {
+            if (set.setType === SetType.TOP_SINGLE) return { ...set };
+            const projectedRIR = rir[position++];
+            const nextRIR = exercise.manualRIRBySet?.[setIndex] ?? projectedRIR;
+            const next = { ...set, targetRIR: nextRIR };
+            if (set.targetWeightKg !== undefined) {
+              next.targetWeightKg = reloadForRIR(
+                set.targetWeightKg, set.targetReps, set.targetRIR, nextRIR,
+              );
+            }
+            return next;
+          }),
+        };
+      }),
+    }));
+  }
 
   const accumulation = Math.max(1, horizon - 1);
   return sessions.map((session) => ({
@@ -101,11 +149,13 @@ export function prescriptionForMicrocycle(
       const current = strengthRIR(role, index, accumulation);
       return {
         ...exercise,
-        sets: exercise.sets.map((set): PlannedSet => {
+        sets: exercise.sets.map((set, setIndex): PlannedSet => {
           if (set.setType === SetType.TOP_SINGLE) return { ...set };
-          const next: PlannedSet = { ...set, targetRIR: current };
+          const nextRIR = exercise.manualRIRBySet?.[setIndex] ?? current;
+          const next: PlannedSet = { ...set, targetRIR: nextRIR };
           if (set.targetWeightKg !== undefined) {
-            next.targetWeightKg = reloadForRIR(set.targetWeightKg, set.targetReps, set.targetRIR, current);
+            next.targetWeightKg = reloadForRIR(set.targetWeightKg, set.targetReps,
+              set.targetRIR, nextRIR);
           }
           return next;
         }),
