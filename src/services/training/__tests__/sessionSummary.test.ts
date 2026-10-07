@@ -9,6 +9,7 @@ import {
   rankedMuscleVolume,
   totalSets,
   totalWorkingSets,
+  visibleChipCount,
   type PlannedExercise,
 } from '@/services/training/sessionSummary';
 
@@ -232,5 +233,25 @@ describe('formatSetVolume', () => {
   it('muestra un decimal en los fraccionados', () => {
     expect(formatSetVolume(12.5)).toBe('12.5');
     expect(formatSetVolume(14.05)).toBe('14.1');
+  });
+});
+
+describe('visibleChipCount', () => {
+  it('shows every chip when all of them fit', () => {
+    expect(visibleChipCount([26, 26, 57, 57, 88], 88)).toBe(5);
+  });
+
+  it('frees one slot for the overflow chip when some do not fit', () => {
+    // Seven chips, the last one wraps to a fourth row.
+    expect(visibleChipCount([26, 26, 26, 57, 57, 88, 119], 88)).toBe(5);
+  });
+
+  it('tolerates sub-pixel rounding at the bottom edge', () => {
+    expect(visibleChipCount([88.4], 88)).toBe(1);
+  });
+
+  it('handles an empty session and an area where nothing fits', () => {
+    expect(visibleChipCount([], 88)).toBe(0);
+    expect(visibleChipCount([119], 88)).toBe(0);
   });
 });

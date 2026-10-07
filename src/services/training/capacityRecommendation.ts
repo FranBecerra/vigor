@@ -1,6 +1,13 @@
 /**
  * Capacity recommendation: the app decides how many sessions and how long.
  *
+ * SCIENTIFIC BOUNDARY
+ * Legacy "recoverable volume" labels below mean the model's estimated starting
+ * budget, not measured individual recovery, MEV/MRV or proof that extra training
+ * cannot produce adaptation. Qualification/ranking are product heuristics.
+ * Production preserves exhaustive ranking while pruning impossible qualifications
+ * and reusing partial samples for the best-available fallback.
+ *
  * WHY THIS EXISTS
  *   A beginner who believes more is better sets 5 or 6 sessions, and the generator
  *   obediently spreads a beginner's recoverable volume over six days, producing thin
@@ -59,6 +66,7 @@
 import type { Exercise, ExperienceLevel, SplitStructure } from '@/models';
 import { planMesocycle } from './mesocyclePlanner';
 import { TOTAL_SETS_RANGE, type TrainingGoal, type VolumeRegion } from './volumePlan';
+import { MINUTES_PER_WORKING_SET_FLOOR, SESSION_OVERHEAD_MINUTES } from './trainingCapacity';
 
 /** Session counts considered. Below two there is no frequency to speak of. */
 export const RECOMMENDED_SESSION_COUNTS: readonly number[] = [2, 3, 4, 5, 6];
@@ -112,34 +120,26 @@ interface ScoredCapacity extends CapacityRecommendation {
   hasEmptySession: boolean;
 }
 
+interface CapacitySample { sets: number; reaches: boolean; structureWarnings: number; empty: boolean }
+function sample(input: CapacityRecommendationInput, sessionsPerMicrocycle: number, minutesPerSession: number, seed: number): CapacitySample {
+  const plan = planMesocycle({ ...input, seed, capacity: { sessionsPerMicrocycle, minutesPerSession } });
+  return {
+    sets: plan.distribution.sessions.reduce((total, session) => total + session.exercises.reduce((sum, entry) => sum + entry.sets, 0), 0),
+    reaches: plan.limitedBy === 'recovery', structureWarnings: plan.distribution.structureWarnings.length,
+    empty: plan.distribution.sessions.some((session) => session.exercises.length === 0),
+  };
+}
+
 function score(
   input: CapacityRecommendationInput,
   sessionsPerMicrocycle: number,
   minutesPerSession: number,
 ): ScoredCapacity {
-  const samples = RECOMMENDATION_SEEDS.map((seed) => {
-    const plan = planMesocycle({
-      level: input.level,
-      goal: input.goal,
-      catalogue: input.catalogue,
-      seed,
-      split: input.split,
-      priorityRegions: input.priorityRegions,
-      deprioritizedRegions: input.deprioritizedRegions,
-      capacity: { sessionsPerMicrocycle, minutesPerSession },
-    });
-    return {
-      sets: plan.distribution.sessions.reduce(
-        (total, session) =>
-          total + session.exercises.reduce((sum, entry) => sum + entry.sets, 0),
-        0,
-      ),
-      reaches: plan.limitedBy === 'recovery',
-      structureWarnings: plan.distribution.structureWarnings.length,
-      empty: plan.distribution.sessions.some((session) => session.exercises.length === 0),
-    };
-  });
-
+  return scored(input, sessionsPerMicrocycle, minutesPerSession,
+    RECOMMENDATION_SEEDS.map((seed) => sample(input, sessionsPerMicrocycle, minutesPerSession, seed)));
+}
+function scored(input: CapacityRecommendationInput, sessionsPerMicrocycle: number, minutesPerSession: number,
+  samples: readonly CapacitySample[]): ScoredCapacity {
   const mean = (values: readonly number[]) =>
     values.reduce((sum, value) => sum + value, 0) / values.length;
 
@@ -160,13 +160,17 @@ function score(
   };
 }
 
-export function recommendCapacity(
+/** Exhaustive reference, retained for paired verification and the fallback contract. */
+export function recommendCapacityExhaustive(
   input: CapacityRecommendationInput,
 ): CapacityRecommendation {
   const candidates = RECOMMENDED_SESSION_COUNTS.flatMap((sessions) =>
     RECOMMENDED_SESSION_MINUTES.map((minutes) => score(input, sessions, minutes)),
   );
 
+  return choose(candidates);
+}
+function choose(candidates: readonly ScoredCapacity[]): CapacityRecommendation {
   const qualifying = candidates.filter(
     (candidate) => candidate.reachesRecoverableVolume && !candidate.hasEmptySession,
   );
@@ -202,4 +206,64 @@ export function recommendCapacity(
     ...best
   } = ranked[0]!;
   return best;
+}
+
+/** Yield between real plans; prune only configurations that cannot qualify. */
+function* recommendationSearch(input: CapacityRecommendationInput): Generator<void, CapacityRecommendation> {
+  const records = RECOMMENDED_SESSION_COUNTS.flatMap((sessions) => RECOMMENDED_SESSION_MINUTES
+    .map((minutes) => ({ sessions, minutes, samples: [] as CapacitySample[] })));
+  const qualified: ScoredCapacity[] = [];
+  const [minimum] = TOTAL_SETS_RANGE[input.goal][input.level];
+  for (const record of records) {
+    const optimisticSets = Math.floor(Math.max(0, record.minutes - SESSION_OVERHEAD_MINUTES)
+      / MINUTES_PER_WORKING_SET_FLOOR) * record.sessions;
+    if (optimisticSets < minimum) continue;
+    for (const seed of RECOMMENDATION_SEEDS) {
+      yield;
+      const result = sample(input, record.sessions, record.minutes, seed);
+      record.samples.push(result);
+      if (!result.reaches || result.empty) break;
+    }
+    if (record.samples.length === RECOMMENDATION_SEEDS.length) {
+      const candidate = scored(input, record.sessions, record.minutes, record.samples);
+      if (candidate.reachesRecoverableVolume && !candidate.hasEmptySession) qualified.push(candidate);
+    }
+  }
+  if (qualified.length) return choose(qualified);
+  // No qualifying plan: preserve the original complete best-available ranking.
+  // Previously computed samples are reused, including failed first samples.
+  for (const record of records) while (record.samples.length < RECOMMENDATION_SEEDS.length) {
+    yield;
+    record.samples.push(sample(input, record.sessions, record.minutes, RECOMMENDATION_SEEDS[record.samples.length]));
+  }
+  return choose(records.map((record) => scored(input, record.sessions, record.minutes, record.samples)));
+}
+export function recommendCapacity(input: CapacityRecommendationInput): CapacityRecommendation {
+  const search = recommendationSearch(input);
+  let step = search.next();
+  while (!step.done) step = search.next();
+  return step.value;
+}
+export interface RecommendationScheduling {
+  /** Cooperative scheduling, not a background thread. */
+  yieldToUI?: () => Promise<void>;
+  isCancelled?: () => boolean;
+}
+export class CapacityRecommendationCancelled extends Error {
+  constructor() { super('Capacity recommendation cancelled'); this.name = 'CapacityRecommendationCancelled'; }
+}
+export async function recommendCapacityAsync(input: CapacityRecommendationInput,
+  options: RecommendationScheduling = {}): Promise<CapacityRecommendation> {
+  const pause = options.yieldToUI ?? (() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+  const check = () => { if (options.isCancelled?.()) throw new CapacityRecommendationCancelled(); };
+  check();
+  const search = recommendationSearch(input);
+  let step = search.next();
+  while (!step.done) {
+    await pause();
+    check();
+    step = search.next();
+  }
+  check();
+  return step.value;
 }

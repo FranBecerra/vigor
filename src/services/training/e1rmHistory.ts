@@ -5,7 +5,7 @@
  * target they merely saw in a prescription. Epley is only used for 1–12 reps:
  * beyond that range its extrapolation is too noisy to turn into a kg suggestion.
  */
-import type { WorkoutSession } from '@/models';
+import { SetType, type WorkoutSession } from '@/models';
 import { epleyE1RM } from '@/services/analytics/e1rm';
 
 const MAX_E1RM_REPS = 12;
@@ -38,6 +38,7 @@ export function e1RMByExerciseFromHistory(
     if (session.completedAt === undefined) return;
     session.exercises.forEach((exercise) => {
       exercise.sets.forEach((set) => {
+        if (set.setType === SetType.WARMUP) return;
         if (!isUsableAttempt(set.actualWeight, set.actualReps)) return;
         const estimate = epleyE1RM(set.actualWeight as number, set.actualReps as number);
         const previous = estimates.get(exercise.exerciseId);

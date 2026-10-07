@@ -79,6 +79,8 @@ interface ChipProps {
   sublabel?: string;
   /** Compact value anchored to the lower-right corner. */
   cornerBadge?: string;
+  /** Picture left of the label; the label then aligns left beside it. */
+  leading?: React.ReactNode;
   centerLabel?: boolean;
   raised?: boolean;
   selected: boolean;
@@ -101,7 +103,8 @@ export const Chip = memo(function Chip({
   label,
   sublabel,
   cornerBadge,
-  centerLabel = false,
+  leading,
+  centerLabel: centerLabelProp = false,
   raised = false,
   selected,
   disabled = false,
@@ -112,6 +115,36 @@ export const Chip = memo(function Chip({
 }: ChipProps) {
   const { colors, typography, spacing, radius, sectionAccent } = useTheme();
   const accent = tint ?? sectionAccent.train;
+  const centerLabel = centerLabelProp && leading === undefined;
+  const text = (
+    <>
+      <Text
+        numberOfLines={centerLabelProp ? 2 : 1}
+        ellipsizeMode="tail"
+        style={[
+          typography.body,
+          {
+            color: selected ? accent : colors.textPrimary,
+            fontWeight: selected ? '600' : '400',
+            textAlign: centerLabel ? 'center' : 'left',
+            ...(centerLabelProp ? { lineHeight: 18 } : {}),
+            ...(cornerBadge === undefined || leading !== undefined ? {} : { paddingHorizontal: spacing.md }),
+          },
+        ]}
+      >
+        {label}
+      </Text>
+      {sublabel !== undefined && (
+        <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={[typography.caption, { color: selected ? accent : colors.textMuted, marginTop: 2, textAlign: centerLabel ? 'center' : 'left' }]}
+        >
+          {sublabel}
+        </Text>
+      )}
+    </>
+  );
   return (
     <Pressable
       onPress={onPress}
@@ -128,7 +161,7 @@ export const Chip = memo(function Chip({
                 ? CHIP_HEIGHT + 14
                 : CHIP_HEIGHT,
           justifyContent: 'center',
-          paddingHorizontal: spacing.lg,
+          paddingHorizontal: leading === undefined ? spacing.lg : spacing.md,
           paddingVertical: spacing.sm,
           borderRadius: radius.pill,
           borderWidth: 1,
@@ -148,30 +181,14 @@ export const Chip = memo(function Chip({
         style,
       ]}
     >
-      <Text
-        numberOfLines={centerLabel ? 2 : 1}
-        ellipsizeMode="tail"
-        style={[
-          typography.body,
-          {
-            color: selected ? accent : colors.textPrimary,
-            fontWeight: selected ? '600' : '400',
-            textAlign: centerLabel ? 'center' : 'left',
-            ...(centerLabel ? { lineHeight: 18 } : {}),
-            ...(cornerBadge === undefined ? {} : { paddingHorizontal: spacing.md }),
-          },
-        ]}
-      >
-        {label}
-      </Text>
-      {sublabel !== undefined && (
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={[typography.caption, { color: selected ? accent : colors.textMuted, marginTop: 2, textAlign: centerLabel ? 'center' : 'left' }]}
-        >
-          {sublabel}
-        </Text>
+      {leading === undefined ? text : (
+        <View style={[styles.leadingRow, { gap: spacing.sm }]}>
+          {leading}
+          {/* Right padding keeps a two-line label clear of the corner badge. */}
+          <View style={[styles.leadingText, cornerBadge !== undefined && { paddingRight: spacing.md }]}>
+            {text}
+          </View>
+        </View>
       )}
       {cornerBadge !== undefined && (
         <View
@@ -288,6 +305,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepperValue: { width: 62, alignItems: 'center' },
+  leadingRow: { flexDirection: 'row', alignItems: 'center' },
+  leadingText: { flex: 1, minWidth: 0 },
   cornerBadge: {
     position: 'absolute',
     right: 7,

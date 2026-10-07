@@ -1,10 +1,24 @@
-import { buildScheduleTemplate, moveRestSlot, templateRecovery, validateScheduleTemplate } from '../scheduleTemplate';
+import { buildScheduleTemplate, moveRestSlot, templateRecovery, validateScheduleTemplate, workloadTemplateRecovery } from '../scheduleTemplate';
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
 import { SetType, type PlannedSession } from '@/models';
 const catalogue = new Map(EXERCISE_CATALOGUE.map((e) => [e.id, e]));
 const session = (index: number, id = 'press-banca', warmup = false): PlannedSession => ({ index, focus: 'UPPER', estimatedWorkMinutes: 20,
   exercises: [{ exerciseId: id, order: 0, isEdited: false,
     sets: Array.from({ length: 3 }, () => ({ setType: warmup ? SetType.WARMUP : SetType.NORMAL, targetReps: 10, targetRIR: 2 })) }] });
+it.each([4, 7, 9])('shares prescription recovery evaluation with raw workload in a %s-day cycle', (days) => {
+  const sessions = [session(2), session(5), session(8, 'curl-barra')];
+  const workloads = sessions.map((s) => ({ index: s.index, directSets: new Map([
+    [catalogue.get(s.exercises[0].exerciseId)!.primaryMuscle, 3],
+  ]) }));
+  expect(workloadTemplateRecovery(workloads, days)).toEqual(
+    templateRecovery(buildScheduleTemplate(sessions, catalogue, days), sessions, catalogue));
+});
+it('handles empty workloads and rejects invalid cycles and duplicate indexes', () => {
+  expect(workloadTemplateRecovery([])).toEqual([]);
+  expect(() => workloadTemplateRecovery([], 0)).toThrow();
+  expect(() => workloadTemplateRecovery([{ index: 0, directSets: new Map() }], NaN)).toThrow();
+  expect(() => workloadTemplateRecovery([0, 0].map((index) => ({ index, directSets: new Map() })))).toThrow();
+});
 it('includes rest without dates and preserves the session sequence', () => {
   const sessions = [session(0), session(1), session(2)];
   const result = buildScheduleTemplate(sessions, catalogue);

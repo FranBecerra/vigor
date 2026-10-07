@@ -35,10 +35,12 @@ import {
 } from './trainingCapacity';
 import { planStrengthMesocycle, type StrengthProgramReport } from './strengthProgram';
 import { TrainingGoal } from './volumePlan';
-import { toPlannedSessions } from './routineMapper';
-import { buildScheduleTemplate, templateRecovery } from './scheduleTemplate';
+import { workloadTemplateRecovery } from './scheduleTemplate';
 import {
   distributeSelection,
+  sessionSequencingWarnings,
+  repairSessionAllocation,
+  orderSessionExercises,
   MIN_HYPERTROPHY_SESSION_SETS,
   type SessionDistribution,
   type SessionExercise,
@@ -106,11 +108,25 @@ export function planMesocycle(input: MesocyclePlanInput): MesocyclePlan {
   const candidate = planWithPolicy({ ...input, rankingPolicy: 'volume-aware' });
   const incumbent = promoteCandidate(input, baseline, candidate, 'volume-aware');
   if (input.rankingPolicy === 'coupled-control') return incumbent;
-  return promoteCandidate(input, incumbent, planWithPolicy({ ...input, rankingPolicy: 'accessory-aware' }), 'accessory-aware');
+  let best = promoteCandidate(input, incumbent, planWithPolicy({ ...input, rankingPolicy: 'accessory-aware' }), 'accessory-aware');
+  if (best.limitedBy === 'time') {
+    const policy = [...(best.policyTrace ?? [])].reverse().find((decision) => decision.accepted)?.candidatePolicy ?? 'legacy-weighted';
+    // Integer allocation can make one draw much less efficient than nearby
+    // draws. Two deterministic alternatives compete under the same full guard.
+    for (const offset of [-1, 1]) {
+      const candidateSeed = input.seed + offset;
+      const candidate = planWithPolicy({ ...input, seed: candidateSeed, rankingPolicy: policy });
+      const decision = { ...evaluatePolicyPromotion(input, best, candidate, policy), candidateSeed };
+      best = { ...(decision.accepted ? candidate : best), policyTrace: [...(best.policyTrace ?? []), decision] };
+    }
+  }
+  return best;
 }
 
 export interface PolicyPromotionDecision {
   candidatePolicy: RankingPolicy;
+  /** Present for a bounded alternative draw; the user's input seed stays fixed. */
+  candidateSeed?: number;
   accepted: boolean;
   reasons: { code: string; subject?: string; before?: number; after?: number; limit?: number }[];
   metrics: { targetShortfallBefore: number; targetShortfallAfter: number;
@@ -129,12 +145,14 @@ export function evaluatePolicyPromotion(input: MesocyclePlanInput, baseline: Mes
   const loads = (plan: MesocyclePlan) => plan.distribution.sessions.map((s) =>
     s.exercises.reduce((sum, e) => sum + e.sets, 0));
   const beforeLoads = loads(baseline), afterLoads = loads(candidate);
-  const catalogue = new Map(input.catalogue.map((e) => [e.id, e]));
-  const recoveryWarnings = (plan: MesocyclePlan) => {
-    const sessions = toPlannedSessions(plan);
-    return templateRecovery(buildScheduleTemplate(sessions, catalogue), sessions, catalogue)
-      .filter((pair) => pair.reviewSuggested).length;
-  };
+  // Compare the allocator's actual dose, not a mapped first-microcycle ramp.
+  // The latter can remove a set and hide an overlap visible in the audit.
+  const recoveryWarnings = (plan: MesocyclePlan) => workloadTemplateRecovery(plan.distribution.sessions.map((session) => {
+    const directSets = new Map<string, number>();
+    session.exercises.forEach((entry) => directSets.set(entry.exercise.primaryMuscle,
+      (directSets.get(entry.exercise.primaryMuscle) ?? 0) + entry.sets));
+    return { index: session.index, directSets };
+  })).filter((pair) => pair.reviewSuggested).length;
   if (candidate.distribution.unassigned.length) reasons.push({ code: 'unassigned-work' });
   for (const session of candidate.distribution.sessions) {
     if (!session.exercises.length) reasons.push({ code: 'empty-session', subject: String(session.index) });
@@ -179,8 +197,64 @@ export function evaluatePolicyPromotion(input: MesocyclePlanInput, baseline: Mes
 
 function promoteCandidate(input: MesocyclePlanInput, baseline: MesocyclePlan, candidate: MesocyclePlan,
   policy: RankingPolicy): MesocyclePlan {
-  const decision = evaluatePolicyPromotion(input, baseline, candidate, policy);
+  let decision = evaluatePolicyPromotion(input, baseline, candidate, policy);
+  if ((input.split === undefined || input.split === SplitStructure.AUTO)
+    && decision.reasons.length === 1 && decision.reasons[0].code === 'template-overlap-count') {
+    const repairedSessions = candidate.distribution.sessions.map((session) => ({ ...session, exercises: [...session.exercises] }));
+    if (repairSessionAllocation(repairedSessions, MIN_HYPERTROPHY_SESSION_SETS,
+      candidate.availableWorkMinutesPerSession, input.previousSession, true)) {
+      const adjusted = refreshPlacement(candidate, repairedSessions, input.previousSession);
+      const proposed = evaluatePolicyPromotion(input, baseline, adjusted, policy);
+      if (proposed.accepted) { candidate = adjusted; decision = proposed; }
+    }
+  }
+  if ((input.split === undefined || input.split === SplitStructure.AUTO)
+    && decision.reasons.length === 1 && decision.reasons[0].code === 'template-overlap-count') {
+    const original = candidate.distribution.sessions;
+    // AUTO owns its sequence. Keep complete sessions/doses and try alternative
+    // orders before rejecting otherwise admissible work for template overlap.
+    const visit = (order: number[], remaining: number[]): boolean => {
+      if (remaining.length) {
+        for (const index of remaining) if (visit([...order, index], remaining.filter((entry) => entry !== index))) return true;
+        return false;
+      }
+      const sessions = order.map((index, position) => ({ ...original[index], index: position }));
+      const sequencingWarnings = sessionSequencingWarnings(sessions, input.previousSession);
+      if (sequencingWarnings.length > candidate.distribution.sequencingWarnings.length) return false;
+      const adjusted = { ...refreshPlacement(candidate, sessions, input.previousSession), distribution: { ...candidate.distribution, sessions, sequencingWarnings,
+        structureWarnings: candidate.distribution.structureWarnings.map((warning) => warning.sessionIndex === undefined
+          ? warning : { ...warning, sessionIndex: order.indexOf(warning.sessionIndex),
+            detail: `${warning.kind}: session ${order.indexOf(warning.sessionIndex)}; ${warning.detail}` }) } };
+      const proposed = evaluatePolicyPromotion(input, baseline, adjusted, policy);
+      if (!proposed.accepted) return false;
+      candidate = adjusted; decision = proposed; return true;
+    };
+    if (original.length <= 6) visit([], original.map((_, index) => index));
+  }
   return { ...(decision.accepted ? candidate : baseline), policyTrace: [...(baseline.policyTrace ?? []), decision] };
+}
+
+function refreshPlacement(plan: MesocyclePlan, sessions: SessionDistribution['sessions'], previous?: readonly SessionExercise[]): MesocyclePlan {
+  const frequencyByMuscle: SessionDistribution['frequencyByMuscle'] = {};
+  sessions.forEach((session) => {
+    session.exercises = orderSessionExercises(session.exercises);
+    new Set(session.exercises.map((entry) => entry.exercise.primaryMuscle)).forEach((muscle) => {
+      frequencyByMuscle[muscle] = (frequencyByMuscle[muscle] ?? 0) + 1;
+    });
+  });
+  const minutes = sessions.map((session) => session.estimatedWorkMinutes);
+  const maxSessionWorkMinutes = Math.max(...minutes);
+  const totalWorkMinutes = minutes.reduce((sum, value) => sum + value, 0);
+  const structureWarnings = plan.distribution.structureWarnings.filter((warning) => warning.kind !== 'unbalanced-load'
+    && !(warning.kind === 'single-frequency' && warning.muscle && (frequencyByMuscle[warning.muscle] ?? 0) >= 2));
+  const minSessionWorkMinutes = Math.min(...minutes);
+  if (maxSessionWorkMinutes - minSessionWorkMinutes > totalWorkMinutes / sessions.length * 0.45) {
+    structureWarnings.push({ kind: 'unbalanced-load', detail: `Session work ranges from ${minSessionWorkMinutes} to ${maxSessionWorkMinutes} minutes.` });
+  }
+  return { ...plan, maxSessionWorkMinutes, estimatedWorkMinutes: totalWorkMinutes,
+    distribution: { ...plan.distribution, sessions, frequencyByMuscle, maxSessionWorkMinutes, structureWarnings,
+      minSessionWorkMinutes, totalWorkMinutes,
+      sequencingWarnings: sessionSequencingWarnings(sessions, previous) } };
 }
 
 function planWithPolicy(input: MesocyclePlanInput): MesocyclePlan {
@@ -207,9 +281,16 @@ function planWithPolicy(input: MesocyclePlanInput): MesocyclePlan {
     0,
     capacity.minutesPerSession - SESSION_OVERHEAD_MINUTES,
   );
-
+  type Evaluation = { plan: VolumePlan; selection: SelectionResult; distribution: SessionDistribution; fitsCapacity: boolean };
+  // Different squeeze fractions often round to exactly the same volume plan.
+  // Reuse only identical full plans and selection modes within this invocation.
+  // No mutable catalogue or athlete state is cached across generator calls.
+  const evaluations = new Map<string, Evaluation>();
   const evaluate = (squeeze: number, timeConstrained = squeeze > 0) => {
     const plan = squeezePlan(uncappedPlan, squeeze);
+    const key = JSON.stringify([timeConstrained, plan]);
+    const cached = evaluations.get(key);
+    if (cached) return cached;
     const selection = selectExercises({
       volumePlan: plan,
       catalogue,
@@ -236,7 +317,9 @@ function planWithPolicy(input: MesocyclePlanInput): MesocyclePlan {
       distribution.sessions.every(
         (session) => session.estimatedWorkMinutes <= availableWorkMinutesPerSession,
       );
-    return { plan, selection, distribution, fitsCapacity };
+    const result = { plan, selection, distribution, fitsCapacity };
+    evaluations.set(key, result);
+    return result;
   };
 
   const unsqueezed = evaluate(0);
@@ -276,7 +359,12 @@ function planWithPolicy(input: MesocyclePlanInput): MesocyclePlan {
     };
   }
 
-  type Evaluation = ReturnType<typeof evaluate>;
+  const templateWarnings = (candidate: Evaluation) => workloadTemplateRecovery(candidate.distribution.sessions.map((session) => {
+    const directSets = new Map<string, number>();
+    session.exercises.forEach((entry) => directSets.set(entry.exercise.primaryMuscle,
+      (directSets.get(entry.exercise.primaryMuscle) ?? 0) + entry.sets));
+    return { index: session.index, directSets };
+  })).filter((pair) => pair.reviewSuggested).length;
   const defects = (candidate: Evaluation) => candidate.distribution.structureWarnings.filter(
     (warning) => warning.kind === 'empty-session' || warning.kind === 'underfilled-session'
       || warning.kind === 'session-volume-cap',
@@ -310,6 +398,22 @@ function planWithPolicy(input: MesocyclePlanInput): MesocyclePlan {
       const candidate = evaluate(squeeze, timeConstrained);
       if (!candidate.fitsCapacity || defects(candidate) > defects(best)) continue;
       if (candidate.selection.performedSets >= best.selection.performedSets && squeeze < bestSqueeze) {
+        best = candidate;
+        bestSqueeze = squeeze;
+      }
+    }
+    // A near-zero feasible pocket can contain fewer sets than a later one.
+    // Search the whole target range: integer dose and roster changes invalidate
+    // the monotonicity assumption behind bisection.
+    const shortfall = (candidate: Evaluation) => uncappedPlan.muscles.reduce((sum, muscle) =>
+      sum + Math.max(0, muscle.meav - (candidate.selection.attributedByMuscle[muscle.muscle] ?? 0)), 0);
+    for (let step = 1; step < 16; step += 1) {
+      const squeeze = MAX_SQUEEZE * step / 16;
+      const candidate = evaluate(squeeze, timeConstrained);
+      if (!candidate.fitsCapacity || defects(candidate) > defects(best)
+        || candidate.distribution.sequencingWarnings.length > best.distribution.sequencingWarnings.length
+        || (input.rankingPolicy === 'legacy-weighted' && templateWarnings(candidate) > templateWarnings(best))) continue;
+      if (candidate.selection.performedSets > best.selection.performedSets && shortfall(candidate) <= shortfall(best)) {
         best = candidate;
         bestSqueeze = squeeze;
       }

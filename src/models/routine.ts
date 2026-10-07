@@ -186,8 +186,8 @@ export type PlannedSessionFocus =
 /**
  * One prescribed session, repeated in every microcycle of the mesocycle.
  *
- * `index` is its position in the microcycle, not a weekday: the model has no
- * calendar at any level (§3.1).
+ * `index` is its position in the microcycle, not a weekday. Optional schedule
+ * templates and calendar assignments are separate from workout progression (§3.1).
  */
 export interface PlannedSession {
   index: number;

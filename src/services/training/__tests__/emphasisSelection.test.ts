@@ -5,8 +5,10 @@ import {
   cycleChoice,
   EMPTY_EMPHASIS,
   GENERATOR_EMPHASIS_REGIONS,
+  GENERATOR_EMPHASIS_GROUPS,
   isLowCost,
   prioritizeBlockedReason,
+  regionBodyHalf,
   remainingSlots,
   usedSlots,
   withChoice,
@@ -17,6 +19,8 @@ import {
   PRIORITY_SLOT_BUDGET,
   VolumeRegion,
 } from '@/services/training/volumePlan';
+import { MuscleGroup } from '@/models';
+import { bodyHalfOf } from '@/services/training/muscleGroups';
 
 const CHEST = VolumeRegion.CHEST; // expensive, 1 slot
 const BACK = VolumeRegion.BACK; // expensive
@@ -113,6 +117,28 @@ describe('canDeprioritize', () => {
   it('hides tibialis from the standard generator without deleting the domain region', () => {
     expect(GENERATOR_EMPHASIS_REGIONS).not.toContain(VolumeRegion.TIBIALIS);
     expect(GENERATOR_EMPHASIS_REGIONS).toContain(VolumeRegion.CALVES);
+  });
+});
+
+describe('GENERATOR_EMPHASIS_GROUPS', () => {
+  it('splits the control into Torso then Pierna without losing or duplicating a region', () => {
+    expect(GENERATOR_EMPHASIS_GROUPS.map((group) => group.half)).toEqual(['UPPER', 'LOWER']);
+    expect(GENERATOR_EMPHASIS_GROUPS.flatMap((group) => group.regions).sort())
+      .toEqual([...GENERATOR_EMPHASIS_REGIONS].sort());
+    expect(GENERATOR_EMPHASIS_GROUPS[1].regions).toEqual([
+      VolumeRegion.QUADS, VolumeRegion.HAMSTRINGS, VolumeRegion.GLUTES,
+      VolumeRegion.ADDUCTORS, VolumeRegion.CALVES,
+    ]);
+  });
+
+  it('agrees with the muscle grouping used by the volume cards and session names', () => {
+    for (const region of Object.values(VolumeRegion)) {
+      if (region in MuscleGroup) {
+        expect(regionBodyHalf(region)).toBe(bodyHalfOf(region as unknown as MuscleGroup));
+      }
+    }
+    expect(regionBodyHalf(VolumeRegion.ERECTORS)).toBe('UPPER');
+    expect(regionBodyHalf(VolumeRegion.CORE)).toBe('UPPER');
   });
 });
 

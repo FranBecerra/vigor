@@ -1,6 +1,31 @@
 # Generator technical debt and resolution plan
 
-Updated: 2026-10-01. PRD.md remains the source of truth. This ledger distinguishes implemented diagnostics from unresolved behavior. A proposal here is not evidence that its code has already shipped.
+Updated: 2026-10-07. PRD.md remains the source of truth. This ledger distinguishes implemented diagnostics from unresolved behavior. A proposal here is not evidence that its code has already shipped.
+
+## Latest five-workstream update
+
+This section supersedes the October 6 counts/statuses below. Details, intermediate rejected experiments and reproduction commands are in `audits/2026-10-07-allocation-and-history.md`.
+
+1. **Allocation — implemented bounded repair, residual debt.** Whole-entry multi-exchange search preserves dose, roster, constraints and recovery. Sufficient-dose allocation bottlenecks decrease 33→14; short sessions 867→838. Intermediate T-seed-2 and advanced AA-seed-4 still have no accepted repair within the search budget. Next: set-level redistribution/appearance splitting, not filler or an unsupported physiological minimum.
+2. **Sensitivity — partial.** Full-range capacity probes, two guarded neighbouring draws and AUTO recovery placement repair address non-monotonic selection. Z seed 50 now has a regression test protecting at least 90 sets rather than 82. The three remaining advanced free/full-equipment profiles need a roster-and-dose joint solver. Wider perturbations and mobile latency optimization remain open. A strict recovery-filter experiment caused dose regressions and was rejected; tests protect repair-before-promotion.
+3. **Catalogue — partial.** Five additional biceps source descriptions, 13 total guide pages individually reviewed. Rotating grip, specialty bar, seat, arm pad and cable torque caveats are explicit. No new scores, tags or generation eligibility were promoted. Remaining 379-entry individual validation, support-aware filtering and provenance remain open.
+4. **Observed personalization — recent loads implemented, adaptive volume open.** Generation uses a 42-day window and latest-three session median after three observations; fewer observations use the newest estimate and remain provisional. Duplicate/incomplete/future/warm-up handling is tested. Logged actual RIR is separate; repeated exercise identity does not prove comparable apparatus, technique or effort. Next: comparable-exposure eligibility and bounded response-driven volume/duration updates, never missed-data stagnation.
+5. **Native QA — partial, concrete tooling blocker.** Device Hub verifies light-mode generation and preview CTAs above the Liquid Glass tab bar, preserving the existing draft without saving. Scroll/drag returns noWindowsAvailable, blocking thumbnail/heat-map/dark-mode sign-off. iPhone 13 unavailable. Capacity copy now describes estimated budgets rather than individualized recovery; lime text contrast and physical-device recommendation responsiveness still need review.
+
+The latest full suite passes: 1,088 tests / 62 suites, with TypeScript passing; the earlier 379-entry catalogue validation remains unchanged. No claim that automatic quality checks constitute individual coaching review of every case. Thirty-four allocation-changed cases need concentration review despite no new rest-template flags. Capacity recommendation now preserves exhaustive ranking through safe qualification pruning, exact fallback and local evaluation reuse, with cooperative scheduling/cancellation in the UI. Paired desktop hypertrophy examples improve from 12.3→2.4 seconds and 15.3→1.9 seconds; all ten benchmark recommendations and 3,575 generator prescriptions remain identical. These are single Mac measurements, not iPhone guarantees. Physical-device timing and maximum per-plan blocking duration remain open. See `audits/2026-10-07-capacity-performance.md`; the future sequential wizard/optional checkbox is approved but not implemented.
+
+## Current six-workstream update
+
+Detailed evidence is in `audits/2026-10-06-navigation-and-biceps.md`. This section supersedes contradictory earlier counts/statuses; earlier sections are historical.
+
+1. Navigation: safe back plus Expo SDK 57 training anchor implemented/tested; native Home/cancel and generation/preview/back verified. The full error preceding the truncated ExpoRoot stack was not recovered.
+2. Biceps: bounded whole-entry exchange onto existing pulling implemented with roster/dose and non-regression guards. Twelve matrix cases improve placement without dose changes. No physiological recovery guarantee.
+3. Sessions/sensitivity: 867 short sessions remain in 238 cases: 205 insufficient total dose, 33 enough dose but unresolved allocation. Next: multi-entry constrained repair for the 33, actually evaluated frequency alternatives for dose-limited cases, then four advanced capacity/selection seed sensitivities. Intermediate T-seed-2 and advanced AA-seed-4 lack accepted alternatives.
+4. Native visual QA: navigation checked; scroll/drag failures block complete thumbnail/heat-map/dark-contrast/bottom-layout sign-off. Body-map tests do not close device QA.
+5. PRD: effective implementation/science/roadmap boundary added; obsolete no-calendar assertion corrected. Early clinical, guaranteed offline/120-fps/timer and measured-recovery claims are not active guarantees.
+6. Catalogue/personalization: eight biceps guide pages individually reviewed without changing production ratings. Bayesian setup and preacher resistance need identity/apparatus/rating experiments. Historical e1RM now really excludes warm-ups. Full individual 379-entry review, support-aware availability, observed-response adaptation and recency/readiness handling remain open.
+
+Validation: 1,030 tests / 58 suites, TypeScript and catalogue validation pass. Paired 3,575-case audit detects no regression, but its sensitivity gate still exits 1. Passing unit tests does not establish that every generated routine is optimal.
 
 ## Accepted design corrections
 

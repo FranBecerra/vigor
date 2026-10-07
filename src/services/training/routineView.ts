@@ -30,6 +30,8 @@ import {
 } from './microcyclePrescription';
 import { sessionKey, sessionsForMicrocycle } from './mesocycleEditing';
 import { restDurationFor } from './restTimer';
+import { plannedPresentationFocus } from './sessionCoherence';
+import { TrainingGoal } from './volumePlan';
 
 export { DEFAULT_PROJECTED_MICROCYCLES };
 
@@ -202,7 +204,9 @@ export function toRoutineView(
   const planned = [...(mesocycle?.plannedSessions ?? [])].sort((a, b) => a.index - b.index);
   if (mesocycle === null || planned.length === 0) return null;
 
-  const names = sessionNames(planned, labels.focus);
+  const names = sessionNames(routine.generation.goal === TrainingGoal.HYPERTROPHY
+    ? planned.map((session) => ({ ...session, focus: plannedPresentationFocus(session, exerciseById) }))
+    : planned, labels.focus);
   const storedCurrent = mesocycle.currentMicrocycleIndex;
   const count = Math.max(mesocycle.projectedMicrocycles ?? DEFAULT_PROJECTED_MICROCYCLES, storedCurrent + 1);
   const completed = completedDatesByPlannedSession(completedSessions, mesocycle.id);

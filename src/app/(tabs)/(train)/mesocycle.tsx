@@ -11,6 +11,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { backToTraining } from '@/services/training/backNavigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
@@ -20,6 +21,7 @@ import { maxVolume, sessionMicrocycleMetrics } from '@/services/training/session
 import { deriveSetRIRs } from '@/services/training/setIntensity';
 import { SetType } from '@/models';
 import { useRoutines } from '@/hooks/useRoutines';
+import { MuscleTags } from '@/components/train/MuscleTags';
 
 const PROJECTED_OPACITY = 0.4;
 const COMPLETED_OPACITY = 0.62;
@@ -68,7 +70,7 @@ export default function MesocycleScreen() {
   if (routine === null || selectedMicrocycle === null || selectedSession === null) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
-        <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backRow}>
+        <Pressable onPress={() => backToTraining(router)} accessibilityRole="button" style={styles.backRow}>
           <Text style={[styles.back, { color: colors.textSecondary }]}>‹ {t('tabs.train')}</Text>
         </Pressable>
         <Text style={[styles.title, { color: colors.textPrimary }]}>
@@ -82,7 +84,7 @@ export default function MesocycleScreen() {
     <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }}>
         <View style={{ paddingHorizontal: spacing.lg }}>
-          <Pressable onPress={() => router.back()} accessibilityRole="button" style={styles.backRow}>
+          <Pressable onPress={() => backToTraining(router)} accessibilityRole="button" style={styles.backRow}>
             <Text style={[styles.back, { color: colors.textSecondary }]}>‹ {t('tabs.train')}</Text>
           </Pressable>
           <Text style={[styles.title, { color: colors.textPrimary }]}>{routine.objective}</Text>
@@ -251,9 +253,7 @@ export default function MesocycleScreen() {
                     <Text style={[styles.exerciseName, { color: colors.textPrimary }]}>
                       {exercise.name}
                     </Text>
-                    <Text style={[styles.exerciseMuscle, { color: colors.textMuted }]}>
-                      {t(`muscle.${exercise.primaryMuscle}`)}
-                    </Text>
+                    <MuscleTags exercise={exercise} />
                   </View>
                   <Text style={[styles.prescription, { color: colors.textSecondary }]}>
                     {workingSets}×{exercise.repRange}
@@ -327,7 +327,6 @@ const styles = StyleSheet.create({
   exerciseCard: { padding: 11, marginBottom: 6 },
   exerciseTop: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   exerciseName: { fontSize: 12.5, fontWeight: '600' },
-  exerciseMuscle: { fontSize: 9.5, marginTop: 1 },
   prescription: { fontSize: 11, fontWeight: '700', fontVariant: ['tabular-nums'] },
   setRirRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 9, flexWrap: 'wrap' },
   setRir: { alignItems: 'center', gap: 2 },

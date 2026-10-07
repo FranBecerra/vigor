@@ -19,6 +19,7 @@
  *   with a hard cap of three regions so that six cheap ones cannot add up to a plan
  *   with no priorities at all (§3.3).
  */
+import type { BodyHalf } from './muscleGroups';
 import {
   LOW_COST_REGIONS,
   MAX_PRIORITY_REGIONS,
@@ -45,6 +46,23 @@ export const EMPTY_EMPHASIS: EmphasisSelection = { priority: [], deprioritized: 
 export const GENERATOR_EMPHASIS_REGIONS: readonly VolumeRegion[] = Object.values(
   VolumeRegion,
 ).filter((region) => region !== VolumeRegion.TIBIALIS && region !== VolumeRegion.FOREARMS);
+
+const LOWER_BODY_REGIONS: ReadonlySet<VolumeRegion> = new Set([
+  VolumeRegion.QUADS, VolumeRegion.HAMSTRINGS, VolumeRegion.GLUTES,
+  VolumeRegion.ADDUCTORS, VolumeRegion.CALVES, VolumeRegion.TIBIALIS,
+]);
+
+export function regionBodyHalf(region: VolumeRegion): BodyHalf {
+  return LOWER_BODY_REGIONS.has(region) ? 'LOWER' : 'UPPER';
+}
+
+/** The emphasis control split into the same Torso / Pierna blocks as every muscle display. */
+export const GENERATOR_EMPHASIS_GROUPS: readonly { half: BodyHalf; regions: VolumeRegion[] }[] = (
+  ['UPPER', 'LOWER'] as const
+).map((half) => ({
+  half,
+  regions: GENERATOR_EMPHASIS_REGIONS.filter((region) => regionBodyHalf(region) === half),
+}));
 
 /** Slots the current priorities consume. */
 export function usedSlots(selection: EmphasisSelection): number {

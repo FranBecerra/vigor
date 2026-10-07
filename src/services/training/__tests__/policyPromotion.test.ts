@@ -2,6 +2,8 @@ import { ExperienceLevel, MuscleGroup, SplitStructure } from '@/models';
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
 import { evaluatePolicyPromotion, planMesocycle, type MesocyclePlan } from '../mesocyclePlanner';
 import { TrainingGoal, VolumeRegion } from '../volumePlan';
+import { buildScheduleTemplate, templateRecovery } from '../scheduleTemplate';
+import { toPlannedSessions } from '../routineMapper';
 
 const input = { level: ExperienceLevel.INTERMEDIATE, goal: TrainingGoal.HYPERTROPHY,
   capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 65 }, catalogue: EXERCISE_CATALOGUE, seed: 31 };
@@ -12,7 +14,8 @@ const decision = (candidate: MesocyclePlan) => evaluatePolicyPromotion(input, ba
 it('records both production comparisons without mutating inputs or changing explicit policies', () => {
   const snapshot = JSON.stringify(input);
   const result = planMesocycle(input);
-  expect(result.policyTrace?.map((entry) => entry.candidatePolicy)).toEqual(['volume-aware', 'accessory-aware']);
+  expect(result.policyTrace?.slice(0, 2).map((entry) => entry.candidatePolicy)).toEqual(['volume-aware', 'accessory-aware']);
+  expect(result.policyTrace?.slice(2).map((entry) => entry.candidateSeed)).toEqual([30, 32]);
   expect(result.policyTrace?.every((entry) => entry.accepted === (entry.reasons.length === 0))).toBe(true);
   expect(planMesocycle({ ...input, rankingPolicy: 'coupled-control' }).policyTrace).toHaveLength(1);
   expect(base.policyTrace).toBeUndefined();
@@ -61,10 +64,39 @@ it('accepts a meaningful target-shortfall improvement even if ordinal cost rises
   expect(result.metrics.ordinalCostAfter).toBeGreaterThan(result.metrics.ordinalCostBefore);
   expect(result.accepted).toBe(true);
 });
-it('explains the real seed-12 overlap rejection rather than treating lower cost as sufficient', () => {
-  const result = planMesocycle({ ...input, seed: 12, split: SplitStructure.AUTO,
+it('rejects the raw overlap regression and accepts an AUTO repair without weakening the guard', () => {
+  const caseInput = { ...input, seed: 49, split: SplitStructure.AUTO,
     capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 75 },
-    priorityRegions: [VolumeRegion.BACK, VolumeRegion.TRICEPS], deprioritizedRegions: [VolumeRegion.QUADS] });
-  expect(result.policyTrace?.[1]).toMatchObject({ candidatePolicy: 'accessory-aware', accepted: false,
+    priorityRegions: [VolumeRegion.BACK, VolumeRegion.TRICEPS], deprioritizedRegions: [VolumeRegion.QUADS] };
+  const incumbent = planMesocycle({ ...caseInput, rankingPolicy: 'coupled-control' });
+  const raw = planMesocycle({ ...caseInput, rankingPolicy: 'accessory-aware' });
+  expect(evaluatePolicyPromotion(caseInput, incumbent, raw, 'accessory-aware')).toMatchObject({ accepted: false,
     reasons: [expect.objectContaining({ code: 'template-overlap-count', before: 0, after: 1 })] });
+  const result = planMesocycle(caseInput);
+  expect(result.policyTrace?.[1]).toMatchObject({ candidatePolicy: 'accessory-aware', accepted: true, reasons: [] });
+});
+it('repairs the advanced five-day seed bottleneck and refreshes placement diagnostics', () => {
+  const result = planMesocycle({ ...input, level: ExperienceLevel.ADVANCED, seed: 50, split: SplitStructure.AUTO,
+    capacity: { sessionsPerMicrocycle: 5, minutesPerSession: 65 },
+    priorityRegions: [VolumeRegion.TRICEPS], deprioritizedRegions: [VolumeRegion.HAMSTRINGS] });
+  expect(result.selection.performedSets).toBeGreaterThanOrEqual(90);
+  const sessions = result.distribution.sessions;
+  expect(sessions).toHaveLength(5);
+  expect(sessions.every((session) => session.estimatedWorkMinutes <= result.availableWorkMinutesPerSession)).toBe(true);
+  expect(sessions.every((session) => session.exercises.reduce((sum, entry) => sum + entry.sets, 0) >= 12)).toBe(true);
+  const frequencies: Partial<Record<MuscleGroup, number>> = {};
+  sessions.forEach((session) => new Set(session.exercises.map((entry) => entry.exercise.primaryMuscle))
+    .forEach((muscle) => { frequencies[muscle] = (frequencies[muscle] ?? 0) + 1; }));
+  expect(result.distribution.frequencyByMuscle).toEqual(frequencies);
+  expect(result.maxSessionWorkMinutes).toBe(Math.max(...sessions.map((session) => session.estimatedWorkMinutes)));
+  expect(result.estimatedWorkMinutes).toBe(sessions.reduce((sum, session) => sum + session.estimatedWorkMinutes, 0));
+});
+it('does not trade consecutive-day recovery for more sets in the advanced upper/lower case', () => {
+  const result = planMesocycle({ ...input, level: ExperienceLevel.ADVANCED, seed: 31,
+    split: SplitStructure.UPPER_LOWER, capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 75 },
+    priorityRegions: [VolumeRegion.BACK], deprioritizedRegions: [] });
+  const sessions = toPlannedSessions(result);
+  const catalogue = new Map(EXERCISE_CATALOGUE.map((exercise) => [exercise.id, exercise]));
+  expect(templateRecovery(buildScheduleTemplate(sessions, catalogue), sessions, catalogue)
+    .filter((pair) => pair.reviewSuggested)).toHaveLength(0);
 });

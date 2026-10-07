@@ -125,3 +125,12 @@ export function estimateSessionMinutes(exercises: readonly PlannedExercise[]): n
 export function formatSetVolume(sets: number): string {
   return Number.isInteger(sets) ? String(sets) : sets.toFixed(1);
 }
+
+/**
+ * How many wrapped chips to show inside a fixed-height area, given each chip's measured
+ * bottom edge in reading order. When some overflow, one slot is freed for the "+N" chip.
+ */
+export function visibleChipCount(bottoms: readonly number[], areaHeight: number): number {
+  const fitting = bottoms.filter((bottom) => bottom <= areaHeight + 0.5).length;
+  return fitting === bottoms.length ? fitting : Math.max(0, fitting - 1);
+}

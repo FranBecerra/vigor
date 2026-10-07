@@ -3,6 +3,18 @@ import { SetType, type Exercise, type PlannedSession } from '@/models';
 import type { ScheduleSlot, ScheduleTemplate } from '@/models/routine';
 export type { ScheduleSlot, ScheduleTemplate } from '@/models/routine';
 
+export interface ScheduleWorkload { index: number; directSets: ReadonlyMap<string, number> }
+
+function workloadOverlap(workloads: readonly ScheduleWorkload[]) {
+  return workloads.map((workload, index) => {
+    const next = workloads[(index + 1) % workloads.length];
+    const muscles = [...workload.directSets.keys()].filter((muscle) =>
+      workload.directSets.get(muscle)! >= 3 && (next.directSets.get(muscle) ?? 0) >= 3);
+    return { from: workload.index, to: next.index, muscles,
+      cost: muscles.reduce((sum, muscle) => sum + Math.min(workload.directSets.get(muscle)!, next.directSets.get(muscle)!), 0) };
+  });
+}
+
 export function validateScheduleTemplate(template: ScheduleTemplate, sessionIndexes: readonly number[]): void {
   if (!Number.isInteger(template.days) || template.days < 1 || template.days > 28
     || template.slots.length !== template.days || new Set(sessionIndexes).size !== sessionIndexes.length
@@ -23,20 +35,18 @@ export function scheduleOverlap(sessions: readonly PlannedSession[], catalogue: 
     });
     return result;
   });
-  return sessions.map((session, i) => {
-    const next = (i + 1) % sessions.length;
-    const muscles = [...direct[i].keys()].filter((m) => direct[i].get(m)! >= 3 && (direct[next].get(m) ?? 0) >= 3);
-    return { from: session.index, to: sessions[next].index, muscles,
-      cost: muscles.reduce((sum, m) => sum + Math.min(direct[i].get(m)!, direct[next].get(m)!), 0) };
-  });
+  return workloadOverlap(sessions.map((session, index) => ({ index: session.index, directSets: direct[index] })));
 }
 
 export function buildScheduleTemplate(sessions: readonly PlannedSession[], catalogue: ReadonlyMap<string, Exercise>,
   days = Math.max(7, sessions.length)): ScheduleTemplate {
-  if (!Number.isInteger(days) || days < Math.max(1, sessions.length) || days > 28) throw new Error('Invalid cycle length');
-  const gaps = Array<number>(sessions.length).fill(0);
-  const overlaps = scheduleOverlap(sessions, catalogue);
-  for (let rest = 0; rest < days - sessions.length && gaps.length; rest += 1) {
+  return buildSlots(sessions.map((session) => session.index), scheduleOverlap(sessions, catalogue), days);
+}
+
+function buildSlots(indexes: readonly number[], overlaps: ReturnType<typeof workloadOverlap>, days: number): ScheduleTemplate {
+  if (!Number.isInteger(days) || days < Math.max(1, indexes.length) || days > 28) throw new Error('Invalid cycle length');
+  const gaps = Array<number>(indexes.length).fill(0);
+  for (let rest = 0; rest < days - indexes.length && gaps.length; rest += 1) {
     const minimum = Math.min(...gaps);
     let best = gaps.indexOf(minimum);
     for (let i = 1; i < gaps.length; i += 1) {
@@ -48,12 +58,12 @@ export function buildScheduleTemplate(sessions: readonly PlannedSession[], catal
     }
     gaps[best] += 1;
   }
-  const slots: ScheduleSlot[] = sessions.length ? sessions.flatMap((session, i) => [
-    { kind: 'workout' as const, sessionIndex: session.index },
+  const slots: ScheduleSlot[] = indexes.length ? indexes.flatMap((index, i) => [
+    { kind: 'workout' as const, sessionIndex: index },
     ...Array.from({ length: gaps[i] }, () => ({ kind: 'rest' as const })),
   ]) : Array.from({ length: days }, () => ({ kind: 'rest' as const }));
   const result = { days, slots };
-  validateScheduleTemplate(result, sessions.map((s) => s.index));
+  validateScheduleTemplate(result, indexes);
   return result;
 }
 
@@ -72,7 +82,17 @@ export function moveRestSlot(template: ScheduleTemplate, from: number, to: numbe
 export function templateRecovery(template: ScheduleTemplate, sessions: readonly PlannedSession[],
   catalogue: ReadonlyMap<string, Exercise>) {
   validateScheduleTemplate(template, sessions.map((s) => s.index));
-  return scheduleOverlap(sessions, catalogue).map((pair) => {
+  return recoveryPairs(template, scheduleOverlap(sessions, catalogue));
+}
+
+/** Same rest-placement algorithm before prescriptions exist; no fabricated sets/RIR. */
+export function workloadTemplateRecovery(workloads: readonly ScheduleWorkload[], days = Math.max(7, workloads.length)) {
+  const overlaps = workloadOverlap(workloads);
+  return recoveryPairs(buildSlots(workloads.map((workload) => workload.index), overlaps, days), overlaps);
+}
+
+function recoveryPairs(template: ScheduleTemplate, overlaps: ReturnType<typeof workloadOverlap>) {
+  return overlaps.map((pair) => {
     const from = template.slots.findIndex((s) => s.kind === 'workout' && s.sessionIndex === pair.from);
     const to = template.slots.findIndex((s) => s.kind === 'workout' && s.sessionIndex === pair.to);
     const gapDays = to > from ? to - from : template.days - from + to;

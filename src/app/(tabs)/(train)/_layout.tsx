@@ -15,6 +15,10 @@
  */
 import { Stack } from 'expo-router';
 
+// SDK 57 uses anchor (initialRouteName is deprecated). Direct links and reloads
+// into a training detail retain Home underneath them.
+export const unstable_settings = { anchor: 'index' };
+
 export default function TrainStackLayout() {
   return (
     <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>

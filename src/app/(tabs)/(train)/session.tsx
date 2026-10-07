@@ -22,6 +22,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { backToTraining } from '@/services/training/backNavigation';
 import { useTranslation } from 'react-i18next';
 
 import { ExercisePage } from '@/components/train/ExercisePage';
@@ -297,14 +298,14 @@ export default function EntrenamientoScreen() {
     if (sessionContext === null || plannedSession === null) return;
     const completed = await flush(Date.now());
     if (!completed) return;
-    router.back();
+    backToTraining(router);
   }, [flush, plannedSession, router, sessionContext]);
 
   if (loadError) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
         <Text style={[styles.sessionName, { color: colors.textPrimary }]}>{t('train.sessionUnavailable')}</Text>
-        <Pressable onPress={() => router.back()} style={{ marginTop: spacing.md }}>
+        <Pressable onPress={() => backToTraining(router)} style={{ marginTop: spacing.md }}>
           <Text style={{ color: accent }}>{t('generate.back')}</Text>
         </Pressable>
       </View>

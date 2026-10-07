@@ -285,15 +285,28 @@ describe('meavForRegion', () => {
     });
   });
 
-  it('un plan CON prioridades baja las regiones normales', () => {
+  it('un plan CON prioridades baja las regiones normales en proporción a su coste', () => {
     LEVELS.forEach((level) => {
       expect(NORMAL_RANGE_FRACTION_WITH_PRIORITY[level]).toBeLessThan(
         NORMAL_RANGE_FRACTION[level] + 0.001,
       );
-      const alone = meavForRegion(landmarks, RegionEmphasis.NORMAL, level, false);
-      const withPriority = meavForRegion(landmarks, RegionEmphasis.NORMAL, level, true);
-      expect(withPriority).toBeLessThanOrEqual(alone);
+      const alone = meavForRegion(landmarks, RegionEmphasis.NORMAL, level, 0);
+      const cheap = meavForRegion(landmarks, RegionEmphasis.NORMAL, level, 0.25);
+      const full = meavForRegion(landmarks, RegionEmphasis.NORMAL, level, 1);
+      expect(cheap).toBeLessThanOrEqual(alone);
+      expect(full).toBeLessThanOrEqual(cheap);
+      // Out-of-range loads clamp instead of extrapolating past either end.
+      expect(meavForRegion(landmarks, RegionEmphasis.NORMAL, level, 3)).toBe(full);
+      expect(meavForRegion(landmarks, RegionEmphasis.NORMAL, level, -1)).toBe(alone);
     });
+  });
+
+  it('priorizar solo tríceps cuesta a los demás menos que dos regiones caras', () => {
+    const plan = (priorityRegions: VolumeRegion[]) => buildVolumePlan({ level: ExperienceLevel.INTERMEDIATE,
+      goal: TrainingGoal.HYPERTROPHY, priorityRegions });
+    const chest = (p: ReturnType<typeof plan>) => p.regions.find((r) => r.region === VolumeRegion.CHEST)!.meav;
+    expect(chest(plan([VolumeRegion.TRICEPS]))).toBeGreaterThan(chest(plan([VolumeRegion.BACK, VolumeRegion.QUADS])));
+    expect(chest(plan([VolumeRegion.TRICEPS]))).toBeLessThanOrEqual(chest(plan([])));
   });
 
   it('nunca supera el MRV, ni priorizando', () => {

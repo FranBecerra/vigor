@@ -42,6 +42,7 @@ import type { SelectedExercise, SelectionResult } from './exerciseSelection';
 import { exerciseMinutes } from './trainingCapacity';
 import { fatigueCost } from './exerciseCatalogue';
 import { isDemandingTorsoHinge, redundantSessionPair } from './exerciseFamilies';
+import { workloadTemplateRecovery } from './scheduleTemplate';
 
 /** Session label, used by distribution logic and by the future UI. */
 export type SessionFocus = 'FULL_BODY' | 'UPPER' | 'LOWER' | 'PUSH' | 'PULL' | 'LEGS';
@@ -366,6 +367,21 @@ function entriesRisk(
   );
 }
 
+/** Refresh neighbour diagnostics after a complete session changes position. */
+export function sessionSequencingWarnings(sessions: readonly DistributedSession[], previousSession: readonly SessionExercise[] = []): SequencingWarning[] {
+  return sessions.flatMap((session, index) => {
+    const preceding = index === 0 ? previousSession : sessions[index - 1].exercises;
+    const risk = entriesRisk(session.exercises, preceding);
+    if (risk < SEQUENCING_WARNING_THRESHOLD) return [];
+    const before = new Set(preceding.flatMap((entry) => [...muscleCredits(entry.exercise).keys()]));
+    const after = new Set(session.exercises.flatMap((entry) => [...muscleCredits(entry.exercise).keys()]));
+    return [{ precedingSessionIndex: index === 0 ? null : index - 1, followingSessionIndex: index, risk,
+      sharedMuscles: [...after].filter((muscle) => before.has(muscle)),
+      sharesMovementVector: session.exercises.some((entry) => preceding.some((prior) =>
+        prior.exercise.movementVector === entry.exercise.movementVector)) }];
+  });
+}
+
 /** Minutes of one entry, at its prescribed rest when it carries one. */
 function entryMinutes(entry: { exercise: Exercise; sets: number; strength?: { restSeconds: number } }): number {
   return exerciseMinutes(entry.exercise, entry.sets, entry.strength?.restSeconds);
@@ -377,6 +393,218 @@ function minutesOf(entries: readonly SessionExercise[]): number {
 
 function setsOf(entries: readonly SessionExercise[]): number {
   return entries.reduce((sum, entry) => sum + entry.sets, 0);
+}
+
+/**
+ * Exchange a concentrated curl with a low-demand accessory on an existing pull
+ * exposure. Frequency is a distribution preference, not a physiological minimum.
+ * Keep the roster and dose exactly; never remove a strength exposure or worsen
+ * neighbouring overlap, session caps, anchors, direct frequency or load spread.
+ */
+export function spreadDirectBiceps(input: Pick<DistributionInput,
+  'maxWorkMinutesPerSession' | 'minimumSessionSets' | 'previousSession' | 'deprioritizedMuscles'>,
+  sessions: DistributedSession[]): boolean {
+  if (sessions.length < 2 || input.deprioritizedMuscles?.includes(MuscleGroup.BICEPS)) return false;
+  const direct = (entries: readonly SessionExercise[]) => entries.filter((entry) =>
+    entry.exercise.primaryMuscle === MuscleGroup.BICEPS);
+  const donors = sessions.filter((session) => direct(session.exercises).length >= 2);
+  if (sessions.filter((session) => direct(session.exercises).length > 0).length >= 2) return false;
+  const floor = Math.min(input.minimumSessionSets ?? 0,
+    Math.floor(sessions.reduce((sum, session) => sum + setsOf(session.exercises), 0) / sessions.length));
+  const overlap = (roster: readonly (readonly SessionExercise[])[]) => roster.reduce((sum, entries, index) =>
+    sum + entriesRisk(entries, index === 0 ? input.previousSession ?? [] : roster[index - 1]), 0)
+    // Include the repeated template boundary even without civil dates.
+    + entriesRisk(roster[0], roster[roster.length - 1]);
+  const original = sessions.map((session) => session.exercises);
+  const originalRisk = overlap(original);
+  const templateWarnings = (roster: readonly (readonly SessionExercise[])[]) => workloadTemplateRecovery(
+    roster.map((entries, index) => {
+      const directSets = new Map<string, number>();
+      entries.forEach((entry) => directSets.set(entry.exercise.primaryMuscle,
+        (directSets.get(entry.exercise.primaryMuscle) ?? 0) + entry.sets));
+      return { index: sessions[index].index, directSets };
+    })).filter((pair) => pair.reviewSuggested);
+  const originalTemplateWarnings = templateWarnings(original);
+  const spread = (roster: readonly (readonly SessionExercise[])[]) => {
+    const values = roster.map(minutesOf);
+    return Math.max(...values) - Math.min(...values);
+  };
+  const beforeSpread = spread(original);
+  const frequencies = (roster: readonly (readonly SessionExercise[])[]) => {
+    const counts = new Map<MuscleGroup, number>();
+    roster.forEach((entries) => new Set(entries.map((entry) => entry.exercise.primaryMuscle))
+      .forEach((muscle) => counts.set(muscle, (counts.get(muscle) ?? 0) + 1)));
+    return counts;
+  };
+  const beforeFrequency = frequencies(original);
+  // Two single-joint variants with explicitly different shoulder positions are
+  // complementary exposures, not automatically identical because they share a
+  // joint action. Unknown geometry retains the conservative family check.
+  const conflicts = (left: Exercise, right: Exercise) => {
+    const shoulder = (exercise: Exercise) => exercise.stimulusTags?.find((tag) => tag.startsWith('SHOULDER:'));
+    const a = shoulder(left); const b = shoulder(right);
+    if (left.id !== right.id && left.profile === ExerciseProfile.ISOLATION
+      && right.profile === ExerciseProfile.ISOLATION && a && b && a !== b) return false;
+    return sameExerciseFamily(left, right);
+  };
+  const holds = (session: DistributedSession, entries: SessionExercise[]) =>
+    setsOf(entries) >= Math.min(floor, setsOf(session.exercises))
+    && (input.maxWorkMinutesPerSession === undefined || minutesOf(entries) <= input.maxWorkMinutesPerSession)
+    && (!session.exercises.some(isSessionAnchor) || entries.some(isSessionAnchor))
+    && [...effectiveSetsByMuscle(entries)].every(([muscle, count]) => count <= sessionSetCap(muscle, entries));
+  let best: { donor: DistributedSession; recipient: DistributedSession;
+    outgoing: SessionExercise; incoming: SessionExercise; score: number } | undefined;
+  for (const donor of donors) for (const outgoing of direct(donor.exercises)) {
+    if (outgoing.strength || outgoing.exercise.profile !== ExerciseProfile.ISOLATION) continue;
+    for (const recipient of sessions) {
+      if (recipient === donor || direct(recipient.exercises).length > 0) continue;
+      const supportedPull = recipient.exercises.some((entry) =>
+        [MovementVector.PULL_HORIZONTAL, MovementVector.PULL_VERTICAL].includes(entry.exercise.movementVector)
+        && muscleCredits(entry.exercise).has(MuscleGroup.BICEPS));
+      if (!supportedPull) continue;
+      for (const incoming of recipient.exercises) {
+        if (incoming.strength || incoming.exercise.profile !== ExerciseProfile.ISOLATION
+          || fatigueCost(incoming.exercise) > 2.5) continue;
+        const left = donor.exercises.filter((entry) => entry !== outgoing);
+        const right = recipient.exercises.filter((entry) => entry !== incoming);
+        if (left.some((entry) => conflicts(entry.exercise, incoming.exercise))
+          || right.some((entry) => conflicts(entry.exercise, outgoing.exercise))) continue;
+        left.push(incoming); right.push(outgoing);
+        if (!holds(donor, left) || !holds(recipient, right)) continue;
+        const roster = sessions.map((session) => session === donor ? left : session === recipient ? right : session.exercises);
+        if ([...beforeFrequency].some(([muscle, count]) => (frequencies(roster).get(muscle) ?? 0) < count)) continue;
+        const risk = overlap(roster);
+        if (risk > originalRisk + 1e-8 || spread(roster) > beforeSpread + 1e-8) continue;
+        const proposedTemplateWarnings = templateWarnings(roster);
+        if (proposedTemplateWarnings.length > originalTemplateWarnings.length
+          || proposedTemplateWarnings.reduce((sum, pair) => sum + pair.cost, 0)
+            > originalTemplateWarnings.reduce((sum, pair) => sum + pair.cost, 0)) continue;
+        const mismatch = focusMismatchCost(donor.focus, incoming.exercise.primaryMuscle)
+          + focusMismatchCost(recipient.focus, outgoing.exercise.primaryMuscle);
+        const beforeMismatch = focusMismatchCost(donor.focus, outgoing.exercise.primaryMuscle)
+          + focusMismatchCost(recipient.focus, incoming.exercise.primaryMuscle);
+        if (mismatch > beforeMismatch) continue;
+        const score = risk + spread(roster) + mismatch;
+        if (!best || score < best.score) best = { donor, recipient, outgoing, incoming, score };
+      }
+    }
+  }
+  if (!best) return false;
+  best.donor.exercises.splice(best.donor.exercises.indexOf(best.outgoing), 1, best.incoming);
+  best.recipient.exercises.splice(best.recipient.exercises.indexOf(best.incoming), 1, best.outgoing);
+  best.donor.estimatedWorkMinutes = minutesOf(best.donor.exercises);
+  best.recipient.estimatedWorkMinutes = minutesOf(best.recipient.exercises);
+  return true;
+}
+
+/** Bounded local search across whole appearances; exact roster and dose survive. */
+export function repairSessionAllocation(sessions: DistributedSession[], floor: number,
+  maxMinutes?: number, previousSession: readonly SessionExercise[] = [], repairRecovery = false): boolean {
+  if (sessions.length < 2 || floor <= 0 || sessions.some((s) => s.exercises.some((e) => e.strength))) return false;
+  const original = sessions.map((s) => s.exercises);
+  const deficit = (roster: readonly (readonly SessionExercise[])[]) => roster.reduce((sum, entries) =>
+    sum + Math.max(0, floor - setsOf(entries)), 0);
+  const originalDeficit = deficit(original);
+  if (repairRecovery && originalDeficit > 0) return false;
+  if ((!originalDeficit && !repairRecovery) || original.reduce((sum, entries) => sum + setsOf(entries), 0) < floor * sessions.length) return false;
+  // Every appearance/dose is immutable during this search. Cache entry minutes
+  // and pairwise exercise risk locally, not across calls or mutable catalogues.
+  const minuteCache = new Map<SessionExercise, number>();
+  const minutesFor = (entries: readonly SessionExercise[]) => entries.reduce((sum, entry) => {
+    if (!minuteCache.has(entry)) minuteCache.set(entry, entryMinutes(entry));
+    return sum + minuteCache.get(entry)!;
+  }, 0);
+  const riskCache = new Map<Exercise, Map<Exercise, number>>();
+  const riskFor = (current: readonly SessionExercise[], previous: readonly SessionExercise[]) => current.reduce((sum, entry) =>
+    sum + previous.reduce((priorSum, prior) => {
+      const row = riskCache.get(entry.exercise) ?? new Map<Exercise, number>();
+      if (!row.has(prior.exercise)) row.set(prior.exercise, exerciseRisk(entry.exercise, prior.exercise));
+      riskCache.set(entry.exercise, row);
+      return priorSum + row.get(prior.exercise)!;
+    }, 0), 0);
+  const frequencies = (roster: readonly (readonly SessionExercise[])[]) => {
+    const result = new Map<MuscleGroup, number>();
+    roster.forEach((entries) => new Set(entries.map((e) => e.exercise.primaryMuscle))
+      .forEach((muscle) => result.set(muscle, (result.get(muscle) ?? 0) + 1)));
+    return result;
+  };
+  const beforeFrequency = frequencies(original);
+  const recovery = (roster: readonly (readonly SessionExercise[])[]) => {
+    const warnings = workloadTemplateRecovery(roster.map((entries, index) => {
+      const directSets = new Map<string, number>();
+      entries.forEach((e) => directSets.set(e.exercise.primaryMuscle,
+        (directSets.get(e.exercise.primaryMuscle) ?? 0) + e.sets));
+      return { index: sessions[index].index, directSets };
+    })).filter((pair) => pair.reviewSuggested);
+    const risks = roster.map((entries, index) => riskFor(entries, index === 0 ? previousSession : roster[index - 1]));
+    return { warningCount: warnings.length, warningCost: warnings.reduce((sum, pair) => sum + pair.cost, 0),
+      risk: risks.reduce((sum, value) => sum + value, 0) + riskFor(roster[0], roster[roster.length - 1]),
+      sequenceCount: risks.filter((value) => value >= SEQUENCING_WARNING_THRESHOLD).length };
+  };
+  const beforeRecovery = recovery(original);
+  if (repairRecovery && beforeRecovery.warningCount === 0) return false;
+  const duplicates = (entries: readonly SessionExercise[]) => entries.reduce((sum, e, i) => sum +
+    entries.slice(i + 1).filter((other) => redundantSessionPair(e.exercise, other.exercise)).length, 0);
+  const originalDuplicates = original.map(duplicates);
+  const originalMin = Math.min(...original.map(setsOf));
+  const allowed = (roster: SessionExercise[][], left: number, right: number) => {
+    for (const index of [left, right]) {
+      const entries = roster[index];
+      if (!entries.length || setsOf(entries) < originalMin
+        || (maxMinutes !== undefined && minutesFor(entries) > maxMinutes + 1e-8)
+        || (original[index].some(isSessionAnchor) && !entries.some(isSessionAnchor))
+        || duplicates(entries) > originalDuplicates[index]
+        || [...effectiveSetsByMuscle(entries)].some(([muscle, count]) => count > sessionSetCap(muscle, entries))) return false;
+    }
+    const afterFrequency = frequencies(roster);
+    if ([...beforeFrequency].some(([muscle, count]) => (afterFrequency.get(muscle) ?? 0)
+      < (repairRecovery ? Math.min(2, count) : count))) return false;
+    const after = recovery(roster);
+    return after.risk <= beforeRecovery.risk + 1e-8 && after.warningCount <= beforeRecovery.warningCount
+      && after.warningCost <= beforeRecovery.warningCost && after.sequenceCount <= beforeRecovery.sequenceCount;
+  };
+  const bundles = (entries: SessionExercise[]) => [[], ...entries.map((e) => [e]),
+    ...entries.flatMap((e, i) => entries.slice(i + 1).map((other) => [e, other]))];
+  const key = (roster: SessionExercise[][]) => roster.map((entries) => entries.map((e) => e.exercise.id).sort().join(',')).join('|');
+  const score = (roster: SessionExercise[][]) => {
+    const counts = roster.map(setsOf); const minutes = roster.map(minutesFor);
+    return deficit(roster) * 10000 + (repairRecovery ? recovery(roster).warningCount * 1000 : 0)
+      + Math.max(...counts) - Math.min(...counts)
+      + (Math.max(...minutes) - Math.min(...minutes)) * 0.1;
+  };
+  let frontier = [original]; const seen = new Set([key(original)]);
+  let best = original; let bestScore = score(original);
+  let examined = 0;
+  // Neutral intermediate exchanges can unlock a three-session rotation.
+  search: for (let depth = 0; depth < 3; depth += 1) {
+    const next: SessionExercise[][][] = [];
+    for (const current of frontier) for (let left = 0; left < current.length; left += 1) {
+      for (let right = left + 1; right < current.length; right += 1) {
+        for (const a of bundles(current[left])) for (const b of bundles(current[right])) {
+          if (++examined > 4000) break search;
+          if (!a.length && !b.length) continue;
+          const candidate = current.map((entries, index) => index === left
+            ? [...entries.filter((e) => !a.includes(e)), ...b]
+            : index === right ? [...entries.filter((e) => !b.includes(e)), ...a] : entries);
+          const fingerprint = key(candidate);
+          if (seen.has(fingerprint) || deficit(candidate) > originalDeficit) continue;
+          seen.add(fingerprint);
+          if (!allowed(candidate, left, right)) continue;
+          const value = score(candidate);
+          if ((deficit(candidate) < originalDeficit || (repairRecovery
+            && recovery(candidate).warningCount < beforeRecovery.warningCount)) && value < bestScore) { best = candidate; bestScore = value; }
+          next.push(candidate);
+        }
+      }
+    }
+    if ((!repairRecovery && deficit(best) === 0) || (repairRecovery && recovery(best).warningCount === 0) || !next.length) break;
+    frontier = next.sort((a, b) => score(a) - score(b) || key(a).localeCompare(key(b))).slice(0, 12);
+  }
+  if (best === original) return false;
+  sessions.forEach((session, index) => {
+    session.exercises = best[index]; session.estimatedWorkMinutes = minutesFor(best[index]);
+  });
+  return true;
 }
 
 /**
@@ -1153,6 +1381,12 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
       input.maxWorkMinutesPerSession,
       input.previousSession,
     );
+  }
+
+  if (!sessions.some((session) => session.exercises.some((entry) => entry.strength))) {
+    repairSessionAllocation(sessions, input.minimumSessionSets ?? 0,
+      input.maxWorkMinutesPerSession, input.previousSession);
+    spreadDirectBiceps(input, sessions);
   }
 
   sessions.forEach((session) => {

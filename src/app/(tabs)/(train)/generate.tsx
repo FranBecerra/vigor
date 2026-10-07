@@ -57,7 +57,8 @@ import { planMesocycle, type MesocyclePlan } from '@/services/training/mesocycle
 import { findAlternativeSchedule } from '@/services/training/alternativeSchedule';
 import { MIN_HYPERTROPHY_SESSION_SETS } from '@/services/training/sessionDistribution';
 import {
-  recommendCapacity,
+  recommendCapacityAsync,
+  CapacityRecommendationCancelled,
   type CapacityRecommendation,
 } from '@/services/training/capacityRecommendation';
 import {
@@ -76,7 +77,7 @@ import {
   choiceOf,
   cycleChoice,
   EMPTY_EMPHASIS,
-  GENERATOR_EMPHASIS_REGIONS,
+  GENERATOR_EMPHASIS_GROUPS,
   isLowCost,
   prioritizeBlockedReason,
   usedSlots,
@@ -101,6 +102,9 @@ import {
   type PrimaryAction,
 } from '@/services/training/generationPhase';
 import { rankSwapCandidates } from '@/services/training/swapEngine';
+import { REGION_THUMBNAILS, regionPaint } from '@/services/training/bodyMap';
+import { BodyMapThumbnail } from '@/components/train/BodyMap';
+import { backToTraining } from '@/services/training/backNavigation';
 import {
   applyPreviewEdits,
   appendPreviewExercises,
@@ -110,7 +114,7 @@ import {
   type PreviewEdits,
 } from '@/services/training/previewEditing';
 import { mesocycleRepository, routineRepository, workoutSessionRepository } from '@/services/repositories';
-import { e1RMByExerciseFromHistory } from '@/services/training/e1rmHistory';
+import { recentE1RMByExerciseFromHistory } from '@/services/training/historyReadiness';
 import {
   DEFAULT_GENERATOR_EQUIPMENT,
   DEFAULT_GENERATOR_GOAL,
@@ -259,6 +263,8 @@ export default function GenerateScreen() {
   }, []);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [recommending, setRecommending] = useState(false);
+  const recommendationTask = useRef<{ cancelled: boolean } | null>(null);
+  const [recommendationFailed, setRecommendationFailed] = useState(false);
   const [recommendation, setRecommendation] = useState<CapacityRecommendation | null>(null);
   const [e1rmByExerciseId, setE1rmByExerciseId] = useState<ReadonlyMap<string, number>>(new Map());
 
@@ -272,7 +278,7 @@ export default function GenerateScreen() {
     let cancelled = false;
     workoutSessionRepository.listByUser(user.uid)
       .then((history) => {
-        if (!cancelled) setE1rmByExerciseId(e1RMByExerciseFromHistory(history));
+        if (!cancelled) setE1rmByExerciseId(recentE1RMByExerciseFromHistory(history, Date.now()));
       })
       .catch((error: unknown) => {
         // Generation remains usable offline: no history means RIR-only targets.
@@ -297,6 +303,16 @@ export default function GenerateScreen() {
   );
   const stale = isPlanStale(planSignature, settings);
   const primary = primaryActionFor({ phase, hasPlan: plan !== null, stale });
+  useEffect(() => {
+    const cancel = () => {
+      if (recommendationTask.current) recommendationTask.current.cancelled = true;
+      recommendationTask.current = null;
+    };
+    cancel();
+    setRecommending(false);
+    setRecommendationFailed(false);
+    return cancel;
+  }, [settings, phase]);
 
   // The pages slide instead of swapping, so the tap that generates is visibly a step
   // forward rather than a silent content change further down a scroll.
@@ -343,27 +359,37 @@ export default function GenerateScreen() {
     );
   }, []);
 
-  /**
-   * Let the engine choose the capacity. The search runs the generator across fifteen
-   * capacities, so the busy state is set and the work deferred by a frame: otherwise
-   * the thread blocks before the spinner ever paints and the button looks dead.
-   */
-  const onRecommendCapacity = useCallback(() => {
+  /** Yield between plans, and discard results when settings change or the route exits. */
+  const onRecommendCapacity = useCallback(async () => {
+    if (recommendationTask.current) return;
+    const task = { cancelled: false };
+    recommendationTask.current = task;
     setRecommending(true);
-    setTimeout(() => {
-      const best = recommendCapacity({
+    setRecommendationFailed(false);
+    try {
+      const best = await recommendCapacityAsync({
         level,
         goal,
         catalogue: availableCatalogue,
         split,
         priorityRegions: emphasis.priority,
         deprioritizedRegions: emphasis.deprioritized,
-      });
+      }, { isCancelled: () => task.cancelled });
+      if (task.cancelled || recommendationTask.current !== task) return;
       setSessions(best.sessionsPerMicrocycle);
       setMinutes(best.minutesPerSession);
       setRecommendation(best);
-      setRecommending(false);
-    }, 0);
+    } catch (error: unknown) {
+      if (!(error instanceof CapacityRecommendationCancelled) && !task.cancelled) {
+        console.warn('[generate] capacity recommendation failed', error);
+        setRecommendationFailed(true);
+      }
+    } finally {
+      if (recommendationTask.current === task) {
+        recommendationTask.current = null;
+        setRecommending(false);
+      }
+    }
   }, [availableCatalogue, emphasis, goal, level, split]);
 
   const generate = useCallback(
@@ -588,7 +614,7 @@ export default function GenerateScreen() {
         }),
       });
       await routineRepository.update(routineId, { activeMesocycleId: mesocycleId });
-      router.back();
+      backToTraining(router);
     } catch (error) {
       // The athlete just spent a minute on this form: keep the plan on screen and let
       // them retry rather than losing it to a transient write failure. The code is
@@ -640,7 +666,7 @@ export default function GenerateScreen() {
       setPhase('configure');
       return;
     }
-    router.back();
+    backToTraining(router);
   }, [phase, router]);
 
   const slots = usedSlots(emphasis);
@@ -699,7 +725,7 @@ export default function GenerateScreen() {
                 </Text>
                 <RerollButton
                   onPress={onReroll}
-                  disabled={!canGenerate}
+                  disabled={!canGenerate || recommending}
                   style={{ marginTop: spacing.md }}
                 />
               </View>
@@ -792,6 +818,11 @@ export default function GenerateScreen() {
                 <Text style={[typography.caption, { color: colors.textMuted }]}>
                   {t('generate.capacityAutoHint')}
                 </Text>
+                {recommendationFailed && (
+                  <Text accessibilityRole="alert" style={[typography.caption, { color: semantic.warning }]}>
+                    {t('generate.capacityAutoError')}
+                  </Text>
+                )}
                 {showsRecommendation && (
                   <Text
                     style={[
@@ -856,39 +887,58 @@ export default function GenerateScreen() {
               trailing={t('generate.slotsLeft', { used: slots, total: PRIORITY_SLOT_BUDGET })}
               trailingTone={slots >= PRIORITY_SLOT_BUDGET ? 'warning' : 'normal'}
             >
-              <ChipRow>
-                {GENERATOR_EMPHASIS_REGIONS.map((region) => {
-                  const choice = choiceOf(emphasis, region);
-                  const blocked = prioritizeBlockedReason(emphasis, region);
-                  return (
-                    <Chip
-                      key={region}
-                      label={t(`region.${region}`)}
-                      sublabel={t(choice === 'PRIORITY'
-                        ? 'generate.emphasisPrioritizeVerb'
-                        : choice === 'DEPRIORITIZED'
-                          ? 'generate.emphasisDeprioritizeVerb'
-                          : 'generate.emphasisBase')}
-                      style={styles.emphasisChip}
-                      cornerBadge={isLowCost(region) ? '½' : '1'}
-                      centerLabel
-                      raised
-                      accessibilityLabel={`${t(`region.${region}`)} · ${t('generate.priorityCost', {
-                        cost: isLowCost(region) ? '½' : '1',
-                      })} · ${t(
-                        choice === 'PRIORITY'
-                          ? 'generate.emphasisPriority'
-                          : choice === 'DEPRIORITIZED'
-                            ? 'generate.emphasisDeprioritized'
-                            : 'generate.emphasisBase',
-                      )}`}
-                      selected={choice !== 'NORMAL'}
-                      tint={choice === 'PRIORITY' ? sectionAccent.train : semantic.deload}
-                      onPress={() => onCycleRegion(region)}
-                    />
-                  );
-                })}
-              </ChipRow>
+              {GENERATOR_EMPHASIS_GROUPS.map((group, groupIndex) => (
+                <View key={group.half} style={groupIndex > 0 ? { marginTop: spacing.lg } : undefined}>
+                  <Text style={[styles.emphasisBlockLabel, { color: colors.textMuted }]}>
+                    {t(`generate.focus${group.half}`).toUpperCase()}
+                  </Text>
+                  <ChipRow>
+                    {group.regions.map((region) => {
+                      const choice = choiceOf(emphasis, region);
+                      const blocked = prioritizeBlockedReason(emphasis, region);
+                      const thumbnail = REGION_THUMBNAILS[region];
+                      return (
+                        <Chip
+                          key={region}
+                          label={t(`region.${region}`)}
+                          sublabel={t(choice === 'PRIORITY'
+                            ? 'generate.emphasisPrioritizeVerb'
+                            : choice === 'DEPRIORITIZED'
+                              ? 'generate.emphasisDeprioritizeVerb'
+                              : 'generate.emphasisBase')}
+                          style={styles.emphasisChip}
+                          leading={thumbnail && (
+                            <BodyMapThumbnail
+                              thumbnail={thumbnail}
+                              size={44}
+                              paint={regionPaint(region, choice === 'PRIORITY'
+                                ? sectionAccent.train
+                                : choice === 'DEPRIORITIZED'
+                                  ? semantic.deload
+                                  : colors.textMuted)}
+                            />
+                          )}
+                          cornerBadge={isLowCost(region) ? '½' : '1'}
+                          centerLabel
+                          raised
+                          accessibilityLabel={`${t(`region.${region}`)} · ${t('generate.priorityCost', {
+                            cost: isLowCost(region) ? '½' : '1',
+                          })} · ${t(
+                            choice === 'PRIORITY'
+                              ? 'generate.emphasisPriority'
+                              : choice === 'DEPRIORITIZED'
+                                ? 'generate.emphasisDeprioritized'
+                                : 'generate.emphasisBase',
+                          )}`}
+                          selected={choice !== 'NORMAL'}
+                          tint={choice === 'PRIORITY' ? sectionAccent.train : semantic.deload}
+                          onPress={() => onCycleRegion(region)}
+                        />
+                      );
+                    })}
+                  </ChipRow>
+                </View>
+              ))}
               {/* Explain the block instead of leaving a control dead with no cause. */}
               {slots >= PRIORITY_SLOT_BUDGET && (
                 <Text
@@ -1085,7 +1135,7 @@ export default function GenerateScreen() {
         </Pressable>
         <Pressable
           onPress={onPrimary}
-          disabled={!canGenerate || saving || (primary === 'save' && plannedSetCount === 0)}
+          disabled={!canGenerate || saving || recommending || (primary === 'save' && plannedSetCount === 0)}
           accessibilityRole="button"
           style={{
             flex: 1,
@@ -1094,7 +1144,7 @@ export default function GenerateScreen() {
             justifyContent: 'center',
             borderRadius: radius.pill,
             backgroundColor: sectionAccent.train,
-            opacity: !canGenerate || saving ? 0.4 : 1,
+            opacity: !canGenerate || saving || recommending ? 0.4 : 1,
           }}
         >
           {saving ? (
@@ -1113,6 +1163,7 @@ export default function GenerateScreen() {
 const styles = StyleSheet.create({
   pages: { flex: 1, flexDirection: 'row' },
   emphasisChip: { width: '47%', minWidth: 0 },
+  emphasisBlockLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.9, marginBottom: 8 },
   rerollButton: {
     height: 48,
     alignItems: 'center',

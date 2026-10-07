@@ -15,6 +15,27 @@ function session(overrides: Partial<WorkoutSession> = {}): WorkoutSession {
 }
 
 describe('e1RMByExerciseFromHistory', () => {
+  it('ignores warm-ups even when their logged estimate exceeds the work sets', () => {
+    const history = session();
+    const normal = history.exercises[0].sets[0];
+    history.exercises[0].sets.push({ ...normal, id: 'warmup', setType: SetType.WARMUP,
+      actualWeight: 200, actualReps: 1 });
+    expect(e1RMByExerciseFromHistory([history]).get('bench')).toBeCloseTo(80 * (1 + 8 / 30));
+    history.exercises[0].sets = [history.exercises[0].sets[1]];
+    expect(e1RMByExerciseFromHistory([history]).size).toBe(0);
+    expect(e1RMByExerciseFromHistory([]).size).toBe(0);
+  });
+
+  it.each([
+    [0, 8], [-1, 8], [NaN, 8], [Infinity, 8], [undefined, 8],
+    [80, 0], [80, -1], [80, 1.5], [80, NaN], [80, Infinity], [80, undefined],
+  ])('ignores malformed actual attempts (%s kg, %s reps)', (weight, reps) => {
+    const history = session();
+    history.exercises[0].sets[0].actualWeight = weight;
+    history.exercises[0].sets[0].actualReps = reps;
+    expect(e1RMByExerciseFromHistory([history]).size).toBe(0);
+  });
+
   it('uses the best completed actual attempt for each exercise', () => {
     const result = e1RMByExerciseFromHistory([
       session(),

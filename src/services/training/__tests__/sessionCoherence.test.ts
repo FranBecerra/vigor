@@ -1,6 +1,6 @@
 import { ExperienceLevel, MuscleGroup } from '@/models';
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
-import { reviewSessionCoherence, sessionPresentationFocus } from '../sessionCoherence';
+import { reviewSessionCoherence, sessionPresentationFocus, plannedPresentationFocus } from '../sessionCoherence';
 import { toPlannedSession } from '../routineMapper';
 import { TrainingGoal } from '../volumePlan';
 import type { DistributedSession } from '../sessionDistribution';
@@ -27,18 +27,41 @@ it('reports beginner coaching needs and concentrated unsupported rows without ba
   expect(reviewSessionCoherence(work, ExperienceLevel.ADVANCED, targets).map((f) => f.code)).toEqual(['unsupported-row-concentration']);
   expect(JSON.stringify(work)).toBe(snapshot);
 });
-it('fixes impossible labels in preview/persistence without moving sets or changing strength', () => {
-  const upperOnly = session('LOWER', ['remo-con-barra', 'curl-barra']);
-  expect(sessionPresentationFocus(upperOnly)).toBe('UPPER');
-  const planned = toPlannedSession(upperOnly);
-  expect(planned.focus).toBe('UPPER');
+it('names sessions by the muscle groups they train without moving sets or changing strength', () => {
+  const pullOnly = session('LOWER', ['remo-con-barra', 'curl-barra']);
+  expect(sessionPresentationFocus(pullOnly)).toBe('PULL');
+  const planned = toPlannedSession(pullOnly);
+  expect(planned.focus).toBe('PULL');
   expect(planned.exercises.map((e) => e.exerciseId)).toEqual(['remo-con-barra', 'curl-barra']);
   expect(planned.exercises.map((e) => e.sets.length)).toEqual([3, 3]);
-  expect(toPlannedSession(upperOnly, TrainingGoal.STRENGTH).focus).toBe('LOWER');
+  expect(toPlannedSession(pullOnly, TrainingGoal.STRENGTH).focus).toBe('LOWER');
   expect(sessionPresentationFocus(session('PUSH', ['sentadilla-libre']))).toBe('LOWER');
-  expect(sessionPresentationFocus(session('UPPER', ['sentadilla-libre']))).toBe('LOWER');
-  expect(sessionPresentationFocus(session('LOWER', ['sentadilla-libre', 'press-banca']))).toBe('LOWER');
-  expect(sessionPresentationFocus(session('PUSH', ['sentadilla-libre', 'press-banca']))).toBe('PUSH');
+  expect(sessionPresentationFocus(session('LEGS', ['sentadilla-libre', 'crunch-polea']))).toBe('LEGS');
+  // Mixed push and pull with lower work is full body, whatever slot it was planned for.
+  expect(sessionPresentationFocus(session('UPPER', ['press-banca', 'jalon-al-pecho', 'sentadilla-libre']))).toBe('FULL_BODY');
+  expect(sessionPresentationFocus(session('UPPER', ['press-banca', 'curl-femoral-sentado']))).toBe('FULL_BODY');
+  // Squats push, hinges and leg curls pull, so push and pull days may carry legs.
+  expect(sessionPresentationFocus(session('LOWER', ['sentadilla-libre', 'press-banca']))).toBe('PUSH');
+  expect(sessionPresentationFocus(session('UPPER', ['prensa-45', 'extension-cuadriceps', 'press-militar-barra', 'press-frances']))).toBe('PUSH');
+  expect(sessionPresentationFocus(session('UPPER', ['peso-muerto-rumano', 'jalon-al-pecho', 'curl-barra']))).toBe('PULL');
+  expect(sessionPresentationFocus(session('UPPER', ['peso-muerto-convencional', 'hip-thrust', 'remo-con-barra']))).toBe('PULL');
+  expect(sessionPresentationFocus(session('PUSH', ['curl-femoral-sentado', 'jalon-al-pecho']))).toBe('PULL');
+  // Calves and isolated hip work do not decide the side.
+  expect(sessionPresentationFocus(session('UPPER', ['press-banca', 'gemelos-de-pie', 'abduccion-cadera-maquina']))).toBe('PUSH');
+  expect(sessionPresentationFocus(session('UPPER', ['elevacion-lateral-mancuernas', 'gemelos-de-pie']))).toBe('FULL_BODY');
+  expect(sessionPresentationFocus(session('FULL_BODY', ['press-banca', 'press-frances']))).toBe('PUSH');
+  expect(sessionPresentationFocus(session('FULL_BODY', ['press-banca', 'jalon-al-pecho']))).toBe('UPPER');
+  // Lateral delts, core and forearms do not decide push versus pull.
+  expect(sessionPresentationFocus(session('PULL', ['jalon-al-pecho', 'elevacion-lateral-mancuernas', 'crunch-polea']))).toBe('PULL');
+  expect(sessionPresentationFocus(session('PUSH', ['elevacion-lateral-mancuernas']))).toBe('UPPER');
   expect(sessionPresentationFocus(session('FULL_BODY', []))).toBe('FULL_BODY');
   expect(sessionPresentationFocus(session('LOWER', ['crunch-polea']))).toBe('LOWER');
+});
+
+it('renames saved sessions from their exercises and ignores unknown ids', () => {
+  const byId = new Map(EXERCISE_CATALOGUE.map((e) => [e.id, e]));
+  const saved = toPlannedSession(session('UPPER', ['press-banca', 'jalon-al-pecho', 'sentadilla-libre']));
+  expect(plannedPresentationFocus({ ...saved, focus: 'UPPER' }, byId)).toBe('FULL_BODY');
+  const unknown = { ...saved, focus: 'PUSH' as const, exercises: [{ ...saved.exercises[0], exerciseId: 'deleted-exercise' }] };
+  expect(plannedPresentationFocus(unknown, byId)).toBe('PUSH');
 });

@@ -2,6 +2,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { backToTraining } from '@/services/training/backNavigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
@@ -18,6 +19,8 @@ import { ExerciseSwapSheet } from '@/components/train/generate/ExerciseSwapSheet
 import { ActionMenuSheet, type ActionMenuItem } from '@/components/train/ActionMenuSheet';
 import { NumericField } from '@/components/train/NumericField';
 import { TrainingCalendarCard } from '@/components/train/TrainingCalendarCard';
+import { MuscleVolumeCard } from '@/components/train/MuscleVolumeCard';
+import { MuscleTags } from '@/components/train/MuscleTags';
 import type { Exercise, Mesocycle, PlannedExercise, PlannedSession } from '@/models';
 import { ExerciseProfile, SetType } from '@/models';
 import { restDurationFor } from '@/services/training/restTimer';
@@ -256,7 +259,7 @@ export default function RoutineDetailScreen() {
         if (selectedSessionIndex !== null && plannedSessionIndex === undefined) {
           resetDraft(); setSelectedSessionIndex(null);
         }
-        else router.back();
+        else backToTraining(router);
       }} accessibilityRole="button">
         <Text style={[typography.body, { color: colors.textSecondary }]}>‹ {selectedSessionIndex === null
           ? t('tabs.train') : routine.name}</Text>
@@ -318,23 +321,10 @@ export default function RoutineDetailScreen() {
         {t('routine.tapSession')}
       </Text>}
       {selected !== null && !editing && <>
-        <Text style={[typography.title, { color: colors.textPrimary, marginBottom: spacing.sm }]}>
-          {t('routine.targetMuscles')}
-        </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: spacing.sm, marginBottom: spacing.xl }}>
-          {previewVolumeBreakdownByMuscle([selected], CATALOGUE).slice(0, 8).map((entry) =>
-            <View key={entry.muscle} style={{ backgroundColor: colors.bgElevated,
-              borderColor: colors.surfaceBorder, borderWidth: 1, borderRadius: 14,
-              padding: spacing.md, minWidth: 115 }}>
-              <Text style={[typography.body, { color: colors.textPrimary }]}>
-                {t(`muscle.${entry.muscle}`)}
-              </Text>
-              <Text style={[typography.caption, { color: colors.textMuted }]}>
-                {entry.sets} {t('home.sets')}
-              </Text>
-            </View>)}
-        </ScrollView>
+        <View style={{ marginBottom: spacing.xl }}>
+          <MuscleVolumeCard title={t('routine.targetMuscles')} hint={t('generate.previewVolumeHint')}
+            entries={previewVolumeBreakdownByMuscle([selected], CATALOGUE)} />
+        </View>
         <Text style={[typography.title, { color: colors.textPrimary }]}>
           {selected.exercises.length} {t('home.exercises')}
         </Text>
@@ -359,6 +349,7 @@ export default function RoutineDetailScreen() {
             </Text>
             {pendingSelection && <Text style={[typography.title, { color: colors.textMuted }]}>⋮</Text>}
           </View>
+          <MuscleTags exercise={CATALOGUE.get(planned.exerciseId)} />
           {planned.sets.map((set, setIndex) => <View key={setIndex}
             style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md,
               marginTop: spacing.xs }}>
@@ -372,9 +363,6 @@ export default function RoutineDetailScreen() {
               RIR {set.targetRIR}
             </Text>
           </View>)}
-          <Text style={[typography.caption, { color: colors.textMuted, marginTop: spacing.sm }]}>
-            {t(`muscle.${CATALOGUE.get(planned.exerciseId)?.primaryMuscle ?? ''}`)}
-          </Text>
         </Pressable>)}
       </>}
       {selectedSessionIndex === null && !editing && <TrainingCalendarCard mesocycleId={mesocycle.id}

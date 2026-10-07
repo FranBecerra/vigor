@@ -12,6 +12,7 @@ import { ScheduleTemplateView } from './ScheduleTemplateView';
 import { sessionsForMicrocycle } from '@/services/training/mesocycleEditing';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
 import { TrainingGoal } from '@/services/training/volumePlan';
+import { plannedPresentationFocus } from '@/services/training/sessionCoherence';
 import type { durationCalibration } from '@/services/training/sessionDuration';
 const CATALOGUE = new Map(EXERCISE_CATALOGUE.map((e) => [e.id, e]));
 const today = () => {
@@ -42,7 +43,9 @@ export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, durat
     return () => { alive = false; };
   }, [mesocycleId, t]));
   const trainingGoal = goal === TrainingGoal.STRENGTH ? TrainingGoal.STRENGTH : TrainingGoal.HYPERTROPHY;
-  const sessions = useMemo(() => mesocycle ? sessionsForMicrocycle(mesocycle, trainingGoal, microcycleIndex) : [],
+  const sessions = useMemo(() => mesocycle ? sessionsForMicrocycle(mesocycle, trainingGoal, microcycleIndex)
+    .map((session) => trainingGoal === TrainingGoal.HYPERTROPHY
+      ? { ...session, focus: plannedPresentationFocus(session, CATALOGUE) } : session) : [],
     [mesocycle, trainingGoal, microcycleIndex]);
   const calendar = mesocycle?.trainingCalendar ?? {};
   const template = mesocycle?.scheduleTemplate ?? buildScheduleTemplate(sessions, CATALOGUE);
@@ -91,7 +94,7 @@ export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, durat
             catch { setError(t('calendar.saveFailed')); }
           }} />
       </View>
-      <ScheduleTemplateView template={template} onMoveRest={busy ? undefined : (from, to) =>
+      <ScheduleTemplateView template={template} sessions={sessions} onMoveRest={busy ? undefined : (from, to) =>
         void persistTemplate(moveRestSlot(template, from, to))} />
       {templateWarnings.map((p) => <Text key={`${p.from}:${p.to}`} style={{ color: colors.textSecondary }}>
         {t('calendar.templateOverlap', { from: p.from + 1, to: p.to + 1 })}</Text>)}

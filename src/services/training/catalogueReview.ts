@@ -3,6 +3,7 @@ import { COMPOUND_VECTORS, Equipment, ExerciseProfile, MovementVector, type Exer
 import { CRITERIA_KEYS } from './exerciseCatalogue';
 import { GUIDE_EXISTING_IDS } from './guideExerciseCatalogue';
 import { tricepsSourceReview, tricepsCriterionBands } from './tricepsSourceReview';
+import { bicepsSourceReview } from './bicepsSourceReview';
 
 export interface CriterionEvidence {
   confidence: string;
@@ -46,6 +47,7 @@ export function reviewCatalogueExercise(exercise: Exercise, evidence: EvidenceLe
   const aliases = Object.entries(GUIDE_EXISTING_IDS).filter(([, id]) => id === exercise.id).map(([page]) => Number(page));
   const pages = exercise.guidePage === undefined ? aliases : [exercise.guidePage];
   const individualSource = pages.map(tricepsSourceReview).find((entry) => entry !== undefined);
+  const bicepsSource = pages.map(bicepsSourceReview).find((entry) => entry !== undefined);
   const issues: string[] = [];
   const criteria = CRITERIA_KEYS.map((key) => {
     const entry = evidence[exercise.id]?.[key];
@@ -53,7 +55,7 @@ export function reviewCatalogueExercise(exercise: Exercise, evidence: EvidenceLe
     if (entry && entry.confidence !== 'programming-judgement') issues.push(`citation-support-unverified:${key}`);
     if (entry && /nervios|neural|SNC|central/i.test(entry.note)) issues.push(`neural-fatigue-claim:${key}`);
     return { key, value: exercise.criteria?.[key] ?? null,
-      provenance: entry?.confidence ?? (individualSource ? 'individual-source-mechanics-point-unresolved' : exercise.guidePage ? 'generic-guide-rubric' : 'absent'),
+      provenance: entry?.confidence ?? (individualSource || bicepsSource ? 'individual-source-mechanics-point-unresolved' : exercise.guidePage ? 'generic-guide-rubric' : 'absent'),
       citations: entry?.citations ?? [], supportVerified: false };
   });
   if (!exercise.stimulusTags?.length) issues.push('stimulus-descriptors-missing');
@@ -74,5 +76,6 @@ export function reviewCatalogueExercise(exercise: Exercise, evidence: EvidenceLe
     biomechanicalReview: approach[exercise.movementVector]
       ?? 'Verify active joint action, support, target attribution and reproducible loading. Do not infer exact hypertrophy or systemic-fatigue magnitude from the movement label.',
     ...(individualSource ? { individualSource, criterionBands: tricepsCriterionBands(individualSource) } : {}),
-    status: individualSource ? 'source-mechanics-reviewed-rating-unresolved' : 'screened-needs-individual-verification' };
+    ...(bicepsSource ? { bicepsSource } : {}),
+    status: individualSource || bicepsSource ? 'source-mechanics-reviewed-rating-unresolved' : 'screened-needs-individual-verification' };
 }

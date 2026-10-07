@@ -51,6 +51,8 @@ export const palette = {
     textPrimary: '#F0F2F4',
     textSecondary: '#9AA1A8',
     textMuted: '#6B7279',
+    /** Body-map muscle with no volume or no emphasis. */
+    muscleNeutral: '#3A3F45',
   },
   light: {
     bg: '#F2F3F5',
@@ -60,6 +62,7 @@ export const palette = {
     textPrimary: '#16191C',
     textSecondary: '#5A6068',
     textMuted: '#8E959C',
+    muscleNeutral: '#DADDE1',
   },
 } as const;
 

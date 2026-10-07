@@ -498,7 +498,7 @@ export function meavForRegion(
   landmarks: VolumeLandmarks,
   emphasis: RegionEmphasis,
   level: ExperienceLevel,
-  planHasPriorities = false,
+  priorityLoad = 0,
 ): number {
   const { mv, mev, mav, mrv } = landmarks;
   let target: number;
@@ -510,9 +510,10 @@ export function meavForRegion(
       target = mv + (mev - mv) * DEPRIORITIZED_RANGE_FRACTION;
       break;
     default: {
-      const fraction = planHasPriorities
-        ? NORMAL_RANGE_FRACTION_WITH_PRIORITY[level]
-        : NORMAL_RANGE_FRACTION[level];
+      // A cheap priority (triceps) must not cost the rest as much as two expensive ones.
+      const load = Math.min(1, Math.max(0, priorityLoad));
+      const fraction = NORMAL_RANGE_FRACTION[level]
+        + (NORMAL_RANGE_FRACTION_WITH_PRIORITY[level] - NORMAL_RANGE_FRACTION[level]) * load;
       target = mev + (mav - mev) * fraction;
     }
   }
@@ -642,7 +643,8 @@ export function buildVolumePlan(input: VolumePlanInput): VolumePlan {
       ? landmarksFromDeclaredVolume(region, input.level, input.goal, declared)
       : landmarksForRegion(region, input.level, input.goal);
 
-    const meav = meavForRegion(landmarks, emphasis, input.level, priorityRegions.length > 0);
+    const meav = meavForRegion(landmarks, emphasis, input.level,
+      priorityRegions.reduce((sum, r) => sum + prioritySlotsOf(r), 0) / PRIORITY_SLOT_BUDGET);
 
     regions.push({
       region,

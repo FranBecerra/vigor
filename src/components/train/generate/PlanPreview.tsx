@@ -15,7 +15,8 @@ import { NumericField } from '@/components/train/NumericField';
 import { SetType, type Exercise } from '@/models';
 import type { PlannedSession } from '@/models';
 import type { LimitingFactor } from '@/services/training/mesocyclePlanner';
-import { previewVolumeBreakdownByMuscle, representativeSet, underfilledSessionIndexes, visibleVolumeComponents } from '@/services/training/previewEditing';
+import { previewVolumeBreakdownByMuscle, representativeSet, underfilledSessionIndexes } from '@/services/training/previewEditing';
+import { MuscleVolumeCard } from '@/components/train/MuscleVolumeCard';
 import { REGION_OF_MUSCLE } from '@/services/training/volumePlan';
 import { SESSION_OVERHEAD_MINUTES } from '@/services/training/trainingCapacity';
 import { buildScheduleTemplate } from '@/services/training/scheduleTemplate';
@@ -77,8 +78,6 @@ export function PlanPreview({
   // Insufficient time is the only case that is an error rather than information.
   const limitTone =
     limitedBy === 'insufficient-time' ? semantic.danger : colors.textSecondary;
-  const volume = previewVolumeBreakdownByMuscle(sessions, exercisesById);
-  const maxVolume = volume[0]?.sets ?? 1;
   const underfilled = minimumSessionSets === undefined
     ? []
     : underfilledSessionIndexes(sessions, minimumSessionSets);
@@ -131,7 +130,7 @@ export function PlanPreview({
         )}
       </GlassSurface>
 
-      {sessions.length > 0 && <ScheduleTemplateView template={buildScheduleTemplate(sessions, exercisesById)} />}
+      {sessions.length > 0 && <ScheduleTemplateView template={buildScheduleTemplate(sessions, exercisesById)} sessions={sessions} />}
 
       {sessions.map((session) => {
         const regions = [
@@ -324,52 +323,8 @@ export function PlanPreview({
         );
       })}
 
-      <View
-        style={[
-          styles.volumeCard,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.surfaceBorder,
-            borderRadius: radius.md,
-          },
-        ]}
-      >
-        <Text style={[typography.title, { color: colors.textPrimary, marginBottom: spacing.md }]}>
-          {t('generate.previewVolume')}
-        </Text>
-        <Text style={[typography.caption, { color: colors.textMuted, marginBottom: spacing.md }]}>
-          {t('generate.previewVolumeHint')}
-        </Text>
-        {volume.map((entry) => (
-          <View key={entry.muscle} style={styles.volumeRow}>
-            <View style={{ width: 118 }}>
-              <Text numberOfLines={1} style={[styles.volumeName, { color: colors.textSecondary }]}>
-                {t(`muscle.${entry.muscle}`)}
-              </Text>
-              {visibleVolumeComponents(entry).length > 0 &&
-                <Text numberOfLines={1} style={{ fontSize: 9, color: colors.textMuted }}>
-                  {visibleVolumeComponents(entry).map((part) => part === 'direct'
-                    ? t('generate.previewDirectSets', { count: entry.directSets })
-                    : t('generate.previewIndirectSets', { count: entry.indirectSets })).join(' · ')}
-                </Text>}
-            </View>
-            <View style={[styles.volumeTrack, { backgroundColor: colors.bgElevated }]}>
-              <View
-                style={[
-                  styles.volumeFill,
-                  {
-                    backgroundColor: sectionAccent.train,
-                    width: `${(entry.sets / maxVolume) * 100}%`,
-                  },
-                ]}
-              />
-            </View>
-            <Text style={[styles.volumeValue, { color: colors.textPrimary }]}>
-              {Number.isInteger(entry.sets) ? entry.sets : entry.sets.toFixed(1)}
-            </Text>
-          </View>
-        ))}
-      </View>
+      <MuscleVolumeCard title={t('generate.previewVolume')} hint={t('generate.previewVolumeHint')}
+        entries={previewVolumeBreakdownByMuscle(sessions, exercisesById)} heatMap />
     </View>
   );
 }
@@ -386,16 +341,4 @@ const styles = StyleSheet.create({
   prescriptionRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 8 },
   numericGroup: { width: 64, alignItems: 'center' },
   numericLabel: { fontSize: 9, fontWeight: '700', marginBottom: 2 },
-  volumeCard: { borderWidth: 1, padding: 16, marginTop: 4 },
-  volumeRow: { flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 7 },
-  volumeName: { width: 92, fontSize: 11 },
-  volumeTrack: { flex: 1, height: 7, borderRadius: 4, overflow: 'hidden' },
-  volumeFill: { height: 7, borderRadius: 4 },
-  volumeValue: {
-    width: 30,
-    fontSize: 11,
-    fontWeight: '700',
-    textAlign: 'right',
-    fontVariant: ['tabular-nums'],
-  },
 });
