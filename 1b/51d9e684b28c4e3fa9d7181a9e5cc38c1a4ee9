@@ -1,0 +1,165 @@
+src/services/training/bicepsSourceReview.ts
+  s_b6a0f22c32fc5f::t_22cc65ca87b7cf 1-8,10-20,30-35,39-41,45-57
+  s_b6a0f22c32fc5f::t_a1922db1f8d94a 9,21-29,36-38,42-44
+src/services/training/__tests__/allocationRepair.test.ts
+  s_b6a0f22c32fc5f::t_407f786791a38c 1-40
+scripts/benchmark-capacity.ts
+  s_b6a0f22c32fc5f::t_20929e432cca34 1-33
+PRD.md
+  s_b6a0f22c32fc5f::t_a4ec1de645365d 13
+  s_b6a0f22c32fc5f::t_0b07875ed76bb6 2803-2810
+  s_b6a0f22c32fc5f::t_16c8c24676ee49 12
+  s_b6a0f22c32fc5f::t_9279b6f151d025 2779-2790
+  s_b6a0f22c32fc5f::t_376efcf31017f1 14-15
+  s_b6a0f22c32fc5f::t_f4bc28ac050327 3,16,20
+  s_b6a0f22c32fc5f::t_4f5e0a5b7c2a5d 4-11,17-19,21,63
+  s_b6a0f22c32fc5f::t_8ec37e8740802c 2791-2802
+  s_b6a0f22c32fc5f::t_8fbba6b682be32 2776-2778
+  s_08d4fdc5d98119::t_9415be0ae55703 403-408,869,2751-2775
+src/services/training/__tests__/bicepsSourceReview.test.ts
+  s_b6a0f22c32fc5f::t_22cc65ca87b7cf 1-4,7,9,11-21
+  s_b6a0f22c32fc5f::t_e0ef7c81b4ab6c 10
+  s_b6a0f22c32fc5f::t_a1922db1f8d94a 5-6,8
+src/i18n/locales/ja.json
+  s_b6a0f22c32fc5f::t_ae12baf0aefeec 223,226-229
+src/i18n/locales/en.json
+  s_b6a0f22c32fc5f::t_f9c17333dce63a 223
+  s_b6a0f22c32fc5f::t_ae12baf0aefeec 226-229
+src/services/training/__tests__/policyPromotion.test.ts
+  s_b6a0f22c32fc5f::t_7a5405527f83f4 67-68,70-73,75-92
+  s_b6a0f22c32fc5f::t_407f786791a38c 17
+  s_b6a0f22c32fc5f::t_e09c7c22b0b2d0 18
+  s_b6a0f22c32fc5f::t_03dabee3104083 5-6,93-101
+scripts/review-generator-changes.ts
+  s_b6a0f22c32fc5f::t_b6227b82484acf 3,52,55
+  s_b6a0f22c32fc5f::t_ee434698873460 1-2,4-33,37-48,50-51,53-54,56-63
+  s_b6a0f22c32fc5f::t_ddc91a84bf9891 34-36,49
+src/services/training/__tests__/bicepsExchange.test.ts
+  s_b6a0f22c32fc5f::t_361826a51eb073 1-24,42-74
+  s_b6a0f22c32fc5f::t_4f5e0a5b7c2a5d 25-41
+src/services/training/sessionDistribution.ts
+  s_b6a0f22c32fc5f::t_4c6a9bd4ef20b9 399-419,428-439,450-466,468-469,472-477,482-499
+  s_b6a0f22c32fc5f::t_1bd172dee7d7e7 577,579,584
+  s_b6a0f22c32fc5f::t_05af8a23b446d0 502,509,545,560-561,571-572,594-595,600
+  s_b6a0f22c32fc5f::t_1c2bc7e04291ad 508
+  s_b6a0f22c32fc5f::t_58d0a2da47e240 440-449,467,470-471
+  s_b6a0f22c32fc5f::t_ff76c11d049a7f 370-384
+  s_b6a0f22c32fc5f::t_050606c9ce7ba5 500-501,503-507,525-538,540,542-544,546-553,555-559,562-569,573-576,578,580-583,585-593,596-599,601-604,606-609,1387-1388
+  s_b6a0f22c32fc5f::t_c147459255c071 510-524,539,541,554,570,605
+  s_b6a0f22c32fc5f::t_6ccab23b7092d8 45,420-427,478-481
+  s_b6a0f22c32fc5f::t_a5e65d5dc9b8c3 1386,1389-1391
+  s_b6a0f22c32fc5f::t_ee3a92e028b853 398
+scripts/review-generator-defects.ts
+  s_b6a0f22c32fc5f::t_2cb3054a25d2e2 6-10,14
+  s_b6a0f22c32fc5f::t_38ad8c18a13cb0 1-5,11-13,15-31
+src/services/training/historyReadiness.ts
+  s_b6a0f22c32fc5f::t_556498eb162136 1-56
+src/services/training/capacityRecommendation.ts
+  s_b6a0f22c32fc5f::t_db738026266c8b 69,123-132,138-142,163-164,171-173,210-269
+  s_b6a0f22c32fc5f::t_ae12baf0aefeec 4-10
+src/services/training/__tests__/capacitySearch.test.ts
+  s_b6a0f22c32fc5f::t_415435abac84e4 1-82
+src/app/(tabs)/(train)/routine.tsx
+  s_b6a0f22c32fc5f::t_61b23df642566b 5,22-23,262,324-327,352
+src/models/routine.ts
+  s_b6a0f22c32fc5f::t_e0ef7c81b4ab6c 189-190
+src/services/training/__tests__/e1rmHistory.test.ts
+  s_b6a0f22c32fc5f::t_8f22465603f71d 18-38
+src/app/(tabs)/(train)/generate.tsx
+  s_b6a0f22c32fc5f::t_61b23df642566b 107,617,669
+  s_b6a0f22c32fc5f::t_ae12baf0aefeec 315,728,1147
+  s_b6a0f22c32fc5f::t_f9c17333dce63a 60-61,266-267,306-314,362-366,368-370,377-378,382-392,821-825,890-941,1138
+  s_b6a0f22c32fc5f::t_556498eb162136 117,281
+  s_b6a0f22c32fc5f::t_42f7338ec414d4 80,105-106,1166
+docs/audits/2026-10-07-allocation-and-history.md
+  s_b6a0f22c32fc5f::t_089ecc775a60d5 42
+  s_b6a0f22c32fc5f::t_f4bc28ac050327 1-10,12,14-41,43-47,49-52,54-58
+  s_b6a0f22c32fc5f::t_8ec37e8740802c 59,70-84
+  s_b6a0f22c32fc5f::t_938acad6ce3c0b 60-69
+  s_b6a0f22c32fc5f::t_a4ec1de645365d 13,48
+  s_b6a0f22c32fc5f::t_16c8c24676ee49 11,53
+docs/audits/2026-10-06-navigation-and-biceps.md
+  s_b6a0f22c32fc5f::t_cbb6d6c971dd6a 1-63,65-82
+  s_b6a0f22c32fc5f::t_9279b6f151d025 64
+src/services/training/scheduleTemplate.ts
+  s_b6a0f22c32fc5f::t_6ccab23b7092d8 6-17,38,43-49,61-62,66,85-95
+src/app/(tabs)/(train)/session.tsx
+  s_b6a0f22c32fc5f::t_61b23df642566b 25,301,308
+docs/generator-technical-debt.md
+  s_b6a0f22c32fc5f::t_8c727c1325944f 3-8,10-12,14
+  s_b6a0f22c32fc5f::t_cbb6d6c971dd6a 16-28
+  s_b6a0f22c32fc5f::t_7e011b63e035c0 9
+  s_b6a0f22c32fc5f::t_0b07875ed76bb6 13,15
+src/services/training/__tests__/generatorDisposition.test.ts
+  s_b6a0f22c32fc5f::t_2cb3054a25d2e2 12
+  s_b6a0f22c32fc5f::t_38ad8c18a13cb0 1-11,13-17
+docs/audits/2026-10-07-capacity-performance.md
+  s_b6a0f22c32fc5f::t_0b07875ed76bb6 49
+  s_b6a0f22c32fc5f::t_376efcf31017f1 1-48
+src/app/(tabs)/(train)/mesocycle.tsx
+  s_b6a0f22c32fc5f::t_61b23df642566b 14,24,73,87,256
+src/services/training/backNavigation.ts
+  s_b6a0f22c32fc5f::t_61b23df642566b 2-3,7
+  s_b6a0f22c32fc5f::t_75ccf9699538fe 1,4-6
+src/services/training/__tests__/historyReadiness.test.ts
+  s_b6a0f22c32fc5f::t_a1922db1f8d94a 1-40
+src/i18n/locales/fr.json
+  s_b6a0f22c32fc5f::t_ae12baf0aefeec 223,226-229
+src/services/training/catalogueReview.ts
+  s_b6a0f22c32fc5f::t_22cc65ca87b7cf 6,50,58,79-80
+src/services/training/__tests__/scheduleTemplate.test.ts
+  s_b6a0f22c32fc5f::t_8f22465603f71d 1,8-21
+src/services/training/e1rmHistory.ts
+  s_b6a0f22c32fc5f::t_8f22465603f71d 8,41
+src/app/(tabs)/(train)/_layout.tsx
+  s_b6a0f22c32fc5f::t_61b23df642566b 18-21
+src/services/training/mesocyclePlanner.ts
+  s_b6a0f22c32fc5f::t_fbea70ac0df189 38,148-155
+  s_b6a0f22c32fc5f::t_ff76c11d049a7f 41,200,211-223,225-233
+  s_b6a0f22c32fc5f::t_30e44ec726e75b 43,206,224,237-247,254,257
+  s_b6a0f22c32fc5f::t_05af8a23b446d0 42,201-205,207-210
+  s_b6a0f22c32fc5f::t_1c2bc7e04291ad 248-253,255-256
+  s_b6a0f22c32fc5f::t_e09c7c22b0b2d0 116
+  s_b6a0f22c32fc5f::t_2063869c06c2cc 111-115,117-123,128-129
+  s_b6a0f22c32fc5f::t_7e70d2620b924e 284-288,291-293,320-322
+  s_b6a0f22c32fc5f::t_a3a37d8dccf2e1 362-367,414-415
+  s_b6a0f22c32fc5f::t_d8c983d035a8aa 405-413,416-420
+  s_b6a0f22c32fc5f::t_9ec661dc206bc9 258-259
+src/services/training/__tests__/backNavigation.test.ts
+  s_b6a0f22c32fc5f::t_61b23df642566b 1-10
+src/services/training/generatorDisposition.ts
+  s_b6a0f22c32fc5f::t_38ad8c18a13cb0 1-15
+src/i18n/locales/es.json
+  s_b6a0f22c32fc5f::t_f9c17333dce63a 223
+  s_b6a0f22c32fc5f::t_ae12baf0aefeec 226-229
+src/services/training/__tests__/capacityEvaluationCache.test.ts
+  s_b6a0f22c32fc5f::t_8a3c78608efced 1-34
+docs/audits/2026-10-07-changed-cases.md
+  s_b6a0f22c32fc5f::t_01a6fd0c4ee129 1-225
+docs/audits/2026-10-07-remaining-defects.md
+  s_b6a0f22c32fc5f::t_3f7e30c7d3607e 1-233
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1b51d9e684b28c4e3fa9d7181a9e5cc38c1a4ee9",
+  "prompts": {},
+  "sessions": {
+    "s_08d4fdc5d98119": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0f2e9-71b2-70e2-96aa-6bdbda290d46",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
