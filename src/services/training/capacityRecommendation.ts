@@ -1,71 +1,17 @@
 /**
- * Capacity recommendation: the app decides how many sessions and how long.
- *
- * SCIENTIFIC BOUNDARY
- * Legacy "recoverable volume" labels below mean the model's estimated starting
- * budget, not measured individual recovery, MEV/MRV or proof that extra training
- * cannot produce adaptation. Qualification/ranking are product heuristics.
- * Production preserves exhaustive ranking while pruning impossible qualifications
- * and reusing partial samples for the best-available fallback.
- *
- * WHY THIS EXISTS
- *   A beginner who believes more is better sets 5 or 6 sessions, and the generator
- *   obediently spreads a beginner's recoverable volume over six days, producing thin
- *   sessions with a worse structure than three honest ones. The volume ceiling is set
- *   by what the athlete RECOVERS from, not by the time they are willing to spend, so
- *   past that ceiling extra sessions add commitment and no adaptation.
- *
- * HOW IT DECIDES
- *   It runs the real generator across a grid of capacities and reads its verdicts,
- *   rather than modelling the engine a second time in a way that could disagree with
- *   it. A candidate qualifies when `limitedBy` is `recovery`: the plan reached the
- *   recoverable volume and lost nothing to the clock. Every qualifying candidate
- *   therefore prescribes the SAME number of sets, which is what makes the choice
- *   purely about structure and time.
- *
- *   Ranking, in order:
- *     1. a structure within `STRUCTURE_TOLERANCE` warnings of the best available is
- *        treated as equally sound. Minimising warnings outright is wrong here: more
- *        sessions almost always shave one off, so it recommended six days, which is
- *        the belief this feature exists to correct. A floor, not a maximum.
- *     2. fewest total weekly minutes — the smallest commitment that still works, and
- *        the headline the athlete needs to hear.
- *     3. fewest sessions, to break a remaining tie.
- *
- *   `single-frequency` warnings never reach zero, and that is correct rather than a
- *   defect: a muscle whose weekly volume is three sets belongs in one session. It is
- *   why the ranking compares warning counts against the best ACHIEVABLE count instead
- *   of against zero.
- *
- *   HOW A CANDIDATE QUALIFIES
- *     `limitedBy === 'recovery'` on its own is not enough, and measuring showed why: a
- *     catalogue of one exercise also reports `recovery`, because the label says which
- *     ceiling BOUND the plan, not that the plan reached the athlete's recoverable
- *     volume. A bodyweight-only advanced plan of 37 sets would have been presented as
- *     "this is what you can recover from". So a candidate must ALSO deliver at least
- *     the level and goal's minimum recoverable volume, which is an absolute reading.
- *     When nothing does, the equipment is the binding constraint and the screen says
- *     so instead of dressing up a thin plan as the right answer.
- *
- *
- * WHY SEVERAL SEEDS AND NOT THE ATHLETE'S OWN
- *   Measured with a single seed, this recommendation was NOT stable: the same
- *   intermediate got 6x60, 5x60 or 4x75 depending on the draw, because the warning
- *   count moves by one or two with which exercises came out and that was enough to
- *   change the winner. Advice that flips with a dice roll is not advice. Each capacity
- *   is therefore scored across a fixed sample of seeds and ranked on the mean, which
- *   also matches what the answer is ABOUT: the capacity, not one selection.
- *
- * WHY SESSIONS ARE CAPPED AT 75 MINUTES
- *   Minimising total weekly minutes alone prefers fewer, longer sessions, because the
- *   warm-up overhead is paid once per session: it would recommend two 90-minute days.
- *   A recommendation has to be something a person will actually do, and the engine's
- *   own per-muscle caps mean the extra minutes in an overlong session go to less
- *   productive work anyway. The athlete can still set 90 or 120 by hand.
+ * Recommend a practical calendar for a provisional fixed muscle-volume budget.
+ * Hypertrophy selects three fixed dose samples once and evaluates placement,
+ * realistic duration, concentration and balance without squeezing that budget.
+ * This is a scheduling estimate, not a generated routine, measured recovery,
+ * individual MEV/MRV, or a claim of injury prevention. Full generation remains
+ * responsible for the final roster, prescriptions and feasibility diagnostics.
+ * Strength keeps the validated lift-specific legacy search for now.
  */
-import type { Exercise, ExperienceLevel, SplitStructure } from '@/models';
+import { SplitStructure, type Exercise, type ExperienceLevel } from '@/models';
 import { planMesocycle } from './mesocyclePlanner';
-import { TOTAL_SETS_RANGE, type TrainingGoal, type VolumeRegion } from './volumePlan';
+import { TOTAL_SETS_RANGE, TrainingGoal, RegionEmphasis, buildVolumePlan, type VolumeRegion, type VolumePlanInput } from './volumePlan';
+import { selectExercises, SECONDARY_CREDIT } from './exerciseSelection';
+import { distributeSelection, type SessionDistribution } from './sessionDistribution';
 import { MINUTES_PER_WORKING_SET_FLOOR, SESSION_OVERHEAD_MINUTES } from './trainingCapacity';
 
 /** Session counts considered. Below two there is no frequency to speak of. */
@@ -88,7 +34,7 @@ export const RECOMMENDATION_SEEDS: readonly number[] = [11, 22, 33];
  */
 export const STRUCTURE_TOLERANCE = 1;
 
-export interface CapacityRecommendationInput {
+export interface CapacityRecommendationInput extends VolumePlanInput {
   level: ExperienceLevel;
   goal: TrainingGoal;
   /** Catalogue ALREADY filtered by the athlete's equipment and vetoes. */
@@ -97,6 +43,8 @@ export interface CapacityRecommendationInput {
   split?: SplitStructure;
   priorityRegions?: readonly VolumeRegion[];
   deprioritizedRegions?: readonly VolumeRegion[];
+  /** Paired diagnostic control only; not a user-facing setting. */
+  capacityPacking?: boolean;
 }
 
 export interface CapacityRecommendation {
@@ -104,13 +52,13 @@ export interface CapacityRecommendation {
   minutesPerSession: number;
   /** Total commitment per microcycle, which is what the athlete actually spends. */
   weeklyMinutes: number;
-  /** Sets the recommended capacity prescribes, rounded from the sampled plans. */
+  /** Estimated performed sets from fixed-dose samples; final generation may differ. */
   sets: number;
   /**
-   * false when no candidate reached the recoverable volume: the athlete's level needs
-   * more time than the considered bounds allow, and this is the best available rather
-   * than the right answer. Saying so is the point; silently recommending a truncated
-   * plan would be the same mistake the feature exists to prevent.
+   * Legacy compatibility name. True only when the fixed dose samples cover all
+   * muscle targets within one-set rounding tolerance and fit the recommended
+   * calendar. False can mean catalogue/selector shortfall or schedule limits;
+   * it is never a measurement of individual recovery or a final-plan guarantee.
    */
   reachesRecoverableVolume: boolean;
 }
@@ -209,7 +157,7 @@ function choose(candidates: readonly ScoredCapacity[]): CapacityRecommendation {
 }
 
 /** Yield between real plans; prune only configurations that cannot qualify. */
-function* recommendationSearch(input: CapacityRecommendationInput): Generator<void, CapacityRecommendation> {
+function* legacyRecommendationSearch(input: CapacityRecommendationInput): Generator<void, CapacityRecommendation> {
   const records = RECOMMENDED_SESSION_COUNTS.flatMap((sessions) => RECOMMENDED_SESSION_MINUTES
     .map((minutes) => ({ sessions, minutes, samples: [] as CapacitySample[] })));
   const qualified: ScoredCapacity[] = [];
@@ -237,6 +185,88 @@ function* recommendationSearch(input: CapacityRecommendationInput): Generator<vo
     record.samples.push(sample(input, record.sessions, record.minutes, RECOMMENDATION_SEEDS[record.samples.length]));
   }
   return choose(records.map((record) => scored(input, record.sessions, record.minutes, record.samples)));
+}
+
+/** Soft planning preference, not an injury threshold or a physiological set cap. */
+export const SESSION_MUSCLE_DISTRIBUTION_REFERENCE = 10;
+
+/** Fractional muscle dose uses the same full-primary/half-secondary convention. */
+export function concentrationCost(distribution: Pick<SessionDistribution, 'sessions'>): number {
+  return distribution.sessions.reduce((cost, session) => {
+    const dose = new Map<string, number>();
+    for (const { exercise, sets } of session.exercises) {
+      dose.set(exercise.primaryMuscle, (dose.get(exercise.primaryMuscle) ?? 0) + sets);
+      for (const muscle of new Set(exercise.secondaryMuscles)) {
+        if (muscle !== exercise.primaryMuscle) dose.set(muscle, (dose.get(muscle) ?? 0) + sets * SECONDARY_CREDIT);
+      }
+    }
+    return cost + [...dose.values()].reduce((sum, sets) =>
+      sum + Math.max(0, sets - SESSION_MUSCLE_DISTRIBUTION_REFERENCE), 0);
+  }, 0);
+}
+
+/**
+ * Hypertrophy: establish the unsqueezed muscle targets once, then arrange fixed
+ * dose samples. No capacity changes the targets or triggers a full plan search.
+ * Strength retains its lift-specific reference until a dedicated dose-first
+ * strength scheduler is validated; muscle-volume targets are not lift practice.
+ */
+function* recommendationSearch(input: CapacityRecommendationInput): Generator<void, CapacityRecommendation> {
+  if (input.goal === TrainingGoal.STRENGTH) return yield* legacyRecommendationSearch(input);
+  yield;
+  const target = buildVolumePlan(input);
+  const selections = RECOMMENDATION_SEEDS.map((seed) => selectExercises({
+    volumePlan: target, catalogue: input.catalogue, seed, rankingPolicy: 'accessory-aware',
+  }));
+  const sets = Math.round(selections.reduce((sum, selection) => sum + selection.performedSets, 0) / selections.length);
+  const targetsCovered = selections.every((selection) => target.muscles.every((muscle) =>
+    (selection.attributedByMuscle[muscle.muscle] ?? 0) >= muscle.meav - 1))
+    && sets >= TOTAL_SETS_RANGE[input.goal][input.level][0];
+  const candidates: (ScoredCapacity & { overflow: number; quality: number })[] = [];
+  for (const sessions of RECOMMENDED_SESSION_COUNTS) {
+    for (const minutes of RECOMMENDED_SESSION_MINUTES) {
+      yield;
+      const distributions = selections.map((selection) => distributeSelection({
+        selection, split: input.split ?? SplitStructure.AUTO, sessionsPerMicrocycle: sessions,
+        maxWorkMinutesPerSession: minutes - SESSION_OVERHEAD_MINUTES,
+        capacityPacking: input.capacityPacking !== false,
+        deprioritizedMuscles: target.muscles.filter((muscle) => muscle.emphasis === RegionEmphasis.DEPRIORITIZED)
+          .map((muscle) => muscle.muscle),
+      }));
+      const overflow = Math.max(...distributions.map((distribution) =>
+        distribution.sessions.reduce((sum, session) => sum + Math.max(0,
+          session.estimatedWorkMinutes + SESSION_OVERHEAD_MINUTES - minutes), 0)
+          + distribution.unassigned.reduce((sum, entry) => sum + entry.sets * MINUTES_PER_WORKING_SET_FLOOR, 0)));
+      const empty = distributions.some((distribution) => distribution.sessions.some((session) => !session.exercises.length));
+      // Ignore blanket frequency-one warnings: low-dose muscles need not be
+      // split merely to satisfy a universal frequency rule.
+      const quality = distributions.reduce((sum, distribution) => {
+        const loads = distribution.sessions.map((session) => session.exercises.reduce((total, entry) => total + entry.sets, 0));
+        const mean = loads.reduce((total, load) => total + load, 0) / sessions;
+        const thin = loads.filter((load) => load < Math.min(12, mean * 0.65)).length;
+        return sum + concentrationCost(distribution) + thin * 2
+          + distribution.structureWarnings.filter((warning) => warning.kind === 'session-volume-cap').length
+          + distribution.sequencingWarnings.length;
+      }, 0) / distributions.length;
+      candidates.push({ sessionsPerMicrocycle: sessions, minutesPerSession: minutes,
+        weeklyMinutes: sessions * minutes, sets, reachesRecoverableVolume: targetsCovered && overflow <= 0.01 && !empty,
+        meanStructureWarnings: quality, hasEmptySession: empty, overflow, quality });
+    }
+  }
+  // Catalogue shortfalls do not justify searching for a different volume.
+  // Rank schedules that fit the fixed roster even when targets are unavailable.
+  const feasible = candidates.filter((candidate) => candidate.overflow <= 0.01 && !candidate.hasEmptySession);
+  let pool = feasible;
+  if (pool.length) {
+    const bestQuality = Math.min(...pool.map((candidate) => candidate.quality));
+    pool = pool.filter((candidate) => candidate.quality <= bestQuality + STRUCTURE_TOLERANCE);
+    pool.sort((a, b) => a.weeklyMinutes - b.weeklyMinutes || a.sessionsPerMicrocycle - b.sessionsPerMicrocycle);
+  } else {
+    pool = [...candidates].sort((a, b) => Number(a.hasEmptySession) - Number(b.hasEmptySession)
+      || a.overflow - b.overflow || a.quality - b.quality || a.weeklyMinutes - b.weeklyMinutes);
+  }
+  const { overflow: _overflow, quality: _quality, meanStructureWarnings: _warnings, hasEmptySession: _empty, ...best } = pool[0]!;
+  return best;
 }
 export function recommendCapacity(input: CapacityRecommendationInput): CapacityRecommendation {
   const search = recommendationSearch(input);

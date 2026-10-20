@@ -8,7 +8,7 @@
  * Heights are FIXED rather than derived from the text, so a long label in German or
  * a wide Japanese glyph cannot reflow the grid.
  */
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ const STEPPER_BUTTON = 44;
 interface SectionProps {
   title: string;
   hint?: string;
+  hintDisclosure?: boolean;
   /** Right-aligned status, e.g. the slot counter. */
   trailing?: string;
   trailingTone?: 'normal' | 'warning';
@@ -37,16 +38,20 @@ interface SectionProps {
 export function Section({
   title,
   hint,
+  hintDisclosure = false,
   trailing,
   trailingTone = 'normal',
   children,
   style,
 }: SectionProps) {
   const { colors, typography, spacing, semantic } = useTheme();
+  const [expanded, setExpanded] = useState(false);
   return (
     <View style={[{ marginBottom: spacing.xl }, style]}>
       <View style={styles.sectionHeader}>
         <Text style={[typography.title, { color: colors.textPrimary, flex: 1 }]}>{title}</Text>
+        {hint && hintDisclosure && <Pressable onPress={() => setExpanded((old) => !old)} accessibilityRole="button" accessibilityLabel={hint}
+          accessibilityState={{ expanded }} style={{ padding: 10 }}><Text style={{ color: colors.textMuted }}>ⓘ</Text></Pressable>}
         {trailing !== undefined && (
           <Text
             style={[
@@ -58,7 +63,7 @@ export function Section({
           </Text>
         )}
       </View>
-      {hint !== undefined && (
+      {hint !== undefined && (!hintDisclosure || expanded) && (
         <Text
           style={[
             typography.caption,

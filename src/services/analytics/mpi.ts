@@ -18,6 +18,7 @@ import { relativeE1RMChange } from './e1rm';
 
 /** Peso biomecánico w_i por perfil de ejercicio (PRD §3.2.2). */
 export const PROFILE_WEIGHT: Record<ExerciseProfile, number> = {
+  [ExerciseProfile.UNCLASSIFIED]: 0,
   [ExerciseProfile.COMPOUND_PRIMARY]: 0.5,
   [ExerciseProfile.COMPOUND_SECONDARY]: 0.35,
   [ExerciseProfile.ISOLATION]: 0.15,
@@ -65,7 +66,7 @@ export interface ExerciseE1RMInput {
  * Traduce cada perfil a su peso y cada par (actual, baseline) a su Δe1RM.
  */
 export function muscleProgressIndexFromE1RM(exercises: ExerciseE1RMInput[]): number {
-  const contributions = exercises.map((e) => ({
+  const contributions = exercises.filter((e) => e.profile !== ExerciseProfile.UNCLASSIFIED).map((e) => ({
     weight: PROFILE_WEIGHT[e.profile],
     deltaE1RM: relativeE1RMChange(e.currentE1RM, e.baselineE1RM),
   }));

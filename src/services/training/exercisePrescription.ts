@@ -25,11 +25,13 @@ export interface ExercisePrescription {
 
 const REP_RANGES: Record<TrainingGoal, Record<ExerciseProfile, RepRange>> = {
   [TrainingGoal.HYPERTROPHY]: {
+    [ExerciseProfile.UNCLASSIFIED]: { min: 8, max: 12 },
     [ExerciseProfile.COMPOUND_PRIMARY]: { min: 6, max: 10 },
     [ExerciseProfile.COMPOUND_SECONDARY]: { min: 8, max: 12 },
     [ExerciseProfile.ISOLATION]: { min: 10, max: 15 },
   },
   [TrainingGoal.STRENGTH]: {
+    [ExerciseProfile.UNCLASSIFIED]: { min: 8, max: 12 },
     [ExerciseProfile.COMPOUND_PRIMARY]: { min: 3, max: 5 },
     [ExerciseProfile.COMPOUND_SECONDARY]: { min: 5, max: 8 },
     [ExerciseProfile.ISOLATION]: { min: 8, max: 12 },
@@ -37,6 +39,7 @@ const REP_RANGES: Record<TrainingGoal, Record<ExerciseProfile, RepRange>> = {
 };
 
 const STRENGTH_RIR: Record<ExerciseProfile, { routine: number; peak: number }> = {
+  [ExerciseProfile.UNCLASSIFIED]: { routine: 3, peak: 3 },
   [ExerciseProfile.COMPOUND_PRIMARY]: { routine: 2, peak: 1 },
   [ExerciseProfile.COMPOUND_SECONDARY]: { routine: 2, peak: 1 },
   [ExerciseProfile.ISOLATION]: { routine: 1, peak: 0 },

@@ -33,6 +33,16 @@ const catalogue = [shoulder, lat, midBack, chest];
 const label = (muscle: MuscleGroup) => muscle;
 
 describe('exercise search', () => {
+  it.each(['pulldown', 'pull down', 'lat pulldown', 'PULL-DOWN'])('finds Spanish pulldowns by keywords: %s', (query) => {
+    const hits = searchExercises(query, EXERCISE_CATALOGUE, label);
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.some((exercise) => /jal[oó]n/i.test(exercise.name))).toBe(true);
+    expect(hits.some((exercise) => /^Press de banca$/.test(exercise.name))).toBe(false);
+  });
+  it('does not assign pulldown aliases to every lat or secondary biceps exercise', () => {
+    expect(searchExercises('pull down', [lat, midBack, chest], label).map((ex) => ex.id)).toEqual(['pulldown']);
+    expect(searchExercises('absentkeyword', catalogue, label)).toEqual([]);
+  });
   it('finds the added JM variants and the Kaz alias', () => {
     expect(searchExercises('JM Press', EXERCISE_CATALOGUE, label).map((e) => e.id))
       .toEqual(expect.arrayContaining(['guide-211', 'guide-210']));

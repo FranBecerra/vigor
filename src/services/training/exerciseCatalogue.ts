@@ -26,6 +26,7 @@
  */
 import {
   Equipment,
+  ExerciseApparatus,
   ExerciseGenerationTier,
   ExerciseProfile,
   MovementVector,
@@ -35,7 +36,10 @@ import {
 } from '@/models';
 import catalogueData from '@/data/exercises.json';
 import guideData from '@/data/guide-exercises.json';
+import manualVariants from '@/data/manual-exercise-variants.json';
+import { EXERCISE_DISPLAY_NAMES } from './exerciseIdentity';
 import { buildGuideExercises } from './guideExerciseCatalogue';
+import { apparatusRequirements, apparatusCapabilities, apparatusOptions } from './exerciseApparatus';
 
 /** The six audited criteria, each scored 1-5. */
 export const CRITERIA_KEYS = [
@@ -163,6 +167,24 @@ export function parseExercise(raw: unknown): Exercise {
   }
 
   const stimulusTags = parseStimulusTags(entry.stimulusTags, id);
+  if (entry.requiredApparatus !== undefined && (!Array.isArray(entry.requiredApparatus)
+    || new Set(entry.requiredApparatus).size !== entry.requiredApparatus.length)) {
+    throw new CatalogueValidationError(id, 'requiredApparatus', entry.requiredApparatus);
+  }
+  const requiredApparatus = entry.requiredApparatus === undefined ? undefined
+    : (entry.requiredApparatus as unknown[]).map((value) => assertEnum(ExerciseApparatus, value, id, 'requiredApparatus'));
+  if (entry.apparatusOptions !== undefined && (!Array.isArray(entry.apparatusOptions)
+    || entry.apparatusOptions.some((group) => !Array.isArray(group) || !group.length || new Set(group).size !== group.length))) {
+    throw new CatalogueValidationError(id, 'apparatusOptions', entry.apparatusOptions);
+  }
+  const options = entry.apparatusOptions === undefined ? undefined : (entry.apparatusOptions as unknown[][])
+    .map((group) => group.map((value) => assertEnum(ExerciseApparatus, value, id, 'apparatusOptions')));
+  if (entry.laterality !== undefined && !['BILATERAL', 'PER_SIDE'].includes(String(entry.laterality))) {
+    throw new CatalogueValidationError(id, 'laterality', entry.laterality);
+  }
+  if (entry.notes !== undefined && (typeof entry.notes !== 'string' || entry.notes.length > 2000)) {
+    throw new CatalogueValidationError(id, 'notes', entry.notes);
+  }
   return {
     id,
     name: entry.name,
@@ -171,6 +193,8 @@ export function parseExercise(raw: unknown): Exercise {
     movementVector: assertEnum(MovementVector, entry.movementVector, id, 'movementVector'),
     profile: assertEnum(ExerciseProfile, entry.profile, id, 'profile'),
     equipment: assertEnum(Equipment, entry.equipment, id, 'equipment'),
+    ...(requiredApparatus === undefined ? {} : { requiredApparatus }),
+    ...(options === undefined ? {} : { apparatusOptions: options }),
     criteria: entry.generationTier === ExerciseGenerationTier.MANUAL_ONLY && entry.criteria === undefined
       ? undefined
       : parseCriteria(entry.criteria, id),
@@ -180,6 +204,8 @@ export function parseExercise(raw: unknown): Exercise {
         : assertEnum(ExerciseGenerationTier, entry.generationTier, id, 'generationTier'),
     ...(stimulusTags === undefined ? {} : { stimulusTags }),
     ...(typeof entry.guidePage === 'number' ? { guidePage: entry.guidePage } : {}),
+    ...(entry.laterality === undefined ? {} : { laterality: entry.laterality as Exercise['laterality'] }),
+    ...(entry.notes === undefined ? {} : { notes: entry.notes as string }),
     isCustom: false,
   };
 }
@@ -205,11 +231,16 @@ export function parseCatalogue(raw: unknown): Exercise[] {
  * Loaded catalogue, validated at import time: a broken catalogue must break the
  * build rather than produce a wrong routine.
  */
-const auditedCatalogue = parseCatalogue(catalogueData);
+const auditedCatalogue = parseCatalogue(catalogueData).map((exercise) => {
+  const required = apparatusRequirements(exercise);
+  return required === undefined ? exercise : { ...exercise, requiredApparatus: [...required] };
+});
 const guideCatalogue = parseCatalogue({
   exercises: buildGuideExercises(guideData.exercises, auditedCatalogue),
 });
-export const EXERCISE_CATALOGUE: readonly Exercise[] = [...auditedCatalogue, ...guideCatalogue];
+export const EXERCISE_CATALOGUE: readonly Exercise[] = parseCatalogue({ exercises: [
+  ...auditedCatalogue, ...guideCatalogue, ...parseCatalogue(manualVariants),
+].map((exercise) => ({ ...exercise, name: EXERCISE_DISPLAY_NAMES[exercise.id] ?? exercise.name })) });
 
 /** Scored criteria, or a neutral default for user-created entries. */
 export function criteriaOf(exercise: Exercise): ExerciseCriteria {
@@ -234,10 +265,9 @@ export function stimulusQuality(exercise: Exercise): number {
 /**
  * Fatigue spent per set, on a 1-5 scale where higher means more expensive.
  *
- * Built from `systemicFatigueCost` (central fatigue, axial compression, joint
- * stress) plus a smaller contribution from `stabilityCost`, because a task that
- * stabilisers limit also degrades faster within a session. Both criteria are
- * scored so that 5 is GOOD, hence the inversion.
+ * A weighted programming judgement combining low systemic demand and stability.
+ * This is not a CNS-fatigue, joint-stress, injury-risk or recovery-time measure.
+ * Both criteria are scored so that 5 is favorable, hence the inversion.
  */
 export const FATIGUE_WEIGHTS = { systemic: 0.75, stability: 0.25 } as const;
 
@@ -264,6 +294,8 @@ export function isTopTierStimulus(exercise: Exercise): boolean {
 export interface CatalogueFilter {
   /** Equipment the athlete has. Omitted means no equipment filter. */
   availableEquipment?: readonly Equipment[];
+  /** Optional explicit setup inventory. Omitted preserves unknown availability, not a verified setup. */
+  availableApparatus?: readonly ExerciseApparatus[];
   /** Exercises the athlete vetoed: disliked, painful, or unavailable. */
   vetoedExerciseIds?: readonly string[];
 }
@@ -274,8 +306,12 @@ export function filterCatalogue(
   filter: CatalogueFilter,
 ): Exercise[] {
   const vetoed = new Set(filter.vetoedExerciseIds ?? []);
+  const apparatus = filter.availableApparatus === undefined ? undefined : apparatusCapabilities(filter.availableApparatus);
   const equipment = filter.availableEquipment ? new Set(filter.availableEquipment) : undefined;
   return catalogue.filter((exercise) => {
+    const required = apparatusRequirements(exercise);
+    if (apparatus && required?.some((item) => !apparatus.has(item))) return false;
+    if (apparatus && apparatusOptions(exercise)?.some((group) => !group.some((item) => apparatus.has(item)))) return false;
     if (vetoed.has(exercise.id)) return false;
     if (
       equipment &&

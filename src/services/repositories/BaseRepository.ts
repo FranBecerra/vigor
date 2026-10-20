@@ -28,6 +28,7 @@ import {
   type DocumentData,
 } from '@react-native-firebase/firestore';
 import { db } from '../firebase';
+import { writeLocally } from './localWrite';
 
 /** Todo documento almacenado tiene, como mínimo, un id. */
 export interface WithId {
@@ -78,6 +79,14 @@ export class BaseRepository<T extends WithId> {
   async create(item: T): Promise<void> {
     const { id, ...data } = item;
     await setDoc(this.ref(id), data);
+  }
+
+  /** Native persistence queues the write; a pending write is not cloud-confirmed. */
+  async createLocally(item: T, onSynced?: () => void, onRejected?: (error: unknown) => void) {
+    const { id, ...data } = item;
+    const clean = JSON.parse(JSON.stringify(data)) as Record<string, unknown>;
+    const token = `${Date.now()}:${Math.random().toString(36).slice(2)}`;
+    return writeLocally(this.ref(id), clean, token, onSynced, onRejected);
   }
 
   /** Actualiza parcialmente un documento existente. */

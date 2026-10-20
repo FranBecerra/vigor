@@ -39,7 +39,7 @@ import {
   type StrengthRole,
 } from '@/models';
 import type { SelectedExercise, SelectionResult } from './exerciseSelection';
-import { exerciseMinutes } from './trainingCapacity';
+import { exerciseMinutes, MAX_SETS_PER_EXERCISE_APPEARANCE } from './trainingCapacity';
 import { fatigueCost } from './exerciseCatalogue';
 import { isDemandingTorsoHinge, redundantSessionPair } from './exerciseFamilies';
 import { workloadTemplateRecovery } from './scheduleTemplate';
@@ -148,6 +148,8 @@ export interface DistributionInput {
   maxWorkMinutesPerSession?: number;
   /** Optional user-facing session floor. Omit for strength and low-volume tests. */
   minimumSessionSets?: number;
+  /** Opt-in for fixed-dose calendar estimates; final mesocycle search keeps its validated behavior. */
+  capacityPacking?: boolean;
 }
 
 /** Product-quality floor for generated hypertrophy sessions, not a physiological minimum. */
@@ -368,10 +370,11 @@ function entriesRisk(
 }
 
 /** Refresh neighbour diagnostics after a complete session changes position. */
-export function sessionSequencingWarnings(sessions: readonly DistributedSession[], previousSession: readonly SessionExercise[] = []): SequencingWarning[] {
+export function sessionSequencingWarnings(sessions: readonly DistributedSession[], previousSession: readonly SessionExercise[] = [],
+  riskFor = entriesRisk): SequencingWarning[] {
   return sessions.flatMap((session, index) => {
     const preceding = index === 0 ? previousSession : sessions[index - 1].exercises;
-    const risk = entriesRisk(session.exercises, preceding);
+    const risk = riskFor(session.exercises, preceding);
     if (risk < SEQUENCING_WARNING_THRESHOLD) return [];
     const before = new Set(preceding.flatMap((entry) => [...muscleCredits(entry.exercise).keys()]));
     const after = new Set(session.exercises.flatMap((entry) => [...muscleCredits(entry.exercise).keys()]));
@@ -380,6 +383,20 @@ export function sessionSequencingWarnings(sessions: readonly DistributedSession[
       sharesMovementVector: session.exercises.some((entry) => preceding.some((prior) =>
         prior.exercise.movementVector === entry.exercise.movementVector)) }];
   });
+}
+
+/** Invocation-local memoization; same diagnostics, no cross-athlete/catalogue cache. */
+export function createSequencingEvaluator() {
+  const risks = new Map<Exercise, Map<Exercise, number>>();
+  const riskFor = (current: readonly SessionExercise[], previous: readonly SessionExercise[]) => current.reduce((sum, entry) =>
+    sum + previous.reduce((priorSum, prior) => {
+      const row = risks.get(entry.exercise) ?? new Map<Exercise, number>();
+      if (!row.has(prior.exercise)) row.set(prior.exercise, exerciseRisk(entry.exercise, prior.exercise));
+      risks.set(entry.exercise, row);
+      return priorSum + row.get(prior.exercise)!;
+    }, 0), 0);
+  return (sessions: readonly DistributedSession[], previous: readonly SessionExercise[] = []) =>
+    sessionSequencingWarnings(sessions, previous, riskFor);
 }
 
 /** Minutes of one entry, at its prescribed rest when it carries one. */
@@ -393,6 +410,141 @@ function minutesOf(entries: readonly SessionExercise[]): number {
 
 function setsOf(entries: readonly SessionExercise[]): number {
   return entries.reduce((sum, entry) => sum + entry.sets, 0);
+}
+
+/** Bounded time packing; dose and exercise identities are never reselected. */
+export function packSessionCapacity(sessions: DistributedSession[], maxMinutes: number,
+  previousSession: readonly SessionExercise[] = [], evaluationLimit = 1000): { moves: number; evaluated: number } {
+  const result = { moves: 0, evaluated: 0 };
+  if (sessions.length < 2 || !Number.isFinite(maxMinutes) || maxMinutes <= 0
+    || !Number.isFinite(evaluationLimit) || evaluationLimit <= 0
+    || sessions.some((session) => session.exercises.some((entry) => entry.strength
+      || !Number.isInteger(entry.sets) || entry.sets <= 0))) return result;
+  evaluationLimit = Math.min(1000, Math.floor(evaluationLimit));
+  const initial = sessions.map((session) => session.exercises);
+  // A time-fitting roster with avoidable thin sessions must not displace a
+  // balanced incumbent during capacity search. Underfilling needs joint repair,
+  // not a time-only packing pass that legitimizes the initial bottleneck.
+  if (initial.some((entries) => setsOf(entries) < MIN_HYPERTROPHY_SESSION_SETS)
+    && initial.reduce((sum, entries) => sum + setsOf(entries), 0) >= MIN_HYPERTROPHY_SESSION_SETS * sessions.length) return result;
+  const minutesCache = new Map<Exercise, Map<number, number>>();
+  const minutes = (entries: readonly SessionExercise[]) => entries.reduce((sum, entry) => {
+    const row = minutesCache.get(entry.exercise) ?? new Map<number, number>();
+    if (!row.has(entry.sets)) row.set(entry.sets, entryMinutes(entry));
+    minutesCache.set(entry.exercise, row);
+    return sum + row.get(entry.sets)!;
+  }, 0);
+  const overflow = (roster: readonly (readonly SessionExercise[])[]) => roster.reduce((sum, entries) =>
+    sum + Math.max(0, minutes(entries) - maxMinutes), 0);
+  // Moving/splitting work cannot fit a calendar with insufficient aggregate time.
+  if (overflow(initial) < 0.01 || initial.reduce((sum, entries) => sum + minutes(entries), 0)
+    > maxMinutes * sessions.length + 0.01) return result;
+  const duplicates = (entries: readonly SessionExercise[]) => entries.reduce((sum, entry, index) => sum
+    + entries.slice(index + 1).filter((other) => redundantSessionPair(entry.exercise, other.exercise)).length, 0);
+  const frequency = (roster: readonly (readonly SessionExercise[])[]) => {
+    const counts = new Map<MuscleGroup, number>();
+    roster.forEach((entries) => new Set(entries.map((entry) => entry.exercise.primaryMuscle))
+      .forEach((muscle) => counts.set(muscle, (counts.get(muscle) ?? 0) + 1)));
+    return counts;
+  };
+  const recovery = (roster: readonly (readonly SessionExercise[])[]) => {
+    const template = workloadTemplateRecovery(roster.map((entries, index) => {
+      const directSets = new Map<string, number>();
+      entries.forEach((entry) => directSets.set(entry.exercise.primaryMuscle,
+        (directSets.get(entry.exercise.primaryMuscle) ?? 0) + entry.sets));
+      return { index, directSets };
+    })).filter((pair) => pair.reviewSuggested);
+    const risk = roster.map((entries, index) => entriesRisk(entries,
+      index === 0 ? previousSession : roster[index - 1]));
+    return { templateCount: template.length, templateCost: template.reduce((sum, pair) => sum + pair.cost, 0),
+      sequenceCount: risk.filter((value) => value >= SEQUENCING_WARNING_THRESHOLD).length,
+      risk: risk.reduce((sum, value) => sum + value, 0) + entriesRisk(roster[0], roster[roster.length - 1]) };
+  };
+  const beforeRecovery = recovery(initial), beforeFrequency = frequency(initial);
+  // Keep already short sessions from getting shorter, but do not freeze a
+  // well-loaded roster's exact minimum: time, not identical set counts, packs it.
+  const minimumLoad = initial.map((entries) => Math.min(MIN_HYPERTROPHY_SESSION_SETS, setsOf(entries)));
+  const excess = (entries: readonly SessionExercise[]) => {
+    const dose = effectiveSetsByMuscle(entries);
+    return [...dose].reduce((sum, [muscle, sets]) => sum + Math.max(0, sets - sessionSetCap(muscle, entries)), 0);
+  };
+  const concentration = (roster: readonly (readonly SessionExercise[])[]) => roster.reduce((sum, entries) => sum
+    + [...effectiveSetsByMuscle(entries).values()].reduce((cost, sets) => cost + Math.max(0, sets - 10), 0), 0);
+  const beforeConcentration = concentration(initial);
+  let current = initial;
+  for (let iteration = 0; iteration < 6 && result.evaluated < evaluationLimit; iteration++) {
+    let best = current, bestOverflow = overflow(current);
+    let donorPacked = false;
+    const donors = current.map((entries, index) => ({ index, minutes: minutes(entries) }))
+      .filter((session) => session.minutes > maxMinutes + 0.01).sort((a, b) => b.minutes - a.minutes);
+    if (!donors.length) break;
+    const recipients = current.map((entries, index) => ({ index, minutes: minutes(entries) }))
+      .sort((a, b) => a.minutes - b.minutes);
+    const consider = (left: number, right: number, a: SessionExercise[], b: SessionExercise[]) => {
+      if (result.evaluated >= evaluationLimit) return;
+      result.evaluated++;
+      if (!a.length || !b.length || setsOf(a) < minimumLoad[left] || setsOf(b) < minimumLoad[right]
+        || minutes(b) > maxMinutes + 0.01 || duplicates(a) > duplicates(initial[left])
+        || duplicates(b) > duplicates(initial[right])
+        || (initial[left].some(isSessionAnchor) && !a.some(isSessionAnchor))
+        || (initial[right].some(isSessionAnchor) && !b.some(isSessionAnchor))
+        || excess(a) > excess(initial[left]) + 1e-8 || excess(b) > excess(initial[right]) + 1e-8) return;
+      const roster = current.map((entries, index) => index === left ? a : index === right ? b : entries);
+      const nextOverflow = overflow(roster);
+      if (nextOverflow >= bestOverflow - 0.01 || concentration(roster) > beforeConcentration + 1e-8) return;
+      const nextFrequency = frequency(roster);
+      if ([...beforeFrequency].some(([muscle, count]) => (nextFrequency.get(muscle) ?? 0) < count)) return;
+      const after = recovery(roster);
+      if (after.templateCount > beforeRecovery.templateCount || after.templateCost > beforeRecovery.templateCost + 1e-8
+        || after.sequenceCount > beforeRecovery.sequenceCount || after.risk > beforeRecovery.risk + 1e-8) return;
+      best = roster; bestOverflow = nextOverflow;
+      donorPacked = minutes(a) <= maxMinutes + 0.01;
+    };
+    search: for (const donor of donors) for (const recipient of recipients) {
+      if (donor.index === recipient.index) continue;
+      const left = current[donor.index], right = current[recipient.index];
+      for (const outgoing of left) {
+        if (donorPacked || result.evaluated >= evaluationLimit) break search;
+        // Whole appearance moves and exchanges avoid extra setup time.
+        consider(donor.index, recipient.index, left.filter((entry) => entry !== outgoing), [...right, outgoing]);
+        for (const incoming of right) {
+          if (donorPacked || result.evaluated >= evaluationLimit) break search;
+          consider(donor.index, recipient.index, left.map((entry) => entry === outgoing ? incoming : entry),
+            right.map((entry) => entry === incoming ? outgoing : entry));
+        }
+        // Transfer sets only between existing appearances. Creating another
+        // appearance would violate the catalogue selector's no-repeat contract.
+        for (let count = 1; count < outgoing.sets; count++) {
+          const remaining = outgoing.sets - count;
+          if (isSessionAnchor(outgoing) && remaining < 3) continue;
+          const existing = right.find((entry) => entry.exercise.id === outgoing.exercise.id);
+          if (!existing || existing.sets + count > MAX_SETS_PER_EXERCISE_APPEARANCE) continue;
+          const a = left.map((entry) => entry === outgoing ? { ...entry, sets: remaining } : entry);
+          const b = right.map((entry) => entry === existing ? { ...entry, sets: entry.sets + count } : entry);
+          consider(donor.index, recipient.index, a, b);
+        }
+      }
+      // Two-appearance exchanges can unlock a fit that no single swap reaches,
+      // without cloning or introducing an additional exercise occurrence.
+      const incomingBundles = [[], ...right.map((entry) => [entry]),
+        ...right.flatMap((entry, index) => right.slice(index + 1).map((other) => [entry, other]))];
+      for (let index = 0; index < left.length; index++) for (const other of left.slice(index + 1)) {
+        const outgoing = [left[index], other];
+        for (const incoming of incomingBundles) {
+          if (donorPacked || result.evaluated >= evaluationLimit) break search;
+          consider(donor.index, recipient.index,
+            [...left.filter((entry) => !outgoing.includes(entry)), ...incoming],
+            [...right.filter((entry) => !incoming.includes(entry)), ...outgoing]);
+        }
+      }
+    }
+    if (best === current) break;
+    current = best; result.moves++;
+  }
+  if (result.moves) sessions.forEach((session, index) => {
+    session.exercises = current[index]; session.estimatedWorkMinutes = minutes(current[index]);
+  });
+  return result;
 }
 
 /**
@@ -1387,6 +1539,10 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
     repairSessionAllocation(sessions, input.minimumSessionSets ?? 0,
       input.maxWorkMinutesPerSession, input.previousSession);
     spreadDirectBiceps(input, sessions);
+  }
+
+  if (input.capacityPacking === true && input.maxWorkMinutesPerSession !== undefined) {
+    packSessionCapacity(sessions, input.maxWorkMinutesPerSession, input.previousSession);
   }
 
   sessions.forEach((session) => {

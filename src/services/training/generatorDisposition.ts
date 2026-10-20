@@ -13,3 +13,25 @@ export function shortSessionDisposition(sets: readonly number[], floor = 12) {
     // Whole exercises, time, muscle caps and recovery can make this upper bound unattainable.
     doseOnlyMaximumSessions: Math.floor(totalSets / floor) };
 }
+
+/** Audit denominators count simulations (including probes), never athletes. */
+export function summarizeSessionDispositions(reports: readonly {
+  input: { goal: string };
+  expectedInfeasible: boolean;
+  quality?: { sessions: readonly { sets: number }[] };
+}[]) {
+  const hypertrophy = reports.filter((report) => report.input.goal === 'HYPERTROPHY');
+  const evaluable = hypertrophy.filter((report) => !report.expectedInfeasible && report.quality);
+  const dispositions = evaluable.map((report) => shortSessionDisposition(report.quality!.sessions.map((session) => session.sets)));
+  return {
+    totalCases: reports.length,
+    hypertrophyCases: hypertrophy.length,
+    evaluableHypertrophyCases: evaluable.length,
+    expectedInfeasibleHypertrophyCases: hypertrophy.filter((report) => report.expectedInfeasible).length,
+    missingQualityHypertrophyCases: hypertrophy.filter((report) => !report.expectedInfeasible && !report.quality).length,
+    shortCases: dispositions.filter((disposition) => disposition.shortSessionIndexes.length > 0).length,
+    shortSessions: dispositions.reduce((sum, disposition) => sum + disposition.shortSessionIndexes.length, 0),
+    insufficientDoseCases: dispositions.filter((disposition) => disposition.category === 'insufficient-total-dose-for-requested-frequency').length,
+    allocationBottleneckCases: dispositions.filter((disposition) => disposition.category === 'allocation-bottleneck-needs-local-repair').length,
+  };
+}

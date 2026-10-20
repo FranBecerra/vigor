@@ -2,10 +2,18 @@ import { Equipment, ExperienceLevel, SplitStructure } from '@/models';
 import {
   isPlanStale,
   primaryActionFor,
+  rerollActionFor,
   settingsSignature,
   type GenerationSettings,
 } from '@/services/training/generationPhase';
 import { TrainingGoal, VolumeRegion } from '@/services/training/volumePlan';
+
+it.each([
+  [false, false, false, 'generate'], [true, true, false, 'generate'],
+  [true, true, true, 'generate'], [true, false, false, 'reroll'], [true, false, true, 'keep-edits'],
+] as const)('resolves reroll intent without discarding unchanged edited drafts', (hasPlan, stale, hasPreviewEdits, expected) => {
+  expect(rerollActionFor({ hasPlan, stale, hasPreviewEdits })).toBe(expected);
+});
 
 const base: GenerationSettings = {
   goal: TrainingGoal.HYPERTROPHY,

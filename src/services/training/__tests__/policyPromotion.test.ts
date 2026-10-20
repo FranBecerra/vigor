@@ -1,6 +1,6 @@
 import { ExperienceLevel, MuscleGroup, SplitStructure } from '@/models';
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
-import { evaluatePolicyPromotion, planMesocycle, type MesocyclePlan } from '../mesocyclePlanner';
+import { evaluatePolicyPromotion, planMesocycle, planDoseFirstMesocycle, type MesocyclePlan } from '../mesocyclePlanner';
 import { TrainingGoal, VolumeRegion } from '../volumePlan';
 import { buildScheduleTemplate, templateRecovery } from '../scheduleTemplate';
 import { toPlannedSessions } from '../routineMapper';
@@ -92,7 +92,7 @@ it('repairs the advanced five-day seed bottleneck and refreshes placement diagno
   expect(result.estimatedWorkMinutes).toBe(sessions.reduce((sum, session) => sum + session.estimatedWorkMinutes, 0));
 });
 it('does not trade consecutive-day recovery for more sets in the advanced upper/lower case', () => {
-  const result = planMesocycle({ ...input, level: ExperienceLevel.ADVANCED, seed: 31,
+  const result = planDoseFirstMesocycle({ ...input, level: ExperienceLevel.ADVANCED, seed: 31,
     split: SplitStructure.UPPER_LOWER, capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 75 },
     priorityRegions: [VolumeRegion.BACK], deprioritizedRegions: [] });
   const sessions = toPlannedSessions(result);

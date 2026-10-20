@@ -6,6 +6,8 @@ import {
   RECOMMENDED_SESSION_MINUTES,
 } from '@/services/training/capacityRecommendation';
 import { TOTAL_SETS_RANGE, TrainingGoal, VolumeRegion } from '@/services/training/volumePlan';
+import { planMesocycle } from '../mesocyclePlanner';
+import { SESSION_OVERHEAD_MINUTES } from '../sessionDuration';
 
 const gym = filterCatalogue(EXERCISE_CATALOGUE, {
   availableEquipment: [
@@ -24,6 +26,38 @@ const bodyweightOnly = filterCatalogue(EXERCISE_CATALOGUE, {
 });
 
 describe('recommendCapacity', () => {
+  it('fits the advanced PPL biceps-priority fixed dose in five days without changing its estimated sets', () => {
+    const input = { level: ExperienceLevel.ADVANCED, goal: TrainingGoal.HYPERTROPHY, catalogue: EXERCISE_CATALOGUE,
+      split: SplitStructure.PUSH_PULL_LEGS, priorityRegions: [VolumeRegion.BICEPS] };
+    const before = recommendCapacity({ ...input, capacityPacking: false });
+    const after = recommendCapacity(input);
+    expect(before.sessionsPerMicrocycle).toBe(6);
+    expect(after.sessionsPerMicrocycle).toBe(5);
+    expect(after.minutesPerSession).toBe(75);
+    expect(after.sets).toBe(before.sets);
+    expect(after.weeklyMinutes).toBeLessThan(before.weeklyMinutes);
+  });
+  it('retains the production five-day balanced recommendation without lowering the dose', () => {
+    const input = { level: ExperienceLevel.ADVANCED, goal: TrainingGoal.HYPERTROPHY, catalogue: EXERCISE_CATALOGUE };
+    const before = recommendCapacity({ ...input, capacityPacking: false });
+    const after = recommendCapacity(input);
+    expect(after.sessionsPerMicrocycle).toBe(5);
+    expect(after.sets).toBe(before.sets);
+    expect(after.weeklyMinutes).toBeLessThanOrEqual(before.weeklyMinutes);
+  });
+  it.each(Object.values(ExperienceLevel))('provides a usable calendar for three generated full-gym draws at %s', (level) => {
+    const input = { level, goal: TrainingGoal.HYPERTROPHY, catalogue: gym };
+    const recommendation = recommendCapacity(input);
+    for (const seed of [11, 22, 33]) {
+      const plan = planMesocycle({ ...input, seed, capacity: recommendation });
+      expect(plan.distribution.unassigned).toHaveLength(0);
+      expect(plan.distribution.sessions).toHaveLength(recommendation.sessionsPerMicrocycle);
+      for (const session of plan.distribution.sessions) {
+        expect(session.exercises.length).toBeGreaterThan(0);
+        expect(session.estimatedWorkMinutes + SESSION_OVERHEAD_MINUTES).toBeLessThanOrEqual(recommendation.minutesPerSession + 0.01);
+      }
+    }
+  });
   it('stays inside the bounds it declares', () => {
     const recommendation = recommendCapacity({
       level: ExperienceLevel.INTERMEDIATE,

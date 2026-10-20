@@ -10,6 +10,7 @@ import {
 import {
   applyPreviewEdits,
   appendPreviewExercises,
+  hasInvalidRepRanges,
   previewEditKey,
   previewVolumeByMuscle,
   previewVolumeBreakdownByMuscle,
@@ -40,6 +41,34 @@ const sessions: PlannedSession[] = [
 ];
 
 describe('previewEditing', () => {
+  it('edits one RIR without recalculating preceding or following sets, including successive edits', () => {
+    const catalogue = new Map(EXERCISE_CATALOGUE.map((ex) => [ex.id, ex]));
+    const added = appendPreviewExercises([], [], catalogue, TrainingGoal.HYPERTROPHY);
+    expect(added).toEqual([]);
+    const base = appendPreviewExercises([{ ...sessions[0], exercises: [] }], [{ sessionIndex: 0, exerciseId: EXERCISE_CATALOGUE[0].id }], catalogue, TrainingGoal.HYPERTROPHY);
+    expect(base[0].exercises[0].sets.map((set) => set.targetRIR)).toEqual([2, 2, 2]);
+    const first = applyPreviewEdits(base, { '0:0': { rirBySet: { 2: 0 } } });
+    expect(first[0].exercises[0].sets.map((set) => set.targetRIR)).toEqual([2, 2, 0]);
+    const second = applyPreviewEdits(first, { '0:0': { rirBySet: { 1: 1 } } });
+    expect(second[0].exercises[0].sets.map((set) => set.targetRIR)).toEqual([2, 1, 0]);
+    expect(applyPreviewEdits(second, { '0:0': { targetReps: 15 } })[0].exercises[0].sets.map((set) => set.targetRIR)).toEqual([2, 1, 0]);
+    expect(base[0].exercises[0].sets.map((set) => set.targetRIR)).toEqual([2, 2, 2]);
+    expect(applyPreviewEdits(second, { '0:0': { sets: 4 } })[0].exercises[0].sets.map((set) => set.targetRIR)).toEqual([2, 1, 0, 0]);
+  });
+  it('allows temporary independent range edits but identifies invalid prescriptions for save guards', () => {
+    const inverted = applyPreviewEdits(sessions, { '0:0': { targetReps: 1 } });
+    expect(inverted[0].exercises[0].sets[0].targetRepsMin).toBe(8);
+    expect(hasInvalidRepRanges(inverted)).toBe(true);
+    const finished = applyPreviewEdits(inverted, { '0:0': { targetReps: 12 } });
+    expect(hasInvalidRepRanges(finished)).toBe(false);
+    expect(finished[0].exercises[0].sets[0].targetRepsMin).toBe(8);
+    expect(hasInvalidRepRanges([])).toBe(false);
+    for (const invalid of [NaN, Infinity, 0, -1]) {
+      expect(hasInvalidRepRanges(applyPreviewEdits(sessions, { '0:0': { targetReps: invalid } }))).toBe(true);
+    }
+    const timed = [{ ...sessions[0], exercises: [{ ...sessions[0].exercises[0], sets: [{ setType: SetType.NORMAL, targetReps: 0, targetRepsMin: 0, targetDurationSeconds: 30, targetRIR: 2 }] }] }];
+    expect(hasInvalidRepRanges(timed)).toBe(false);
+  });
   it('adds unscored JM and Kaz manually with editable prescriptions and no fabricated load', () => {
     const catalogue = new Map(EXERCISE_CATALOGUE.map((e) => [e.id, e]));
     const result = appendPreviewExercises(sessions, ['guide-211', 'guide-210'].map((exerciseId) =>

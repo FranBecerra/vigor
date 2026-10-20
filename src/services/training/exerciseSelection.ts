@@ -432,6 +432,10 @@ function patternKey(exercise: Exercise): string {
 }
 
 export interface SelectionInput {
+  /** Dose planning uses marginal utility, never a random draw. Variation is separate. */
+  deterministic?: boolean;
+  /** Bounded beam branch: reconsider one ranked choice, without randomizing dose. */
+  deterministicAlternative?: { position: number; rank: number };
   /** Plan de volumen. Solo se atienden los músculos con objetivo mayor que cero. */
   volumePlan: VolumePlan;
   /** Catálogo YA filtrado por material disponible y vetos. */
@@ -501,9 +505,18 @@ function credit(
 }
 
 export function selectExercises(input: SelectionInput): SelectionResult {
+  if (input.deterministic && input.deterministicAlternative
+    && [input.deterministicAlternative.position, input.deterministicAlternative.rank].some((value) =>
+      !Number.isInteger(value) || value < 0)) throw new RangeError('Invalid allocation branch');
   const config = { ...DEFAULT_SELECTION_CONFIG, ...input.config };
   const rankingPolicy = input.rankingPolicy ?? 'legacy-weighted';
   const random = createRandom(input.seed);
+  let position = 0;
+  const pickCandidate = (candidates: readonly Exercise[], score: (exercise: Exercise) => number): Exercise | undefined => {
+    if (!input.deterministic) return weightedPick(candidates, score, random);
+    const rank = input.deterministicAlternative?.position === position++ ? input.deterministicAlternative.rank : 0;
+    return [...candidates].sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[Math.min(rank, candidates.length - 1)];
+  };
   const pool = input.catalogue.filter(
     (exercise) => exercise.generationTier !== ExerciseGenerationTier.STRENGTH_VARIANT &&
       exercise.generationTier !== ExerciseGenerationTier.MANUAL_ONLY,
@@ -669,7 +682,7 @@ export function selectExercises(input: SelectionInput): SelectionResult {
       undefined,
       rankingPolicy,
     );
-    const pick = weightedPick(candidates, diversityAdjustedScore, random)!;
+    const pick = pickCandidate(candidates, diversityAdjustedScore)!;
     const sets = config.minSetsPerExercise;
     chosen.set(pick.id, { exercise: pick, sets });
     recordPattern(pick);
@@ -736,7 +749,7 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     const candidates = available;
 
     // `candidates` no está vacío, así que weightedPick siempre devuelve uno.
-    const pick = weightedPick(
+    const pick = pickCandidate(
       candidates,
       (exercise) => {
         let weight = diversityAdjustedScore(exercise);
@@ -773,7 +786,6 @@ export function selectExercises(input: SelectionInput): SelectionResult {
             : config.vectorPenalty;
         return weight / (1 + used * penalty);
       },
-      random,
     )!;
 
     const sets = Math.min(config.minSetsPerExercise, config.maxSetsPerExercise);

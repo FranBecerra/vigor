@@ -233,7 +233,7 @@ describe('EXERCISE_CATALOGUE', () => {
   });
 
   it('cada grupo muscular tiene al menos un ejercicio como principal', () => {
-    Object.values(MuscleGroup).forEach((muscle) => {
+    Object.values(MuscleGroup).filter((muscle) => muscle !== MuscleGroup.UNCLASSIFIED).forEach((muscle) => {
       expect(exercisesForMuscle(EXERCISE_CATALOGUE, muscle).length).toBeGreaterThan(0);
     });
   });

@@ -168,6 +168,12 @@ export default function TrainHomeScreen() {
           />
         </View>
 
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md }}>
+          {(['exercises', 'rehab', 'history'] as const).map((route) => <Pressable key={route} onPress={() => router.push(`/${route}`)}
+            style={{ padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface }}>
+            <Text style={{ color: colors.textPrimary }}>{t(route === 'exercises' ? 'custom.library' : route === 'history' ? 'workout.history' : 'rehab.title')}</Text>
+          </Pressable>)}
+        </View>
         {selectedSession !== null ? (
           <View style={{ marginTop: spacing.lg }}>
             <TodayCard
@@ -273,7 +279,7 @@ export default function TrainHomeScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('home.newRoutine')}
-          onPress={() => router.push('/generate')}
+          onPress={() => router.push('/create-routine')}
           style={[
             styles.emptyWorkout,
             { borderColor: colors.surfaceBorder, borderRadius: radius.md, marginTop: spacing.md },

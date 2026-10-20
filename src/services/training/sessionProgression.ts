@@ -43,6 +43,7 @@ export function averageTargetRIR(exercises: readonly PlannedExercise[]): number 
   let workingSets = 0;
 
   for (const exercise of exercises) {
+    if (exercise.isTimed) continue;
     for (const set of exercise.sets) {
       if (set.setType === SetType.WARMUP) continue;
       weightedRIR += set.targetRIR ?? exercise.targetRIR;

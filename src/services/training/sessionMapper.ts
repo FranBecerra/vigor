@@ -30,11 +30,19 @@ export type SessionSetsByExercise = Record<string, SessionSetState[]>;
  */
 function toPersistedSet(set: SessionSetState): WorkoutSet {
   const { isCompleted, previous, ...persisted } = set;
-  return persisted;
+  return { ...persisted, completionState: isCompleted ? 'DONE' : 'PENDING' };
 }
 
 /** ¿Esta serie cuenta como ejecutada? */
 export function isSetCompleted(set: WorkoutSet): boolean {
+  if (set.completionState === 'PENDING') return false;
+  if (set.recording) {
+    const value = set.recording.measure === 'SECONDS' ? set.actualDurationSeconds : set.actualReps;
+    const load = set.recording.load === 'LEVEL' ? set.actualLoadLevel : set.actualWeight;
+    return typeof value === 'number' && Number.isFinite(value) && Number.isInteger(value) && value > 0
+      && value <= (set.recording.measure === 'SECONDS' ? 3600 : 999)
+      && (set.recording.load === 'NONE' || (typeof load === 'number' && Number.isFinite(load) && load >= 0));
+  }
   return set.actualReps !== undefined && set.actualWeight !== undefined;
 }
 
@@ -68,6 +76,10 @@ export function toWorkoutExercises(
 
 /** Datos de la sesión que no viven en el estado de series. */
 export interface SessionContext {
+  persistDraft?: boolean;
+  exerciseNotes?: Record<string, string>;
+  swappedFrom?: Record<string, string>;
+  exerciseSnapshots?: Record<string, import('@/models').Exercise>;
   sessionId: string;
   userId: string;
   mesocycleId: string;
@@ -95,6 +107,14 @@ export function toWorkoutSession(
     exercises: toWorkoutExercises(exerciseOrder, setsByExercise),
     performedAt: context.performedAt,
   };
+  for (const exercise of session.exercises) {
+    const snapshot = context.exerciseSnapshots?.[exercise.exerciseId];
+    if (snapshot) exercise.exerciseSnapshot = snapshot;
+    const notes = context.exerciseNotes?.[exercise.exerciseId];
+    if (notes) exercise.notes = notes;
+    const original = context.swappedFrom?.[exercise.exerciseId];
+    if (original) { exercise.isSwap = true; exercise.swappedFromExerciseId = original; }
+  }
   if (context.plannedSessionIndex !== undefined) {
     session.plannedSessionIndex = context.plannedSessionIndex;
   }
@@ -155,6 +175,7 @@ export function isSessionEmpty(setsByExercise: SessionSetsByExercise): boolean {
     sets.every(
       (set) =>
         set.actualWeight === undefined &&
+        set.actualDurationSeconds === undefined && set.actualLoadLevel === undefined &&
         set.actualReps === undefined &&
         set.actualRIR === undefined &&
         !set.extensions?.some((extension) => extension.reps !== undefined || extension.weight !== undefined),

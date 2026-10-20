@@ -40,9 +40,12 @@ export type TrainingDomain = 'STRENGTH' | 'CARDIO';
 
 /** One exercise of a session, resolved against the catalogue. */
 export interface SessionExerciseView {
+  isTimed?: boolean;
+  excludeFromVolume?: boolean;
   exerciseId: string;
   name: string;
   primaryMuscle: MuscleGroup;
+  primaryMuscles?: MuscleGroup[];
   secondaryMuscles: MuscleGroup[];
   sets: { setType: SetType; targetRIR?: number }[];
   restSeconds: number;
@@ -153,6 +156,7 @@ export function sessionNames(
 ): string[] {
   const seen = new Map<PlannedSessionFocus, number>();
   return sessions.map((session) => {
+    if (session.name?.trim()) return session.name.trim();
     const label = focusLabel(session.focus);
     if (sessions.filter((other) => other.focus === session.focus).length < 2) return label;
     const nth = seen.get(session.focus) ?? 0;
@@ -165,7 +169,7 @@ function toExerciseView(
   planned: PlannedSession['exercises'][number],
   exerciseById: ReadonlyMap<string, Exercise>,
 ): SessionExerciseView | null {
-  const exercise = exerciseById.get(planned.exerciseId);
+  const exercise = planned.exerciseSnapshot ?? exerciseById.get(planned.exerciseId);
   // An id the catalogue no longer knows cannot be named or attributed to a muscle.
   // Dropping it keeps the card honest about what it can show.
   if (exercise === undefined || planned.sets.length === 0) return null;
@@ -179,10 +183,13 @@ function toExerciseView(
     exerciseId: exercise.id,
     name: exercise.name,
     primaryMuscle: exercise.primaryMuscle,
+    ...(exercise.primaryMuscles ? { primaryMuscles: [...exercise.primaryMuscles] } : {}),
+    ...(exercise.recording?.measure === 'SECONDS' ? { isTimed: true } : {}),
+    ...(exercise.recording?.measure === 'SECONDS' ? { excludeFromVolume: true } : {}),
     secondaryMuscles: [...exercise.secondaryMuscles],
     sets: planned.sets.map((set) => ({ setType: set.setType, targetRIR: set.targetRIR })),
     restSeconds: planned.restSeconds ?? restDurationFor(exercise.profile),
-    repRange: min < max ? formatRepRange({ min, max }) : `${max}`,
+    repRange: last.targetDurationSeconds !== undefined ? `${last.targetDurationSeconds}s` : min < max ? formatRepRange({ min, max }) : `${max}`,
     targetRIR: Math.min(...effort.map((set) => set.targetRIR)),
   };
 }
@@ -216,8 +223,10 @@ export function toRoutineView(
   const setsOf = (sessions: readonly PlannedSession[]) =>
     sessions.flatMap((session) => session.exercises.flatMap((exercise) => exercise.sets));
   const base = setsOf(planned);
-  const meanRIR = (sets: readonly { targetRIR: number }[]) =>
-    sets.reduce((sum, set) => sum + set.targetRIR, 0) / Math.max(1, sets.length);
+  const meanRIR = (sets: readonly { targetRIR: number; targetDurationSeconds?: number }[]) => {
+    const repetitionSets = sets.filter((set) => set.targetDurationSeconds === undefined);
+    return repetitionSets.reduce((sum, set) => sum + set.targetRIR, 0) / Math.max(1, repetitionSets.length);
+  };
 
   // Volume is static within a mesocycle (§3); what moves between microcycles, the
   // strength RIR ramp and the deload, comes from `prescriptionForMicrocycle`.
@@ -227,7 +236,7 @@ export function toRoutineView(
     return {
       id: `${mesocycle.id}:m${index}`,
       number: index + 1,
-      isDeload: isDeloadMicrocycle(index, count),
+      isDeload: mesocycle.prescriptionMode !== 'MANUAL' && isDeloadMicrocycle(index, count),
       isProjected: index > current,
       volumeAdjustmentSets: sets.length - base.length,
       intensityAdjustmentRIR: meanRIR(sets) - meanRIR(base),

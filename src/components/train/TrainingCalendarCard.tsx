@@ -11,10 +11,10 @@ import { buildScheduleTemplate, moveRestSlot, templateRecovery, type ScheduleTem
 import { ScheduleTemplateView } from './ScheduleTemplateView';
 import { sessionsForMicrocycle } from '@/services/training/mesocycleEditing';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
+import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import { TrainingGoal } from '@/services/training/volumePlan';
 import { plannedPresentationFocus } from '@/services/training/sessionCoherence';
 import type { durationCalibration } from '@/services/training/sessionDuration';
-const CATALOGUE = new Map(EXERCISE_CATALOGUE.map((e) => [e.id, e]));
 const today = () => {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -27,6 +27,7 @@ export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, durat
   onChanged?: () => void;
 }) {
   const { t } = useTranslation();
+  const { exercisesById: CATALOGUE } = useExerciseCatalogue();
   const { colors, spacing } = useTheme();
   const [mesocycle, setMesocycle] = useState<Mesocycle | null>(null);
   const [start, setStart] = useState(today);
@@ -46,7 +47,7 @@ export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, durat
   const sessions = useMemo(() => mesocycle ? sessionsForMicrocycle(mesocycle, trainingGoal, microcycleIndex)
     .map((session) => trainingGoal === TrainingGoal.HYPERTROPHY
       ? { ...session, focus: plannedPresentationFocus(session, CATALOGUE) } : session) : [],
-    [mesocycle, trainingGoal, microcycleIndex]);
+    [mesocycle, trainingGoal, microcycleIndex, CATALOGUE]);
   const calendar = mesocycle?.trainingCalendar ?? {};
   const template = mesocycle?.scheduleTemplate ?? buildScheduleTemplate(sessions, CATALOGUE);
   const templateWarnings = templateRecovery(template, sessions, CATALOGUE).filter((p) => p.reviewSuggested);

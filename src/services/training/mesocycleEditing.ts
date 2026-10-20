@@ -19,6 +19,7 @@ export function baseSessionsForMicrocycle(
     .filter((candidate) => candidate.fromMicrocycleIndex <= index)
     .sort((a, b) => b.fromMicrocycleIndex - a.fromMicrocycleIndex)[0];
   const start = revision?.fromMicrocycleIndex ?? 0;
+  if (mesocycle.prescriptionMode === 'MANUAL') return JSON.parse(JSON.stringify(revision?.plannedSessions ?? mesocycle.plannedSessions ?? []));
   // A strength ramp is tied to the whole mesocycle, not restarted when a
   // routine is edited halfway through it. Hypertrophy edits instead become
   // the new baseline for the remaining accumulation weeks.

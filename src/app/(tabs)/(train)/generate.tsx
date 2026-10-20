@@ -1,8 +1,8 @@
 /**
  * Mesocycle generation screen (PRD §8.8).
  *
- * The first screen that reaches the engine. Until now `planMesocycle` had no caller
- * outside tests.
+ * Initial generation allocates dose before seeded variation; existing previews
+ * use the separate dose-preserving reroll contract.
  *
  * TWO PAGES, ONE PER PHASE
  *   Configure, then preview, as two horizontally-paged views with explicit forward
@@ -48,13 +48,15 @@ import {
   Stepper,
 } from '@/components/train/generate/GenerateControls';
 import { PlanPreview } from '@/components/train/generate/PlanPreview';
+import { GenerationArtwork } from '@/components/train/generate/GenerationArtwork';
 import { ExerciseSwapSheet } from '@/components/train/generate/ExerciseSwapSheet';
+import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import {
   EXERCISE_CATALOGUE,
   filterCatalogue,
 } from '@/services/training/exerciseCatalogue';
-import { planMesocycle, type MesocyclePlan } from '@/services/training/mesocyclePlanner';
-import { findAlternativeSchedule } from '@/services/training/alternativeSchedule';
+import { planDoseFirstMesocycle, rerollMesocycle, type MesocyclePlan } from '@/services/training/mesocyclePlanner';
+import { reviewScheduleSuitability } from '@/services/training/alternativeSchedule';
 import { MIN_HYPERTROPHY_SESSION_SETS } from '@/services/training/sessionDistribution';
 import {
   recommendCapacityAsync,
@@ -96,6 +98,7 @@ import {
 import {
   isPlanStale,
   primaryActionFor,
+  rerollActionFor,
   settingsSignature,
   type GenerationPhase,
   type GenerationSettings,
@@ -107,6 +110,7 @@ import { BodyMapThumbnail } from '@/components/train/BodyMap';
 import { backToTraining } from '@/services/training/backNavigation';
 import {
   applyPreviewEdits,
+  hasInvalidRepRanges,
   appendPreviewExercises,
   previewEditKey,
   representativeSet,
@@ -244,7 +248,11 @@ export default function GenerateScreen() {
   const [emphasis, setEmphasis] = useState<EmphasisSelection>(EMPTY_EMPHASIS);
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1_000_000));
   const [phase, setPhase] = useState<GenerationPhase>('configure');
+  const [step, setStep] = useState(0);
+  const configureScrollRef = useRef<ScrollView>(null);
+  const goToStep = (next: number) => { setStep(Math.max(0, Math.min(5, next))); configureScrollRef.current?.scrollTo({ y: 0, animated: false }); };
   const [plan, setPlan] = useState<MesocyclePlan | null>(null);
+  const [rerollNotice, setRerollNotice] = useState<'unchanged' | 'edited' | null>(null);
   // Settings the plan on screen was built from, so going back to LOOK at a setting is
   // told apart from changing one.
   const [planSignature, setPlanSignature] = useState<string | null>(null);
@@ -342,13 +350,10 @@ export default function GenerateScreen() {
     [sessions, minutes],
   );
 
-  const exercisesById = useMemo(
-    () => new Map(EXERCISE_CATALOGUE.map((exercise) => [exercise.id, exercise])),
-    [],
-  );
+  const { catalogue: sharedCatalogue, exercisesById } = useExerciseCatalogue();
   const availableCatalogue = useMemo(
-    () => filterCatalogue(EXERCISE_CATALOGUE, { availableEquipment: equipment }),
-    [equipment],
+    () => filterCatalogue(sharedCatalogue.filter((exercise) => exercise.archivedAt === undefined), { availableEquipment: equipment }),
+    [equipment, sharedCatalogue],
   );
 
   const toggleEquipment = useCallback((item: Equipment) => {
@@ -394,11 +399,12 @@ export default function GenerateScreen() {
 
   const generate = useCallback(
     (withSeed: number) => {
+      setRerollNotice(null);
       const catalogue = filterCatalogue(EXERCISE_CATALOGUE, {
         availableEquipment: equipment,
       });
       setPlan(
-        planMesocycle({
+        planDoseFirstMesocycle({
           level,
           goal,
           catalogue,
@@ -421,15 +427,33 @@ export default function GenerateScreen() {
 
   const onReroll = useCallback(() => {
     const next = Math.floor(Math.random() * 1_000_000);
+    const action = rerollActionFor({ hasPlan: plan !== null, stale,
+      hasPreviewEdits: Object.keys(previewEdits).length > 0 || previewAdditions.length > 0 });
+    if (plan && action !== 'generate') {
+      if (action === 'keep-edits') {
+        setRerollNotice('edited');
+        return;
+      }
+      const candidate = rerollMesocycle({ level, goal, catalogue: availableCatalogue, seed: next, split,
+        priorityRegions: emphasis.priority, deprioritizedRegions: emphasis.deprioritized,
+        capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes } }, plan);
+      setRerollNotice(candidate === plan ? 'unchanged' : null);
+      if (candidate !== plan) { setSeed(next); setPlan(candidate); }
+      setSwapTarget(null);
+      setAddTarget(null);
+      setPhase('preview');
+      return;
+    }
     setSeed(next);
     generate(next);
-  }, [generate]);
+  }, [generate, plan, stale, previewEdits, previewAdditions, level, goal, availableCatalogue, split, emphasis, sessions, minutes]);
 
   const plannedSessions = useMemo<PlannedSession[]>(() => {
     if (plan === null) return [];
     const base = toPlannedSessions(plan, false, { e1rmByExerciseId });
     return applyPreviewEdits(
       appendPreviewExercises(base, previewAdditions, exercisesById, goal), previewEdits,
+      exercisesById,
     ).map((session) => ({
       ...session,
       estimatedWorkMinutes: session.exercises.reduce((total, exercise) => {
@@ -448,12 +472,13 @@ export default function GenerateScreen() {
     [plannedSessions],
   );
   const hasPreviewEdits = Object.keys(previewEdits).length > 0 || previewAdditions.length > 0;
-  const alternative = useMemo(() => {
+  const scheduleReview = useMemo(() => {
     if (!plan || stale || hasPreviewEdits) return null;
-    return findAlternativeSchedule({ level, goal, split, seed, catalogue: availableCatalogue,
+    return reviewScheduleSuitability({ level, goal, split, seed, catalogue: availableCatalogue,
       priorityRegions: emphasis.priority, deprioritizedRegions: emphasis.deprioritized,
       capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes } }, plan);
   }, [plan, stale, hasPreviewEdits, level, goal, split, seed, availableCatalogue, emphasis, sessions, minutes]);
+  const alternative = scheduleReview?.alternative ?? null;
   const overTimeSessionIndexes = useMemo(() => {
     if (!hasPreviewEdits) return [];
     const workBudget = Math.max(0, minutes - SESSION_OVERHEAD_MINUTES);
@@ -532,11 +557,10 @@ export default function GenerateScreen() {
       const firstSet = representativeSet(planned?.sets ?? []);
       if (firstSet === undefined) return;
       const targetRepsMin = Math.max(1, Math.min(100, Math.trunc(value)));
-      const targetReps = Math.max(targetRepsMin, firstSet.targetReps);
       const key = previewEditKey(sessionIndex, order);
       setPreviewEdits((current) => ({
         ...current,
-        [key]: { ...current[key], targetRepsMin, targetReps },
+        [key]: { ...current[key], targetRepsMin },
       }));
     },
     [plannedSessions],
@@ -550,8 +574,8 @@ export default function GenerateScreen() {
         ?.exercises.find((exercise) => exercise.order === order);
       const firstSet = representativeSet(planned?.sets ?? []);
       if (firstSet === undefined) return;
-      const targetReps = Math.max(1, Math.min(100, Math.trunc(value)));
-      const targetRepsMin = Math.min(firstSet.targetRepsMin ?? firstSet.targetReps, targetReps);
+      const targetReps = Math.max(1, Math.min(firstSet.targetDurationSeconds === undefined ? 100 : 3600, Math.trunc(value)));
+      const targetRepsMin = firstSet.targetRepsMin ?? firstSet.targetReps;
       const key = previewEditKey(sessionIndex, order);
       setPreviewEdits((current) => ({
         ...current,
@@ -563,6 +587,7 @@ export default function GenerateScreen() {
 
   const onSave = useCallback(async () => {
     if (plan === null || user === null || plannedSessions.every((session) => session.exercises.length === 0)) return;
+    if (hasInvalidRepRanges(plannedSessions)) { setSaveError(t('exerciseEditor.invalidRange')); return; }
     const chosenName = normalizeRoutineName(name);
     if (chosenName === null) {
       reportNameProblem('empty');
@@ -614,7 +639,7 @@ export default function GenerateScreen() {
         }),
       });
       await routineRepository.update(routineId, { activeMesocycleId: mesocycleId });
-      backToTraining(router);
+      router.dismissTo('/(tabs)/(train)');
     } catch (error) {
       // The athlete just spent a minute on this form: keep the plan on screen and let
       // them retry rather than losing it to a transient write failure. The code is
@@ -683,7 +708,7 @@ export default function GenerateScreen() {
       {/* A swipe back from the preview would pop the whole screen and discard an
           unsaved plan with its edits, so while the preview is up the phase owns going
           back and the gesture is off. */}
-      <Stack.Screen options={{ gestureEnabled: phase === 'configure' }} />
+      <Stack.Screen options={{ gestureEnabled: phase === 'configure' && step === 0 }} />
       <Animated.View style={[styles.pages, { width: width * 2 }, pagesStyle]}>
         <View
           style={{ width }}
@@ -692,6 +717,7 @@ export default function GenerateScreen() {
           importantForAccessibility={phase === 'configure' ? 'auto' : 'no-hide-descendants'}
         >
           <ScrollView
+            ref={configureScrollRef}
             contentContainerStyle={{
               paddingTop: insets.top + spacing.lg,
               paddingHorizontal: spacing.lg,
@@ -699,19 +725,16 @@ export default function GenerateScreen() {
             }}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={[typography.h1, { color: colors.textPrimary }]}>{t('generate.title')}</Text>
-            <Text
-              style={[
-                typography.body,
-                { color: colors.textSecondary, marginTop: spacing.sm },
-              ]}
-            >
-              {t('generate.subtitle')}
-            </Text>
+            <Text style={[typography.caption, { color: sectionAccent.train, marginBottom: 8 }]}>{t('workout.step', { current: step + 1, total: 6 })}</Text>
+            <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{t(['generate.goal', 'generate.level', 'generate.emphasis', 'generate.equipment', 'generate.capacity', 'generate.split'][step])}</Text>
+            <View style={{ flexDirection: 'row', gap: 6, marginVertical: 20 }}>
+              {Array.from({ length: 6 }, (_, index) => <View key={index} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: index <= step ? sectionAccent.train : colors.surface }} />)}
+            </View>
+            {step !== 2 && <GenerationArtwork kind={(['goal', 'level', 'goal', 'equipment', 'capacity', 'split'] as const)[step]} />}
 
             {/* Once a plan exists, this page has to say what is waiting on the other
                 one, and whether the settings have moved under it since. */}
-            {plan !== null && (
+            {plan !== null && step === 5 && (
               <View style={{ marginTop: spacing.lg }}>
                 <Text
                   style={[
@@ -725,14 +748,17 @@ export default function GenerateScreen() {
                 </Text>
                 <RerollButton
                   onPress={onReroll}
-                  disabled={!canGenerate || recommending}
+                  disabled={!canGenerate || recommending || saving}
                   style={{ marginTop: spacing.md }}
                 />
+                {rerollNotice && <Text style={[typography.caption, { color: colors.textSecondary, marginTop: spacing.sm }]}>
+                  {t(rerollNotice === 'edited' ? 'generate.rerollEdited' : 'generate.rerollUnchanged')}
+                </Text>}
               </View>
             )}
             <View style={{ height: spacing.xl }} />
 
-            <Section title={t('generate.goal')}>
+            {step === 0 && <Section title={t('generate.goal')}>
               <ChipRow>
                 {GOALS.map((entry) => (
                   <Chip
@@ -743,9 +769,9 @@ export default function GenerateScreen() {
                   />
                 ))}
               </ChipRow>
-            </Section>
+            </Section>}
 
-            <Section title={t('generate.level')}>
+            {step === 1 && <Section title={t('generate.level')}>
               <ChipRow>
                 {LEVELS.map((entry) => (
                   <Chip
@@ -757,9 +783,9 @@ export default function GenerateScreen() {
                   />
                 ))}
               </ChipRow>
-            </Section>
+            </Section>}
 
-            <Section
+            {step === 4 && <Section hintDisclosure
               title={t('generate.capacity')}
               hint={t('generate.capacityBudget', {
                 perSession: setBudget.perSession,
@@ -847,9 +873,9 @@ export default function GenerateScreen() {
                   </Text>
                 )}
               </View>
-            </Section>
+            </Section>}
 
-            <Section
+            {step === 5 && <Section hintDisclosure
               title={t('generate.split')}
               hint={split === SplitStructure.AUTO ? t('generate.splitAutoHint') : undefined}
             >
@@ -863,9 +889,9 @@ export default function GenerateScreen() {
                   />
                 ))}
               </ChipRow>
-            </Section>
+            </Section>}
 
-            <Section
+            {step === 3 && <Section
               title={t('generate.equipment')}
               hint={equipment.length === 0 ? t('generate.equipmentEmpty') : undefined}
             >
@@ -879,9 +905,9 @@ export default function GenerateScreen() {
                   />
                 ))}
               </ChipRow>
-            </Section>
+            </Section>}
 
-            <Section
+            {step === 2 && <Section hintDisclosure
               title={t('generate.emphasis')}
               hint={t('generate.emphasisHint')}
               trailing={t('generate.slotsLeft', { used: slots, total: PRIORITY_SLOT_BUDGET })}
@@ -960,7 +986,7 @@ export default function GenerateScreen() {
                   {t('generate.blockedRegionCap', { max: MAX_PRIORITY_REGIONS })}
                 </Text>
               )}
-            </Section>
+            </Section>}
           </ScrollView>
         </View>
 
@@ -990,8 +1016,12 @@ export default function GenerateScreen() {
                   another draw is usually something just read in this list. */}
               <RerollButton
                 onPress={onReroll}
+                disabled={!canGenerate || recommending || saving}
                 style={{ marginTop: spacing.md, marginBottom: spacing.xl }}
               />
+              {rerollNotice && <Text style={[typography.caption, { color: colors.textSecondary, marginBottom: spacing.lg }]}>
+                {t(rerollNotice === 'edited' ? 'generate.rerollEdited' : 'generate.rerollUnchanged')}
+              </Text>}
               {/* Named here, not on the form: the name belongs to the plan being kept. */}
               <Section title={t('generate.name')}>
                 <TextInput
@@ -1048,7 +1078,14 @@ export default function GenerateScreen() {
                   <Text style={[typography.body, { color: colors.textPrimary }]}>{t('generate.alternativePreview')}</Text>
                 </Pressable>
               </View>}
+              {(scheduleReview?.status === 'no-compatible-alternative' || scheduleReview?.status === 'allocation-bottleneck') && (
+                <Text style={[typography.caption, { color: colors.textSecondary, marginBottom: spacing.lg }]}>
+                  {t(scheduleReview.status === 'allocation-bottleneck'
+                    ? 'generate.scheduleAllocationReview' : 'generate.alternativeUnavailable')}
+                </Text>
+              )}
               <PlanPreview
+                sessionTabs
                 sessions={plannedSessions}
                 limitedBy={plan.limitedBy}
                 performedSets={plannedSetCount}
@@ -1073,6 +1110,17 @@ export default function GenerateScreen() {
                 onChangeSets={onChangePreviewSets}
                 onChangeRepMin={onChangePreviewRepMin}
                 onChangeRepMax={onChangePreviewRepMax}
+                onChangeRest={(sessionIndex, order, value) => {
+                  if (value === undefined || !Number.isFinite(value)) return;
+                  const key = previewEditKey(sessionIndex, order);
+                  setPreviewEdits((current) => ({ ...current, [key]: { ...current[key], restSeconds: value } }));
+                }}
+                onChangeSetRIR={(sessionIndex, order, setIndex, value) => {
+                  if (value === undefined || !Number.isFinite(value)) return;
+                  const key = previewEditKey(sessionIndex, order);
+                  setPreviewEdits((current) => ({ ...current, [key]: { ...current[key],
+                    rirBySet: { ...current[key]?.rirBySet, [setIndex]: Math.max(0, Math.min(5, Math.trunc(value))) } } }));
+                }}
                 overTimeSessionIndexes={overTimeSessionIndexes}
                 volumeOutsideRange={volumeOutsideRange}
                 minimumSessionSets={goal === TrainingGoal.HYPERTROPHY
@@ -1108,6 +1156,8 @@ export default function GenerateScreen() {
         current={null}
         candidates={addCandidates}
         onSelect={onSelectAdd}
+        onSelectMany={(chosen) => { if (addTarget === null) return;
+          setPreviewAdditions((old) => [...old, ...chosen.map((ex) => ({ sessionIndex: addTarget, exerciseId: ex.id }))]); setAddTarget(null); }}
         onClose={() => setAddTarget(null)}
       />
 
@@ -1125,16 +1175,16 @@ export default function GenerateScreen() {
         ]}
       >
         <Pressable
-          onPress={onLeftAction}
+          onPress={() => { if (phase === 'configure' && step > 0) goToStep(step - 1); else onLeftAction(); }}
           accessibilityRole="button"
           style={{ height: 52, justifyContent: 'center', paddingRight: spacing.lg }}
         >
           <Text style={[typography.body, { color: colors.textSecondary }]}>
-            {t(phase === 'preview' ? 'generate.back' : 'generate.cancel')}
+            {t(phase === 'preview' || step > 0 ? 'generate.back' : 'generate.cancel')}
           </Text>
         </Pressable>
         <Pressable
-          onPress={onPrimary}
+          onPress={() => { if (phase === 'configure' && step < 5) goToStep(step + 1); else onPrimary(); }}
           disabled={!canGenerate || saving || recommending || (primary === 'save' && plannedSetCount === 0)}
           accessibilityRole="button"
           style={{
@@ -1151,7 +1201,7 @@ export default function GenerateScreen() {
             <ActivityIndicator color={colors.bg} />
           ) : (
             <Text style={[typography.title, { color: '#16191C' }]}>
-              {t(PRIMARY_LABEL[primary])}
+              {t(phase === 'configure' && step < 5 ? 'exerciseWizard.next' : PRIMARY_LABEL[primary])}
             </Text>
           )}
         </Pressable>

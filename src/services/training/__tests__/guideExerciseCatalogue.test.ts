@@ -47,6 +47,12 @@ describe('source guide exercise index', () => {
         expect(exercise.generationTier).toBe(TRICEPS_ELIGIBILITY[exercise.id].tier);
         return;
       }
+      if (exercise.guidePage! >= 233 && exercise.guidePage! <= 260) {
+        expect(exercise.criteria).toBeUndefined();
+        expect(exercise.generationTier).toBe(ExerciseGenerationTier.MANUAL_ONLY);
+        expect(() => criteriaOf(exercise)).toThrow('no scoring rubric');
+        return;
+      }
       expect(exercise.criteria).toBeDefined();
       expect(exercise.secondaryMuscles).toEqual([]);
       expect(exercise.guidePage).toBeGreaterThanOrEqual(32);
@@ -93,7 +99,7 @@ describe('source guide exercise index', () => {
   it('uses conservative ties and specific page exceptions instead of universal machine bonuses', () => {
     const byPage = (page: number) => EXERCISE_CATALOGUE.find((exercise) => exercise.id === `guide-${page}`)!;
     expect(criteriaOf(byPage(195)).resistanceProfileMatch).toBe(2);
-    expect(criteriaOf(byPage(252)).stretchedPositionLoading).toBe(2);
+    expect(byPage(252).criteria).toBeUndefined();
     expect(criteriaOf(byPage(341)).rangeOfMotion).toBe(2);
     expect(criteriaOf(byPage(338)).stabilityCost).toBe(1);
     expect(criteriaOf(byPage(287)).loadProgressability).toBe(2);

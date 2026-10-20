@@ -25,15 +25,16 @@ import type { Exercise, Mesocycle, PlannedExercise, PlannedSession } from '@/mod
 import { ExerciseProfile, SetType } from '@/models';
 import { restDurationFor } from '@/services/training/restTimer';
 import { TrainingGoal } from '@/services/training/volumePlan';
-import { previewVolumeBreakdownByMuscle } from '@/services/training/previewEditing';
+import { previewVolumeBreakdownByMuscle, hasInvalidRepRanges } from '@/services/training/previewEditing';
 import { SESSION_OVERHEAD_MINUTES } from '@/services/training/trainingCapacity';
 import { sessionKey } from '@/services/training/mesocycleEditing';
 import { resizeExerciseSets } from '@/services/training/mesocycleEditing';
 import { SafeAreaView } from 'react-native-screens/experimental';
+import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 
-const CATALOGUE = new Map(EXERCISE_CATALOGUE.map((exercise) => [exercise.id, exercise]));
 
 export default function RoutineDetailScreen() {
+  const { catalogue, exercisesById: CATALOGUE } = useExerciseCatalogue();
   const { t } = useTranslation();
   const { colors, typography, spacing, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets();
@@ -95,7 +96,7 @@ export default function RoutineDetailScreen() {
       exercises: session.exercises.filter((exercise) =>
         !removed.includes(previewEditKey(session.index, exercise.order))),
     }));
-    return applyPreviewEdits(appendPreviewExercises(filtered, additions, CATALOGUE, goal), edits)
+    return applyPreviewEdits(appendPreviewExercises(filtered, additions, CATALOGUE, goal), edits, CATALOGUE)
       .map((session) => ({
         ...session,
         estimatedWorkMinutes: session.exercises.reduce((sum, entry) => {
@@ -103,10 +104,10 @@ export default function RoutineDetailScreen() {
           return sum + (exercise ? exerciseMinutes(exercise, entry.sets.length, entry.restSeconds) : 0);
         }, 0),
       }));
-  }, [additions, base, edits, goal, removed]);
+  }, [additions, base, edits, goal, removed, CATALOGUE]);
   const used = useMemo(() => new Set(sessions.flatMap((session) =>
     session.exercises.map((exercise) => exercise.exerciseId))), [sessions]);
-  const available = routine ? filterCatalogue(EXERCISE_CATALOGUE, {
+  const available = routine ? filterCatalogue(catalogue.filter((exercise) => exercise.archivedAt === undefined), {
     availableEquipment: routine.availableEquipment,
   }) : [];
   const swapCurrent = useMemo(() => {
@@ -114,7 +115,7 @@ export default function RoutineDetailScreen() {
     const id = sessions.find((session) => session.index === swapTarget.sessionIndex)
       ?.exercises.find((exercise) => exercise.order === swapTarget.order)?.exerciseId;
     return id ? CATALOGUE.get(id) ?? null : null;
-  }, [sessions, swapTarget]);
+  }, [sessions, swapTarget, CATALOGUE]);
   const swapCandidates = swapCurrent === null ? []
     : rankSwapCandidates(swapCurrent, available).filter((exercise) => !used.has(exercise.id));
   const addCandidates = available.filter((exercise) => !used.has(exercise.id));
@@ -138,6 +139,9 @@ export default function RoutineDetailScreen() {
   const save = async (scope?: SessionEditScope) => {
     if (mesocycle === null || routine === undefined ||
       (selectedSessionIndex === null && fromIndex >= routine.microcycles.length)) return;
+    if (hasInvalidRepRanges(visibleSessions)) {
+      Alert.alert(t('routine.editError'), t('exerciseEditor.invalidRange')); return;
+    }
     if (visibleSessions.some((session) => session.exercises.length === 0)) {
       Alert.alert(t('routine.editError'), t('routine.emptySession'));
       return;
@@ -357,11 +361,11 @@ export default function RoutineDetailScreen() {
               {setIndex + 1}
             </Text>
             <Text style={[typography.body, { color: colors.textSecondary, flex: 1 }]}>
-              {set.targetRepsMin ?? set.targetReps}–{set.targetReps} {t('routine.reps')}
+              {set.targetDurationSeconds !== undefined ? `${set.targetDurationSeconds} ${t('rehab.seconds')}` : `${set.targetRepsMin ?? set.targetReps}–${set.targetReps} ${t('routine.reps')}`}
             </Text>
-            <Text style={[typography.caption, { color: sectionAccent.train }]}>
+            {set.targetDurationSeconds === undefined && <Text style={[typography.caption, { color: sectionAccent.train }]}>
               RIR {set.targetRIR}
-            </Text>
+            </Text>}
           </View>)}
         </Pressable>)}
       </>}
@@ -401,18 +405,21 @@ export default function RoutineDetailScreen() {
             if (value !== undefined && set !== undefined) {
               const min = Math.max(1, Math.min(100, Math.trunc(value)));
               updateEdit(sessionIndex, order, { targetRepsMin: min,
-                targetReps: Math.max(min, set.targetReps), repsBySet: undefined });
+                repsBySet: undefined });
             }
           } : undefined}
           onChangeRepMax={editing ? (sessionIndex, order, value) => {
             const set = representativeSet(sessions.find((session) => session.index === sessionIndex)
               ?.exercises.find((exercise) => exercise.order === order)?.sets ?? []);
             if (value !== undefined && set !== undefined) {
-              const max = Math.max(1, Math.min(100, Math.trunc(value)));
+              const max = Math.max(1, Math.min(set.targetDurationSeconds === undefined ? 100 : 3600, Math.trunc(value)));
               updateEdit(sessionIndex, order, { targetReps: max,
-                targetRepsMin: Math.min(set.targetRepsMin ?? set.targetReps, max),
+                targetRepsMin: set.targetRepsMin ?? set.targetReps,
                 repsBySet: undefined });
             }
+          } : undefined}
+          onChangeRest={editing ? (sessionIndex, order, value) => {
+            if (value !== undefined && Number.isFinite(value)) updateEdit(sessionIndex, order, { restSeconds: value });
           } : undefined}
           onChangeSetRIR={editing && selectedSessionIndex !== null ? (sessionIndex, order, setIndex, value) => {
             if (value === undefined) return;
@@ -471,10 +478,10 @@ export default function RoutineDetailScreen() {
               <Text style={[typography.caption, { color: colors.textMuted, width: 22 }]}>
                 {setIndex + 1}
               </Text>
-              {(['targetRepsMin', 'targetReps', 'targetRIR'] as const).map((field) =>
+              {(set.targetDurationSeconds !== undefined ? ['targetDurationSeconds'] as const : ['targetRepsMin', 'targetReps', 'targetRIR'] as const).map((field) =>
                 <View key={field} style={{ width: 72, alignItems: 'center' }}>
                   <Text style={[typography.caption, { color: colors.textMuted }]}>
-                    {field === 'targetRepsMin' ? t('generate.previewRepMin')
+                    {field === 'targetDurationSeconds' ? t('rehab.seconds') : field === 'targetRepsMin' ? t('generate.previewRepMin')
                       : field === 'targetReps' ? t('generate.previewRepMax') : 'RIR'}
                   </Text>
                   <NumericField value={field === 'targetRepsMin'
@@ -485,10 +492,11 @@ export default function RoutineDetailScreen() {
                       if (value === undefined) return;
                       const bounded = field === 'targetRIR'
                         ? Math.max(0, Math.min(5, Math.trunc(value)))
-                        : Math.max(1, Math.min(100, Math.trunc(value)));
+                        : Math.max(1, Math.min(field === 'targetDurationSeconds' ? 3600 : 100, Math.trunc(value)));
                       setDraftExercise({ ...draftExercise, sets: draftExercise.sets.map(
                         (entry, position) => {
                           if (position !== setIndex) return entry;
+                          if (field === 'targetDurationSeconds') return { ...entry, targetDurationSeconds: bounded };
                           if (field === 'targetRIR') return { ...entry, targetRIR: bounded };
                           if (field === 'targetRepsMin') return { ...entry,
                             targetRepsMin: bounded, targetReps: Math.max(bounded, entry.targetReps) };

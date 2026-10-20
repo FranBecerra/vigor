@@ -37,7 +37,9 @@ export function e1RMByExerciseFromHistory(
   sessions.forEach((session) => {
     if (session.completedAt === undefined) return;
     session.exercises.forEach((exercise) => {
+      if (exercise.exerciseId.startsWith('custom:') || exercise.exerciseSnapshot?.isCustom) return;
       exercise.sets.forEach((set) => {
+        if (set.recording && (set.recording.measure !== 'REPETITIONS' || set.recording.load !== 'TOTAL_KG')) return;
         if (set.setType === SetType.WARMUP) return;
         if (!isUsableAttempt(set.actualWeight, set.actualReps)) return;
         const estimate = epleyE1RM(set.actualWeight as number, set.actualReps as number);

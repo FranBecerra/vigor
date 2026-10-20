@@ -60,6 +60,7 @@ interface SetRowProps {
   onChangeReps: (value: number | undefined) => void;
   onChangeIntensity: (value: IntensityValue) => void;
   onChangeExtensions: (extensions: SetExtension[]) => void;
+  onRemove?: () => void;
 }
 
 function SetRowComponent({
@@ -71,6 +72,7 @@ function SetRowComponent({
   onChangeReps,
   onChangeIntensity,
   onChangeExtensions,
+  onRemove,
 }: SetRowProps) {
   const { colors, sectionAccent, motion } = useTheme();
   const accent = sectionAccent.train;
@@ -101,6 +103,7 @@ function SetRowComponent({
         {/* SET */}
         <Pressable
           onPress={onPressSetType}
+          onLongPress={onRemove}
           style={{ width: COLUMN_WIDTHS.set }}
           accessibilityRole="button"
           accessibilityLabel="Tipo de serie">

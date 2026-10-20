@@ -50,7 +50,7 @@ describe('VOLUME_REGIONS', () => {
         });
       },
     );
-    expect(seen.size).toBe(Object.values(MuscleGroup).length);
+    expect(seen.size).toBe(Object.values(MuscleGroup).filter((muscle) => muscle !== MuscleGroup.UNCLASSIFIED).length);
   });
 
   it('el reparto de cada región suma 1 y tiene un valor por músculo', () => {
@@ -70,7 +70,7 @@ describe('VOLUME_REGIONS', () => {
   });
 
   it('REGION_OF_MUSCLE cubre todos los músculos y concuerda con la definición', () => {
-    Object.values(MuscleGroup).forEach((muscle) => {
+    Object.values(MuscleGroup).filter((muscle) => muscle !== MuscleGroup.UNCLASSIFIED).forEach((muscle) => {
       const region = REGION_OF_MUSCLE[muscle];
       expect(region).toBeDefined();
       expect(VOLUME_REGIONS[region].muscles).toContain(muscle);

@@ -1,0 +1,47 @@
+{
+  "source": "Micro 1.html",
+  "name": "Octubre 2026 · Micro 1",
+  "clarifications": [
+    "The user confirmed two hammer-curl sets, each at RIR 2, overriding the inconsistent three-value source cell.",
+    "Low Cable Triceps Extension is an overhead extension from a low pulley.",
+    "High Cable Triceps Extension is a pushdown; its attachment is unspecified.",
+    "High Cable Lateral Raises uses a pulley at hip height.",
+    "Neutral Chest-Supported Low Row uses the existing upper/mid-back low-row entry.",
+    "Micro 1 is the authored baseline. The user requested Vigor's existing automatic hypertrophy continuation for later microcycles; no future source sheets, kg or rest values are invented."
+  ],
+  "sessions": [
+    { "name": "Upper #1", "focus": "UPPER", "exercises": [
+      { "sourceName": "Chest Supported High Machine Row", "exerciseId": "remo-alto-maquina-pecho-apoyado", "min": 8, "max": 10, "rir": [2, 2, 2] },
+      { "sourceName": "Neutral Grip Pull Down", "exerciseId": "jalon-agarre-neutro", "min": 8, "max": 12, "rir": [2, 2, 2] },
+      { "sourceName": "Incline Machine Chest Press", "exerciseId": "press-inclinado-maquina", "min": 10, "max": 12, "rir": [2, 2, 2, 2] },
+      { "sourceName": "DB Concentration Curl", "exerciseId": "curl-concentrado", "min": 12, "max": 16, "rir": [2, 2] },
+      { "sourceName": "DB Hammer Curls", "exerciseId": "curl-martillo", "min": 10, "max": 12, "rir": [2, 2] },
+      { "sourceName": "Low Cable Triceps Extension", "exerciseId": "extension-sobre-cabeza-polea", "min": 10, "max": 12, "rir": [2, 2, 1] },
+      { "sourceName": "Cable Lateral Raises", "exerciseId": "elevacion-lateral-polea", "min": 12, "max": 15, "rir": [2, 2, 2] }
+    ] },
+    { "name": "Lower #1", "focus": "LOWER", "exercises": [
+      { "sourceName": "Shrug Machine RDL", "exerciseId": "peso-muerto-rumano-maquina-encogimientos", "min": 8, "max": 10, "rir": [2, 2, 2] },
+      { "sourceName": "Adduction Machine", "exerciseId": "aduccion-cadera-maquina", "min": 12, "max": 15, "rir": [2, 2, 2] },
+      { "sourceName": "High Bar Squat", "exerciseId": "sentadilla-libre", "min": 8, "max": 10, "rir": [3, 3, 3] },
+      { "sourceName": "Glute Bulgarian Squat", "exerciseId": "guide-315", "min": 8, "max": 10, "rir": [2, 2] },
+      { "sourceName": "Single Leg Extensions", "exerciseId": "extension-cuadriceps-unilateral", "min": 12, "max": 15, "rir": [2, 2, 2] },
+      { "sourceName": "Lying Leg Curl", "exerciseId": "curl-femoral-tumbado", "min": 8, "max": 10, "rir": [2, 2] }
+    ] },
+    { "name": "Pull", "focus": "PULL", "exercises": [
+      { "sourceName": "Single Hand Incline Pulldown Machine", "exerciseId": "jalon-unilateral-maquina-inclinada", "min": 8, "max": 10, "rir": [2, 2, 2], "notes": "Hammer Strength" },
+      { "sourceName": "Neutral Chest-Supported Low Row", "exerciseId": "guide-122", "min": 10, "max": 12, "rir": [2, 2, 2] },
+      { "sourceName": "Wide Pull Downs", "exerciseId": "guide-102", "min": 10, "max": 12, "rir": [2, 2, 2] },
+      { "sourceName": "Incline Dumbbell Curls", "exerciseId": "curl-inclinado", "min": 10, "max": 12, "rir": [2, 2, 1] },
+      { "sourceName": "Face Pulls", "exerciseId": "face-pull", "min": 15, "max": 20, "rir": [2, 2, 1] },
+      { "sourceName": "Seated Leg Curl", "exerciseId": "curl-femoral-sentado", "min": 8, "max": 10, "rir": [2, 2, 2] }
+    ] },
+    { "name": "Push", "focus": "PUSH", "exercises": [
+      { "sourceName": "Machine Chest Press", "exerciseId": "press-pecho-maquina", "min": 10, "max": 12, "rir": [2, 2, 2], "notes": "Hammer Strength" },
+      { "sourceName": "Incline Dumbbell Press", "exerciseId": "press-inclinado-mancuernas", "min": 8, "max": 10, "rir": [2, 2, 2] },
+      { "sourceName": "High Cable Lateral Raises", "exerciseId": "guide-179", "min": 12, "max": 15, "rir": [2, 2] },
+      { "sourceName": "Seated DB Lateral Raises", "exerciseId": "guide-164", "min": 12, "max": 15, "rir": [2, 2, 2] },
+      { "sourceName": "High Cable Triceps Extension", "exerciseId": "extension-triceps-polea-alta", "min": 8, "max": 12, "rir": [2, 2, 1] },
+      { "sourceName": "Katana Extensions", "exerciseId": "guide-208", "min": 10, "max": 12, "rir": [2, 2, 2] }
+    ] }
+  ]
+}

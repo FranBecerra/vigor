@@ -33,6 +33,8 @@ export interface AuditRecord {
     issues: { code: string; severity: string }[]; assessment?: { version: string } };
 }
 export interface AuditArchive {
+  /** Omitted on historical raw-planner archives. */
+  generationMode?: 'raw-planner' | 'stable-budget' | 'dose-first';
   schemaVersion: number;
   catalogueFingerprint: string;
   catalogueSnapshots?: Record<string, Exercise[]>;
@@ -111,6 +113,26 @@ export function parseSeedCount(raw: string | undefined): number {
   const value = raw === undefined ? 10 : Number(raw);
   if (!Number.isInteger(value) || value < 2 || value > 20) throw new Error('Seeds must be an integer from 2 to 20');
   return value;
+}
+
+/** New audits exercise production; archives retain their recorded control mode. */
+export function resolveGenerationMode(options: { raw?: boolean; stable?: boolean; dose?: boolean;
+  replayMode?: 'raw-planner' | 'stable-budget' | 'dose-first' }) {
+  const selected = [options.raw && 'raw-planner', options.stable && 'stable-budget', options.dose && 'dose-first']
+    .filter(Boolean) as ('raw-planner' | 'stable-budget' | 'dose-first')[];
+  if (selected.length > 1) throw new Error('Choose only one generation mode');
+  if (selected[0] && options.replayMode && selected[0] !== options.replayMode) {
+    throw new Error('Generation mode conflicts with the replay archive');
+  }
+  return selected[0] ?? options.replayMode ?? 'dose-first';
+}
+
+/** A focused audit includes the exact requested family, never an unrelated prefix. */
+export function scopeAuditCases<T extends { id: string }>(cases: readonly T[], requested?: string): T[] {
+  if (!requested) return [...cases];
+  const selected = cases.filter(({ id }) => id === requested || id.startsWith(`${requested}-seed`) || id === `${requested}-time`);
+  if (!selected.length) throw new Error(`Unknown audit case: ${requested}`);
+  return selected;
 }
 
 /** Experiments and unmatched inputs require review, not automatic promotion. */

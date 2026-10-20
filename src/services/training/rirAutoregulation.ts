@@ -25,6 +25,7 @@ export interface RIRPrescription {
 }
 
 const RIR_MATRIX: Record<ExerciseProfile, RIRPrescription> = {
+  [ExerciseProfile.UNCLASSIFIED]: { start: 3, routineFloor: 3, peakFloor: 3 },
   [ExerciseProfile.COMPOUND_PRIMARY]: { start: 3, routineFloor: 2, peakFloor: 0 },
   [ExerciseProfile.COMPOUND_SECONDARY]: { start: 2, routineFloor: 1, peakFloor: 0 },
   [ExerciseProfile.ISOLATION]: { start: 2, routineFloor: 0, peakFloor: 0 },

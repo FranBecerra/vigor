@@ -1,0 +1,61 @@
+{
+  "exercises": [
+    {
+      "id": "jalon-unilateral-maquina-inclinada",
+      "name": "Jalón unilateral en máquina inclinada",
+      "primaryMuscle": "LATS",
+      "secondaryMuscles": ["BICEPS"],
+      "movementVector": "PULL_VERTICAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "laterality": "PER_SIDE",
+      "generationTier": "MANUAL_ONLY",
+      "notes": "User-described single-arm incline pulldown machine. The Hammer Strength note identifies the user's apparatus, not an independently verified model or resistance curve. No efficacy rating is assigned."
+    },
+    {
+      "id": "extension-triceps-polea-alta",
+      "name": "Extensión de tríceps en polea alta (pushdown)",
+      "primaryMuscle": "TRICEPS",
+      "secondaryMuscles": [],
+      "movementVector": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "generationTier": "MANUAL_ONLY",
+      "notes": "User-confirmed high-cable pushdown; attachment is deliberately unspecified. This is not an overhead extension. No efficacy rating is assigned."
+    },
+    {
+      "id": "remo-alto-maquina-pecho-apoyado",
+      "name": "Remo alto en máquina con pecho apoyado",
+      "primaryMuscle": "MID_BACK",
+      "secondaryMuscles": ["BICEPS", "DELTS_REAR"],
+      "movementVector": "PULL_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "generationTier": "MANUAL_ONLY",
+      "notes": "User-requested high-row variant with chest support. Machine geometry and grip remain setup-specific; no efficacy rating is assigned."
+    },
+    {
+      "id": "extension-cuadriceps-unilateral",
+      "name": "Extensión de cuádriceps unilateral en máquina",
+      "primaryMuscle": "QUADS",
+      "secondaryMuscles": [],
+      "movementVector": "KNEE_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "laterality": "PER_SIDE",
+      "generationTier": "MANUAL_ONLY",
+      "notes": "Perform the prescribed working sets on each leg; do not double the displayed number of sets or attributed muscle dose. No efficacy rating is assigned."
+    },
+    {
+      "id": "peso-muerto-rumano-maquina-encogimientos",
+      "name": "Peso muerto rumano en máquina de encogimientos",
+      "primaryMuscle": "HAMSTRINGS",
+      "secondaryMuscles": ["GLUTES", "ERECTORS"],
+      "movementVector": "HIP_DOMINANT",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "MACHINE",
+      "generationTier": "MANUAL_ONLY",
+      "notes": "Specific user-authored RDL using a shrug machine. This is not an alias of every machine deadlift; machine fit and execution are not independently verified. No efficacy rating is assigned."
+    }
+  ]
+}

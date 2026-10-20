@@ -16,7 +16,7 @@ describe('BODY_MAP data', () => {
   const muscles = new Set([...BODY_MAP.front.paths, ...BODY_MAP.back.paths].map((p) => p.muscle));
 
   it('draws every muscle group', () => {
-    expect([...muscles].sort()).toEqual(Object.values(MuscleGroup).sort());
+    expect([...muscles].sort()).toEqual(Object.values(MuscleGroup).filter((muscle) => muscle !== MuscleGroup.UNCLASSIFIED).sort());
   });
 
   it('draws every generator emphasis region somewhere', () => {

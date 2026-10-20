@@ -84,7 +84,7 @@ export function startRest(
 /** Segundos restantes, nunca negativo. 0 si no hay temporizador. */
 export function remainingSeconds(state: RestTimerState, nowMs: number): number {
   if (state.startedAt === null) return 0;
-  const elapsed = Math.floor((nowMs - state.startedAt) / 1000);
+  const elapsed = Math.floor(Math.max(0, nowMs - state.startedAt) / 1000);
   return Math.max(0, state.durationSeconds - elapsed);
 }
 

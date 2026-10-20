@@ -15,6 +15,7 @@
  */
 import { SetType, type MuscleGroup } from '@/models';
 import { exerciseDurationBreakdown, SESSION_OVERHEAD_MINUTES } from './sessionDuration';
+import { primaryMusclesOf } from './exerciseMuscles';
 export { WORK_SECONDS_PER_SET } from './sessionDuration';
 
 /**
@@ -29,8 +30,11 @@ export const SECONDARY_MUSCLE_WEIGHT = 0.5;
 
 /** Ejercicio planificado, reducido a lo que necesita el resumen. */
 export interface PlannedExercise {
+  isTimed?: boolean;
+  excludeFromVolume?: boolean;
   exerciseId: string;
   primaryMuscle: MuscleGroup;
+  primaryMuscles?: readonly MuscleGroup[];
   secondaryMuscles: readonly MuscleGroup[];
   /** Series de la sesión, en orden. */
   sets: readonly { setType: SetType; targetRIR?: number }[];
@@ -62,14 +66,17 @@ export function muscleSetVolume(
   const volume: Record<string, number> = {};
 
   for (const exercise of exercises) {
+    if (exercise.excludeFromVolume || exercise.primaryMuscle === 'UNCLASSIFIED') continue;
     const working = countWorkingSets(exercise.sets);
     if (working === 0) continue;
 
-    volume[exercise.primaryMuscle] = (volume[exercise.primaryMuscle] ?? 0) + working;
+    const primaries = primaryMusclesOf(exercise);
+    primaries.forEach((muscle) => { volume[muscle] = (volume[muscle] ?? 0) + working; });
 
     const uniqueSecondaries = new Set(exercise.secondaryMuscles);
     // El principal nunca se cuenta además como secundario.
-    uniqueSecondaries.delete(exercise.primaryMuscle);
+    primaries.forEach((muscle) => uniqueSecondaries.delete(muscle));
+    uniqueSecondaries.delete('UNCLASSIFIED' as MuscleGroup);
     for (const muscle of uniqueSecondaries) {
       volume[muscle] = (volume[muscle] ?? 0) + working * SECONDARY_MUSCLE_WEIGHT;
     }

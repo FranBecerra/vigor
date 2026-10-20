@@ -21,6 +21,8 @@
  *    no debe dejar un documento huérfano en el historial.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
+import type { WorkoutSession } from '@/models';
 import { workoutSessionRepository } from '@/services/repositories';
 import {
   isSessionEmpty,
@@ -33,7 +35,7 @@ import {
 /** Margen de inactividad antes de escribir. Suficiente para agrupar el tecleo. */
 const WRITE_DELAY_MS = 1200;
 
-export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+export type SaveStatus = 'idle' | 'saving' | 'saved' | 'queued' | 'error';
 
 interface UseSessionPersistenceOptions {
   /** Contexto de la sesión. `null` mientras no hay usuario autenticado. */
@@ -41,7 +43,7 @@ interface UseSessionPersistenceOptions {
   exerciseOrder: readonly string[];
   setsByExercise: SessionSetsByExercise;
   /** Se invoca si existía una sesión guardada, para restaurar el estado. */
-  onRestore: (restored: SessionSetsByExercise) => void;
+  onRestore: (restored: SessionSetsByExercise, session: WorkoutSession) => void;
 }
 
 export function useSessionPersistence({
@@ -51,7 +53,7 @@ export function useSessionPersistence({
   onRestore,
 }: UseSessionPersistenceOptions) {
   const [status, setStatus] = useState<SaveStatus>('idle');
-  const [hasRestored, setHasRestored] = useState(false);
+  const [restoredSessionId, setRestoredSessionId] = useState<string | null>(null);
 
   // Refs para leer el último estado dentro del temporizador sin re-armarlo en
   // cada cambio, que anularía el propósito del debounce.
@@ -65,10 +67,16 @@ export function useSessionPersistence({
   // never erase `completedAt` by replacing the document with an in-progress copy.
   const completedAtRef = useRef<number | undefined>(undefined);
   const sessionId = context?.sessionId ?? null;
+  const currentSessionId = useRef(sessionId);
+  currentSessionId.current = sessionId;
+  const hasRestored = sessionId !== null && restoredSessionId === sessionId;
+  const writeAttempt = useRef(0);
 
   // --- Recuperación: una sola vez por sesión ------------------------------
   useEffect(() => {
     if (context === null) return;
+    completedAtRef.current = undefined;
+    setStatus('idle');
     let cancelled = false;
 
     workoutSessionRepository
@@ -76,14 +84,17 @@ export function useSessionPersistence({
       .then((saved) => {
         if (cancelled) return;
         if (saved && saved.exercises.length > 0) {
-          onRestore(toSessionSetsByExercise(saved));
+          onRestore(toSessionSetsByExercise(saved), saved);
         }
-        setHasRestored(true);
+        const completed = saved?.completedAt;
+        completedAtRef.current = typeof completed === 'number' ? completed
+          : completed ? completed.seconds * 1000 + completed.nanoseconds / 1e6 : undefined;
+        setRestoredSessionId(context.sessionId);
       })
       .catch(() => {
         // Un fallo al recuperar no debe impedir entrenar: se sigue con el
         // estado local y se marca como restaurado para habilitar el guardado.
-        if (!cancelled) setHasRestored(true);
+        if (!cancelled) setRestoredSessionId(context.sessionId);
       });
 
     return () => {
@@ -96,33 +107,38 @@ export function useSessionPersistence({
 
   /** Escribe ya, sin esperar al temporizador. Para cerrar o salir. */
   const flush = useCallback(async (completedAt?: number): Promise<boolean> => {
-    if (context === null || isSessionEmpty(latestSets.current)) return false;
-    if (completedAt !== undefined) completedAtRef.current = completedAt;
+    if (context === null || !hasRestored || currentSessionId.current !== context.sessionId || (!context.persistDraft && isSessionEmpty(latestSets.current))) return false;
     const finalCompletedAt = completedAt ?? completedAtRef.current;
 
     setStatus('saving');
+    const attempt = ++writeAttempt.current;
+    let synced = false;
+    let rejected = false;
     try {
-      await workoutSessionRepository.create(
+      const acceptance = await workoutSessionRepository.createLocally(
         toWorkoutSession(
           finalCompletedAt === undefined ? context : { ...context, completedAt: finalCompletedAt },
           latestOrder.current,
           latestSets.current,
         ),
+        () => { synced = true; if (attempt === writeAttempt.current) setStatus('saved'); },
+        () => { rejected = true; if (attempt === writeAttempt.current) setStatus('error'); },
       );
-      setStatus('saved');
-      return true;
+      if (attempt === writeAttempt.current) setStatus(rejected ? 'error' : synced || acceptance === 'synced' ? 'saved' : 'queued');
+      if (!rejected && completedAt !== undefined) completedAtRef.current = completedAt;
+      return !rejected;
     } catch {
-      setStatus('error');
+      if (attempt === writeAttempt.current) setStatus('error');
       return false;
     }
-  }, [context]);
+  }, [context, hasRestored]);
 
   // --- Guardado diferido --------------------------------------------------
   useEffect(() => {
     // No guardar antes de haber intentado recuperar: escribir primero
     // sobreescribiría con el estado inicial una sesión ya empezada.
     if (context === null || !hasRestored) return;
-    if (isSessionEmpty(setsByExercise)) return;
+    if (!context.persistDraft && isSessionEmpty(setsByExercise)) return;
 
     if (timer.current !== null) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
@@ -132,16 +148,17 @@ export function useSessionPersistence({
     return () => {
       if (timer.current !== null) clearTimeout(timer.current);
     };
-  }, [setsByExercise, context, hasRestored, flush]);
+  }, [setsByExercise, exerciseOrder, context, hasRestored, flush]);
 
   // Al desmontar, vuelca lo pendiente: salir de la pantalla no debe perder los
   // cambios de los últimos segundos.
-  useEffect(
-    () => () => {
-      void flush();
-    },
-    [flush],
-  );
+  const latestFlush = useRef(flush);
+  latestFlush.current = flush;
+  useEffect(() => () => { void latestFlush.current(); }, []);
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => { if (state !== 'active') void flush(); });
+    return () => subscription.remove();
+  }, [flush]);
 
   return { status, hasRestored, flush };
 }

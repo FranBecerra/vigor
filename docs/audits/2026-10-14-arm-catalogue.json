@@ -1,0 +1,6019 @@
+{
+  "totalCatalogue": 380,
+  "armEntries": 68,
+  "scope": "Source mechanics, minimum indexed apparatus and eligibility; no verified numeric growth hierarchy.",
+  "rows": [
+    {
+      "id": "curl-barra",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "GRIP:SUPINATED",
+        "RESISTANCE:MID_RANGE"
+      ],
+      "requiredApparatus": [],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        233
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 233,
+        "equipment": "BARBELL",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "grip": "SUPINATED",
+        "setup": "Standing straight/EZ bar curl, braced torso, no hip impulse; slight shoulder flexion is optional.",
+        "unresolved": "Bar geometry and wrist comfort vary. No exact lengthened torque or head-specific credit is established."
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Standing supinated free-bar role; numeric ratings remain programming judgements."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 2,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "curl-inclinado",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:EXTENDED",
+        "GRIP:SUPINATED",
+        "RESISTANCE:LENGTHENED"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        238
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 238,
+        "equipment": "DUMBBELL",
+        "shoulder": "EXTENDED",
+        "support": "BACKREST",
+        "grip": "SUPINATED",
+        "setup": "Seated incline dumbbell curl on a 45–80-degree backrest, upper arms behind the torso.",
+        "unresolved": "Longer muscle position does not guarantee high bottom-range torque; this depends on forearm orientation relative to gravity."
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Supported shoulder-extended dumbbell role; length is not bottom-range torque."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "curl-bayesian",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:EXTENDED",
+        "GRIP:SUPINATED",
+        "RESISTANCE:LENGTHENED"
+      ],
+      "requiredApparatus": null,
+      "apparatusOptions": [],
+      "apparatusStatus": "not-established",
+      "sourcePages": [],
+      "relatedSourcePages": [
+        239,
+        259
+      ],
+      "sourceRelation": "related-variant",
+      "sourceMechanics": null,
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Generic shoulder-extended cable role; support, laterality and cable geometry are not specified."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 4,
+          "provenance": "direct-evidence",
+          "citations": [
+            "PMID:40082069"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 5,
+          "provenance": "direct-evidence",
+          "citations": [
+            "PMID:40082069"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 4,
+          "provenance": "direct-evidence",
+          "citations": [
+            "PMID:40082069"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "citation-support-unverified:stretchedPositionLoading",
+        "citation-support-unverified:rangeOfMotion",
+        "citation-support-unverified:resistanceProfileMatch",
+        "related-guide-variant-not-identical",
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "related-variant-rating-unresolved"
+    },
+    {
+      "id": "curl-predicador",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "GRIP:SUPINATED",
+        "RESISTANCE:LENGTHENED"
+      ],
+      "requiredApparatus": [
+        "BICEPS_PREACHER_MACHINE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        241
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 241,
+        "equipment": "MACHINE",
+        "shoulder": "FLEXED",
+        "support": "ARM_PAD",
+        "grip": "SUPINATED",
+        "setup": "Seated machine preacher curl with upper arms supported; guide recommends stopping short of full elbow lockout.",
+        "unresolved": "Cam, axis and machine geometry determine torque. MACHINE alone cannot validate LENGTHENED resistance or an ideal profile score; the endpoint recommendation is not a universal safety rule."
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Supported machine preacher role; machine-specific resistance remains unverified."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 5,
+          "provenance": "direct-evidence",
+          "citations": [
+            "PMID:33977835"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "direct-evidence",
+          "citations": [
+            "PMID:33977835"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "citation-support-unverified:stretchedPositionLoading",
+        "citation-support-unverified:rangeOfMotion",
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "curl-martillo",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "GRIP:NEUTRAL",
+        "RESISTANCE:MID_RANGE"
+      ],
+      "requiredApparatus": [],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        234
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 234,
+        "equipment": "DUMBBELL",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "grip": "NEUTRAL",
+        "setup": "Standing dumbbell hammer curl without torso swing; optional slight shoulder flexion.",
+        "unresolved": "Neutral grip does not establish a precise biceps/brachialis/brachioradialis attribution fraction."
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Neutral-grip elbow-flexor role; no precise brachioradialis credit is established."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 2,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "curl-polea-baja",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "GRIP:SUPINATED",
+        "RESISTANCE:EVEN"
+      ],
+      "requiredApparatus": [
+        "BAR_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        243
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 243,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "grip": "SUPINATED",
+        "setup": "Standing low-cable bar curl with optional slight shoulder flexion.",
+        "unresolved": "Cable tension is not joint torque; pulley height, distance and forearm angle change bottom/top loading."
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Neutral-shoulder cable role; constant cable tension is not constant joint torque."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "neural-fatigue-claim:systemicFatigueCost",
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "curl-concentrado",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "GRIP:SUPINATED",
+        "RESISTANCE:SHORTENED"
+      ],
+      "requiredApparatus": [
+        "SEAT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        250
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 250,
+        "equipment": "DUMBBELL",
+        "shoulder": "FLEXED",
+        "support": "THIGH",
+        "grip": "SUPINATED",
+        "setup": "Seated unilateral concentration curl, upper arm supported against the inner thigh.",
+        "unresolved": "Loading increments and bilateral elapsed time need implementation-specific treatment; no superior growth or precise local fatigue score is inferred."
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Thigh-supported unilateral alternative; unilateral elapsed-time modeling remains open."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 2,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "curl-araña",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "GRIP:SUPINATED",
+        "RESISTANCE:SHORTENED"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        244
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 244,
+        "equipment": "DUMBBELL",
+        "shoulder": "FLEXED",
+        "support": "CHEST",
+        "grip": "SUPINATED",
+        "setup": "Chest-supported spider curl on a 45–60-degree incline bench.",
+        "unresolved": "Support reduces balance demands, not all technique demands. A free-weight curve does not establish comparative regional hypertrophy."
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Chest-supported flexed-shoulder role; growth head-specificity remains unverified."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 2,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "extension-sobre-cabeza-polea",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:OVERHEAD",
+        "GRIP:NEUTRAL",
+        "RESISTANCE:LENGTHENED"
+      ],
+      "requiredApparatus": null,
+      "apparatusOptions": [],
+      "apparatusStatus": "not-established",
+      "sourcePages": [],
+      "relatedSourcePages": [],
+      "sourceRelation": "unreviewed",
+      "sourceMechanics": null,
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Overhead cable extension: the lengthened-long-head role tested directly by Maeo et al. 2023."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 5,
+          "provenance": "direct-evidence",
+          "citations": [
+            "PMID:35819335"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "citation-support-unverified:stretchedPositionLoading",
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "screened-needs-individual-verification"
+    },
+    {
+      "id": "extension-sobre-cabeza-mancuerna",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:OVERHEAD",
+        "GRIP:NEUTRAL",
+        "RESISTANCE:LENGTHENED"
+      ],
+      "requiredApparatus": null,
+      "apparatusOptions": [],
+      "apparatusStatus": "not-established",
+      "sourcePages": [
+        197
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "related-variant",
+      "sourceMechanics": {
+        "page": 197,
+        "equipment": "DUMBBELL",
+        "shoulder": "OVERHEAD",
+        "support": "BENCH",
+        "setup": "Seated two-hand dumbbell extension; elbow action, shoulder held flexed.",
+        "uncertainty": "Dumbbell increments and shoulder comfort depend on the athlete.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Overhead role without a cable station; coarser dumbbell increments."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 5,
+          "provenance": "indirect-evidence",
+          "citations": [
+            "PMID:35819335"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "citation-support-unverified:stretchedPositionLoading",
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "related-variant-rating-unresolved"
+    },
+    {
+      "id": "press-frances",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "GRIP:PRONATED",
+        "RESISTANCE:LENGTHENED"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        200
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 200,
+        "equipment": "BARBELL",
+        "shoulder": "FLEXED",
+        "support": "BENCH",
+        "setup": "Supine bar extension behind the head; EZ or straight bar.",
+        "uncertainty": "Bar type and wrist comfort are not established by the generic catalogue name.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Flexed-shoulder barbell extension; the single-joint arm of Brandao et al. 2020."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 4,
+          "provenance": "indirect-evidence",
+          "citations": [
+            "PMID:32149887"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "citation-support-unverified:stretchedPositionLoading",
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "pushdown-cuerda",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "GRIP:NEUTRAL",
+        "RESISTANCE:SHORTENED"
+      ],
+      "requiredApparatus": [
+        "ROPE_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        230
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 230,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "setup": "High-cable rope pushdown, elbow-only action, no forced rope separation.",
+        "uncertainty": "Rope versus cuff growth superiority is not established.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Same neutral-shoulder role as the bar pushdown with another attachment."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 2,
+          "provenance": "direct-evidence",
+          "citations": [
+            "PMID:35819335"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "citation-support-unverified:stretchedPositionLoading",
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "pushdown-barra",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "GRIP:PRONATED",
+        "RESISTANCE:SHORTENED"
+      ],
+      "requiredApparatus": [
+        "BAR_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        213
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 213,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "setup": "V1 high-cable bar pushdown with fixed shoulder and elbow position.",
+        "uncertainty": "Full elbow excursion does not imply resistance at the very end of extension.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Neutral-shoulder complement with low skill demand and stack increments."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 2,
+          "provenance": "direct-evidence",
+          "citations": [
+            "PMID:35819335"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "citation-support-unverified:stretchedPositionLoading",
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "extension-triceps-maquina",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "stimulusTags": [
+        "SHOULDER:SUPPORTED",
+        "GRIP:NEUTRAL",
+        "RESISTANCE:EVEN"
+      ],
+      "requiredApparatus": [
+        "TRICEPS_EXTENSION_MACHINE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        224
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "related-variant",
+      "sourceMechanics": {
+        "page": 224,
+        "equipment": "MACHINE",
+        "shoulder": "FLEXED",
+        "support": "BACKREST",
+        "setup": "Seated machine elbow extension with shoulder/arm support.",
+        "uncertainty": "Manufacturer-specific ROM, axis and cam cannot be inferred from MACHINE.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Supported, low-skill extension; the specific machine geometry stays unverified."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "resistance-descriptor-needs-setup-verification"
+      ],
+      "status": "related-variant-rating-unresolved"
+    },
+    {
+      "id": "fondos-banco",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BODYWEIGHT",
+      "stimulusTags": [],
+      "requiredApparatus": [
+        "FLAT_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [],
+      "relatedSourcePages": [],
+      "sourceRelation": "unreviewed",
+      "sourceMechanics": null,
+      "eligibility": "FALLBACK",
+      "eligibilityDecision": {
+        "tier": "FALLBACK",
+        "reason": "Bodyweight hybrid for equipment-limited plans; coarse loading and end-range shoulder extension."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 2,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 2,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "stimulus-descriptors-missing"
+      ],
+      "status": "screened-needs-individual-verification"
+    },
+    {
+      "id": "press-banca-cerrado",
+      "muscle": "TRICEPS",
+      "movement": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BARBELL",
+      "stimulusTags": [],
+      "requiredApparatus": [
+        "FLAT_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        43
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "unreviewed",
+      "sourceMechanics": null,
+      "eligibility": "STANDARD",
+      "eligibilityDecision": {
+        "tier": "STANDARD",
+        "reason": "Triceps-primary press. It currently counts as direct triceps work; that definition is allocator debt."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 2,
+          "provenance": "indirect-evidence",
+          "citations": [
+            "PMID:32149887"
+          ],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 4,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 5,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 3,
+          "provenance": "programming-judgement",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "citation-support-unverified:stretchedPositionLoading",
+        "stimulus-descriptors-missing"
+      ],
+      "status": "screened-needs-individual-verification"
+    },
+    {
+      "id": "guide-198",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:OVERHEAD",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [
+        "SEAT",
+        "ROPE_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        198
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 198,
+        "equipment": "CABLE",
+        "shoulder": "OVERHEAD",
+        "support": "BENCH",
+        "setup": "Seated low-cable rope extension behind the head.",
+        "uncertainty": "Cable tension is not constant joint torque; pulley distance changes the curve.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Same overhead-cable role as extension-sobre-cabeza-polea, plus a bench."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-199",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        199
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 199,
+        "equipment": "DUMBBELL",
+        "shoulder": "FLEXED",
+        "support": "BENCH",
+        "setup": "Supine neutral-grip extension; dumbbells descend behind the head.",
+        "uncertainty": "Elbow flexion and actual upper-arm angle determine the lengthened demand.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Fills the flexed-shoulder dumbbell role, but its promotion experiment was rejected: a near-zero time squeeze then drops 2.5-4 chest sets in dumbbell-only plans."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": 4,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": 4,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": 3,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": 3,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": 3,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": 4,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-201",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:OVERHEAD",
+        "SUPPORT:NONE"
+      ],
+      "requiredApparatus": [],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        201
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 201,
+        "equipment": "DUMBBELL",
+        "shoulder": "OVERHEAD",
+        "support": "NONE",
+        "setup": "Standing dumbbell overhead extension; no leg impulse.",
+        "uncertainty": "Title and instructions specify dumbbells but the figure shows a bar; default follows the instructions.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Same role as the seated overhead dumbbell entry with less support; source text and figure disagree."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-202",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        202
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 202,
+        "equipment": "BARBELL",
+        "shoulder": "FLEXED",
+        "support": "BENCH",
+        "setup": "Supine skullcrusher toward forehead or nose, distinct from behind-head French press.",
+        "uncertainty": "Endpoint clearance can restrict elbow flexion.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Near-duplicate of press-frances with a shorter endpoint."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-203",
+      "muscle": "TRICEPS",
+      "movement": "PUSH_HORIZONTAL",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BODYWEIGHT",
+      "stimulusTags": [
+        "SHOULDER:MOVING",
+        "SUPPORT:PARALLEL_BARS"
+      ],
+      "requiredApparatus": [
+        "PARALLEL_BARS"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        203
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 203,
+        "equipment": "BODYWEIGHT",
+        "shoulder": "MOVING",
+        "support": "PARALLEL_BARS",
+        "setup": "Narrow-grip dip with both shoulder and elbow movement; external loading optional.",
+        "uncertainty": "No direct hypertrophy hierarchy versus machines is established; equipment includes bars and optional belt.",
+        "unilateral": false,
+        "hybrid": true
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Hybrid dip classified as a horizontal press; it would fill the chest-press slot before its role is decided."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost",
+        "compound-secondary-credit-missing"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-204",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE"
+      ],
+      "requiredApparatus": [
+        "DUAL_CABLE"
+      ],
+      "apparatusOptions": [
+        [
+          "HANDLE_PAIR",
+          "CUFF_PAIR",
+          "ROPE_PAIR"
+        ]
+      ],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        204
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 204,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "setup": "Crossed high cables with cuffs or independent handles; elbow extension.",
+        "uncertainty": "Two cable stations required for the bilateral description; optional shoulder motion is not the default.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Needs two cable stations, which availability does not model."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-205",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "SINGLE_HANDLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        205
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 205,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "setup": "One high cable, lateral stance, shoulder held fixed.",
+        "uncertainty": "Cable line and torso orientation determine resistance.",
+        "unilateral": true,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unilateral, doubling time per set, in a role the pushdowns already cover."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-206",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:BACKREST"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH",
+        "DUAL_CABLE"
+      ],
+      "apparatusOptions": [
+        [
+          "HANDLE_PAIR",
+          "CUFF_PAIR",
+          "ROPE_PAIR"
+        ]
+      ],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        206
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 206,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "BACKREST",
+        "setup": "Seated at 80-90 degree backrest, shoulders near 90 degrees; independent cables.",
+        "uncertainty": "Support does not establish ideal machine/cable resistance matching.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Needs independent cables and a backrest, which availability does not model."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-207",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:NONE",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "SINGLE_HANDLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        207
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 207,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "NONE",
+        "setup": "Standing unilateral elbow extension with shoulder near 90 degrees.",
+        "uncertainty": "Do not translate 90-degree shoulder flexion into fully overhead.",
+        "unilateral": true,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unilateral flexed-shoulder role already covered bilaterally."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-208",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:OVERHEAD",
+        "SUPPORT:NONE",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "SINGLE_HANDLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        208
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 208,
+        "equipment": "CABLE",
+        "shoulder": "OVERHEAD",
+        "support": "NONE",
+        "setup": "Low cable behind head, diagonal katana extension, shoulder held flexed.",
+        "uncertainty": "No direct katana-versus-other-extension growth comparison.",
+        "unilateral": true,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unilateral overhead role already covered bilaterally."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-209",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH",
+        "DUAL_CABLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        209
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 209,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "BENCH",
+        "setup": "Cable Tate extension on a 20-45 degree bench, independent low cables.",
+        "uncertainty": "Despite press in the name, the source holds the shoulder fixed.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Needs two low cables and a bench, which availability does not model."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-210",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "SMITH_MACHINE",
+      "stimulusTags": [
+        "SHOULDER:MOVING",
+        "SUPPORT:BENCH",
+        "FAMILY:TRICEPS_PRESS_EXTENSION"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        210
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 210,
+        "equipment": "SMITH_MACHINE",
+        "shoulder": "MOVING",
+        "support": "BENCH",
+        "setup": "Kaz/JM hybrid on Smith rails; elbow travels, bar approaches chin/clavicle.",
+        "uncertainty": "Rail geometry and technique matter; superiority over close-grip bench is a coaching claim.",
+        "unilateral": false,
+        "hybrid": true
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Technique-dependent press-extension hybrid in the close-grip-bench role; revisit with beginner eligibility."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-211",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BARBELL",
+      "stimulusTags": [
+        "SHOULDER:MOVING",
+        "SUPPORT:BENCH",
+        "FAMILY:TRICEPS_PRESS_EXTENSION"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        211
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 211,
+        "equipment": "BARBELL",
+        "shoulder": "MOVING",
+        "support": "BENCH",
+        "setup": "Free-bar JM hybrid; elbows travel forward, bar approaches chin/clavicle.",
+        "uncertainty": "No validated fixed chest credit or comparative growth advantage.",
+        "unilateral": false,
+        "hybrid": true
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Technique-dependent press-extension hybrid in the close-grip-bench role; revisit with beginner eligibility."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-212",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:NONE"
+      ],
+      "requiredApparatus": [],
+      "apparatusOptions": [
+        [
+          "BAR_ATTACHMENT",
+          "ROPE_ATTACHMENT"
+        ]
+      ],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        212
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 212,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "NONE",
+        "setup": "High cable behind body, description specifies shoulders near 90 degrees.",
+        "uncertainty": "Figure appears more overhead than the 90-degree description; exact equivalence unresolved, preserved separately.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Disputed identity: the text says 90-degree shoulder flexion, the figure looks overhead."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-214",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:MOVING",
+        "SUPPORT:NONE"
+      ],
+      "requiredApparatus": [
+        "BAR_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        214
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 214,
+        "equipment": "CABLE",
+        "shoulder": "MOVING",
+        "support": "NONE",
+        "setup": "V2 pushdown deliberately couples elbow extension and shoulder extension.",
+        "uncertainty": "Coordination-heavy variant; no evidence for a quantified long-head bonus.",
+        "unilateral": false,
+        "hybrid": true
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Coordination-heavy coupled elbow and shoulder extension."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-215",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE"
+      ],
+      "requiredApparatus": [
+        "BAR_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        215
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 215,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "setup": "V3 leaned-over pushdown, shoulders held above the bar, elbows travel backward.",
+        "uncertainty": "Source describes a slight pressing component; hybrid accessory, not a basic press.",
+        "unilateral": false,
+        "hybrid": true
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Hybrid with a pressing component in the pushdown role."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-216",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH",
+        "BAR_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        216
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 216,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "BENCH",
+        "setup": "Supine low-cable French extension; fixed shoulder is the default.",
+        "uncertainty": "Optional shoulder motion would define a different execution, not mandatory hybrid status.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Needs a cable and a bench; the flexed-shoulder role is already covered."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-217",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        217
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 217,
+        "equipment": "DUMBBELL",
+        "shoulder": "FLEXED",
+        "support": "BENCH",
+        "setup": "Supine Tate extension with laterally directed elbows, no shoulder press.",
+        "uncertainty": "Kettlebell option is not availability of the default dumbbell variant.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unusual lateral elbow path; guide-199 covers the flexed dumbbell role."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-218",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "SINGLE_HANDLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        218
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 218,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "setup": "Unilateral high-cable pushdown with shoulder fixed near torso.",
+        "uncertainty": "The kickback label does not imply a dumbbell-like terminal-loading curve.",
+        "unilateral": true,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unilateral pushdown."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-219",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:HAND_SUPPORT",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "SINGLE_HANDLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        219
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 219,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "HAND_SUPPORT",
+        "setup": "Bent-over cable kickback, free hand supported, pulley below shoulder.",
+        "uncertainty": "Pulley height can shift demand from early/mid to late elbow extension.",
+        "unilateral": true,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unilateral kickback."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-220",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:ARM_PAD"
+      ],
+      "requiredApparatus": [
+        "TRICEPS_EXTENSION_MACHINE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        220
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 220,
+        "equipment": "MACHINE",
+        "shoulder": "FLEXED",
+        "support": "ARM_PAD",
+        "setup": "Machine French extension, upper arm on pad, shoulder near 90 degrees.",
+        "uncertainty": "Cam, axis alignment and available elbow excursion vary by manufacturer.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Same supported-machine role as extension-triceps-maquina; manufacturer-specific."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-221",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:NONE"
+      ],
+      "requiredApparatus": [
+        "DUAL_CABLE",
+        "HANDLE_PAIR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        221
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 221,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "NONE",
+        "setup": "Standing chest-height extension, usually crossed cables, shoulder near 90 degrees.",
+        "uncertainty": "Cable height changes peak demand; no muscle-head multiplier is inferred.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Needs two cable stations, which availability does not model."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-222",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [],
+      "apparatusOptions": [
+        [
+          "FLAT_BENCH",
+          "MAT"
+        ],
+        [
+          "LONG_ROPE",
+          "ROPE_PAIR"
+        ]
+      ],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        222
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 222,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "BENCH",
+        "setup": "Supine cable kickback, shoulder fixed, long/double ropes clear the torso.",
+        "uncertainty": "Bench or mat and cable placement needed; not a standing overhead variant.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Needs long or double ropes and a bench at the cable."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-223",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "SINGLE_HANDLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        223
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 223,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "setup": "Back-to-high-cable unilateral pushdown with line near shoulder.",
+        "uncertainty": "Usually unilateral; a two-hand execution requires a suitable cable portal.",
+        "unilateral": true,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unilateral pushdown."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-225",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE"
+      ],
+      "requiredApparatus": [
+        "BAR_ATTACHMENT",
+        "HANDLE_PAIR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        225
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 225,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "setup": "High-cable pushdown using bar/multigrip plus independent handles.",
+        "uncertainty": "Attachment requirements differ from an ordinary bar pushdown.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Needs a multigrip plus independent handles in the pushdown role."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-226",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:OVERHEAD",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [
+        "SEAT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        226
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 226,
+        "equipment": "DUMBBELL",
+        "shoulder": "OVERHEAD",
+        "support": "BENCH",
+        "setup": "Seated two-dumbbell overhead French extension.",
+        "uncertainty": "Distinct loading/hand setup from the one-dumbbell two-hand entry.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Same overhead dumbbell role as extension-sobre-cabeza-mancuerna."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-227",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:OVERHEAD",
+        "SUPPORT:BENCH",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "SEAT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        227
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 227,
+        "equipment": "DUMBBELL",
+        "shoulder": "OVERHEAD",
+        "support": "BENCH",
+        "setup": "Seated unilateral diagonal katana extension.",
+        "uncertainty": "Free-hand support is optional; vertical alignment unloads the terminal elbow range.",
+        "unilateral": true,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unilateral, and vertical alignment unloads the terminal range."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-228",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH",
+        "BAR_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        228
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 228,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "BENCH",
+        "setup": "High-cable elbow extension with torso on 45-60 degree bench.",
+        "uncertainty": "Source contains a shoulder-motion typo; fixed shoulder is consistently specified elsewhere.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Needs a bench at the cable; the neutral role is already covered."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-229",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE"
+      ],
+      "requiredApparatus": [
+        "LONG_ROPE_PAIR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        229
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 229,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "setup": "Rapunzel pushdown using extra-long crossed ropes near shoulders.",
+        "uncertainty": "Cable/rope clearance matters; ordinary short ropes are not an equivalent setup.",
+        "unilateral": false,
+        "hybrid": false
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Needs extra-long ropes."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-231",
+      "muscle": "TRICEPS",
+      "movement": "ELBOW_EXTENSION",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:MOVING",
+        "SUPPORT:BENCH"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        231
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 231,
+        "equipment": "DUMBBELL",
+        "shoulder": "MOVING",
+        "support": "BENCH",
+        "setup": "Supine PJR combines elbow extension and substantial shoulder movement.",
+        "uncertainty": "Dumbbell is the indexed default; bar alternative is not silently equipment-equivalent.",
+        "unilateral": false,
+        "hybrid": true
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Hybrid with substantial shoulder movement; technique-dependent."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-235",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE",
+        "GRIP:NEUTRAL"
+      ],
+      "requiredApparatus": [
+        "ROMAN_BAR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        235
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 235,
+        "equipment": "BARBELL",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "grip": "NEUTRAL",
+        "setup": "Standing Roman/triceps-bar hammer curl; neutral handles, elbow flexion without torso impulse.",
+        "unresolved": "A specialty neutral-handle bar is required; generic barbell availability cannot establish it. Fixed wrists do not establish superior hypertrophy."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Requires a specialty Roman bar, not established by ordinary BARBELL availability."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-236",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE",
+        "GRIP:ROTATING"
+      ],
+      "requiredApparatus": [
+        "SEAT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        236
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 236,
+        "equipment": "DUMBBELL",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "grip": "ROTATING",
+        "setup": "Seated dumbbell curl, starts neutral and supinates during elbow flexion. Backrest is optional.",
+        "unresolved": "A seat is required for this source variant; a standing alternative is described separately. Optional support and supination do not establish a quantitative stimulus bonus."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Seated rotating-grip variant; optional support and elapsed time are not modeled precisely."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-237",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "COMPOUND_SECONDARY",
+      "equipment": "BARBELL",
+      "stimulusTags": [
+        "SHOULDER:EXTENDED",
+        "SUPPORT:NONE",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        237
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 237,
+        "equipment": "BARBELL",
+        "shoulder": "EXTENDED",
+        "support": "NONE",
+        "grip": "SUPINATED",
+        "setup": "Standing straight/EZ-bar drag curl; elbows travel behind the torso while the bar rises. Optional wall/back support.",
+        "unresolved": "Shoulder motion and coordination make it distinct from a fixed-upper-arm curl. The guide long-head emphasis claim is not a validated growth multiplier."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Moving-shoulder drag hybrid; no secondary muscle fraction is inferred."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-238",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:EXTENDED",
+        "SUPPORT:BACKREST",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        238
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 238,
+        "equipment": "DUMBBELL",
+        "shoulder": "EXTENDED",
+        "support": "BACKREST",
+        "grip": "SUPINATED",
+        "setup": "Seated incline dumbbell curl on a 45–80-degree backrest, upper arms behind the torso.",
+        "unresolved": "Longer muscle position does not guarantee high bottom-range torque; this depends on forearm orientation relative to gravity."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Related to the existing incline curl; retain saved identity without duplicate promotion."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-239",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:EXTENDED",
+        "SUPPORT:BACKREST",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH",
+        "DUAL_CABLE",
+        "HANDLE_PAIR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        239
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 239,
+        "equipment": "CABLE",
+        "shoulder": "EXTENDED",
+        "support": "BACKREST",
+        "grip": "SUPINATED",
+        "setup": "Seated bilateral Bayesian curl, 80–90-degree backrest and two independent low cables.",
+        "unresolved": "Generic standing Bayesian identity lacks the specified bench and dual-cable support; do not transfer stability or availability automatically."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Distinct seated bilateral Bayesian setup requiring a bench and two cable lines."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-240",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "DUMBBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:ARM_PAD",
+        "GRIP:SUPINATED",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        240
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 240,
+        "equipment": "DUMBBELL",
+        "shoulder": "FLEXED",
+        "support": "ARM_PAD",
+        "grip": "SUPINATED",
+        "setup": "Unilateral dumbbell preacher, upper arm on a 45–60-degree incline bench; elbow stays supported.",
+        "unresolved": "Bench support is required. Avoiding final elbow extension is a guide preference, not a universal safety rule; short-head growth superiority is unverified."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unilateral dumbbell preacher; benchmark dose/time behavior before automatic promotion."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-242",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:ARM_PAD",
+        "GRIP:SUPINATED",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH",
+        "SINGLE_HANDLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        242
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 242,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "ARM_PAD",
+        "grip": "SUPINATED",
+        "setup": "Unilateral low-cable preacher with an independent handle and upper-arm support on a 45–60-degree bench.",
+        "unresolved": "Bench and cable geometry determine availability and torque. Constant cable tension does not imply constant elbow torque or a universally optimal resistance profile."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unilateral cable preacher with an adjustable bench and independent handle."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-245",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:CHEST",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        245
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 245,
+        "equipment": "BARBELL",
+        "shoulder": "FLEXED",
+        "support": "CHEST",
+        "grip": "SUPINATED",
+        "setup": "Chest-supported spider curl on a 45–60-degree bench with straight/EZ bar.",
+        "unresolved": "Gravity loads according to forearm angle. The guide short-head preference is not a validated credit multiplier."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Bar spider variant overlaps the chest-supported role; no individual numeric rating."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-246",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:CHEST",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH",
+        "BAR_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        246
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 246,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "CHEST",
+        "grip": "SUPINATED",
+        "setup": "Chest-supported 45–60-degree bench spider curl facing a low cable with bar attachment.",
+        "unresolved": "The cable changes force direction, not necessarily constant elbow torque; bench distance changes the curve."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Bench/cable spider variant; cable geometry and numeric rating remain unresolved."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-247",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "stimulusTags": [
+        "SHOULDER:EXTENDED",
+        "SUPPORT:ARM_PAD",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "BICEPS_BEHIND_BODY_MACHINE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        247
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 247,
+        "equipment": "MACHINE",
+        "shoulder": "EXTENDED",
+        "support": "ARM_PAD",
+        "grip": "SUPINATED",
+        "setup": "Seated curl machine with elbows supported behind the torso and feet bracing the seat.",
+        "unresolved": "This is not a shoulder-flexed preacher machine. Its cam and available ROM require specific machine inspection."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Specific behind-body machine is not implied by generic machine availability."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-248",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:NONE",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "DUAL_CABLE",
+        "HANDLE_PAIR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        248
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 248,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "NONE",
+        "grip": "SUPINATED",
+        "setup": "Standing low-cable preacher-style curl with arms held forward, two independent handles, no arm pad.",
+        "unresolved": "Preacher in the title does not imply support; a unilateral alternative is a separate setup."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unsupported standing preacher-style curl; not equivalent to an arm-pad preacher."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-249",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:ABDUCTED",
+        "SUPPORT:NONE",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "DUAL_CABLE",
+        "HANDLE_PAIR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        249
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 249,
+        "equipment": "CABLE",
+        "shoulder": "ABDUCTED",
+        "support": "NONE",
+        "grip": "SUPINATED",
+        "setup": "Bilateral high-cable double-biceps curl with upper arms held out to the sides; standing or kneeling.",
+        "unresolved": "Shoulder abduction is not sagittal flexion. Cable width/height determine loading; no head-specific growth bonus is established."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Abducted-shoulder bilateral high curl requires two cables; not sagittal shoulder flexion."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-251",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:NEUTRAL",
+        "SUPPORT:NONE",
+        "GRIP:NEUTRAL"
+      ],
+      "requiredApparatus": [
+        "DUAL_CABLE",
+        "ROPE_PAIR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        251
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 251,
+        "equipment": "CABLE",
+        "shoulder": "NEUTRAL",
+        "support": "NONE",
+        "grip": "NEUTRAL",
+        "setup": "Bilateral low-cable hammer curl using two nearby cables and separate rope handles; no wrist rotation.",
+        "unresolved": "The default needs two cable lines; a single-rope or unilateral implementation is not identical apparatus or elapsed time."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Default needs two nearby cable lines; a unilateral alternative is a different implementation."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-252",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:BACKREST",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH",
+        "BAR_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        252
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 252,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "BACKREST",
+        "grip": "SUPINATED",
+        "setup": "Supine guillotine curl on a flat/slightly inclined bench, high cable and bar directed toward the face.",
+        "unresolved": "The source notes little demand when the cable aligns with the forearm; this does not justify a numeric growth rating."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "High-cable supine role; alignment-dependent torque does not establish a numeric preference."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-253",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:NONE",
+        "GRIP:SUPINATED",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "SINGLE_HANDLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        253
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 253,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "NONE",
+        "grip": "SUPINATED",
+        "setup": "Standing high-cable preacher-style curl facing a head-height pulley, unilateral handle default.",
+        "unresolved": "No arm pad is present. Optional hand support/kneeling changes stability; an elbow endpoint is not a universal safety rule."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Unsupported high-cable unilateral role; no generic preacher-support bonus."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-254",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:ARM_PAD",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "PREACHER_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        254
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 254,
+        "equipment": "BARBELL",
+        "shoulder": "FLEXED",
+        "support": "ARM_PAD",
+        "grip": "SUPINATED",
+        "setup": "Curl over the near-vertical reverse side of a Scott pad with EZ bar; dumbbells are an optional alternative.",
+        "unresolved": "Reverse describes the bench orientation, not a pronated grip. It must not be relabeled as a forearm/reverse-grip curl."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Reverse side of Scott bench, not reverse grip; preserve distinct setup."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-255",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "BARBELL",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:ARM_PAD",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "PREACHER_BENCH"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        255
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 255,
+        "equipment": "BARBELL",
+        "shoulder": "FLEXED",
+        "support": "ARM_PAD",
+        "grip": "SUPINATED",
+        "setup": "Seated conventional Scott preacher with straight/EZ bar, upper arms supported on the forward-sloping pad.",
+        "unresolved": "Pad angle and forearm orientation set external torque; the guide preference for other implements is not universal comparative evidence."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Free-bar supported preacher differs from the existing machine preacher."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-256",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:ABDUCTED",
+        "SUPPORT:BACKREST",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "FLAT_BENCH",
+        "DUAL_CABLE",
+        "WIDE_CABLE_PORTAL",
+        "HANDLE_PAIR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        256
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 256,
+        "equipment": "CABLE",
+        "shoulder": "ABDUCTED",
+        "support": "BACKREST",
+        "grip": "SUPINATED",
+        "setup": "Supine crucifix curl on a flat/slightly inclined bench between widely separated independent cables.",
+        "unresolved": "Cable span can restrict elbow ROM for a given arm length; a generic cable flag cannot establish this setup."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Wide-portal supine crucifix can be ROM-limited; verify apparatus and alignment."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-257",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:BACKREST",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH",
+        "BAR_ATTACHMENT"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        257
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 257,
+        "equipment": "CABLE",
+        "shoulder": "FLEXED",
+        "support": "BACKREST",
+        "grip": "SUPINATED",
+        "setup": "Supine 45–60-degree bench curl facing a high cable with a straight/EZ attachment, shoulders fixed.",
+        "unresolved": "Support differs from the standing high curl. Alignment can unload the extended elbow despite cable tension."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Bench-supported high cable requires separate setup and individual rating."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-258",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:VARIABLE",
+        "SUPPORT:BACKREST",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "ADJUSTABLE_BENCH",
+        "DUAL_CABLE",
+        "HANDLE_PAIR"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        258
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 258,
+        "equipment": "CABLE",
+        "shoulder": "VARIABLE",
+        "support": "BACKREST",
+        "grip": "SUPINATED",
+        "setup": "Supine 30–45-degree bench curl between two low cables; shoulder neutral or mildly flexed according to setup.",
+        "unresolved": "The text permits more than one shoulder angle; do not assign a precise resistance or head-growth descriptor."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Two low cables and bench; shoulder position is explicitly variable."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-259",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "CABLE",
+      "stimulusTags": [
+        "SHOULDER:EXTENDED",
+        "SUPPORT:HAND_SUPPORT",
+        "GRIP:SUPINATED",
+        "LATERALITY:UNILATERAL"
+      ],
+      "requiredApparatus": [
+        "SINGLE_HANDLE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        259
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 259,
+        "equipment": "CABLE",
+        "shoulder": "EXTENDED",
+        "support": "HAND_SUPPORT",
+        "grip": "SUPINATED",
+        "setup": "Standing unilateral Bayesian curl with cable behind the torso; free-hand support is recommended, not mandatory.",
+        "unresolved": "Pulley height and distance can bias early or late elbow loading. Neither long-head superiority nor a fixed LENGTHENED curve follows from the name."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Standing unilateral Bayesian with optional hand support; not the seated bilateral source."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    },
+    {
+      "id": "guide-260",
+      "muscle": "BICEPS",
+      "movement": "ELBOW_FLEXION",
+      "profile": "ISOLATION",
+      "equipment": "MACHINE",
+      "stimulusTags": [
+        "SHOULDER:FLEXED",
+        "SUPPORT:ARM_PAD",
+        "GRIP:SUPINATED"
+      ],
+      "requiredApparatus": [
+        "HIGH_CURL_MACHINE"
+      ],
+      "apparatusOptions": [],
+      "apparatusStatus": "known-prerequisites-recorded",
+      "sourcePages": [
+        260
+      ],
+      "relatedSourcePages": [],
+      "sourceRelation": "matching-execution",
+      "sourceMechanics": {
+        "page": 260,
+        "equipment": "MACHINE",
+        "shoulder": "FLEXED",
+        "support": "ARM_PAD",
+        "grip": "SUPINATED",
+        "setup": "Seated high-curl specialty machine with upper arms supported and handles moving toward the face.",
+        "unresolved": "Generic machine availability does not establish this specialty device or its cam, axis alignment and usable ROM."
+      },
+      "eligibility": "MANUAL_ONLY",
+      "eligibilityDecision": {
+        "tier": "MANUAL_ONLY",
+        "reason": "Specialty high-curl machine requires individual apparatus availability and rating."
+      },
+      "criteria": [
+        {
+          "key": "stretchedPositionLoading",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "rangeOfMotion",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "resistanceProfileMatch",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "stabilityCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "loadProgressability",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        },
+        {
+          "key": "systemicFatigueCost",
+          "value": null,
+          "provenance": "individual-source-mechanics-point-unresolved",
+          "citations": [],
+          "supportVerified": false
+        }
+      ],
+      "issues": [
+        "criterion-provenance:stretchedPositionLoading",
+        "criterion-provenance:rangeOfMotion",
+        "criterion-provenance:resistanceProfileMatch",
+        "criterion-provenance:stabilityCost",
+        "criterion-provenance:loadProgressability",
+        "criterion-provenance:systemicFatigueCost"
+      ],
+      "status": "source-mechanics-reviewed-rating-unresolved"
+    }
+  ]
+}

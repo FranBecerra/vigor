@@ -7,20 +7,21 @@ import { gzipSync, gunzipSync } from 'node:zlib';
 import { cases } from './evaluate-exercise-ranking';
 import { Equipment, ExperienceLevel, SplitStructure } from '../src/models';
 import { EXERCISE_CATALOGUE, filterCatalogue } from '../src/services/training/exerciseCatalogue';
-import { planMesocycle, type MesocyclePlanInput } from '../src/services/training/mesocyclePlanner';
+import { allocateDoseFirst, planMesocycle, rerollMesocycle, type MesocyclePlanInput } from '../src/services/training/mesocyclePlanner';
 import { auditCatalogue, evaluateGeneratorQuality } from '../src/services/training/generatorQuality';
 import { TrainingGoal, VolumeRegion } from '../src/services/training/volumePlan';
 import { catalogueWithReviewedTags, reviewedExerciseMetadata } from '../src/services/training/exerciseMetadataReview';
+import { catalogueWithArmGeometry } from '../src/services/training/armSelectionDescriptors';
 import { toPlannedSessions } from '../src/services/training/routineMapper';
-import { findAlternativeSchedule } from '../src/services/training/alternativeSchedule';
+import { reviewScheduleSuitability } from '../src/services/training/alternativeSchedule';
 import { GENERATOR_QUALITY_VERSION } from '../src/services/training/generatorQualityContract';
 import { AUDIT_SCHEMA_VERSION, AUDIT_MATRIX_VERSION, fingerprint, snapshotInput, replayInput,
-  compareAudits, comparisonGate, parseSeedCount, type AuditArchive } from './generator-audit-protocol';
+  compareAudits, comparisonGate, parseSeedCount, scopeAuditCases, resolveGenerationMode, type AuditArchive } from './generator-audit-protocol';
 import { crossedAuditCases, expandAuditCases } from './generator-audit-matrix';
 
 const option = (name: string) => process.argv.find((arg) => arg.startsWith(`--${name}=`))?.slice(name.length + 3);
 const valueOptions = ['output', 'baseline', 'replay', 'case', 'matrix', 'policy', 'metadata', 'seeds'];
-const flags = ['--extended', '--exclude-unscored', '--allow-version-drift'];
+const flags = ['--extended', '--exclude-unscored', '--allow-version-drift', '--stable-dose', '--dose-first', '--raw-planner'];
 for (const arg of process.argv.slice(2)) if (!flags.includes(arg) && !valueOptions.some((name) => arg.startsWith(`--${name}=`) && arg.length > name.length + 3)) {
   throw new Error(`Unknown or incomplete audit option: ${arg}`);
 }
@@ -32,7 +33,7 @@ if (!['legacy', 'full'].includes(matrix)) throw new Error('Matrix must be legacy
 if (option('policy') && !['ordinal', 'volume-aware', 'accessory-aware', 'coupled-control', 'legacy-weighted'].includes(option('policy')!)) {
   throw new Error('Unknown ranking policy');
 }
-if (option('metadata') && option('metadata') !== 'reviewed') throw new Error('Unknown metadata experiment');
+if (option('metadata') && !['reviewed', 'arm-geometry'].includes(option('metadata')!)) throw new Error('Unknown metadata experiment');
 const policy: MesocyclePlanInput['rankingPolicy'] = option('policy') === 'ordinal' ? 'ordinal' : option('policy') === 'volume-aware' ? 'volume-aware'
   : option('policy') === 'accessory-aware' ? 'accessory-aware'
   : option('policy') === 'coupled-control' ? 'coupled-control'
@@ -40,7 +41,8 @@ const policy: MesocyclePlanInput['rankingPolicy'] = option('policy') === 'ordina
 const seedCount = parseSeedCount(option('seeds'));
 const controlledCatalogue = process.argv.includes('--exclude-unscored')
   ? EXERCISE_CATALOGUE.filter((e) => e.criteria !== undefined) : EXERCISE_CATALOGUE;
-const sourceCatalogue = option('metadata') === 'reviewed' ? catalogueWithReviewedTags(controlledCatalogue) : controlledCatalogue;
+const sourceCatalogue = option('metadata') === 'reviewed' ? catalogueWithReviewedTags(controlledCatalogue)
+  : option('metadata') === 'arm-geometry' ? catalogueWithArmGeometry(controlledCatalogue) : controlledCatalogue;
 const catalogueFingerprint = createHash('sha256').update(JSON.stringify(sourceCatalogue)).digest('hex');
 const engineFingerprint = createHash('sha256').update([
   'mesocyclePlanner', 'exerciseSelection', 'sessionDistribution', 'volumePlan', 'trainingCapacity', 'strengthProgram',
@@ -107,22 +109,47 @@ if (replayPath) {
     throw new Error('Replay source/runtime mismatch. Restore archived versions or use --allow-version-drift for an explicit experiment.');
   }
   expanded = [{ id: option('case')!, input }];
+} else if (option('case')) {
+  expanded = scopeAuditCases(expanded, option('case'));
 }
 if (new Set(expanded.map((c) => c.id)).size !== expanded.length) throw new Error('Duplicate audit IDs');
 const catalogueSnapshots: Record<string, import('../src/models').Exercise[]> = {};
+const generationMode = resolveGenerationMode({ raw: process.argv.includes('--raw-planner'),
+  stable: process.argv.includes('--stable-dose'), dose: process.argv.includes('--dose-first'),
+  replayMode: replayArchive?.generationMode });
+const stableDose = generationMode === 'stable-budget';
+const doseFirst = generationMode === 'dose-first';
+// Audit-local reuse only: immutable catalogue snapshots and identical inputs,
+// excluding the variation seed. --stable-dose is a rejected reference-budget
+// experiment; --dose-first evaluates the app's dose-before-variation allocator.
+// The raw-planner mode remains an explicit historical/control comparison.
+const stableReferences = new Map<string, ReturnType<typeof planMesocycle>>();
 const reports = expanded.map(({ id, input }) => {
   const start = performance.now();
   const snapshot = snapshotInput(id, input, catalogueSnapshots);
   try {
-    const plan = planMesocycle(input);
-    const alternative = findAlternativeSchedule(input, plan);
+    let plan;
+    if ((stableDose || doseFirst) && input.rankingPolicy === undefined && input.goal === TrainingGoal.HYPERTROPHY) {
+      const key = fingerprint({ ...snapshot.input, seed: 0, catalogueFingerprint: snapshot.catalogueFingerprint });
+      let reference = stableReferences.get(key);
+      if (!reference) {
+        reference = doseFirst ? allocateDoseFirst(input)
+          : planMesocycle({ ...input, seed: 0 });
+        stableReferences.set(key, reference);
+      }
+      plan = rerollMesocycle(input, reference);
+    } else plan = planMesocycle(input);
+    const scheduleReview = reviewScheduleSuitability(input, plan);
+    const alternative = scheduleReview.alternative;
     const quality = evaluateGeneratorQuality(input, plan);
     return { ...snapshot, expectedInfeasible: input.catalogue.length === 0,
       expectationMatches: input.catalogue.length > 0 ? quality.valid : !quality.valid && quality.totalSets === 0, error: undefined,
       durationMs: Math.round(performance.now() - start), limitedBy: plan.limitedBy,
       squeeze: plan.squeeze, prescription: toPlannedSessions(plan), volumeBudget: plan.plan.regions, strength: plan.strength,
       policyTrace: plan.policyTrace ?? [],
-      alternative: alternative ? { capacity: alternative.input.capacity, prescription: toPlannedSessions(alternative.plan),
+      scheduleReview: { status: scheduleReview.status, disposition: scheduleReview.disposition, attempts: scheduleReview.attempts },
+      alternative: alternative ? { capacity: alternative.input.capacity, preservesExactDose: alternative.preservesExactDose,
+        prescription: toPlannedSessions(alternative.plan),
         quality: alternative.quality } : null,
       quality };
   } catch (error) {
@@ -136,7 +163,7 @@ const groups = Object.fromEntries(Object.values(ExperienceLevel).map((level) => 
     hardFailures: group.filter((r) => r.quality && !r.quality.valid).length,
     underfilled: group.reduce((sum, r) => sum + (r.quality?.issues.filter((i) => i.code === 'underfilled-session').length ?? 0), 0) }];
 }));
-const sensitivity = replayPath ? [] : inputs.map(({ id }) => {
+const sensitivity = replayPath ? [] : inputs.filter(({ id }) => reports.some((report) => report.id === id)).map(({ id }) => {
   const base = reports.find((r) => r.id === id)!;
   const seeds = reports.filter((r) => r.id === id || r.id.startsWith(`${id}-seed`));
   const time = reports.find((r) => r.id === `${id}-time`)!;
@@ -145,7 +172,9 @@ const sensitivity = replayPath ? [] : inputs.map(({ id }) => {
     extraTimeSetDelta: complete ? time.quality!.totalSets - base.quality!.totalSets : null };
 });
 const baseline = baselinePath ? readArchive(baselinePath) : null;
-const comparisons = baseline ? compareAudits(baseline, { schemaVersion: AUDIT_SCHEMA_VERSION, catalogueFingerprint, reports }) : [];
+const scopedBaseline = baseline && option('case') ? { ...baseline,
+  reports: baseline.reports.filter((record) => expanded.some((entry) => entry.id === record.id)) } : baseline;
+const comparisons = scopedBaseline ? compareAudits(scopedBaseline, { schemaVersion: AUDIT_SCHEMA_VERSION, catalogueFingerprint, reports }) : [];
 const comparisonStatus = comparisonGate(comparisons);
 const goalGroups = Object.values(TrainingGoal).flatMap((goal) => Object.values(ExperienceLevel).map((level) => {
   const group = reports.filter((r) => r.input.goal === goal && r.input.level === level);
@@ -159,7 +188,8 @@ const replayResult = replayArchive ? { source: replayPath, versionMatches: repla
   prescriptionMatches: fingerprint(replayArchive.reports.find((r) => r.id === option('case'))?.prescription ?? null)
     === fingerprint(reports[0].prescription ?? null) } : null;
 const artifact = { schemaVersion: AUDIT_SCHEMA_VERSION, generatedAt: new Date().toISOString(), manifest, catalogueSnapshots,
-  matrix: { name: matrix, seedCount, baseCases: replayPath ? 1 : inputs.length, cases: expanded.length }, goalGroups, replayResult, comparisonStatus,
+  generationMode: doseFirst ? 'dose-first' : stableDose ? 'stable-budget' : 'raw-planner',
+  matrix: { name: matrix, seedCount, baseCases: option('case') ? 1 : sensitivity.length, cases: expanded.length }, goalGroups, replayResult, comparisonStatus,
   policy: policy ?? 'production-coupled', engineFingerprint, catalogueFingerprint, catalogue: auditCatalogue(sourceCatalogue),
   baselineSource: baselinePath?.endsWith('.gz') ? baselinePath
     : baseline ? output.replace(/\.json(?:\.gz)?$/, '') + '.baseline.json.gz' : null,

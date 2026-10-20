@@ -13,6 +13,7 @@ import { useTheme } from '@/theme/useTheme';
 import { SetType, type Exercise } from '@/models';
 import type { MockSetRow } from '@/mocks/session';
 import type { IntensityScale, IntensityValue } from '@/services/training/intensityScale';
+import { CustomRecordingRows } from './CustomRecordingRows';
 
 interface ExercisePageProps {
   exercise: Exercise;
@@ -23,6 +24,8 @@ interface ExercisePageProps {
   onUpdateSet: (exerciseId: string, setId: string, patch: Partial<MockSetRow>) => void;
   onAddSet: (exerciseId: string) => void;
   onPressSetType: (exerciseId: string, setId: string) => void;
+  onAction?: (exerciseId: string, action: 'swap' | 'info' | 'note') => void;
+  onRemoveSet?: (exerciseId: string, setId: string) => void;
 }
 
 function ExercisePageComponent({
@@ -34,6 +37,8 @@ function ExercisePageComponent({
   onUpdateSet,
   onAddSet,
   onPressSetType,
+  onAction,
+  onRemoveSet,
 }: ExercisePageProps) {
   const { t } = useTranslation();
   const { colors, spacing, radius } = useTheme();
@@ -78,6 +83,7 @@ function ExercisePageComponent({
         </Text>
       </View>
 
+      {exercise.isCustom ? <CustomRecordingRows exercise={exercise} sets={sets} update={update} /> : <>
       {/* Cabecera de columnas */}
       <View style={[styles.columnHeader, { paddingHorizontal: spacing.lg }]}>
         <Text style={[styles.columnLabel, { width: COLUMN_WIDTHS.set }]}>SET</Text>
@@ -112,8 +118,10 @@ function ExercisePageComponent({
           onChangeReps={(value) => update(row.id, { actualReps: value })}
           onChangeIntensity={(value: IntensityValue) => update(row.id, { actualRIR: value })}
           onChangeExtensions={(extensions) => update(row.id, { extensions })}
+          onRemove={onRemoveSet ? () => onRemoveSet(exercise.id, row.id) : undefined}
         />
       ))}
+      </>}
 
       {/* + para añadir serie */}
       <Pressable
@@ -128,16 +136,17 @@ function ExercisePageComponent({
 
       {/* Acciones centradas */}
       <View style={styles.actions}>
-        {[t('train.swap'), t('train.info'), t('train.note')].map((label) => (
+        {(['swap', 'info', 'note'] as const).map((action) => (
           <Pressable
-            key={label}
+            key={action}
+            onPress={() => onAction?.(exercise.id, action)}
             accessibilityRole="button"
-            accessibilityLabel={label}
+            accessibilityLabel={t(`train.${action}`)}
             style={[
               styles.actionChip,
               { borderRadius: radius.pill, backgroundColor: colors.bgElevated },
             ]}>
-            <Text style={[styles.actionText, { color: colors.textSecondary }]}>{label}</Text>
+            <Text style={[styles.actionText, { color: colors.textSecondary }]}>{t(`train.${action}`)}</Text>
           </Pressable>
         ))}
       </View>

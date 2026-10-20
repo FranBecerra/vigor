@@ -12,6 +12,8 @@
  * simetría se rompiera, los objetos saldrían de la base de datos sin id.
  */
 import { BaseRepository } from '@/services/repositories/BaseRepository';
+import { writeLocally } from '../localWrite';
+jest.mock('../localWrite', () => ({ writeLocally: jest.fn() }));
 
 // --- Simulación del módulo de Firestore ------------------------------------
 const mockGetDoc = jest.fn();
@@ -51,6 +53,16 @@ describe('BaseRepository', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     repo = new BaseRepository<Widget>('widgets');
+  });
+
+  it('prepares private local writes without document IDs or undefined nested fields and retains callbacks', async () => {
+    const synced = jest.fn(), rejected = jest.fn();
+    (writeLocally as jest.Mock).mockResolvedValue('pending');
+    const privateRepo = new BaseRepository<Widget>('users/owner/customExercises');
+    await expect(privateRepo.createLocally({ id: 'private', userId: 'owner', label: 'hold',
+      nested: { unset: undefined, value: 30 } } as Widget, synced, rejected)).resolves.toBe('pending');
+    expect(writeLocally).toHaveBeenCalledWith(expect.objectContaining({ path: 'users/owner/customExercises/private' }),
+      { userId: 'owner', label: 'hold', nested: { value: 30 } }, expect.any(String), synced, rejected);
   });
 
   describe('get', () => {

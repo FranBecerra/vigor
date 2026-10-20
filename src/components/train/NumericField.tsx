@@ -17,7 +17,7 @@
  * automático por fatiga).
  */
 import { useEffect, useState } from 'react';
-import { TextInput, StyleSheet, type KeyboardTypeOptions } from 'react-native';
+import { Platform, TextInput, StyleSheet, type KeyboardTypeOptions } from 'react-native';
 import { useTheme } from '@/theme/useTheme';
 
 interface NumericFieldProps {
@@ -62,7 +62,7 @@ export function NumericField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  const keyboardType: KeyboardTypeOptions = decimal ? 'decimal-pad' : 'number-pad';
+  const keyboardType: KeyboardTypeOptions = decimal ? 'decimal-pad' : Platform.OS === 'ios' ? 'ascii-capable-number-pad' : 'number-pad';
 
   return (
     <TextInput
@@ -73,6 +73,7 @@ export function NumericField({
       }}
       editable={editable}
       keyboardType={keyboardType}
+      inputMode={decimal ? 'decimal' : undefined}
       selectTextOnFocus={editable}
       accessibilityLabel={accessibilityLabel}
       style={[

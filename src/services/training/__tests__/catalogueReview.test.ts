@@ -1,5 +1,7 @@
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
 import { reviewCatalogueExercise } from '../catalogueReview';
+import { MuscleGroup } from '@/models';
+import { catalogueWithArmGeometry } from '../armSelectionDescriptors';
 
 it('keeps source-derived faults separate from unverified criterion claims without changing prescriptions', () => {
   const exercise = EXERCISE_CATALOGUE.find((e) => e.id === 'guide-347')!;
@@ -28,4 +30,24 @@ it('distinguishes individual source mechanics from unresolved numeric rating app
   expect(review.criteria.every((criterion) => criterion.value === null && !criterion.supportVerified)).toBe(true);
   expect(reviewCatalogueExercise(EXERCISE_CATALOGUE.find((e) => e.id === 'guide-347')!, {}).status)
     .toBe('screened-needs-individual-verification');
+});
+
+it('does not transfer apparatus-specific rating bands to related generic triceps executions', () => {
+  for (const id of ['extension-sobre-cabeza-mancuerna', 'extension-triceps-maquina']) {
+    const review = reviewCatalogueExercise(EXERCISE_CATALOGUE.find((exercise) => exercise.id === id)!, {});
+    expect(review.sourceRelation).toBe('related-variant');
+    expect(review.criterionBands).toBeUndefined();
+  }
+});
+
+it('keeps arm resistance claims unverified and isolates their removal in the controlled experiment', () => {
+  const arms = EXERCISE_CATALOGUE.filter((exercise) =>
+    [MuscleGroup.BICEPS, MuscleGroup.TRICEPS].includes(exercise.primaryMuscle));
+  expect(arms).toHaveLength(69);
+  expect(arms.find((exercise) => exercise.id === 'extension-triceps-polea-alta')?.criteria).toBeUndefined();
+  expect(arms.some((exercise) => exercise.stimulusTags?.some((tag) => tag.startsWith('RESISTANCE:')))).toBe(true);
+  for (const exercise of catalogueWithArmGeometry(arms)) {
+    expect(exercise.stimulusTags?.some((tag) => tag.startsWith('RESISTANCE:')) ?? false).toBe(false);
+    expect(reviewCatalogueExercise(exercise, {}).criteria.every((criterion) => !criterion.supportVerified)).toBe(true);
+  }
 });

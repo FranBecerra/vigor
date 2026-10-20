@@ -11,5 +11,6 @@ export * from './cardio';
 export * from './analytics';
 export * from './readiness';
 export * from './injury';
+export * from './rehabilitation';
 export * from './nutrition';
 export * from './user';

@@ -79,7 +79,8 @@ export function prescriptionForMicrocycle(
       const before = session.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
       const exercises = session.exercises.map((exercise) => ({
         ...exercise,
-        sets: deloadSets(exercise.sets),
+        sets: exercise.exerciseSnapshot?.isCustom || exercise.exerciseId.startsWith('custom:')
+          ? exercise.sets.map((set) => ({ ...set })) : deloadSets(exercise.sets),
       }));
       const after = exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
       return {
@@ -95,6 +96,7 @@ export function prescriptionForMicrocycle(
     return sessions.map((session) => ({
       ...session,
       exercises: session.exercises.map((exercise) => {
+        if (exercise.exerciseSnapshot?.isCustom || exercise.exerciseId.startsWith('custom:')) return exercise;
         const working = exercise.sets.filter((set) => set.setType !== SetType.TOP_SINGLE);
         const workingIndexes = exercise.sets.flatMap((set, setIndex) =>
           set.setType === SetType.TOP_SINGLE ? [] : [setIndex]);
@@ -144,6 +146,7 @@ export function prescriptionForMicrocycle(
   return sessions.map((session) => ({
     ...session,
     exercises: session.exercises.map((exercise) => {
+      if (exercise.exerciseSnapshot?.isCustom || exercise.exerciseId.startsWith('custom:')) return exercise;
       const role = exercise.strengthRole;
       if (role === undefined) return exercise;
       const current = strengthRIR(role, index, accumulation);

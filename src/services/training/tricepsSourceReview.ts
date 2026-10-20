@@ -86,6 +86,7 @@ const MANUAL = ExerciseGenerationTier.MANUAL_ONLY;
 
 /** Individual automatic-programming decision for every triceps-primary catalogue entry. */
 export const TRICEPS_ELIGIBILITY: Readonly<Record<string, TricepsEligibility>> = {
+  'extension-triceps-polea-alta': { tier: MANUAL, reason: 'User-confirmed generic pushdown for an authored import; attachment and apparatus-specific execution are unspecified, with no numeric rating or automatic promotion.' },
   'extension-sobre-cabeza-polea': { tier: AUTOMATIC, reason: 'Overhead cable extension: the lengthened-long-head role tested directly by Maeo et al. 2023.' },
   'extension-sobre-cabeza-mancuerna': { tier: AUTOMATIC, reason: 'Overhead role without a cable station; coarser dumbbell increments.' },
   'press-frances': { tier: AUTOMATIC, reason: 'Flexed-shoulder barbell extension; the single-joint arm of Brandao et al. 2020.' },

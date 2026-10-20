@@ -1,4 +1,6 @@
 import { MuscleGroup, type Exercise } from '@/models';
+import { primaryMusclesOf } from './exerciseMuscles';
+import { EXERCISE_NAME_ALIASES } from './exerciseIdentity';
 
 /**
  * Search vocabulary is deliberately multilingual and domain-based. Exercise
@@ -6,6 +8,7 @@ import { MuscleGroup, type Exercise } from '@/models';
  * neither word has to appear in a Spanish catalogue name.
  */
 const MUSCLE_SEARCH_ALIASES: Record<MuscleGroup, readonly string[]> = {
+  [MuscleGroup.UNCLASSIFIED]: ['unclassified', 'rehab', 'mobility'],
   [MuscleGroup.DELTS_FRONT]: ['deltoide', 'deltoides', 'delt', 'hombro', 'shoulder', 'front delt'],
   [MuscleGroup.DELTS_LATERAL]: ['deltoide', 'deltoides', 'delt', 'hombro', 'shoulder', 'side delt'],
   [MuscleGroup.DELTS_REAR]: ['deltoide', 'deltoides', 'delt', 'hombro', 'shoulder', 'rear delt'],
@@ -42,9 +45,29 @@ export function normalizeExerciseSearch(value: string): string {
   return value
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[-_]+/g, ' ')
     .toLocaleLowerCase()
     .trim();
 }
+
+/** Execution-name aliases, not aliases for every exercise using the same muscle. */
+const EXERCISE_KEYWORDS: readonly [RegExp, string][] = [
+  [/jalon|pull[ -]?down/, 'pulldown pull down lat pulldown'],
+  [/dominada|chin[ -]?up|pull[ -]?up/, 'pullup pull up chinup chin up'],
+  [/remo|\brow\b/, 'row rowing remo'],
+  [/press.*banca|bench press/, 'bench press banca'],
+  [/peso muerto|deadlift/, 'deadlift peso muerto'],
+  [/rumano|romanian/, 'romanian rdl rumano'],
+  [/sentadilla|squat/, 'squat sentadilla'],
+  [/elevacion lateral|lateral raise/, 'lateral raise side raise'],
+  [/apertura|contractor|pec deck|fly/, 'fly flyes pec deck'],
+  [/inclinad|incline/, 'incline inclined'],
+  [/declinad|decline/, 'decline declined'],
+  [/mancuerna|dumbbell/, 'dumbbell dumbbells'],
+  [/polea|cable/, 'cable pulley'],
+  [/maquina|machine/, 'machine maquina'],
+  [/multipower|smith/, 'smith machine multipower'],
+];
 
 export function searchExercises(
   query: string,
@@ -55,11 +78,16 @@ export function searchExercises(
   if (tokens.length === 0) return [...exercises];
 
   return exercises.filter((exercise) => {
-    const muscles = [exercise.primaryMuscle, ...exercise.secondaryMuscles];
+    const normalizedName = normalizeExerciseSearch(exercise.name);
+    const muscles = [exercise.primaryMuscle, ...primaryMusclesOf(exercise), ...exercise.secondaryMuscles];
     const haystack = normalizeExerciseSearch(
       [
         exercise.name,
+        ...(EXERCISE_NAME_ALIASES[exercise.id] ?? []),
         exercise.primaryMuscle,
+        ...EXERCISE_KEYWORDS.filter(([pattern]) => pattern.test(normalizedName)).map(([, words]) => words),
+        exercise.equipment,
+        ...(exercise.movementVectors ?? [exercise.movementVector]).map((value) => value.replace(/_/g, ' ')),
         ...muscles.map(muscleLabel),
         ...muscles.flatMap((muscle) => MUSCLE_SEARCH_ALIASES[muscle]),
       ].join(' '),
@@ -75,7 +103,8 @@ export function partitionSwapCandidates(
   const related: Exercise[] = [];
   const other: Exercise[] = [];
   candidates.forEach((candidate) => {
-    (candidate.primaryMuscle === current.primaryMuscle ? related : other).push(candidate);
+    (primaryMusclesOf(candidate).some((muscle) => primaryMusclesOf(current).includes(muscle))
+      || candidate.primaryMuscle === current.primaryMuscle ? related : other).push(candidate);
   });
   return { related, other };
 }

@@ -19,6 +19,17 @@ function archive(): AuditArchive {
 }
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v));
 
+it('scopes a requested audit family including its seed/time probes without prefix collisions', () => {
+  const { scopeAuditCases } = require('../generator-audit-protocol');
+  const cases = ['A', 'A-seed', 'A-seed-2', 'A-time', 'AB', 'A-other'].map((id) => ({ id }));
+  expect(scopeAuditCases(cases, 'A').map((entry: { id: string }) => entry.id))
+    .toEqual(['A', 'A-seed', 'A-seed-2', 'A-time']);
+  expect(scopeAuditCases(cases)).toEqual(cases);
+  expect(scopeAuditCases(cases, 'A-seed')).toEqual([{ id: 'A-seed' }]);
+  expect(() => scopeAuditCases(cases, 'missing')).toThrow('Unknown audit case');
+  expect(() => scopeAuditCases([], 'A')).toThrow('Unknown audit case');
+});
+
 it('canonicalizes object keys while preserving meaningful array order and rejecting nonfinite values', () => {
   expect(fingerprint({ a: 1, b: 2 })).toBe(fingerprint({ b: 2, a: 1, ignored: undefined }));
   expect(fingerprint([1, 2])).not.toBe(fingerprint([2, 1]));
@@ -139,4 +150,19 @@ it('requires experiment review, fails removed coverage and accepts only non-regr
   expect(comparisonGate(compareAudits(before, after))).toBe('regression');
   after.reports = [];
   expect(comparisonGate(compareAudits(before, after))).toBe('regression');
+});
+import { resolveGenerationMode } from '../generator-audit-protocol';
+
+it('defaults audits to production without reinterpreting archived control modes', () => {
+  expect(resolveGenerationMode({})).toBe('dose-first');
+  expect(resolveGenerationMode({ raw: true })).toBe('raw-planner');
+  expect(resolveGenerationMode({ stable: true })).toBe('stable-budget');
+  expect(resolveGenerationMode({ dose: true })).toBe('dose-first');
+  for (const replayMode of ['raw-planner', 'stable-budget', 'dose-first'] as const) {
+    expect(resolveGenerationMode({ replayMode })).toBe(replayMode);
+  }
+  for (const options of [{ raw: true, stable: true }, { raw: true, dose: true },
+    { stable: true, dose: true }, { raw: true, replayMode: 'dose-first' as const }]) {
+    expect(() => resolveGenerationMode(options)).toThrow();
+  }
 });

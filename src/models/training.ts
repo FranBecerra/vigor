@@ -29,6 +29,8 @@ export enum SetType {
 export type MesocycleStatus = 'ACTIVE' | 'DELOAD' | 'COMPLETED' | 'INTERRUPTED';
 
 export interface Mesocycle {
+  /** Absent on legacy/automatic plans. Manual prescriptions do not acquire an automatic effort ramp/deload. */
+  prescriptionMode?: 'MANUAL' | 'AUTOMATIC';
   id: string;
   userId: string;
   status: MesocycleStatus;
@@ -147,6 +149,12 @@ export interface SetExtension {
 }
 
 export interface WorkoutSet {
+  recording?: import('./biomechanics').ExerciseRecording;
+  targetDurationSeconds?: number;
+  actualDurationSeconds?: number;
+  targetLoadLevel?: number;
+  actualLoadLevel?: number;
+  completionState?: 'DONE' | 'PENDING';
   id: string;
   setType: SetType;
   targetReps: number;
@@ -177,6 +185,8 @@ export interface WorkoutSet {
 
 /** Un ejercicio ejecutado dentro de una sesión, con sus series. */
 export interface WorkoutExercise {
+  notes?: string;
+  exerciseSnapshot?: import('./biomechanics').Exercise;
   id: string;
   exerciseId: string;
   /** Orden en la sesión. */

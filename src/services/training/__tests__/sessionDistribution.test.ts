@@ -16,12 +16,29 @@ import {
   buildFocusSequence,
   canonicalPplFocuses,
   distributeSelection,
+  createSequencingEvaluator,
+  sessionSequencingWarnings,
   effectiveSetsByMuscle,
   isSessionAnchor,
   matchingMoveForEmpty,
   orderSessionExercises,
   sessionSetCap,
 } from '@/services/training/sessionDistribution';
+
+it('keeps locally cached sequencing identical for empty, repeated and preceding workouts', () => {
+  const evaluate = createSequencingEvaluator();
+  const entries = [{ exercise: exercise(), sets: 3 }];
+  const sessions = [0, 1, 2].map((index) => ({ index, focus: 'FULL_BODY' as const,
+    exercises: entries, estimatedWorkMinutes: 10 }));
+  const before = JSON.stringify(sessions);
+  expect(evaluate([])).toEqual(sessionSequencingWarnings([]));
+  for (const previous of [[], entries]) {
+    expect(evaluate(sessions, previous)).toEqual(sessionSequencingWarnings(sessions, previous));
+    expect(evaluate([...sessions].reverse(), previous)).toEqual(sessionSequencingWarnings([...sessions].reverse(), previous));
+    expect(evaluate(sessions, previous)).toEqual(sessionSequencingWarnings(sessions, previous));
+  }
+  expect(JSON.stringify(sessions)).toBe(before);
+});
 
 describe('orderSessionExercises', () => {
   it('starts with a three-set compound and leaves isolation work last', () => {

@@ -1,9 +1,11 @@
 /** Diagnostic review ledger. It does not change eligibility, scores or selection. */
-import { COMPOUND_VECTORS, Equipment, ExerciseProfile, MovementVector, type Exercise } from '@/models';
+import { COMPOUND_VECTORS, Equipment, ExerciseProfile, MovementVector, MuscleGroup, type Exercise } from '@/models';
 import { CRITERIA_KEYS } from './exerciseCatalogue';
 import { GUIDE_EXISTING_IDS } from './guideExerciseCatalogue';
 import { tricepsSourceReview, tricepsCriterionBands } from './tricepsSourceReview';
-import { bicepsSourceReview } from './bicepsSourceReview';
+import { bicepsReviewForExercise, BICEPS_ELIGIBILITY } from './bicepsSourceReview';
+import { TRICEPS_ELIGIBILITY } from './tricepsSourceReview';
+import { reviewedExerciseMetadata } from './exerciseMetadataReview';
 
 export interface CriterionEvidence {
   confidence: string;
@@ -47,7 +49,9 @@ export function reviewCatalogueExercise(exercise: Exercise, evidence: EvidenceLe
   const aliases = Object.entries(GUIDE_EXISTING_IDS).filter(([, id]) => id === exercise.id).map(([page]) => Number(page));
   const pages = exercise.guidePage === undefined ? aliases : [exercise.guidePage];
   const individualSource = pages.map(tricepsSourceReview).find((entry) => entry !== undefined);
-  const bicepsSource = pages.map(bicepsSourceReview).find((entry) => entry !== undefined);
+  const bicepsReview = bicepsReviewForExercise(exercise);
+  const bicepsSource = bicepsReview.source;
+  const metadata = reviewedExerciseMetadata(exercise);
   const issues: string[] = [];
   const criteria = CRITERIA_KEYS.map((key) => {
     const entry = evidence[exercise.id]?.[key];
@@ -60,6 +64,11 @@ export function reviewCatalogueExercise(exercise: Exercise, evidence: EvidenceLe
   });
   if (!exercise.stimulusTags?.length) issues.push('stimulus-descriptors-missing');
   if (exercise.equipment === Equipment.UNSPECIFIED) issues.push('equipment-unspecified');
+  if (bicepsReview.relatedSources.length) issues.push('related-guide-variant-not-identical');
+  if ([MuscleGroup.BICEPS, MuscleGroup.TRICEPS].includes(exercise.primaryMuscle)
+    && exercise.stimulusTags?.some((tag) => tag.startsWith('RESISTANCE:'))) {
+    issues.push('resistance-descriptor-needs-setup-verification');
+  }
   if (COMPOUND_VECTORS.includes(exercise.movementVector) && !exercise.secondaryMuscles.length) issues.push('compound-secondary-credit-missing');
   if (exercise.profile === ExerciseProfile.ISOLATION && COMPOUND_VECTORS.includes(exercise.movementVector)) issues.push('profile-vector-review');
   const sourceFindings = pages.flatMap((page) => VERIFIED_GUIDE_FINDINGS[page]
@@ -72,10 +81,17 @@ export function reviewCatalogueExercise(exercise: Exercise, evidence: EvidenceLe
   return { id: exercise.id, name: exercise.name, primaryMuscle: exercise.primaryMuscle,
     secondaryMuscles: exercise.secondaryMuscles, movement: exercise.movementVector,
     profile: exercise.profile, equipment: exercise.equipment, eligibility: exercise.generationTier ?? 'STANDARD',
-    sourcePages: pages, criteria, sourceFindings, issues,
+    sourcePages: bicepsSource && !pages.includes(bicepsSource.page) ? [...pages, bicepsSource.page] : pages, criteria, sourceFindings, issues,
+    sourceRelation: metadata.sourceRelation, requiredApparatus: metadata.requiredApparatus,
+    apparatusOptions: metadata.apparatusOptions,
+    apparatusStatus: metadata.apparatusStatus,
+    eligibilityDecision: BICEPS_ELIGIBILITY[exercise.id] ?? TRICEPS_ELIGIBILITY[exercise.id] ?? null,
+    ...(bicepsReview.relatedSources.length ? { relatedSourcePages: bicepsReview.relatedSources.map((entry) => entry.page) } : {}),
     biomechanicalReview: approach[exercise.movementVector]
       ?? 'Verify active joint action, support, target attribution and reproducible loading. Do not infer exact hypertrophy or systemic-fatigue magnitude from the movement label.',
-    ...(individualSource ? { individualSource, criterionBands: tricepsCriterionBands(individualSource) } : {}),
+    ...(individualSource ? { individualSource,
+      ...(metadata.sourceRelation === 'matching-execution' ? { criterionBands: tricepsCriterionBands(individualSource) } : {}) } : {}),
     ...(bicepsSource ? { bicepsSource } : {}),
-    status: individualSource || bicepsSource ? 'source-mechanics-reviewed-rating-unresolved' : 'screened-needs-individual-verification' };
+    status: metadata.sourceRelation === 'related-variant' ? 'related-variant-rating-unresolved'
+      : individualSource || bicepsSource ? 'source-mechanics-reviewed-rating-unresolved' : 'screened-needs-individual-verification' };
 }

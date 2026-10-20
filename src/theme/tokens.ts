@@ -68,6 +68,7 @@ export const palette = {
 
 /** Tipografía (escala minimalista). */
 export const typography = {
+  emphasis: { fontSize: 30, fontWeight: '800' as const, letterSpacing: -0.5 },
   h1: { fontSize: 28, fontWeight: '700' as const },
   h2: { fontSize: 22, fontWeight: '700' as const },
   title: { fontSize: 17, fontWeight: '600' as const },

@@ -22,6 +22,7 @@ import {
   totalWorkingSets,
 } from '@/services/training/sessionSummary';
 import type { MockSession } from '@/mocks/home';
+import { primaryMusclesOf } from '@/services/training/exerciseMuscles';
 
 interface SessionPreviewSheetProps {
   session: MockSession | null;
@@ -128,20 +129,20 @@ export function SessionPreviewSheet({
                     {exercise.name}
                   </Text>
                   <Text style={[styles.exerciseMuscle, { color: colors.textMuted }]}>
-                    {muscleLabel(exercise.primaryMuscle)}
+                    {(primaryMusclesOf(exercise).length ? primaryMusclesOf(exercise) : [exercise.primaryMuscle]).map(muscleLabel).join(' · ')}
                     {typeCode !== '' ? ` · ${typeCode}` : ''}
                   </Text>
                 </View>
                 <Text style={[styles.exercisePrescription, { color: colors.textSecondary }]}>
                   {countWorkingSets(exercise.sets)}×{exercise.repRange}
                 </Text>
-                <View
+                {!exercise.isTimed && <View
                   style={[
                     styles.rirBadge,
                     { backgroundColor: rirColor(exercise.targetRIR), borderRadius: radius.sm },
                   ]}>
                   <Text style={styles.rirText}>{exercise.targetRIR}</Text>
-                </View>
+                </View>}
               </View>
             );
           })}

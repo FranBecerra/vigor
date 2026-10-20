@@ -13,6 +13,8 @@ import { useEffect, useState } from 'react';
 import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { GlassSurface } from '@/components/GlassSurface';
+import { useRestAlert } from '@/hooks/useRestAlert';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import {
   REST_STEP_SECONDS,
@@ -38,6 +40,8 @@ export function RestTimer({
   onCancel,
 }: RestTimerProps) {
   const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
+  const { t } = useTranslation();
+  const alertUnavailable = useRestAlert(state);
   const [now, setNow] = useState(() => Date.now());
   const [controlsOpen, setControlsOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -49,9 +53,10 @@ export function RestTimer({
   // programa nada, para no repintar en balde.
   useEffect(() => {
     if (!isActive) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
+    setNow(Date.now());
+    const id = setInterval(() => setNow(Date.now()), 200);
     return () => clearInterval(id);
-  }, [isActive]);
+  }, [isActive, state.startedAt]);
 
   // Al desaparecer el descanso, recoge los controles.
   useEffect(() => {
@@ -96,6 +101,7 @@ export function RestTimer({
               gap: spacing.xs,
             },
           ]}>
+          {alertUnavailable && <Text style={{ color: semantic.warning, maxWidth: 240 }}>{t('workout.alertUnavailable')}</Text>}
           {editing ? (
             <View style={styles.editRow}>
               <TextInput
@@ -183,7 +189,7 @@ function ControlButton({ label, onPress, tint, accessibilityLabel }: ControlButt
 
 const styles = StyleSheet.create({
   container: { alignItems: 'flex-end' },
-  timer: { paddingHorizontal: 12, paddingVertical: 6, overflow: 'hidden' },
+  timer: { width: 82, height: 36, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   timerText: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
   controls: {
     position: 'absolute',

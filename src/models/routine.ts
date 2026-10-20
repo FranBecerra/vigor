@@ -64,12 +64,13 @@ export const ROUTINE_ICON_ORDER: readonly RoutineIconKey[] = [
  * Everything the generator needs to produce a mesocycle, stored so the next block
  * can be generated without asking again.
  *
- * `seed` is stored on purpose. It is what makes a generated plan reproducible: the
- * athlete can reroll until they like the exercise selection, and the seed that
- * produced the one they kept is part of the routine. Without it, reopening a
- * routine could not show the plan it actually produced.
+ * `seed` records the last accepted variation draw. Initial generation uses a
+ * seeded budget; subsequent variations also depend on the
+ * incumbent roster. Saved session prescriptions, not this seed alone, are the
+ * authority when reopening a routine or reproducing a manually edited plan.
  */
 export interface RoutineGenerationInput {
+  creationMode?: 'MANUAL' | 'AUTOMATIC';
   /** `TrainingGoal` from the volume plan. Kept as a string to avoid a service import. */
   goal: string;
   /** `ExperienceLevel` at the time of generation. */
@@ -138,6 +139,8 @@ export type StrengthRole = 'MAIN' | 'VARIANT' | 'COMPLEMENTARY' | 'ACCESSORY';
  * project from, so the first session is where the athlete establishes it.
  */
 export interface PlannedSet {
+  targetDurationSeconds?: number;
+  targetLoadLevel?: number;
   setType: SetType;
   /** Lower bound of the prescribed repetition range; absent on legacy plans. */
   targetRepsMin?: number;
@@ -149,6 +152,7 @@ export interface PlannedSet {
 }
 
 export interface PlannedExercise {
+  exerciseSnapshot?: import('./biomechanics').Exercise;
   /** Catalogue id, or a custom exercise id owned by the athlete. */
   exerciseId: string;
   /** Order within the session. */
@@ -190,6 +194,7 @@ export type PlannedSessionFocus =
  * templates and calendar assignments are separate from workout progression (§3.1).
  */
 export interface PlannedSession {
+  name?: string;
   index: number;
   focus: PlannedSessionFocus;
   exercises: PlannedExercise[];

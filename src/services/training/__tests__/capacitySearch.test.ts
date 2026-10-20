@@ -6,7 +6,8 @@ import { MINUTES_PER_WORKING_SET_FLOOR, SESSION_OVERHEAD_MINUTES } from '../trai
 
 jest.mock('../mesocyclePlanner', () => ({ planMesocycle: jest.fn() }));
 const planner = jest.mocked(planMesocycle);
-const input = { level: ExperienceLevel.INTERMEDIATE, goal: TrainingGoal.HYPERTROPHY,
+// Strength retains the old lift-specific exhaustive search contract.
+const input = { level: ExperienceLevel.INTERMEDIATE, goal: TrainingGoal.STRENGTH,
   split: SplitStructure.AUTO, catalogue: [] };
 function scenario(value: number) {
   planner.mockImplementation((request: MesocyclePlanInput) => {

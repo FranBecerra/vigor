@@ -24,6 +24,12 @@ export type GenerationPhase = 'configure' | 'preview';
 /** What the fixed primary button does right now. */
 export type PrimaryAction = 'generate' | 'regenerate' | 'view' | 'save';
 
+/** Changed settings establish a new budget; unchanged settings only vary the roster. */
+export function rerollActionFor(input: { hasPlan: boolean; stale: boolean; hasPreviewEdits: boolean }): 'generate' | 'reroll' | 'keep-edits' {
+  if (!input.hasPlan || input.stale) return 'generate';
+  return input.hasPreviewEdits ? 'keep-edits' : 'reroll';
+}
+
 /** Every setting that changes what the generator produces. The seed is separate. */
 export interface GenerationSettings {
   goal: TrainingGoal;

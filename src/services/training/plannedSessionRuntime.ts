@@ -26,7 +26,7 @@ export function exercisesForPlannedSession(
 ): Exercise[] {
   return [...session.exercises]
     .sort((a, b) => a.order - b.order)
-    .map((planned) => exerciseById.get(planned.exerciseId))
+    .map((planned) => planned.exerciseSnapshot ?? exerciseById.get(planned.exerciseId))
     .filter((exercise): exercise is Exercise => exercise !== undefined);
 }
 
@@ -42,6 +42,9 @@ export function initialSetsForPlannedSession(session: PlannedSession): SessionSe
         targetWeight: set.targetWeightKg ?? 0,
         targetReps: set.targetReps,
         targetRIR: set.targetRIR,
+        ...(exercise.exerciseSnapshot?.recording ? { recording: exercise.exerciseSnapshot.recording } : {}),
+        ...(set.targetDurationSeconds === undefined ? {} : { targetDurationSeconds: set.targetDurationSeconds }),
+        ...(set.targetLoadLevel === undefined ? {} : { targetLoadLevel: set.targetLoadLevel }),
         isAutoFilled: false,
         isCompleted: false,
       }));

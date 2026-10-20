@@ -12,6 +12,7 @@
  * retractors used by rows, while NECK covers cervical work and upper trapezius.
  */
 export enum MuscleGroup {
+  UNCLASSIFIED = 'UNCLASSIFIED',
   DELTS_FRONT = 'DELTS_FRONT',
   DELTS_LATERAL = 'DELTS_LATERAL',
   DELTS_REAR = 'DELTS_REAR',
@@ -31,6 +32,8 @@ export enum MuscleGroup {
   TRICEPS = 'TRICEPS',
   CORE = 'CORE',
 }
+/** Anatomical attribution targets; UNCLASSIFIED is a missing-data state. */
+export const CLASSIFIED_MUSCLE_GROUPS = Object.values(MuscleGroup).filter((muscle) => muscle !== MuscleGroup.UNCLASSIFIED);
 
 /**
  * Patrón de movimiento del ejercicio.
@@ -44,6 +47,7 @@ export enum MuscleGroup {
  * es lo que un veto clínico necesita señalar.
  */
 export enum MovementVector {
+  UNCLASSIFIED = 'UNCLASSIFIED',
   // --- Multiarticulares ---------------------------------------------------
   PUSH_HORIZONTAL = 'PUSH_HORIZONTAL',
   PUSH_VERTICAL = 'PUSH_VERTICAL',
@@ -134,6 +138,7 @@ export const ANTAGONIST_PAIRS: readonly (readonly [MovementVector, MovementVecto
  * (PRD §3.2.2), el RIR de inicio/tope (PRD §3.4) y el descanso por defecto (PRD §3.4).
  */
 export enum ExerciseProfile {
+  UNCLASSIFIED = 'UNCLASSIFIED',
   /** Multiarticular primario/axial: banca plana, sentadilla, peso muerto. w=0.50, RIR conservador. */
   COMPOUND_PRIMARY = 'COMPOUND_PRIMARY',
   /** Multiarticular secundario/guiado: press inclinado mancuernas, hack, prensas, jalones. w=0.35. */
@@ -163,6 +168,31 @@ export enum Equipment {
   STABILITY_BALL = 'STABILITY_BALL',
   KETTLEBELL = 'KETTLEBELL',
   BANDS = 'BANDS',
+}
+
+/** Setup capabilities beyond the primary resistance implement; unknown is not absence. */
+export enum ExerciseApparatus {
+  SEAT = 'SEAT',
+  FLAT_BENCH = 'FLAT_BENCH',
+  ADJUSTABLE_BENCH = 'ADJUSTABLE_BENCH',
+  PREACHER_BENCH = 'PREACHER_BENCH',
+  DUAL_CABLE = 'DUAL_CABLE',
+  WIDE_CABLE_PORTAL = 'WIDE_CABLE_PORTAL',
+  ROMAN_BAR = 'ROMAN_BAR',
+  PARALLEL_BARS = 'PARALLEL_BARS',
+  BAR_ATTACHMENT = 'BAR_ATTACHMENT',
+  SINGLE_HANDLE = 'SINGLE_HANDLE',
+  HANDLE_PAIR = 'HANDLE_PAIR',
+  ROPE_ATTACHMENT = 'ROPE_ATTACHMENT',
+  ROPE_PAIR = 'ROPE_PAIR',
+  LONG_ROPE = 'LONG_ROPE',
+  LONG_ROPE_PAIR = 'LONG_ROPE_PAIR',
+  CUFF_PAIR = 'CUFF_PAIR',
+  MAT = 'MAT',
+  BICEPS_PREACHER_MACHINE = 'BICEPS_PREACHER_MACHINE',
+  BICEPS_BEHIND_BODY_MACHINE = 'BICEPS_BEHIND_BODY_MACHINE',
+  HIGH_CURL_MACHINE = 'HIGH_CURL_MACHINE',
+  TRICEPS_EXTENSION_MACHINE = 'TRICEPS_EXTENSION_MACHINE',
 }
 
 /** Score on one audited criterion, 1 to 5. */
@@ -229,11 +259,19 @@ export interface Exercise {
   id: string;
   name: string;
   primaryMuscle: MuscleGroup;
+  /** Optional multiple direct targets for manual exercises; legacy entries use primaryMuscle. */
+  primaryMuscles?: MuscleGroup[];
   secondaryMuscles: MuscleGroup[];
   movementVector: MovementVector;
+  /** Optional user-classified patterns; the first remains the legacy vector. */
+  movementVectors?: MovementVector[];
   profile: ExerciseProfile;
   /** Material necesario, para filtrar por disponibilidad. */
   equipment: Equipment;
+  /** Explicit setup requirements. Undefined means unreviewed/unspecified, not no apparatus. */
+  requiredApparatus?: ExerciseApparatus[];
+  /** Each group needs at least one capability; groups combine with AND. */
+  apparatusOptions?: ExerciseApparatus[][];
   /**
    * Ordinal programming assessment. Absent on unscored manual-only imports and
    * user-created exercises. Only custom entries use the calculation fallback;
@@ -264,4 +302,16 @@ export interface Exercise {
   isCustom: boolean;
   /** userId si es personalizado; ausente en el catálogo global. */
   ownerId?: string;
+  recording?: ExerciseRecording;
+  notes?: string;
+  referenceUrl?: string;
+  laterality?: 'BILATERAL' | 'PER_SIDE';
+  archivedAt?: number;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
+export interface ExerciseRecording {
+  measure: 'REPETITIONS' | 'SECONDS';
+  load: 'NONE' | 'TOTAL_KG' | 'PER_HAND_KG' | 'ADDED_KG' | 'ASSISTANCE_KG' | 'LEVEL';
 }

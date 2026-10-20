@@ -168,7 +168,7 @@ export function evaluateGeneratorQuality(input: MesocyclePlanInput, plan: Mesocy
     missingCriteriaIds: [...occurrences.keys()].filter((id) => !catalogue.get(id)?.criteria),
     unknownStimulusIds: unknownStimulusExercises,
     unverifiedResistanceIds: selected.filter((e) => reviewedExerciseMetadata(e).resistanceProfile === 'unverified').map((e) => e.id),
-    individuallySourceReviewedIds: selected.filter((e) => reviewedExerciseMetadata(e).sourceReview).map((e) => e.id) });
+    individuallySourceReviewedIds: selected.filter((e) => reviewedExerciseMetadata(e).sourceRelation === 'matching-execution').map((e) => e.id) });
   return { totalSets, sessions: sessions.map((s) => ({ ...s, volumeShare: totalSets ? s.sets / totalSets : 0 })),
     muscles, issues, valid: assessment.feasibility.status === 'feasible', assessment,
     compromises: { limitingFactor: plan.limitedBy, squeeze: plan.squeeze, targetCompromises,

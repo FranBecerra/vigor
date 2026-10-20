@@ -2,6 +2,8 @@
 import type { Exercise } from '@/models';
 import { GUIDE_EXISTING_IDS } from './guideExerciseCatalogue';
 import { tricepsSourceReview, tricepsCriterionBands } from './tricepsSourceReview';
+import { bicepsReviewForExercise } from './bicepsSourceReview';
+import { apparatusRequirements, apparatusOptions } from './exerciseApparatus';
 
 const groups: readonly { ids: readonly string[]; tags: readonly string[] }[] = [
   { ids: ['press-banca', 'press-banca-mancuernas', 'press-banca-smith', 'press-pecho-maquina'], tags: ['PRESS_ANGLE:HORIZONTAL'] },
@@ -26,16 +28,25 @@ const review = new Map(groups.flatMap(({ ids, tags }) => ids.map((id) => [id, ta
 
 export function reviewedExerciseMetadata(exercise: Exercise) {
   const page = exercise.guidePage ?? Number(Object.entries(GUIDE_EXISTING_IDS).find(([, id]) => id === exercise.id)?.[0]);
-  const sourceReview = tricepsSourceReview(page);
+  const tricepsSource = tricepsSourceReview(page);
+  const bicepsReview = bicepsReviewForExercise(exercise);
+  const sourceReview = tricepsSource ?? bicepsReview.source;
+  const relatedTriceps = !!tricepsSource && ['extension-sobre-cabeza-mancuerna', 'extension-triceps-maquina'].includes(exercise.id);
+  const sourceRelation = relatedTriceps ? 'related-variant' as const
+    : tricepsSource ? 'matching-execution' as const : bicepsReview.relation;
   const descriptiveTags = review.get(exercise.id) ?? [];
   return { id: exercise.id, movement: exercise.movementVector, equipment: exercise.equipment,
     descriptiveTags, source: descriptiveTags.length ? 'explicit-exercise-description' : 'unreviewed',
     // Cable height, machine cams, execution and anthropometry can change the curve.
     resistanceProfile: 'unverified',
-    minimumExperience: 'not-established',
+    minimumExperience: 'not-established', sourceRelation,
+    requiredApparatus: apparatusRequirements(exercise) ?? null,
+    apparatusOptions: apparatusOptions(exercise) ?? [],
+    apparatusStatus: apparatusRequirements(exercise) === undefined ? 'not-established' : 'known-prerequisites-recorded',
+    ...(bicepsReview.relatedSources.length ? { relatedSourceReviews: bicepsReview.relatedSources } : {}),
     criteriaProvenance: sourceReview ? 'individual-source-mechanics-numeric-rating-unresolved'
       : exercise.guidePage ? 'guide-derived-expert-rubric' : 'expert-rubric',
-    ...(sourceReview ? { sourceReview, criterionBands: tricepsCriterionBands(sourceReview),
+    ...(sourceReview ? { sourceReview, ...(tricepsSource && !relatedTriceps ? { criterionBands: tricepsCriterionBands(tricepsSource) } : {}),
       evidenceStatus: 'source-mechanics-reviewed-not-comparative-trial' } : {}) };
 }
 

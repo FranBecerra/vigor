@@ -10,14 +10,13 @@ import { useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { mesocycleRepository, routineRepository, workoutSessionRepository } from '@/services/repositories';
-import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
+import { useExerciseCatalogue } from './useExerciseCatalogue';
 import { TrainingGoal } from '@/services/training/volumePlan';
 import { loadRoutineViews, type RoutineView } from '@/services/training/routineView';
 import { activationChanges, normalizeRoutineName } from '@/services/training/routineMapper';
 
 export type RoutinesStatus = 'loading' | 'ready' | 'error';
 
-const EXERCISE_BY_ID = new Map(EXERCISE_CATALOGUE.map((exercise) => [exercise.id, exercise]));
 
 const SOURCES = {
   listRoutines: (userId: string) => routineRepository.listByUser(userId),
@@ -35,6 +34,7 @@ export function useRoutines(): {
 } {
   const { t } = useTranslation();
   const { uid } = useAuth();
+  const { exercisesById: EXERCISE_BY_ID } = useExerciseCatalogue();
   const [status, setStatus] = useState<RoutinesStatus>('loading');
   const [routines, setRoutines] = useState<RoutineView[]>([]);
   // A slow read must not overwrite a newer one that already landed.
@@ -67,7 +67,7 @@ export function useRoutines(): {
         console.error('[routines] load failed', error);
         setStatus('error');
       });
-  }, [uid, labels]);
+  }, [uid, labels, EXERCISE_BY_ID]);
 
   useFocusEffect(reload);
 

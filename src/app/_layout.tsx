@@ -12,15 +12,18 @@
  * existe forma de añadir una pantalla nueva y olvidarse de protegerla.
  */
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { Stack } from 'expo-router';
+import { Stack, ThemeProvider } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { SignInScreen } from '@/components/auth/SignInScreen';
 import { useTheme } from '@/theme/useTheme';
+import { navigationThemeFor } from '@/theme/navigationTheme';
 
 import '@/i18n';
+import { ExerciseCatalogueProvider } from '@/hooks/useExerciseCatalogue';
+import { RehabilitationProvider } from '@/hooks/useRehabilitation';
 
 /**
  * Decide qué mostrar según el estado de sesión.
@@ -44,19 +47,26 @@ function AuthGate() {
   if (user === null) return <SignInScreen />;
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
       <Stack.Screen name="(tabs)" />
     </Stack>
   );
 }
 
 export default function RootLayout() {
+  const { colors, scheme } = useTheme();
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaProvider>
         <AuthProvider>
-          <StatusBar style="auto" />
-          <AuthGate />
+          <ExerciseCatalogueProvider>
+          <RehabilitationProvider>
+          <ThemeProvider value={navigationThemeFor(scheme)}>
+            <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+            <AuthGate />
+          </ThemeProvider>
+          </RehabilitationProvider>
+          </ExerciseCatalogueProvider>
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
