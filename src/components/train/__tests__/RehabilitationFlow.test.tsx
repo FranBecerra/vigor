@@ -19,6 +19,7 @@ jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: 'owner' }) }));
 jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: [], create: mockCreate }) }));
 jest.mock('@/hooks/useRehabilitation', () => ({ useRehabilitation: () => mockRehab }));
+jest.mock('@/hooks/useRoutines', () => ({ useRoutines: () => ({ routines: [] }) }));
 
 const ex = createCustomExercise({ name: 'Synthetic hold', recording: { measure: 'SECONDS', load: 'NONE' } },
   'owner', 'custom:owner:sample', [], 1);

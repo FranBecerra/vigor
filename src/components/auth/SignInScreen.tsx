@@ -18,12 +18,14 @@ import { useTranslation } from 'react-i18next';
 import { DumbbellIcon } from '@/components/icons';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/theme/useTheme';
+import { authErrorPresentation } from '@/services/authError';
 
 export function SignInScreen() {
   const { t } = useTranslation();
   const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { signInWithGoogle, continueWithoutAccount, isSigningIn, error } = useAuth();
+  const failure = authErrorPresentation(error);
 
   return (
     <View
@@ -51,8 +53,9 @@ export function SignInScreen() {
               { borderColor: semantic.warning, borderRadius: radius.md },
             ]}>
             <Text style={[styles.errorText, { color: semantic.warning }]}>
-              {t('auth.signInError')}
+              {t(failure.messageKey)}
             </Text>
+            {failure.code && <Text selectable style={[styles.errorText, { color: colors.textMuted, marginTop: 6 }]}>{failure.code}</Text>}
           </View>
         ) : null}
 

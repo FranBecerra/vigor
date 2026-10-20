@@ -46,7 +46,9 @@
       ],
       "@react-native-google-signin/google-signin",
       "expo-localization",
-      "./plugins/withFreePersonalTeam"
+      "./plugins/withFreePersonalTeam",
+      ["expo-widgets", { "groupIdentifier": "group.com.franciscobecerra.vigor", "enablePushNotifications": false }],
+      "./plugins/withWorkoutWidgetEmbedding"
     ]
   }
 }

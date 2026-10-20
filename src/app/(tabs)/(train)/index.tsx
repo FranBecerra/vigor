@@ -25,6 +25,7 @@ import { RenameRoutineSheet } from '@/components/home/RenameRoutineSheet';
 import { TrainingCalendarCard } from '@/components/train/TrainingCalendarCard';
 import { useTheme } from '@/theme/useTheme';
 import { useRoutines } from '@/hooks/useRoutines';
+import { useActiveWorkout } from '@/hooks/useActiveWorkout';
 import {
   defaultExpandedRoutineId,
   defaultSessionId,
@@ -48,6 +49,8 @@ export default function TrainHomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { status, routines: allRoutines, reload, activate, rename, remove } = useRoutines();
+  const activeWorkout = useActiveWorkout();
+  const resumeGoal = activeWorkout?.trainingGoal ?? allRoutines.find((routine) => routine.mesocycleId === activeWorkout?.mesocycleId)?.generationGoal;
   const [renaming, setRenaming] = useState<RoutineView | null>(null);
 
   const [domain, setDomain] = useState<TrainingDomain>('STRENGTH');
@@ -174,6 +177,14 @@ export default function TrainHomeScreen() {
             <Text style={{ color: colors.textPrimary }}>{t(route === 'exercises' ? 'custom.library' : route === 'history' ? 'workout.history' : 'rehab.title')}</Text>
           </Pressable>)}
         </View>
+        {activeWorkout && resumeGoal && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/session', params: {
+          mesocycleId: activeWorkout.mesocycleId, goal: resumeGoal,
+          microcycleIndex: String(activeWorkout.microcycleIndex), plannedSessionIndex: String(activeWorkout.plannedSessionIndex),
+        } })} style={{ padding: 20, marginTop: spacing.lg, backgroundColor: colors.bgElevated, borderRadius: radius.lg }}>
+          <Text style={{ color: colors.textSecondary }}>{t('workout.inProgress')}</Text>
+          <Text style={{ color: colors.textPrimary, fontSize: 20, fontWeight: '700', marginVertical: 6 }}>{activeWorkout.sessionName ?? t('tabs.train')}</Text>
+          <Text style={{ color: colors.textPrimary }}>{t('workout.resume')} →</Text>
+        </Pressable>}
         {selectedSession !== null ? (
           <View style={{ marginTop: spacing.lg }}>
             <TodayCard

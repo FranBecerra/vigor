@@ -25,7 +25,7 @@ export const STEPPER_HEIGHT = 52;
 const STEPPER_BUTTON = 44;
 
 interface SectionProps {
-  title: string;
+  title?: string;
   hint?: string;
   hintDisclosure?: boolean;
   /** Right-aligned status, e.g. the slot counter. */
@@ -49,7 +49,7 @@ export function Section({
   return (
     <View style={[{ marginBottom: spacing.xl }, style]}>
       <View style={styles.sectionHeader}>
-        <Text style={[typography.title, { color: colors.textPrimary, flex: 1 }]}>{title}</Text>
+        {title && <Text style={[typography.title, { color: colors.textPrimary, flex: 1 }]}>{title}</Text>}
         {hint && hintDisclosure && <Pressable onPress={() => setExpanded((old) => !old)} accessibilityRole="button" accessibilityLabel={hint}
           accessibilityState={{ expanded }} style={{ padding: 10 }}><Text style={{ color: colors.textMuted }}>ⓘ</Text></Pressable>}
         {trailing !== undefined && (

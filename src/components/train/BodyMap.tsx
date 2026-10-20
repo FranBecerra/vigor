@@ -6,7 +6,7 @@
  */
 import { useId } from 'react';
 import { View, StyleSheet } from 'react-native';
-import Svg, { ClipPath, Defs, G, Path, Rect } from 'react-native-svg';
+import Svg, { ClipPath, Defs, G, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import { MuscleGroup } from '@/models';
 import { BODY_MAP } from '@/data/bodyMapPaths';
 import type { BodyMapPaint, RegionThumbnail } from '@/services/training/bodyMap';
@@ -25,9 +25,18 @@ function Silhouette({ side, viewBox, width, height, paint }: {
   // Several thumbnails share a screen, so clip ids must not collide between them.
   const idPrefix = useId().replace(/:/g, '');
   const view = BODY_MAP[side];
+  const paints = new Map(view.paths.map((path) => [path.muscle, paint(path.muscle)]));
   return (
     <Svg width={width} height={height} viewBox={viewBox}>
       <Defs>
+        {[...paints].map(([muscle, fill]) => fill?.bands && fill.bands.length > 1 && (
+          <LinearGradient key={muscle} id={`${idPrefix}-${muscle}`} x1="0%" y1="0%" x2="0%" y2="100%">
+            {fill.bands.flatMap((color, index, bands) => [
+              <Stop key={`${index}-start`} offset={`${index / bands.length * 100}%`} stopColor={color} />,
+              <Stop key={`${index}-end`} offset={`${(index + 1) / bands.length * 100}%`} stopColor={color} />,
+            ])}
+          </LinearGradient>
+        ))}
         {view.paths.map((path, index) => path.clip && (
           <ClipPath key={index} id={`${idPrefix}-${index}`}>
             <Rect x={path.clip[0]} y={path.clip[1]} width={path.clip[2]} height={path.clip[3]} />
@@ -37,12 +46,12 @@ function Silhouette({ side, viewBox, width, height, paint }: {
       <Path d={view.outline} fill="none" stroke={colors.textMuted} strokeOpacity={0.45}
         strokeWidth={1} vectorEffect="non-scaling-stroke" />
       {view.paths.map((path, index) => {
-        const fill = paint(path.muscle);
+        const fill = paints.get(path.muscle);
         // Colour goes over the neutral tone, so a faint heat level reads darker than none.
         return (
           <G key={index} clipPath={path.clip ? `url(#${idPrefix}-${index})` : undefined}>
             <Path d={path.d} fill={colors.muscleNeutral} />
-            {fill && <Path d={path.d} fill={fill.color} fillOpacity={fill.opacity} />}
+            {fill && <Path d={path.d} fill={fill.bands && fill.bands.length > 1 ? `url(#${idPrefix}-${path.muscle})` : fill.color} fillOpacity={fill.opacity} />}
           </G>
         );
       })}
@@ -50,15 +59,16 @@ function Silhouette({ side, viewBox, width, height, paint }: {
   );
 }
 
-export function BodyMap({ paint, height }: {
+export function BodyMap({ paint, height, gap }: {
   paint: Paint;
   /** Height of each silhouette; the width follows the 1:2 drawing. */
   height: number;
+  gap?: number;
 }) {
   const { spacing } = useTheme();
   return (
     <View
-      style={[styles.row, { gap: spacing.md }]}
+      style={[styles.row, { gap: gap ?? spacing.md }]}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >

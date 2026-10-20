@@ -8,8 +8,9 @@ import { customCompletionPatch } from '@/services/training/customRecording';
 import { useTheme } from '@/theme/useTheme';
 import { NumericField } from './NumericField';
 
-export function CustomRecordingRows({ exercise, sets, update }: {
+export function CustomRecordingRows({ exercise, sets, update, onRemoveSet }: {
   exercise: Exercise; sets: MockSetRow[]; update: (setId: string, patch: Partial<MockSetRow>) => void;
+  onRemoveSet?: (exerciseId: string, setId: string) => void;
 }) {
   const { t } = useTranslation();
   const { colors, sectionAccent, spacing } = useTheme();
@@ -37,6 +38,8 @@ export function CustomRecordingRows({ exercise, sets, update }: {
         try { update(set.id, customCompletionPatch(exercise, set)); setError(''); }
         catch { setError(t('rehab.invalidActual')); }
       }} style={{ padding: 12 }}><Text style={{ color: sectionAccent.train, fontSize: 23 }}>{set.isCompleted ? '✓' : '○'}</Text></Pressable>
+      {onRemoveSet && <Pressable accessibilityRole="button" accessibilityLabel={t('workout.removeSet')}
+        onPress={() => onRemoveSet(exercise.id, set.id)} style={{ padding: 12 }}><Text style={{ color: colors.textMuted }}>−</Text></Pressable>}
     </View>)}
     {!!error && <Text accessibilityRole="alert" style={{ color: colors.textPrimary }}>{error}</Text>}
   </View>;

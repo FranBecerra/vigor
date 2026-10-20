@@ -57,10 +57,14 @@ export function RehabBlockEditor({ initial, onClose }: { initial?: RehabBlock; o
         <Text style={{ ...text, flex: 1, flexShrink: 1 }}>{t('rehab.timesPerWeek')}</Text><View style={{ width: 64 }}><NumericField value={target} onChangeValue={setTarget} accessibilityLabel={t('rehab.timesPerWeek')} /></View>
       </View> : scheduleKind === 'ROUTINE' ? <View>
         <Text style={text}>{activeRoutine?.name ?? t('workout.noActiveRoutine')}</Text>
-        {activeRoutine?.microcycles[activeRoutine.currentMicrocycleIndex]?.sessions.map((session) => <Pressable key={session.id} style={button}
+        {activeRoutine?.microcycles[activeRoutine.currentMicrocycleIndex]?.sessions.map((session) => <Pressable key={session.id} style={{ ...button, flexDirection: 'row', alignItems: 'center', gap: 12 }}
           accessibilityRole="checkbox" accessibilityState={{ checked: routineSessions.includes(session.plannedSessionIndex) }}
           onPress={() => setRoutineSessions((old) => old.includes(session.plannedSessionIndex) ? old.filter((index) => index !== session.plannedSessionIndex) : [...old, session.plannedSessionIndex])}>
-          <Text style={{ color: routineSessions.includes(session.plannedSessionIndex) ? sectionAccent.train : colors.textPrimary }}>{routineSessions.includes(session.plannedSessionIndex) ? '✓ ' : ''}{session.name}</Text>
+          <View style={{ width: 24, height: 24, borderRadius: 6, borderWidth: 1.5, borderColor: routineSessions.includes(session.plannedSessionIndex) ? sectionAccent.train : colors.textMuted,
+            backgroundColor: routineSessions.includes(session.plannedSessionIndex) ? sectionAccent.train : 'transparent', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ color: colors.bg }}>{routineSessions.includes(session.plannedSessionIndex) ? '✓' : ''}</Text>
+          </View>
+          <Text style={{ color: colors.textPrimary, flex: 1 }}>{session.name}</Text>
         </Pressable>)}
       </View> : <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
         {[1, 2, 3, 4, 5, 6, 7].map((day) => <Pressable key={day} onPress={() => setDays((old) => old.includes(day) ? old.filter((value) => value !== day) : [...old, day])}

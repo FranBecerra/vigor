@@ -1,11 +1,12 @@
 import React from 'react';
-import { TextInput, Pressable } from 'react-native';
+import { TextInput, Pressable, Modal } from 'react-native';
 import ManualRoutineScreen from '@/app/(tabs)/(train)/manual-routine';
 import CreateRoutineScreen from '@/app/(tabs)/(train)/create-routine';
 import { PlanPreview } from '../generate/PlanPreview';
 import { ExerciseSwapSheet } from '../generate/ExerciseSwapSheet';
 import { Stepper } from '../generate/GenerateControls';
 import { NumericField } from '../NumericField';
+import { MusclePicture } from '../MusclePicture';
 import { Equipment, MuscleGroup } from '@/models';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
 import { createCustomExercise } from '@/services/training/customExercises';
@@ -127,6 +128,7 @@ it('intersects muscle, material and query filters, then resets them on reopening
   let tree: any;
   const render = (open: boolean) => <ExerciseSwapSheet open={open} current={null} candidates={mockCatalogue} onSelect={jest.fn()} onClose={jest.fn()} />;
   await act(async () => { tree = create(render(true)); });
+  await act(async () => button(tree.root, 'picker.targetMuscle').props.onPress());
   await act(async () => { button(tree.root, 'muscle.CHEST').props.onPress(); button(tree.root, 'picker.MACHINES').props.onPress(); });
   expect(tree.root.findAllByProps({ accessibilityLabel: 'Free chest' })).toHaveLength(0);
   expect(leafMatches(tree.root, (node) => node.props.accessibilityLabel === 'Machine chest')).toHaveLength(1);
@@ -135,5 +137,35 @@ it('intersects muscle, material and query filters, then resets them on reopening
   await act(async () => tree.update(render(false)));
   await act(async () => tree.update(render(true)));
   expect(leafMatches(tree.root, (node) => node.props.accessibilityLabel === 'Free chest')).toHaveLength(1);
+  await act(async () => tree.unmount());
+});
+
+it('does not mount a hidden catalogue or anatomical illustrations per result row', async () => {
+  const candidates = Array.from({ length: 200 }, (_, index) => ({ ...mockCatalogue[0], id: `exercise-${index}`, name: `Exercise ${index}` }));
+  let tree: any;
+  const render = (open: boolean) => <ExerciseSwapSheet open={open} current={null} candidates={candidates} onSelect={jest.fn()} onClose={jest.fn()} />;
+  await act(async () => { tree = create(render(false)); });
+  expect(tree.root.findAllByType(TextInput)).toHaveLength(0);
+  await act(async () => tree.update(render(true)));
+  expect(tree.root.findByType(Modal).props.animationType).toBe('none');
+  const mounted = leafMatches(tree.root, (node) => /^Exercise \d+$/.test(node.props.accessibilityLabel ?? ''));
+  expect(mounted.length).toBeGreaterThan(0); expect(mounted.length).toBeLessThan(30);
+  expect(tree.root.findAllByType(MusclePicture)).toHaveLength(0);
+  await act(async () => button(tree.root, 'picker.targetMuscle').props.onPress());
+  expect(tree.root.findAllByType(MusclePicture).length).toBeGreaterThan(0);
+  await act(async () => tree.unmount());
+});
+
+it('keeps a batch selected across muscle filters and search before adding once', async () => {
+  const add = jest.fn(); let tree: any;
+  await act(async () => { tree = create(<ExerciseSwapSheet open mode="add" current={null} candidates={mockCatalogue}
+    onSelect={jest.fn()} onSelectMany={add} onClose={jest.fn()} />); });
+  const exerciseButton = (label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
+  await act(async () => exerciseButton('Free chest').props.onPress());
+  await act(async () => button(tree.root, 'picker.MACHINES').props.onPress());
+  await act(async () => tree.root.findByType(TextInput).props.onChangeText('machine'));
+  await act(async () => exerciseButton('Machine chest').props.onPress());
+  await act(async () => button(tree.root, 'workout.addSelected').props.onPress());
+  expect(add).toHaveBeenCalledWith(mockCatalogue);
   await act(async () => tree.unmount());
 });

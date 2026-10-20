@@ -1,0 +1,7 @@
+# Training option artwork
+
+`training-options-v1.png` is a rejected exploration generated with the built-in image generation tool for goal and experience cards. It is not imported or shipped by the app. The user rejected synthetic people as visually artificial and insufficiently useful for these choices. Future generated imagery must depict objects unless people are explicitly requested. Existing anatomical muscle diagrams remain functional selection aids.
+
+Prompt: A coherent editorial illustration sheet for Vigor, five equal vertical panels: controlled dumbbell curl, barbell deadlift, beginner goblet squat, seated dumbbell press, and advanced rack squat. Premium tactile sport editorial, charcoal clothing and graphite studio with lime accents; consistent camera and lighting, realistic adult proportions, no text, logos or watermark.
+
+Equipment now uses distinct, theme-aware technical SVG illustrations in `src/components/train/generate/EquipmentIllustration.tsx`, not synthetic product photos or people. Each of the thirteen selectable implements has a drawing and a short translated explanation; the safety squat bar and floor-pivot landmine are deliberately distinct from the straight barbell. The existing anatomical drawings are reused at full-body scale for splits and cropped for emphasis. Split colour bands identify illustrative session overlaps, not additional muscle groups or fixed allocator constraints.

@@ -200,6 +200,11 @@ export interface WorkoutExercise {
 
 /** Sesión de entrenamiento completa dentro de un microciclo del mesociclo. */
 export interface WorkoutSession {
+  /** Optional runtime metadata; older history documents remain readable. */
+  trainingGoal?: string;
+  sessionName?: string;
+  activeExerciseId?: string;
+  restTimer?: { startedAt: number | null; durationSeconds: number; anchorSetId: string | null };
   id: string;
   userId: string;
   mesocycleId: string;

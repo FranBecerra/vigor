@@ -24,6 +24,7 @@ import { navigationThemeFor } from '@/theme/navigationTheme';
 import '@/i18n';
 import { ExerciseCatalogueProvider } from '@/hooks/useExerciseCatalogue';
 import { RehabilitationProvider } from '@/hooks/useRehabilitation';
+import { useWorkoutActivityOwner } from '@/hooks/useWorkoutActivity';
 
 /**
  * Decide qué mostrar según el estado de sesión.
@@ -34,6 +35,7 @@ import { RehabilitationProvider } from '@/hooks/useRehabilitation';
  */
 function AuthGate() {
   const { user, isLoading } = useAuth();
+  useWorkoutActivityOwner(user?.uid ?? null, isLoading);
   const { colors, sectionAccent } = useTheme();
 
   if (isLoading) {

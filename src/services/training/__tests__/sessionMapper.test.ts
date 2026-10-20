@@ -172,8 +172,8 @@ describe('sessionProgress', () => {
   it('cuenta series totales y completadas', () => {
     expect(
       sessionProgress({
-        bench: [setState({ isCompleted: true }), setState()],
-        ohp: [setState({ isCompleted: true })],
+        bench: [setState({ isCompleted: true, actualWeight: 80, actualReps: 8 }), setState()],
+        ohp: [setState({ isCompleted: true, actualWeight: 80, actualReps: 8 })],
       }),
     ).toEqual({ total: 3, completed: 2 });
   });

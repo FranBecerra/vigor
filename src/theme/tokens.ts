@@ -10,6 +10,9 @@
 /** Acento principal de marca (verde lima Vigor, distinto del neón de Ladder). */
 export const BRAND_LIME = '#9BE317';
 
+/** Session identity colours for illustrative split diagrams, never effort/volume scores. */
+export const sessionPalette = ['#9BE317', '#54A9F8', '#F28B69', '#B295EF', '#E9BD4F', '#41BFA6', '#E990BC'] as const;
+
 /** Acentos por sección (misma familia armónica verde→ámbar, PRD §8.2). */
 export const sectionAccent = {
   train: BRAND_LIME, // Entrenar

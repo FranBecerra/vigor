@@ -17,8 +17,8 @@
  *    encola y sincroniza sola al recuperar red (PRD §2.1). Entrenar en un sótano
  *    sin señal es el caso normal, no la excepción.
  *
- * 3. NO SE GUARDA UNA SESIÓN VACÍA. Abrir la pantalla y salir sin registrar nada
- *    no debe dejar un documento huérfano en el historial.
+ * 3. An explicitly started workout persists its initial prescription too, so
+ *    leaving before completing the first set still offers a resumable draft.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
@@ -54,6 +54,8 @@ export function useSessionPersistence({
 }: UseSessionPersistenceOptions) {
   const [status, setStatus] = useState<SaveStatus>('idle');
   const [restoredSessionId, setRestoredSessionId] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState(false);
+  const [restoreAttempt, setRestoreAttempt] = useState(0);
 
   // Refs para leer el último estado dentro del temporizador sin re-armarlo en
   // cada cambio, que anularía el propósito del debounce.
@@ -76,12 +78,16 @@ export function useSessionPersistence({
   useEffect(() => {
     if (context === null) return;
     completedAtRef.current = undefined;
+    setRestoreError(false);
     setStatus('idle');
     let cancelled = false;
 
     workoutSessionRepository
-      .get(context.sessionId)
-      .then((saved) => {
+      .listByUser(context.userId)
+      .then((sessions) => {
+        // Owner-constrained queries safely return an empty list for a new
+        // workout. Direct reads of absent documents can fail ownership rules.
+        const saved = sessions.find((session) => session.id === context.sessionId);
         if (cancelled) return;
         if (saved && saved.exercises.length > 0) {
           onRestore(toSessionSetsByExercise(saved), saved);
@@ -92,9 +98,8 @@ export function useSessionPersistence({
         setRestoredSessionId(context.sessionId);
       })
       .catch(() => {
-        // Un fallo al recuperar no debe impedir entrenar: se sigue con el
-        // estado local y se marca como restaurado para habilitar el guardado.
-        if (!cancelled) setRestoredSessionId(context.sessionId);
+        // Never replace an unread draft with an empty initial prescription.
+        if (!cancelled) { setRestoreError(true); setStatus('error'); }
       });
 
     return () => {
@@ -103,7 +108,7 @@ export function useSessionPersistence({
     // Deliberadamente ligado al id de sesión: recuperar es una operación única
     // por sesión, no algo que repetir cuando cambian las series.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [sessionId, restoreAttempt]);
 
   /** Escribe ya, sin esperar al temporizador. Para cerrar o salir. */
   const flush = useCallback(async (completedAt?: number): Promise<boolean> => {
@@ -143,7 +148,7 @@ export function useSessionPersistence({
     if (timer.current !== null) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       void flush();
-    }, WRITE_DELAY_MS);
+    }, context.persistDraft && isSessionEmpty(setsByExercise) ? 0 : WRITE_DELAY_MS);
 
     return () => {
       if (timer.current !== null) clearTimeout(timer.current);
@@ -160,5 +165,5 @@ export function useSessionPersistence({
     return () => subscription.remove();
   }, [flush]);
 
-  return { status, hasRestored, flush };
+  return { status, hasRestored, flush, restoreError, retryRestore: () => setRestoreAttempt((old) => old + 1) };
 }

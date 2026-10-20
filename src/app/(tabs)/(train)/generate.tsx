@@ -4,13 +4,9 @@
  * Initial generation allocates dose before seeded variation; existing previews
  * use the separate dose-preserving reroll contract.
  *
- * TWO PAGES, ONE PER PHASE
- *   Configure, then preview, as two horizontally-paged views with explicit forward
- *   and back actions. The seven INPUT groups still share a single scroll, because
- *   session count and minutes move the set budget together and splitting them across
- *   steps would hide that. The generated plan is not an eighth input group: it is the
- *   result of the other seven, and appending it to the same scroll meant the primary
- *   action produced no visible movement on the one tap that matters most.
+ * Configure in six focused steps, then preview one session at a time. Capacity
+ * retains session count and minutes together; the shared plan survives a trip
+ * back to any step until the athlete explicitly regenerates it.
  *
  *   Both pages stay mounted, so going back to change a setting keeps the athlete's
  *   place in the form and keeps their preview edits. Regenerating is reachable from
@@ -43,12 +39,16 @@ import { Equipment, ExperienceLevel, SplitStructure, type Exercise, type Planned
 import { useAuth } from '@/hooks/useAuth';
 import {
   Chip,
-  ChipRow,
   Section,
   Stepper,
 } from '@/components/train/generate/GenerateControls';
 import { PlanPreview } from '@/components/train/generate/PlanPreview';
-import { GenerationArtwork } from '@/components/train/generate/GenerationArtwork';
+import { GenerationChoice, PriorityBudget } from '@/components/train/generate/GenerationChoice';
+import { SplitDiagram, SplitLegend } from '@/components/train/generate/SplitDiagram';
+import { EquipmentIllustration } from '@/components/train/generate/EquipmentIllustration';
+import { sortEquipmentOptions } from '@/services/training/generationPresentation';
+import { useMeasuredCommit } from '@/hooks/useMeasuredCommit';
+import { uiPerformance } from '@/services/performance/uiPerformance';
 import { ExerciseSwapSheet } from '@/components/train/generate/ExerciseSwapSheet';
 import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import {
@@ -146,7 +146,6 @@ const SPLITS = [
   SplitStructure.FULL_BODY,
   SplitStructure.UPPER_LOWER,
   SplitStructure.PUSH_PULL_LEGS,
-  SplitStructure.PUSH_PULL_LEGS_UPPER,
 ] as const;
 const EQUIPMENT = [
   Equipment.BARBELL,
@@ -231,10 +230,10 @@ function saveFailureCode(error: unknown): string {
 }
 
 export default function GenerateScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width, fontScale = 1 } = useWindowDimensions();
   const { colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
   const { user } = useAuth();
 
@@ -250,7 +249,8 @@ export default function GenerateScreen() {
   const [phase, setPhase] = useState<GenerationPhase>('configure');
   const [step, setStep] = useState(0);
   const configureScrollRef = useRef<ScrollView>(null);
-  const goToStep = (next: number) => { setStep(Math.max(0, Math.min(5, next))); configureScrollRef.current?.scrollTo({ y: 0, animated: false }); };
+  const goToStep = (next: number) => { uiPerformance.begin('wizard.commit'); setStep(Math.max(0, Math.min(5, next))); configureScrollRef.current?.scrollTo({ y: 0, animated: false }); };
+  useMeasuredCommit(step, 'wizard.commit');
   const [plan, setPlan] = useState<MesocyclePlan | null>(null);
   const [rerollNotice, setRerollNotice] = useState<'unchanged' | 'edited' | null>(null);
   // Settings the plan on screen was built from, so going back to LOOK at a setting is
@@ -695,6 +695,9 @@ export default function GenerateScreen() {
   }, [phase, router]);
 
   const slots = usedSlots(emphasis);
+  const twoEmphasisColumns = width >= 340 && fontScale < 1.4;
+  const orderedEquipment = useMemo(() => sortEquipmentOptions(EQUIPMENT,
+    (entry) => t(`generate.equipment${entry}`), i18n?.resolvedLanguage ?? i18n?.language ?? 'en'), [t, i18n?.resolvedLanguage, i18n?.language]);
   const canGenerate = equipment.length > 0;
   // The recommendation is only worth showing while the controls still hold it: once a
   // stepper moves, the numbers on screen are the athlete's and not the engine's.
@@ -730,7 +733,6 @@ export default function GenerateScreen() {
             <View style={{ flexDirection: 'row', gap: 6, marginVertical: 20 }}>
               {Array.from({ length: 6 }, (_, index) => <View key={index} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: index <= step ? sectionAccent.train : colors.surface }} />)}
             </View>
-            {step !== 2 && <GenerationArtwork kind={(['goal', 'level', 'goal', 'equipment', 'capacity', 'split'] as const)[step]} />}
 
             {/* Once a plan exists, this page has to say what is waiting on the other
                 one, and whether the settings have moved under it since. */}
@@ -758,35 +760,35 @@ export default function GenerateScreen() {
             )}
             <View style={{ height: spacing.xl }} />
 
-            {step === 0 && <Section title={t('generate.goal')}>
-              <ChipRow>
+            {step === 0 && <Section>
+              <View accessibilityRole="radiogroup">
                 {GOALS.map((entry) => (
-                  <Chip
+                  <GenerationChoice
                     key={entry}
-                    label={t(GOAL_LABEL[entry])}
+                    title={t(GOAL_LABEL[entry])}
+                    description={t(entry === TrainingGoal.HYPERTROPHY ? 'generate.goalHypertrophyDescription' : 'generate.goalStrengthDescription')}
                     selected={goal === entry}
                     onPress={() => setGoal(entry)}
                   />
                 ))}
-              </ChipRow>
+              </View>
             </Section>}
 
-            {step === 1 && <Section title={t('generate.level')}>
-              <ChipRow>
+            {step === 1 && <Section>
+              <View accessibilityRole="radiogroup">
                 {LEVELS.map((entry) => (
-                  <Chip
+                  <GenerationChoice
                     key={entry}
-                    label={t(`generate.level${entry}`)}
-                    sublabel={t(`generate.levelHint${entry}`)}
+                    title={t(`generate.level${entry}`)}
+                    description={t(`generate.levelHint${entry}`)}
                     selected={level === entry}
                     onPress={() => setLevel(entry)}
                   />
                 ))}
-              </ChipRow>
+              </View>
             </Section>}
 
             {step === 4 && <Section hintDisclosure
-              title={t('generate.capacity')}
               hint={t('generate.capacityBudget', {
                 perSession: setBudget.perSession,
                 total: setBudget.total,
@@ -876,49 +878,48 @@ export default function GenerateScreen() {
             </Section>}
 
             {step === 5 && <Section hintDisclosure
-              title={t('generate.split')}
               hint={split === SplitStructure.AUTO ? t('generate.splitAutoHint') : undefined}
             >
-              <ChipRow>
+              <View accessibilityRole="radiogroup">
                 {SPLITS.map((entry) => (
-                  <Chip
+                  <GenerationChoice
                     key={entry}
-                    label={t(`generate.split${entry}`)}
-                    selected={split === entry}
+                    title={t(`generate.split${entry}`)}
+                    description={t(`generate.splitDescription${entry}`)}
+                    artwork={<SplitDiagram split={entry} sessions={sessions} />}
+                    footer={<SplitLegend split={entry} sessions={sessions} />}
+                    selected={split === entry || (entry === SplitStructure.PUSH_PULL_LEGS && split === SplitStructure.PUSH_PULL_LEGS_UPPER)}
                     onPress={() => setSplit(entry)}
                   />
                 ))}
-              </ChipRow>
+              </View>
             </Section>}
 
             {step === 3 && <Section
-              title={t('generate.equipment')}
               hint={equipment.length === 0 ? t('generate.equipmentEmpty') : undefined}
             >
-              <ChipRow>
-                {EQUIPMENT.map((entry) => (
-                  <Chip
+              <View>
+                {orderedEquipment.map((entry) => (
+                  <GenerationChoice compact multiple
                     key={entry}
-                    label={t(`generate.equipment${entry}`)}
+                    title={t(`generate.equipment${entry}`)}
+                    description={t(`generate.equipmentHelp.${entry}`)}
+                    artwork={<EquipmentIllustration equipment={entry} />}
                     selected={equipment.includes(entry)}
                     onPress={() => toggleEquipment(entry)}
                   />
                 ))}
-              </ChipRow>
+              </View>
             </Section>}
 
-            {step === 2 && <Section hintDisclosure
-              title={t('generate.emphasis')}
-              hint={t('generate.emphasisHint')}
-              trailing={t('generate.slotsLeft', { used: slots, total: PRIORITY_SLOT_BUDGET })}
-              trailingTone={slots >= PRIORITY_SLOT_BUDGET ? 'warning' : 'normal'}
-            >
+            {step === 2 && <Section>
+              <PriorityBudget used={slots} total={PRIORITY_SLOT_BUDGET} hint={t('generate.budgetHint')} />
               {GENERATOR_EMPHASIS_GROUPS.map((group, groupIndex) => (
                 <View key={group.half} style={groupIndex > 0 ? { marginTop: spacing.lg } : undefined}>
                   <Text style={[styles.emphasisBlockLabel, { color: colors.textMuted }]}>
                     {t(`generate.focus${group.half}`).toUpperCase()}
                   </Text>
-                  <ChipRow>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10 }}>
                     {group.regions.map((region) => {
                       const choice = choiceOf(emphasis, region);
                       const blocked = prioritizeBlockedReason(emphasis, region);
@@ -932,11 +933,12 @@ export default function GenerateScreen() {
                             : choice === 'DEPRIORITIZED'
                               ? 'generate.emphasisDeprioritizeVerb'
                               : 'generate.emphasisBase')}
-                          style={styles.emphasisChip}
+                          style={{ width: twoEmphasisColumns ? '48%' : '100%', borderRadius: radius.lg,
+                            minHeight: twoEmphasisColumns ? 106 : 82, paddingBottom: twoEmphasisColumns ? 26 : 12 }}
                           leading={thumbnail && (
                             <BodyMapThumbnail
                               thumbnail={thumbnail}
-                              size={44}
+                              size={twoEmphasisColumns ? 40 : 58}
                               paint={regionPaint(region, choice === 'PRIORITY'
                                 ? sectionAccent.train
                                 : choice === 'DEPRIORITIZED'
@@ -962,7 +964,7 @@ export default function GenerateScreen() {
                         />
                       );
                     })}
-                  </ChipRow>
+                  </View>
                 </View>
               ))}
               {/* Explain the block instead of leaving a control dead with no cause. */}
@@ -1090,8 +1092,8 @@ export default function GenerateScreen() {
                 limitedBy={plan.limitedBy}
                 performedSets={plannedSetCount}
                 exercisesById={exercisesById}
-                onSwap={(sessionIndex, order) => setSwapTarget({ sessionIndex, order })}
-                onAdd={setAddTarget}
+                onSwap={(sessionIndex, order) => { uiPerformance.begin('picker.ready'); setSwapTarget({ sessionIndex, order }); }}
+                onAdd={(index) => { uiPerformance.begin('picker.ready'); setAddTarget(index); }}
                 isAdded={(sessionIndex, exerciseId) => previewAdditions.some(
                   (entry) => entry.sessionIndex === sessionIndex && entry.exerciseId === exerciseId,
                 )}

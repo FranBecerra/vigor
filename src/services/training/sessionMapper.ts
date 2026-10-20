@@ -12,7 +12,7 @@
  * tiene que devolver las mismas series, en el mismo orden, con los mismos
  * tramos. Si no lo fuera, el usuario perdería trabajo real al reabrir la app.
  */
-import type { SetExtension, WorkoutExercise, WorkoutSession, WorkoutSet } from '@/models';
+import { SetType, type SetExtension, type WorkoutExercise, type WorkoutSession, type WorkoutSet } from '@/models';
 
 /** Serie tal como la maneja la pantalla: el modelo más su estado de ejecución. */
 export interface SessionSetState extends WorkoutSet {
@@ -24,9 +24,8 @@ export interface SessionSetState extends WorkoutSet {
 export type SessionSetsByExercise = Record<string, SessionSetState[]>;
 
 /**
- * Serie persistida. `isCompleted` NO se guarda como campo propio: se deriva de
- * que existan valores reales registrados. Guardar ambas cosas permitiría que se
- * contradijeran, y entonces habría que decidir cuál gana.
+ * Persist explicit completionState so editing values does not silently mark a
+ * pending set complete when restoring it. Older rows retain their legacy fallback.
  */
 function toPersistedSet(set: SessionSetState): WorkoutSet {
   const { isCompleted, previous, ...persisted } = set;
@@ -46,6 +45,11 @@ export function isSetCompleted(set: WorkoutSet): boolean {
   return set.actualReps !== undefined && set.actualWeight !== undefined;
 }
 
+/** In-memory completion overrides the older serialized flag after resuming. */
+export function isLiveSetCompleted(set: SessionSetState): boolean {
+  return set.isCompleted && isSetCompleted({ ...set, completionState: 'DONE' });
+}
+
 /**
  * Construye los `WorkoutExercise` en el ORDEN dado por `exerciseOrder`.
  *
@@ -56,12 +60,13 @@ export function isSetCompleted(set: WorkoutSet): boolean {
 export function toWorkoutExercises(
   exerciseOrder: readonly string[],
   setsByExercise: SessionSetsByExercise,
+  preserveEmpty = false,
 ): WorkoutExercise[] {
   const exercises: WorkoutExercise[] = [];
 
   exerciseOrder.forEach((exerciseId) => {
     const sets = setsByExercise[exerciseId] ?? [];
-    if (sets.length === 0) return;
+    if (sets.length === 0 && !preserveEmpty) return;
     exercises.push({
       id: exerciseId,
       exerciseId,
@@ -76,6 +81,10 @@ export function toWorkoutExercises(
 
 /** Datos de la sesión que no viven en el estado de series. */
 export interface SessionContext {
+  trainingGoal?: string;
+  sessionName?: string;
+  activeExerciseId?: string;
+  restTimer?: WorkoutSession['restTimer'];
   persistDraft?: boolean;
   exerciseNotes?: Record<string, string>;
   swappedFrom?: Record<string, string>;
@@ -104,14 +113,18 @@ export function toWorkoutSession(
     mesocycleId: context.mesocycleId,
     microcycleId: context.microcycleId,
     microcycleIndex: context.microcycleIndex,
-    exercises: toWorkoutExercises(exerciseOrder, setsByExercise),
+    exercises: toWorkoutExercises(exerciseOrder, setsByExercise, context.persistDraft === true),
     performedAt: context.performedAt,
   };
+  if (context.trainingGoal !== undefined) session.trainingGoal = context.trainingGoal;
+  if (context.sessionName !== undefined) session.sessionName = context.sessionName;
+  if (context.activeExerciseId !== undefined) session.activeExerciseId = context.activeExerciseId;
+  if (context.restTimer !== undefined) session.restTimer = context.restTimer;
   for (const exercise of session.exercises) {
     const snapshot = context.exerciseSnapshots?.[exercise.exerciseId];
     if (snapshot) exercise.exerciseSnapshot = snapshot;
     const notes = context.exerciseNotes?.[exercise.exerciseId];
-    if (notes) exercise.notes = notes;
+    if (notes !== undefined) exercise.notes = notes;
     const original = context.swappedFrom?.[exercise.exerciseId];
     if (original) { exercise.isSwap = true; exercise.swappedFromExerciseId = original; }
   }
@@ -159,10 +172,10 @@ export function sessionProgress(setsByExercise: SessionSetsByExercise): {
   total: number;
   completed: number;
 } {
-  const all = Object.values(setsByExercise).flat();
+  const all = Object.values(setsByExercise).flat().filter((set) => set.setType !== SetType.WARMUP);
   return {
     total: all.length,
-    completed: all.filter((set) => set.isCompleted).length,
+    completed: all.filter(isLiveSetCompleted).length,
   };
 }
 

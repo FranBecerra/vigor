@@ -16,7 +16,7 @@
  * Se resincroniza si el valor llega cambiado desde fuera (p. ej. un ajuste
  * automático por fatiga).
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Platform, TextInput, StyleSheet, type KeyboardTypeOptions } from 'react-native';
 import { useTheme } from '@/theme/useTheme';
 
@@ -50,11 +50,12 @@ export function NumericField({
 }: NumericFieldProps) {
   const { colors, radius } = useTheme();
   const [text, setText] = useState(value === undefined ? '' : String(value));
+  const focused = useRef(false);
 
   // Resincroniza si el valor externo cambia y no coincide con lo escrito.
   useEffect(() => {
     const currentAsNumber = parseNumericText(text, decimal);
-    if (currentAsNumber !== value) {
+    if (!focused.current && currentAsNumber !== value) {
       setText(value === undefined ? '' : String(value));
     }
     // Deliberadamente solo depende de `value`: no queremos pisar lo que el
@@ -62,11 +63,13 @@ export function NumericField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
-  const keyboardType: KeyboardTypeOptions = decimal ? 'decimal-pad' : Platform.OS === 'ios' ? 'ascii-capable-number-pad' : 'number-pad';
+  const keyboardType: KeyboardTypeOptions = decimal || Platform.OS === 'ios' ? 'decimal-pad' : 'number-pad';
 
   return (
     <TextInput
       value={text}
+      onFocus={() => { focused.current = true; }}
+      onBlur={() => { focused.current = false; }}
       onChangeText={(next) => {
         setText(next);
         onChangeValue(parseNumericText(next, decimal));

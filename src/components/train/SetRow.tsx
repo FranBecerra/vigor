@@ -8,7 +8,7 @@
  *
  * Memoizada: editar una fila no debe repintar las demás páginas del carrusel.
  */
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -20,8 +20,8 @@ import { SetType, type SetExtension } from '@/models';
 import { supportsExtensions } from '@/services/training/advancedSets';
 import { useTheme } from '@/theme/useTheme';
 import { setTypeLabel } from './setTypeLabel';
-import { NumericField } from './NumericField';
-import { IntensityCell } from './IntensityCell';
+import { SetEntrySheet } from './SetEntrySheet';
+import { useTranslation } from 'react-i18next';
 import { SetExtensionsEditor } from './SetExtensionsEditor';
 import { intensityLabel, type IntensityScale, type IntensityValue } from '@/services/training/intensityScale';
 
@@ -32,6 +32,7 @@ export const COLUMN_WIDTHS = {
   reps: 56,
   intensity: 44,
   done: 30,
+  remove: 32,
 } as const;
 
 export interface SetRowData {
@@ -76,6 +77,8 @@ function SetRowComponent({
 }: SetRowProps) {
   const { colors, sectionAccent, motion } = useTheme();
   const accent = sectionAccent.train;
+  const { t } = useTranslation();
+  const [editing, setEditing] = useState<'weight' | 'reps' | 'intensity' | null>(null);
 
   const done = useSharedValue(data.isCompleted ? 1 : 0);
   useEffect(() => {
@@ -138,35 +141,25 @@ function SetRowComponent({
 
         {/* KG — bloqueado al completar */}
         <View style={{ width: COLUMN_WIDTHS.weight, alignItems: 'center' }}>
-          <NumericField
-            value={data.weight}
-            onChangeValue={onChangeWeight}
-            decimal
-            editable={!data.isCompleted}
-            isPlanned={data.weightIsPlanned}
-            accessibilityLabel="Peso en kilogramos"
-          />
+          <Pressable onPress={() => setEditing('weight')} accessibilityRole="button" accessibilityLabel={t('train.weight')}
+            style={{ paddingVertical: 10, width: '92%', borderRadius: 8, backgroundColor: colors.surface }}>
+            <Text style={{ textAlign: 'center', color: data.weightIsPlanned ? colors.textMuted : colors.textPrimary, fontWeight: '700' }}>{data.weight ?? '—'}</Text>
+          </Pressable>
         </View>
 
         {/* REPS — bloqueado al completar */}
         <View style={{ width: COLUMN_WIDTHS.reps, alignItems: 'center' }}>
-          <NumericField
-            value={data.reps}
-            onChangeValue={onChangeReps}
-            editable={!data.isCompleted}
-            isPlanned={data.repsIsPlanned}
-            accessibilityLabel="Repeticiones"
-          />
+          <Pressable onPress={() => setEditing('reps')} accessibilityRole="button" accessibilityLabel={t('train.reps')}
+            style={{ paddingVertical: 10, width: '92%', borderRadius: 8, backgroundColor: colors.surface }}>
+            <Text style={{ textAlign: 'center', color: data.repsIsPlanned ? colors.textMuted : colors.textPrimary, fontWeight: '700' }}>{data.reps ?? '—'}</Text>
+          </Pressable>
         </View>
 
         {/* INTENSIDAD — sigue editable incluso en una serie completada */}
         <View style={{ width: COLUMN_WIDTHS.intensity, alignItems: 'center' }}>
-          <IntensityCell
-            cellId={data.id}
-            value={data.intensity}
-            scale={scale}
-            onChange={onChangeIntensity}
-          />
+          <Pressable onPress={() => setEditing('intensity')} accessibilityRole="button" accessibilityLabel={scale} style={{ paddingVertical: 10 }}>
+            <Text style={{ color: accent, fontWeight: '700' }}>{intensityLabel(data.intensity ?? null, scale)}</Text>
+          </Pressable>
         </View>
 
         {/* ✓ */}
@@ -179,7 +172,11 @@ function SetRowComponent({
             {data.isCompleted ? <Text style={styles.checkMark}>✓</Text> : null}
           </Animated.View>
         </Pressable>
+        {onRemove && <Pressable onPress={onRemove} accessibilityRole="button" accessibilityLabel={t('workout.removeSet')}
+          hitSlop={6} style={{ width: COLUMN_WIDTHS.remove, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.textMuted, fontSize: 18 }}>−</Text></Pressable>}
       </Animated.View>
+      {editing && <SetEntrySheet initialField={editing} weight={data.weight} reps={data.reps} intensity={data.intensity} scale={scale}
+        onWeight={onChangeWeight} onReps={onChangeReps} onIntensity={onChangeIntensity} onClose={() => setEditing(null)} />}
 
       {/* Los parámetros aparecen justo al seleccionar un tipo avanzado. */}
       {hasExtraFields ? (

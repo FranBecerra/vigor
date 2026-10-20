@@ -5,11 +5,12 @@ import TrainStackLayout from '@/app/(tabs)/(train)/_layout';
 import TabsLayout from '@/app/(tabs)/_layout';
 const { create, act } = require('react-test-renderer');
 let mockScheme: 'dark' | 'light' = 'dark';
+let mockSegments: string[] = ['(tabs)', '(train)'];
 jest.mock('expo-router', () => {
   const React = require('react');
   const Stack = (props: any) => React.createElement('Stack', props, props.children);
   Stack.Screen = (props: any) => React.createElement('Screen', props);
-  return { Stack, DarkTheme: { dark: true, colors: { background: '#000', card: '#000', notification: 'red' }, fonts: {} },
+  return { Stack, useSegments: () => mockSegments, DarkTheme: { dark: true, colors: { background: '#000', card: '#000', notification: 'red' }, fonts: {} },
     DefaultTheme: { dark: false, colors: { background: '#fff', card: '#fff', notification: 'red' }, fonts: {} } };
 });
 jest.mock('expo-router/unstable-native-tabs', () => {
@@ -39,4 +40,17 @@ it.each(['dark', 'light'] as const)('matches native stack, tab surfaces, safe-ar
   expect(tabs.root.findAllByType('Trigger')).toHaveLength(4);
   tabs.root.findAllByType('Trigger').forEach((node: any) => expect(node.props.contentStyle.backgroundColor).toBe(palette[scheme].bg));
   await act(async () => { stack.unmount(); tabs.unmount(); });
+});
+it('hides native tabs during workouts and preserves the training stack when reselected', async () => {
+  mockSegments = ['(tabs)', '(train)', 'session']; let tree: any;
+  await act(async () => { tree = create(<TabsLayout />); });
+  expect(tree.root.findByType('NativeTabs').props.hidden).toBe(true);
+  expect(tree.root.findAllByType('Trigger').find((node: any) => node.props.name === '(train)').props.disablePopToTop).toBe(true);
+  mockSegments = ['(tabs)', '(train)', 'workout-check'];
+  await act(async () => tree.update(<TabsLayout />));
+  expect(tree.root.findByType('NativeTabs').props.hidden).toBe(true);
+  mockSegments = ['(tabs)', '(train)'];
+  await act(async () => tree.update(<TabsLayout />));
+  expect(tree.root.findByType('NativeTabs').props.hidden).toBe(false);
+  await act(async () => tree.unmount());
 });

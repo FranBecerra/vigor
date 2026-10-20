@@ -2,14 +2,16 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
+import { useSegments } from 'expo-router';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
   const { sectionAccent, colors } = useTheme();
+  const segments = useSegments();
 
   return (
-    <NativeTabs tintColor={sectionAccent.train}>
-      <NativeTabs.Trigger name="(train)" contentStyle={{ backgroundColor: colors.bg }}>
+    <NativeTabs tintColor={sectionAccent.train} hidden={segments.some((segment) => ['session', 'workout-check'].includes(segment))}>
+      <NativeTabs.Trigger name="(train)" disablePopToTop contentStyle={{ backgroundColor: colors.bg }}>
         <NativeTabs.Trigger.Label>{t('tabs.train')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'dumbbell', selected: 'dumbbell.fill' }} md="fitness_center" />
       </NativeTabs.Trigger>

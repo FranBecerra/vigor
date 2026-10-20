@@ -6,7 +6,7 @@ const { create, act } = require('react-test-renderer');
 const mockGet = jest.fn();
 const mockWrite = jest.fn();
 jest.mock('@/services/repositories', () => ({ workoutSessionRepository: {
-  get: (...args: unknown[]) => mockGet(...args), createLocally: (...args: unknown[]) => mockWrite(...args),
+  listByUser: (...args: unknown[]) => mockGet(...args).then((saved: unknown) => saved ? [saved] : []), createLocally: (...args: unknown[]) => mockWrite(...args),
 } }));
 let result: ReturnType<typeof useSessionPersistence>;
 const restore = jest.fn();
@@ -20,6 +20,35 @@ beforeEach(() => {
   jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() });
 });
 afterEach(() => jest.restoreAllMocks());
+it('never overwrites an unread saved workout after a restore failure and allows a retry', async () => {
+  mockGet.mockRejectedValueOnce(new Error('offline read failed'));
+  let tree: any;
+  await act(async () => { tree = create(<Probe />); });
+  expect(result.restoreError).toBe(true); expect(result.hasRestored).toBe(false);
+  await act(async () => { expect(await result.flush()).toBe(false); });
+  expect(mockWrite).not.toHaveBeenCalled();
+  mockGet.mockResolvedValueOnce({ id: 'workout', exercises: [], performedAt: 1 });
+  await act(async () => result.retryRestore());
+  expect(result.hasRestored).toBe(true); expect(result.restoreError).toBe(false);
+  await act(async () => tree.unmount());
+});
+it('persists a started workout before the first completed set and restores its runtime', async () => {
+  const emptySets = { hold: sets.hold.map((row) => ({ ...row, actualDurationSeconds: undefined, isCompleted: false })) };
+  const runtime = { ...context, persistDraft: true, trainingGoal: 'HYPERTROPHY', sessionName: 'Upper',
+    activeExerciseId: 'hold', restTimer: { startedAt: 50, durationSeconds: 120, anchorSetId: 'one' } };
+  function StartedProbe() { result = useSessionPersistence({ context: runtime, exerciseOrder: ['hold'], setsByExercise: emptySets, onRestore: restore }); return null; }
+  let tree: any;
+  await act(async () => { tree = create(<StartedProbe />); });
+  await act(async () => { expect(await result.flush()).toBe(true); });
+  const saved = mockWrite.mock.calls.at(-1)[0];
+  expect(saved).toMatchObject({ performedAt: 1, sessionName: 'Upper', activeExerciseId: 'hold', restTimer: runtime.restTimer,
+    exercises: [{ sets: [{ completionState: 'PENDING' }] }] });
+  await act(async () => tree.unmount());
+  mockGet.mockResolvedValue(saved);
+  await act(async () => { tree = create(<StartedProbe />); });
+  expect(restore).toHaveBeenCalledWith(expect.any(Object), saved);
+  await act(async () => tree.unmount());
+});
 it('allows offline completion and keeps completion on subsequent background or exit writes', async () => {
   let tree: any; let stateChange: ((state: AppStateStatus) => void) | undefined;
   const subscription = jest.spyOn(AppState, 'addEventListener').mockImplementation((_event, listener) => {

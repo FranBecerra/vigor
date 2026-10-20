@@ -1,6 +1,6 @@
 import { SetType, type Exercise, type MuscleGroup, type PlannedSession, type WorkoutSession } from '@/models';
 import { primaryMusclesOf } from './exerciseMuscles';
-import { isSetCompleted, type SessionSetsByExercise } from './sessionMapper';
+import { isLiveSetCompleted, isSetCompleted, type SessionSetsByExercise } from './sessionMapper';
 
 /** Stable move: payloads and completed work stay attached to their exercise identity. */
 export function moveItem<T>(items: readonly T[], from: number, to: number): T[] {
@@ -17,12 +17,12 @@ export function workoutReview(exercises: readonly Exercise[], sets: SessionSetsB
   const records: { exerciseId: string; weight: number; reps: number }[] = [];
   for (const exercise of exercises) {
     const rows = sets[exercise.id] ?? [];
-    pending += rows.filter((set) => !set.isCompleted).length;
-    const working = rows.filter((set) => set.isCompleted && isSetCompleted(set) && set.setType !== SetType.WARMUP);
+    pending += rows.filter((set) => set.setType !== SetType.WARMUP && !isLiveSetCompleted(set)).length;
+    const working = rows.filter((set) => isLiveSetCompleted(set) && set.setType !== SetType.WARMUP);
     completed += working.length;
-    for (const muscle of primaryMusclesOf(exercise)) muscles.set(muscle, (muscles.get(muscle) ?? 0) + working.length);
+    for (const muscle of primaryMusclesOf(exercise)) if (working.length) muscles.set(muscle, (muscles.get(muscle) ?? 0) + working.length);
     for (const muscle of exercise.secondaryMuscles.filter((muscle) => !primaryMusclesOf(exercise).includes(muscle))) {
-      muscles.set(muscle, (muscles.get(muscle) ?? 0) + working.length * 0.5);
+      if (working.length) muscles.set(muscle, (muscles.get(muscle) ?? 0) + working.length * 0.5);
     }
     // Compare same-exercise load/repetition performances only, never different machines or assisted loads.
     const comparable = !exercise.recording || ['TOTAL_KG', 'PER_HAND_KG', 'ADDED_KG'].includes(exercise.recording.load);

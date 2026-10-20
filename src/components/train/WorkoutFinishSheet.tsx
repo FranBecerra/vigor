@@ -6,10 +6,11 @@ import { BodyMap } from './BodyMap';
 import { heatPaint } from '@/services/training/bodyMap';
 import type { workoutReview } from '@/services/training/workoutReview';
 import type { Exercise } from '@/models';
+import { WorkoutClock } from './WorkoutClock';
 
-export function WorkoutFinishSheet({ open, saved, busy, error, summary, exercises, changed, historyReady, onFinish, onClose }:
+export function WorkoutFinishSheet({ open, saved, busy, error, summary, exercises, changed, historyReady, startedAt, completedAt, onFinish, onClose }:
   { open: boolean; saved: boolean; busy: boolean; error: boolean; summary: ReturnType<typeof workoutReview>; exercises: Exercise[];
-    changed: boolean; historyReady: boolean; onFinish: (savePlan: boolean) => void; onClose: () => void }) {
+    changed: boolean; historyReady: boolean; startedAt?: number; completedAt?: number; onFinish: (savePlan: boolean) => void; onClose: () => void }) {
   const { t } = useTranslation(); const { colors, typography, spacing, sectionAccent, radius, semantic } = useTheme(); const insets = useSafeAreaInsets();
   const action = (label: string, callback: () => void, primary = false) => <Pressable disabled={busy} onPress={callback}
     style={{ padding: 18, marginTop: 10, borderRadius: radius.pill, backgroundColor: primary ? sectionAccent.train : colors.surface }}>
@@ -18,6 +19,9 @@ export function WorkoutFinishSheet({ open, saved, busy, error, summary, exercise
   return <Modal visible={open} animationType="slide" onRequestClose={() => { if (!busy) onClose(); }}>
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: spacing.lg, paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}>
       <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{t(saved ? 'workout.saved' : 'workout.finishTitle')}</Text>
+      {startedAt !== undefined && <View style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
+        <Text style={{ color: colors.textSecondary }}>{t('workout.duration')}</Text><WorkoutClock startedAt={startedAt} completedAt={completedAt} />
+      </View>}
       {!saved && summary.pending > 0 && <Text accessibilityRole="alert" style={{ color: semantic.warning, marginVertical: 16 }}>{t('workout.pending', { count: summary.pending })}</Text>}
       <View style={{ flexDirection: 'row', gap: 12, marginVertical: 20 }}>
         {[ [summary.completed, t('workout.workingSets')], [Math.round(summary.tonnage).toLocaleString(), 'kg × reps'] ].map(([value, label]) =>

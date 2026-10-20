@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { Modal, Pressable, ScrollView, SectionList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { ExerciseGenerationTier, MuscleGroup, type Exercise } from '@/models';
@@ -13,6 +13,8 @@ import {
   partitionSwapCandidates,
   searchExercises,
 } from '@/services/training/exerciseSearch';
+import { measureNextFrame } from '@/hooks/useMeasuredCommit';
+import { uiPerformance } from '@/services/performance/uiPerformance';
 
 interface ExerciseSwapSheetProps {
   embedded?: boolean;
@@ -23,10 +25,12 @@ interface ExerciseSwapSheetProps {
   onSelect: (exercise: Exercise) => void;
   onSelectMany?: (exercises: Exercise[]) => void;
   onClose: () => void;
+  /** Native benchmark callback; omitted in ordinary UI. */
+  onPresented?: () => void;
 }
 
 /** Searchable selector shared conceptually with the in-session swap flow. */
-export function ExerciseSwapSheet({
+function ExercisePickerContent({
   embedded = false,
   open,
   mode = 'swap',
@@ -35,11 +39,14 @@ export function ExerciseSwapSheet({
   onSelect,
   onSelectMany,
   onClose,
+  onPresented,
 }: ExerciseSwapSheetProps) {
   const { t } = useTranslation();
   const { colors, typography, spacing, radius, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
+  const [showMuscles, setShowMuscles] = useState(false);
   const [creating, setCreating] = useState(false);
   const [muscle, setMuscle] = useState<MuscleGroup | null>(null);
   const [equipment, setEquipment] = useState<ExerciseEquipmentFilter>('ALL');
@@ -56,8 +63,8 @@ export function ExerciseSwapSheet({
   }, [current, open]);
 
   const visible = useMemo(
-    () => searchExercises(query, filterExercisePicker(candidates, muscle, equipment), (muscle) => t(`muscle.${muscle}`)),
-    [candidates, query, t, muscle, equipment],
+    () => searchExercises(deferredQuery, filterExercisePicker(candidates, muscle, equipment), (muscle) => t(`muscle.${muscle}`)),
+    [candidates, deferredQuery, t, muscle, equipment],
   );
   const groups = useMemo(
     () => current === null
@@ -65,12 +72,16 @@ export function ExerciseSwapSheet({
       : partitionSwapCandidates(current, visible),
     [current, visible],
   );
+  const sections = useMemo(() => [
+    { title: t('generate.swapRelated'), data: groups.related },
+    { title: t('generate.swapOther'), data: groups.other },
+  ].filter((group) => group.data.length), [groups, t]);
 
   const renderRows = (title: string, exercises: readonly Exercise[]) => {
     if (exercises.length === 0) return null;
     return (
       <View>
-        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{title}</Text>
+        {!!title && <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{title}</Text>}
         {exercises.map((exercise) => (
           <Pressable
             key={exercise.id}
@@ -80,7 +91,6 @@ export function ExerciseSwapSheet({
             accessibilityLabel={exercise.name}
             style={[styles.row, { borderBottomColor: colors.surfaceBorder }]}
           >
-            <MusclePicture muscle={exercise.primaryMuscle} />
             <View style={{ flex: 1 }}>
               <Text style={[typography.body, { color: colors.textPrimary }]}>
                 {exercise.name}
@@ -131,7 +141,13 @@ export function ExerciseSwapSheet({
           {t(mode === 'add' ? 'generate.addExercise' : 'generate.swapTitle')}
         </Text>
         <Pressable onPress={onClose} style={{ paddingVertical: 12 }}><Text style={{ color: sectionAccent.train }}>{t('generate.cancel')}</Text></Pressable>
-        <ScrollView style={{ flexShrink: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+        <SectionList style={{ flex: 1 }} sections={sections} extraData={selected} keyExtractor={(exercise) => exercise.id}
+          initialNumToRender={8} maxToRenderPerBatch={8} windowSize={5} stickySectionHeadersEnabled={false}
+          keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets
+          renderSectionHeader={({ section }) => <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>{section.title}</Text>}
+          renderItem={({ item }) => renderRows('', [item])}
+          ListEmptyComponent={<Text style={[typography.body, { color: colors.textMuted, paddingVertical: spacing.xl }]}>{t('generate.swapEmpty')}</Text>}
+          ListHeaderComponent={<View>
         {current !== null && (
           <Text style={[typography.caption, { color: colors.textMuted, marginTop: 2 }]}>
             {current.name}
@@ -154,18 +170,22 @@ export function ExerciseSwapSheet({
             },
           ]}
         />
-        <Text style={[typography.caption, { color: colors.textMuted }]}>{t('picker.targetMuscle')}</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, flexShrink: 0, minHeight: 60 }} contentContainerStyle={{ gap: 6, paddingVertical: 8, alignItems: 'center' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('picker.targetMuscle')} accessibilityState={{ expanded: showMuscles }}
+          onPress={() => setShowMuscles((old) => !old)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10 }}>
+          {muscle && <MusclePicture muscle={muscle} />}
+          <View style={{ flex: 1 }}><Text style={[typography.caption, { color: colors.textMuted }]}>{t('picker.targetMuscle')}</Text>
+            <Text style={[typography.title, { color: colors.textPrimary }]}>{t(muscle ? `muscle.${muscle}` : 'picker.ALL')}</Text></View>
+          <Text style={{ color: sectionAccent.train }}>{showMuscles ? '⌃' : '⌄'}</Text>
+        </Pressable>
+        {showMuscles && <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ height: 118, flexGrow: 0, flexShrink: 0 }} contentContainerStyle={{ gap: 8, paddingVertical: 8 }}>
           {[null, ...Object.values(MuscleGroup)].map((value) => <Pressable key={value ?? 'ALL'} accessibilityRole="button"
-            accessibilityState={{ selected: muscle === value }} onPress={() => setMuscle(value)}
-            style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: radius.md, backgroundColor: muscle === value ? sectionAccent.train : colors.bgElevated }}>
-            <Text style={[typography.body, { color: muscle === value ? colors.bg : colors.textPrimary }]}>{t(value === null ? 'picker.ALL' : `muscle.${value}`)}</Text>
+            accessibilityLabel={t(value === null ? 'picker.ALL' : `muscle.${value}`)} accessibilityState={{ selected: muscle === value }} onPress={() => { setMuscle(value); setShowMuscles(false); }}
+            style={{ width: 94, alignItems: 'center', justifyContent: 'center', gap: 6, paddingHorizontal: 8, paddingVertical: 8, borderWidth: 1,
+              borderColor: muscle === value ? sectionAccent.train : colors.surfaceBorder, borderRadius: radius.md, backgroundColor: colors.bgElevated }}>
+            {value ? <MusclePicture muscle={value} /> : <Text style={{ fontSize: 26, color: colors.textSecondary }}>◎</Text>}
+            <Text numberOfLines={2} style={[typography.caption, { textAlign: 'center', color: muscle === value ? sectionAccent.train : colors.textPrimary }]}>{t(value === null ? 'picker.ALL' : `muscle.${value}`)}</Text>
           </Pressable>)}
-        </ScrollView>
-        {multiple && <Pressable disabled={!selected.length} onPress={() => onSelectMany?.(selected)} accessibilityRole="button"
-          style={{ padding: 16, marginTop: 8, borderRadius: radius.pill, backgroundColor: selected.length ? sectionAccent.train : colors.surface }}>
-          <Text style={{ textAlign: 'center', fontWeight: '700', color: selected.length ? colors.bg : colors.textMuted }}>{t('workout.addSelected', { count: selected.length })}</Text>
-        </Pressable>}
+        </ScrollView>}
         <Text style={[typography.caption, { color: colors.textMuted }]}>{t('picker.equipment')}</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexGrow: 0, flexShrink: 0, minHeight: 60 }} contentContainerStyle={{ gap: 6, paddingVertical: 8, alignItems: 'center' }}>
           {EXERCISE_EQUIPMENT_FILTERS.map((value) => <Pressable key={value} accessibilityRole="button"
@@ -180,23 +200,28 @@ export function ExerciseSwapSheet({
         <Pressable onPress={() => setCreating(true)} accessibilityRole="button" style={{ paddingVertical: 10 }}>
           <Text style={{ color: sectionAccent.train }}>{t('custom.createInline')}</Text>
         </Pressable>
-          {renderRows(t('generate.swapRelated'), groups.related)}
-          {renderRows(t('generate.swapOther'), groups.other)}
-          {visible.length === 0 && (
-            <Text style={[typography.body, { color: colors.textMuted, paddingVertical: spacing.xl }]}>
-              {t('generate.swapEmpty')}
-            </Text>
-          )}
-        </ScrollView>
+        </View>} />
+        {multiple && <Pressable disabled={!selected.length} onPress={() => onSelectMany?.(selected)} accessibilityRole="button"
+          style={{ padding: 16, marginTop: 8, borderRadius: radius.pill, backgroundColor: selected.length ? sectionAccent.train : colors.surface }}>
+          <Text style={{ textAlign: 'center', fontWeight: '700', color: selected.length ? colors.bg : colors.textMuted }}>{t('workout.addSelected', { count: selected.length })}</Text>
+        </Pressable>}
       </View>
     </>;
   if (embedded) return <View style={{ flex: 1, backgroundColor: colors.bg }}>{content}</View>;
-  return <Modal visible={open ?? current !== null} transparent animationType="slide" onRequestClose={() => creating ? setCreating(false) : onClose()}>{content}</Modal>;
+  return <Modal visible transparent animationType="none" onShow={() => {
+    if (onPresented || uiPerformance.enabled) measureNextFrame('picker.ready', onPresented);
+  }} onRequestClose={() => creating ? setCreating(false) : onClose()}>{content}</Modal>;
+}
+
+/** Closed selectors mount no catalogue rows or body illustrations. */
+export function ExerciseSwapSheet(props: ExerciseSwapSheetProps) {
+  if (!(props.open ?? props.current !== null)) return null;
+  return <ExercisePickerContent key={props.current?.id ?? 'add'} {...props} />;
 }
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
-  sheet: { height: '82%', paddingHorizontal: 18, paddingTop: 10 },
+  sheet: { height: '92%', paddingHorizontal: 18, paddingTop: 10 },
   grabber: { width: 36, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 12 },
   search: { height: 46, borderWidth: 1, paddingHorizontal: 14, marginVertical: 14 },
   sectionTitle: {

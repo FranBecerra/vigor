@@ -1,11 +1,8 @@
 /**
  * Stack anidado de la pestaña Entrenamiento (PRD §8.5, §8.6).
  *
- * Por qué un stack DENTRO de la pestaña y no una ruta al margen de las
- * pestañas: el usuario quiere poder consultar Bio o Nutrición mientras entrena,
- * así que la barra de pestañas debe seguir visible durante la sesión. Anidando
- * aquí, al empujar `session` la barra permanece; si la sesión viviera fuera del
- * grupo `(tabs)`, la taparía.
+ * Training keeps its own navigation stack. The parent hides native tabs while
+ * a workout is open; leaving via the save/back action retains a resumable draft.
  *
  * Rutas:
  *  - `index`      → Inicio/Hoy (E1), pantalla de inicio de la pestaña.
@@ -34,6 +31,7 @@ export default function TrainStackLayout() {
       <Stack.Screen name="exercises" />
       <Stack.Screen name="rehab" />
       <Stack.Screen name="history" />
+      <Stack.Screen name="performance" />
     </Stack>
   );
 }

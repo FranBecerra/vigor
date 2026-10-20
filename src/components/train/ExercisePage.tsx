@@ -26,6 +26,8 @@ interface ExercisePageProps {
   onPressSetType: (exerciseId: string, setId: string) => void;
   onAction?: (exerciseId: string, action: 'swap' | 'info' | 'note') => void;
   onRemoveSet?: (exerciseId: string, setId: string) => void;
+  note?: string;
+  active?: boolean;
 }
 
 function ExercisePageComponent({
@@ -39,6 +41,8 @@ function ExercisePageComponent({
   onPressSetType,
   onAction,
   onRemoveSet,
+  note,
+  active = true,
 }: ExercisePageProps) {
   const { t } = useTranslation();
   const { colors, spacing, radius } = useTheme();
@@ -69,21 +73,22 @@ function ExercisePageComponent({
     };
   });
 
-  const completed = sets.filter((s) => s.isCompleted).length;
-
   return (
     <ScrollView
+      accessibilityElementsHidden={!active}
+      importantForAccessibility={active ? 'auto' : 'no-hide-descendants'}
       style={{ width }}
       contentContainerStyle={{ paddingBottom: bottomInset + 110 }}
       keyboardShouldPersistTaps="handled">
       <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}>
         <Text style={[styles.exerciseName, { color: colors.textPrimary }]}>{exercise.name}</Text>
-        <Text style={[styles.exerciseMeta, { color: colors.textSecondary }]}>
-          {completed}/{sets.length} {t('train.sets').toLowerCase()}
-        </Text>
+        {!!note?.trim() && <Pressable accessibilityRole="button" accessibilityLabel={t('train.note')} onPress={() => onAction?.(exercise.id, 'note')}
+          style={{ padding: spacing.md, marginTop: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface }}>
+          <Text style={{ color: colors.textSecondary, lineHeight: 21 }}>{note}</Text>
+        </Pressable>}
       </View>
 
-      {exercise.isCustom ? <CustomRecordingRows exercise={exercise} sets={sets} update={update} /> : <>
+      {exercise.isCustom ? <CustomRecordingRows exercise={exercise} sets={sets} update={update} onRemoveSet={onRemoveSet} /> : <>
       {/* Cabecera de columnas */}
       <View style={[styles.columnHeader, { paddingHorizontal: spacing.lg }]}>
         <Text style={[styles.columnLabel, { width: COLUMN_WIDTHS.set }]}>SET</Text>
@@ -97,7 +102,7 @@ function ExercisePageComponent({
         <Text style={[styles.columnLabel, styles.centered, { width: COLUMN_WIDTHS.intensity }]}>
           {scale}
         </Text>
-        <View style={{ width: COLUMN_WIDTHS.done }} />
+        <View style={{ width: COLUMN_WIDTHS.done + (onRemoveSet ? COLUMN_WIDTHS.remove : 0) }} />
       </View>
 
       {rows.map((row) => (

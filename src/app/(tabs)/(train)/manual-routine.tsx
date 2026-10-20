@@ -10,7 +10,7 @@ import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import { useTheme } from '@/theme/useTheme';
 import { PlanPreview } from '@/components/train/generate/PlanPreview';
 import { ExerciseSwapSheet } from '@/components/train/generate/ExerciseSwapSheet';
-import { Chip, ChipRow, Stepper } from '@/components/train/generate/GenerateControls';
+import { Stepper } from '@/components/train/generate/GenerateControls';
 import { TrainingGoal } from '@/services/training/volumePlan';
 import { appendPreviewExercises, applyPreviewEdits, previewEditKey, representativeSet, type PreviewExerciseEdit } from '@/services/training/previewEditing';
 import { manualRoutineDocuments, resizeManualSessions, timeManualSessions } from '@/services/training/manualRoutine';
@@ -21,7 +21,7 @@ import { backToTraining } from '@/services/training/backNavigation';
 export default function ManualRoutineScreen() {
   const { t } = useTranslation(); const router = useRouter(); const insets = useSafeAreaInsets(); const { uid } = useAuth();
   const { catalogue, exercisesById } = useExerciseCatalogue(); const { colors, spacing, radius, sectionAccent } = useTheme();
-  const [name, setName] = useState(''); const [goal, setGoal] = useState(TrainingGoal.HYPERTROPHY);
+  const [name, setName] = useState(''); const goal = TrainingGoal.HYPERTROPHY;
   const [microcycles, setMicrocycles] = useState(6);
   const [sessions, setSessions] = useState(() => resizeManualSessions([], 3));
   const [picker, setPicker] = useState<{ sessionIndex: number; order?: number } | null>(null);
@@ -67,8 +67,6 @@ export default function ManualRoutineScreen() {
       <Text style={{ color: colors.textMuted, marginVertical: spacing.md }}>{t('routineCreation.manualHint')}</Text>
       <TextInput value={name} onChangeText={setName} maxLength={MAX_ROUTINE_NAME_LENGTH} style={field}
         accessibilityLabel={t('generate.name')} placeholder={t('generate.namePlaceholder')} placeholderTextColor={colors.textMuted} />
-      <ChipRow>{Object.values(TrainingGoal).map((value) => <Chip key={value} selected={goal === value} onPress={() => setGoal(value)}
-        label={t(value === TrainingGoal.STRENGTH ? 'generate.goalStrength' : 'generate.goalHypertrophy')} />)}</ChipRow>
       <View style={{ gap: spacing.md, marginVertical: spacing.lg }}>
         <Stepper label={t('generate.sessions')} value={sessions.length} min={1} max={7} onChange={(count) => {
           const apply = () => setSessions((old) => resizeManualSessions(old, count));

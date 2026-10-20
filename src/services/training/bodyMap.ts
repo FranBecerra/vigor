@@ -5,6 +5,8 @@ import { REGION_OF_MUSCLE, VolumeRegion } from './volumePlan';
 export interface BodyMapPaint {
   color: string;
   opacity: number;
+  /** Equal-sized session colour bands for a diagram's overlapping training days. */
+  bands?: readonly string[];
 }
 
 /** Lowest opacity of a muscle with any volume, so one set still reads as worked. */
