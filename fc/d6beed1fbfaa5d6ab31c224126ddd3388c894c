@@ -1,0 +1,1003 @@
+src/services/settings/__tests__/settingsClient.test.ts
+  s_b6a0f22c32fc5f::t_0aacc862916545 4
+  s_b6a0f22c32fc5f::t_fa91127b1ef5f9 1-3,5-25
+src/services/training/microcyclePrescription.ts
+  s_b6a0f22c32fc5f::t_f86d47225fbd29 54-60,63,69,136,138,164-165
+  s_b6a0f22c32fc5f::t_4ed61dd3a0c08c 13
+  s_b6a0f22c32fc5f::t_7777fee3ae76ba 88,105,157
+  s_b6a0f22c32fc5f::t_ed0562e5fb36af 52,106,108
+src/app/(tabs)/(train)/routine.tsx
+  s_b6a0f22c32fc5f::t_4a59d1dbda8e04 22,167
+  s_b6a0f22c32fc5f::t_c48a4a669ec990 24
+  s_b6a0f22c32fc5f::t_782c349f4b05a8 144-145,166,172,252,254,257
+  s_b6a0f22c32fc5f::t_ccffaa9f64a4df 12,178-179
+  s_b6a0f22c32fc5f::t_bd800da0e4cade 2,135-138,278,409-410
+  s_b6a0f22c32fc5f::t_2e589b90a6df75 20,25,270,432-436,492-500
+  s_b6a0f22c32fc5f::t_b029247d8caad7 389
+  s_b6a0f22c32fc5f::t_93b88f4f7db559 390
+  s_b6a0f22c32fc5f::t_3807c8c51fa232 45,489
+  s_b6a0f22c32fc5f::t_7b643168abc43e 395,510
+  s_b6a0f22c32fc5f::t_da257377cc4c39 27,381
+  s_b6a0f22c32fc5f::t_ed22f44a539df2 180-183
+  s_b6a0f22c32fc5f::t_be8e262305c6db 23,406,414
+  s_b6a0f22c32fc5f::t_71aa1a988e95cb 26,102,115,402
+  s_b6a0f22c32fc5f::t_4a6f2c1c2baddc 21,66,147,171,253,255-256,481
+  s_b6a0f22c32fc5f::t_f86d47225fbd29 271
+src/hooks/__tests__/restAlert.test.tsx
+  s_b6a0f22c32fc5f::t_a226b5883f9f92 3,104-106
+  s_b6a0f22c32fc5f::t_7c897e34e5877a 7-8,40,44-56,107
+  s_b6a0f22c32fc5f::t_df61be2e346ce2 57
+plugins/withWorkoutHealth.js
+  s_b6a0f22c32fc5f::t_d84d335060b442 1-12
+src/components/train/WorkoutHistoryDetails.tsx
+  s_b6a0f22c32fc5f::t_b029247d8caad7 36
+  s_b6a0f22c32fc5f::t_77ef330775340b 14-17,46-47
+  s_b6a0f22c32fc5f::t_3807c8c51fa232 6,11,19
+  s_b6a0f22c32fc5f::t_76051a1cb05e69 7,9
+  s_b6a0f22c32fc5f::t_31994542f57bb7 1-5,8,10,12-13,18,20,22-28,33-35,37-45,48-50
+  s_b6a0f22c32fc5f::t_e11887507a6793 29-32
+  s_b6a0f22c32fc5f::t_e5d9a082a1a258 21
+modules/vigor-health/expo-module.config.json
+  s_b6a0f22c32fc5f::t_d84d335060b442 1-4
+src/hooks/useSessionPersistence.ts
+  s_b6a0f22c32fc5f::t_2a0cb2755a79b7 119
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 27,77,83,120,131,139-140,150-161,189
+  s_b6a0f22c32fc5f::t_f9341322c8acfb 78,84,122-124,133
+src/components/PlaceholderScreen.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 24
+src/app/(tabs)/(train)/create-routine.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 13,18
+src/app/settings.tsx
+  s_b6a0f22c32fc5f::t_c85e5bb6fcbadb 16-17,49,53
+  s_b6a0f22c32fc5f::t_7b643168abc43e 29,41,45,59
+  s_b6a0f22c32fc5f::t_5992149860fe21 1-15,18-28,30-40,42-44,46-48,50-52,54-58,60-63
+src/services/repositories/__tests__/historyEditing.test.ts
+  s_b6a0f22c32fc5f::t_41192aeb72cfac 29-35
+  s_b6a0f22c32fc5f::t_0cd2f82c671e3c 26
+  s_b6a0f22c32fc5f::t_dc84177fb567c2 1-25,27-28
+src/components/train/CustomExerciseSheet.tsx
+  s_b6a0f22c32fc5f::t_f839e56addff97 149,158-159,161,163
+  s_58860a6dd107b9::t_ad4de1bf369bce 162
+  s_b6a0f22c32fc5f::t_1c09e3b42cbd16 143-144
+  s_b6a0f22c32fc5f::t_3607b5c818d5b2 64
+  s_b6a0f22c32fc5f::t_7b643168abc43e 84,121,153,175
+  s_b6a0f22c32fc5f::t_adb197ace8d523 160,168
+  s_b6a0f22c32fc5f::t_a06bb9e2b60ef8 6-7,12-13,17,30,32,39-43,45-46,72-73,75,82,119-120,122,124-125,150-152,154-157,164-165
+  s_b6a0f22c32fc5f::t_3b4490e46782c2 31,38,44,74,123
+src/services/training/numericDraft.ts
+  s_b6a0f22c32fc5f::t_5f7340525dcce6 1-7
+src/components/train/__tests__/WorkoutHistoryDetails.test.tsx
+  s_b6a0f22c32fc5f::t_e5113c4036abdc 1-20
+src/hooks/useExerciseName.ts
+  s_b6a0f22c32fc5f::t_da257377cc4c39 1-8
+src/hooks/useWorkoutRecordHistory.ts
+  s_b6a0f22c32fc5f::t_f21c1548459061 1-17
+src/i18n/locales/fr.json
+  s_b6a0f22c32fc5f::t_39eb46a93ae411 201-266
+  s_b6a0f22c32fc5f::t_bb925427dff096 277-278,281-284
+  s_b6a0f22c32fc5f::t_9da08f68361745 390
+  s_b6a0f22c32fc5f::t_1850c92686b32b 163
+src/components/train/__tests__/SwipeableSet.test.tsx
+  s_b6a0f22c32fc5f::t_94d67a57cac903 45-51
+  s_b6a0f22c32fc5f::t_2e84cb28ac8f1b 1-3,5-9,11-20,22-23,25-27,35-44
+  s_b6a0f22c32fc5f::t_ddeb0a245a811a 4,10,21,24,28-34
+src/components/train/__tests__/HistoryScreen.test.tsx
+  s_b6a0f22c32fc5f::t_8169b4ee3dd28c 2
+  s_b6a0f22c32fc5f::t_2d2c3545f402f8 1,3,5-6,8-16,18-21,23-27,32,34,53-78
+  s_b6a0f22c32fc5f::t_9074f715bdec02 29-31
+  s_b6a0f22c32fc5f::t_1850c92686b32b 4,7,17,22,28,33,35-52
+modules/vigor-health/ios/VigorHealthModule.swift
+  s_b6a0f22c32fc5f::t_4203159e9ee2a6 18-20,45-51,53,56,58-61,63-71,74,76-79,82-86
+  s_b6a0f22c32fc5f::t_2905e05d7b7197 4-6,16-17,52,54-55,57,62,72-73,75,80,87-93
+  s_b6a0f22c32fc5f::t_d84d335060b442 1-3,7-15,21-44,94-140
+  s_b6a0f22c32fc5f::t_cec76092220170 81
+src/components/train/WorkoutLiveActivity.ios.tsx
+  s_b6a0f22c32fc5f::t_abea72fc529667 1,6,12-17,20-24,26-29,31-33
+  s_b6a0f22c32fc5f::t_504d9098227771 19,25,30,39
+  s_b6a0f22c32fc5f::t_cec76092220170 2,18
+src/services/settings/appSettings.ts
+  s_b6a0f22c32fc5f::t_5992149860fe21 1-50
+src/components/train/ExerciseDetailSheet.tsx
+  s_b6a0f22c32fc5f::t_a21aeea7290d07 11
+  s_b6a0f22c32fc5f::t_7b643168abc43e 25,42
+  s_b6a0f22c32fc5f::t_dc154df64e395e 9,37
+  s_b6a0f22c32fc5f::t_5f9553d08ce6e9 13,28-36
+  s_b6a0f22c32fc5f::t_3807c8c51fa232 3,19
+  s_b6a0f22c32fc5f::t_8b083d6fbaee35 16
+src/services/training/sessionDistribution.ts
+  s_b6a0f22c32fc5f::t_00e966a6094697 260
+  s_b6a0f22c32fc5f::t_ec8d129677bef6 1233,1249
+  s_b6a0f22c32fc5f::t_f1ae9c5b2c256f 124-125,1288-1290,1295-1296
+src/models/athlete.ts
+  s_b6a0f22c32fc5f::t_e292a2718392e5 12-15,18,20,22
+src/services/training/__tests__/experienceGuidance.test.ts
+  s_b6a0f22c32fc5f::t_29de64023ccc8b 1-47
+src/components/train/generate/PlanPreview.tsx
+  s_b6a0f22c32fc5f::t_99f262af83d9ed 17,20,50,86,275-281,332
+  s_b6a0f22c32fc5f::t_be8e262305c6db 18,217
+  s_b6a0f22c32fc5f::t_f21c1548459061 14-15,320,323
+  s_b6a0f22c32fc5f::t_824c8f02acc7c8 286,298,310,339
+  s_b6a0f22c32fc5f::t_7b643168abc43e 207,226,258,368
+  s_58860a6dd107b9::t_ad4de1bf369bce 116
+  s_b6a0f22c32fc5f::t_dc56c3e74294b2 57,70,100-101,117,162
+  s_b6a0f22c32fc5f::t_da257377cc4c39 30,95,242
+  s_b6a0f22c32fc5f::t_71aa1a988e95cb 21,58,71,122,128,164
+src/components/train/__tests__/RehabilitationFlow.test.tsx
+  s_b6a0f22c32fc5f::t_52128932397245 20
+src/services/training/__tests__/targetCoverage.test.ts
+  s_b6a0f22c32fc5f::t_e11887507a6793 1-33
+modules/vigor-health/ios/VigorHealth.podspec
+  s_b6a0f22c32fc5f::t_e0de178382e383 14
+  s_b6a0f22c32fc5f::t_2905e05d7b7197 15
+  s_b6a0f22c32fc5f::t_d84d335060b442 1-13,16-17
+src/services/training/prescriptionEntry.ts
+  s_b6a0f22c32fc5f::t_c1dbdc2be7e5ff 4,8-9,25-26
+  s_b6a0f22c32fc5f::t_a8aad062303ee0 1-3,5-7,10-24,27-36
+package.json
+  s_b6a0f22c32fc5f::t_fa91127b1ef5f9 77-78
+  s_b6a0f22c32fc5f::t_297e7ce181c735 74
+  s_b6a0f22c32fc5f::t_affb912f3a30e5 76
+src/app/workout-history.tsx
+  s_b6a0f22c32fc5f::t_2a0cb2755a79b7 64
+  s_b6a0f22c32fc5f::t_7b643168abc43e 60,78-79
+  s_b6a0f22c32fc5f::t_dc2973d09545e2 89
+  s_b6a0f22c32fc5f::t_76051a1cb05e69 81
+  s_b6a0f22c32fc5f::t_c113588d4ea405 2-19,21-24,26-30,34-49,57-59,61-63,66-77,80,83-86,92-99
+  s_b6a0f22c32fc5f::t_1c09e3b42cbd16 65
+  s_b6a0f22c32fc5f::t_a8dd5959e02693 20,31,33,82,87-88,90-91
+  s_b6a0f22c32fc5f::t_98999e69066084 1,25,32,50-56
+src/services/training/__tests__/previewEditing.test.ts
+  s_b6a0f22c32fc5f::t_d809dae6804866 89-90
+src/components/train/__tests__/HistoryIndex.test.tsx
+  s_b6a0f22c32fc5f::t_411c739efed6fb 17-18
+  s_b6a0f22c32fc5f::t_0d10da150a6370 1-16,21-22,25-33,35-38,40-41
+  s_b6a0f22c32fc5f::t_d80f5d73de1867 19-20,23-24,34,39
+src/services/training/plannedSessionRuntime.ts
+  s_b6a0f22c32fc5f::t_782c349f4b05a8 4,46
+src/components/train/SetRow.tsx
+  s_b6a0f22c32fc5f::t_dffa2c8bd06139 108
+  s_b6a0f22c32fc5f::t_ec8d129677bef6 127
+  s_b6a0f22c32fc5f::t_f21c1548459061 14,182-184
+  s_b6a0f22c32fc5f::t_ced4075d56a606 25-26,49,70-71,85-86,114,164,170,178,188-189,202
+  s_b6a0f22c32fc5f::t_76051a1cb05e69 27,43
+  s_b6a0f22c32fc5f::t_7b643168abc43e 171
+  s_b6a0f22c32fc5f::t_edbbe291350d0c 180
+src/components/train/__tests__/WorkoutHealthExport.test.tsx
+  s_b6a0f22c32fc5f::t_a5ecccc6f93a6e 1-51
+src/components/train/CustomRecordingRows.tsx
+  s_b6a0f22c32fc5f::t_e11a5aa3a4ecc9 10,23,25,29,33,42
+  s_b6a0f22c32fc5f::t_7b643168abc43e 39
+src/theme/tokens.ts
+  s_b6a0f22c32fc5f::t_249169c214f97f 57-58,70-72
+  s_b6a0f22c32fc5f::t_dffa2c8bd06139 59,73
+scripts/configure-workout-health.cjs
+  s_b6a0f22c32fc5f::t_97a6c1596dd832 1-8
+src/components/train/RestTimer.tsx
+  s_b6a0f22c32fc5f::t_495121afe3e39c 13,16,21,24,32,38,47,49,56-60,63-69,71-73
+  s_b6a0f22c32fc5f::t_e6106f4e96bb1c 2,4,9-10,12,14-15,17-20,22,25-27,29-31,33-36,39-46,48,50-55,61-62,70,74-76
+src/services/training/sessionProgression.ts
+  s_b6a0f22c32fc5f::t_98999e69066084 38-39,71,77-80,83-85,94
+src/services/training/exerciseSearch.ts
+  s_b6a0f22c32fc5f::t_307fa88b717bda 89
+  s_b6a0f22c32fc5f::t_07090f9d9de714 5,108
+  s_b6a0f22c32fc5f::t_8b083d6fbaee35 4
+src/services/training/__tests__/dosePreservingReroll.test.ts
+  s_b6a0f22c32fc5f::t_cf0c69f6ae80aa 3,11-18
+src/theme/__tests__/contrast.test.ts
+  s_b6a0f22c32fc5f::t_6fe314d0d46ed8 1-14
+src/services/settings/settingsClient.ts
+  s_b6a0f22c32fc5f::t_5992149860fe21 1-15
+output/performance/ios-1792616854-37231.json
+  s_58860a6dd107b9::t_ea321b81f2958f 1-5994
+src/services/training/exerciseEditing.ts
+  s_b6a0f22c32fc5f::t_8169b4ee3dd28c 36,40-42
+  s_b6a0f22c32fc5f::t_3b4490e46782c2 25,38-39
+  s_b6a0f22c32fc5f::t_adb197ace8d523 1,56-57
+  s_b6a0f22c32fc5f::t_9aa55e2abb7091 2-24,26-35,37,43-53,58-60
+  s_b6a0f22c32fc5f::t_7777fee3ae76ba 54-55
+docs/audits/2026-10-22-auto-followup-matrix.json
+  s_58860a6dd107b9::t_f5770b91d4700c 1-2,4-188,190-449,451-536,538-623,625-1682,1684-1815,1817-1948,1950-2214,2216-2721,2723-3735,3737-3896
+  s_b6a0f22c32fc5f::t_7e94d88e356ce3 3,189,450,537,624,1683,1816,1949,2215,2722,3736
+src/hooks/__tests__/privateTrainingData.test.tsx
+  s_b6a0f22c32fc5f::t_8169b4ee3dd28c 36
+  s_b6a0f22c32fc5f::t_06c434c77eedfc 5,72-76,78-92,94-97,99-101
+  s_b6a0f22c32fc5f::t_cda821d6c36aab 37,77,93,98,102-120
+src/components/train/__tests__/CustomRecordingRows.test.tsx
+  s_b6a0f22c32fc5f::t_4ed61dd3a0c08c 1-5,7,9-20
+  s_b6a0f22c32fc5f::t_ba735fda39575c 6
+  s_b6a0f22c32fc5f::t_69008bc3cf59cc 8
+src/services/health/workoutExport.ts
+  s_b6a0f22c32fc5f::t_199091bbda478f 31,33-34,67,71,84,102,106,117,120,132,134,149,151
+  s_b6a0f22c32fc5f::t_fafddf2c216b72 1-28,30,32,35-50,52-66,68-70,72-79,81-83,85-101,103-105,107-116,118-119,121-131,133,135-148,150,152-170
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 29
+  s_b6a0f22c32fc5f::t_b387b4691fd66f 51
+  s_b6a0f22c32fc5f::t_4ebd61bc3b2eef 80
+src/app/_layout.tsx
+  s_b6a0f22c32fc5f::t_d84d335060b442 28,68,79
+  s_b6a0f22c32fc5f::t_1952e9ec05bfaf 30,70,77
+  s_b6a0f22c32fc5f::t_5992149860fe21 29,67,80
+src/hooks/__tests__/healthExport.test.tsx
+  s_b6a0f22c32fc5f::t_50789ef4b435f1 7,11
+  s_b6a0f22c32fc5f::t_0e2b07018d80e6 1-6,8-10,12-15,17,19-44
+  s_b6a0f22c32fc5f::t_affb912f3a30e5 16,18
+src/app/(tabs)/(train)/index.tsx
+  s_b6a0f22c32fc5f::t_84f0dd86ae9a18 20,326,338,342-354,385-386
+  s_b6a0f22c32fc5f::t_c5945b75f39491 280,283
+  s_b6a0f22c32fc5f::t_33a781569d8223 15,54,177
+  s_b6a0f22c32fc5f::t_dc56c3e74294b2 169-170,173-175,180-183,281
+  s_b6a0f22c32fc5f::t_d748c2e2aeb40a 16,33,57-63,188-191,282
+  s_b6a0f22c32fc5f::t_87a3f462820d6e 30-32,53,171-172,176,178-179
+src/components/train/__tests__/ExercisePickerMotion.test.tsx
+  s_b6a0f22c32fc5f::t_cb32434664da06 1,3,5-6,8-16,18-26,36-37
+  s_b6a0f22c32fc5f::t_53193a0a0fd7bb 17
+  s_b6a0f22c32fc5f::t_7acabb5857b893 2,7,27-35
+  s_b6a0f22c32fc5f::t_a21aeea7290d07 4
+src/app/(tabs)/(train)/generate.tsx
+  s_b6a0f22c32fc5f::t_c1f057a0ec2cda 291-292,408,427,436
+  s_b6a0f22c32fc5f::t_88ee545b6b54f9 735
+  s_b6a0f22c32fc5f::t_00e966a6094697 27,49,451,729-734,736-737,755-758,769,797,1055,1068,1114-1120,1247
+  s_b6a0f22c32fc5f::t_1ba9ad8032ec21 326,328,375-378,399,409,421,426,437,447,464,480,508,511,741
+  s_b6a0f22c32fc5f::t_be8e262305c6db 48,500
+  s_b6a0f22c32fc5f::t_60d39ab2a8c40a 438-439
+  s_b6a0f22c32fc5f::t_7b643168abc43e 775,888
+  s_b6a0f22c32fc5f::t_8e0530d1e3f7ed 224-225
+  s_b6a0f22c32fc5f::t_2e589b90a6df75 47,1165-1166,1168-1169
+  s_b6a0f22c32fc5f::t_4e259959bd2255 62,209,214,237,267-269,452-453,462-463,465-467,469-470,473-475,507
+  s_b6a0f22c32fc5f::t_29de64023ccc8b 821
+  s_b6a0f22c32fc5f::t_53193a0a0fd7bb 450,471-472
+  s_b6a0f22c32fc5f::t_93fd244f4f4aa7 1167
+  s_b6a0f22c32fc5f::t_edbbe291350d0c 484,497
+  s_b6a0f22c32fc5f::t_e292a2718392e5 51,253,820,822-824,1268
+  s_b6a0f22c32fc5f::t_2f2b66cb04442c 315,655
+  s_b6a0f22c32fc5f::t_3607b5c818d5b2 788
+  s_b6a0f22c32fc5f::t_5688e2610423ac 67
+  s_b6a0f22c32fc5f::t_cefc0ae3c7d591 63,266,468,800,1071
+src/services/training/__tests__/personalRecords.test.ts
+  s_b6a0f22c32fc5f::t_6fe314d0d46ed8 1-14,17-25
+  s_b6a0f22c32fc5f::t_6e72af962128b4 15-16
+app.json
+  s_b6a0f22c32fc5f::t_fb36a9946e632a 50
+  s_b6a0f22c32fc5f::t_7463af70c76561 34
+  s_b6a0f22c32fc5f::t_d84d335060b442 51
+src/services/training/__tests__/exerciseEditing.test.ts
+  s_b6a0f22c32fc5f::t_3b4490e46782c2 28-31,33
+  s_b6a0f22c32fc5f::t_7868632dd3a408 32
+  s_b6a0f22c32fc5f::t_4ed61dd3a0c08c 35-48
+  s_b6a0f22c32fc5f::t_b44294c57b0d9a 1-19,21-27,34,49-50,52-82
+  s_b6a0f22c32fc5f::t_2a0cb2755a79b7 51
+  s_b6a0f22c32fc5f::t_7777fee3ae76ba 20
+src/components/train/NumericKeypad.tsx
+  s_b6a0f22c32fc5f::t_5f7340525dcce6 7
+  s_b6a0f22c32fc5f::t_49023205f2f51c 32,34
+  s_b6a0f22c32fc5f::t_013c08cef98e23 1-6,8-31,33,35-38
+src/app/(tabs)/(train)/workout-check.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 76
+  s_b6a0f22c32fc5f::t_4203159e9ee2a6 9,28,61-69,99
+  s_b6a0f22c32fc5f::t_d2c45b4fe8e8b1 29-30,43-44,60,71,90,147,151-153
+  s_b6a0f22c32fc5f::t_689d3aa4cb8a70 51,83-84
+  s_b6a0f22c32fc5f::t_6824851bdae46a 23-27,58-59,91,111,118-119,143-146,148-150,154-158
+  s_b6a0f22c32fc5f::t_b0dee0d5073bb7 31-32,52,112,133-142
+  s_b6a0f22c32fc5f::t_4ce1b874f61d48 15,21,101-110
+  s_b6a0f22c32fc5f::t_1a92f2c1d6d133 6-8,13,35-37,54-55,127-130
+  s_b6a0f22c32fc5f::t_b83930062ef5e0 2-5,53,56,89,98,113,120-126,131-132
+src/components/train/__tests__/SettingsScreen.test.tsx
+  s_b6a0f22c32fc5f::t_c85e5bb6fcbadb 20-21
+  s_b6a0f22c32fc5f::t_773e69a95e1d94 1-7,9-19,22-33
+  s_b6a0f22c32fc5f::t_fa91127b1ef5f9 8
+src/components/train/__tests__/ExerciseLibrary.test.tsx
+  s_b6a0f22c32fc5f::t_a21aeea7290d07 22
+  s_b6a0f22c32fc5f::t_0623955ef31035 10,17,37-42
+  s_b6a0f22c32fc5f::t_0d10da150a6370 1-9,11-16,18-21,24-36,43-53
+  s_b6a0f22c32fc5f::t_d80f5d73de1867 23
+src/app/(tabs)/(train)/exercises.tsx
+  s_b6a0f22c32fc5f::t_f839e56addff97 3,6,9,11-12
+  s_b6a0f22c32fc5f::t_16e898093e55f7 8,10
+src/services/training/routineMapper.ts
+  s_b6a0f22c32fc5f::t_edbbe291350d0c 61-62,109
+src/services/training/targetCoverage.ts
+  s_b6a0f22c32fc5f::t_c1f057a0ec2cda 4,19-21
+  s_b6a0f22c32fc5f::t_026a7ccd8cf769 1-3,5-12,15-18,22-28,42-53
+  s_b6a0f22c32fc5f::t_706eee497d24ee 14,29-35,37-41
+  s_b6a0f22c32fc5f::t_f9a92af5003fdd 13,36
+src/services/training/nativeRestFeedback.ios.ts
+  s_b6a0f22c32fc5f::t_4203159e9ee2a6 2-4,8-10
+  s_b6a0f22c32fc5f::t_2905e05d7b7197 1,5-7,11
+src/components/train/__tests__/WorkoutHistoryEditor.test.tsx
+  s_b6a0f22c32fc5f::t_dc84177fb567c2 1-31
+src/services/settings/__tests__/profileName.test.ts
+  s_b6a0f22c32fc5f::t_f8fdaf775de2ae 1-16
+src/hooks/__tests__/workoutRecordHistory.test.tsx
+  s_b6a0f22c32fc5f::t_cf0c69f6ae80aa 1-2,7-28,40-41
+  s_b6a0f22c32fc5f::t_5229f3b6af1133 3-6,29-39
+src/services/training/__tests__/autoAllocation.test.ts
+  s_b6a0f22c32fc5f::t_e3b05240c08cc8 1-37
+src/app/(tabs)/profile.tsx
+  s_b6a0f22c32fc5f::t_5992149860fe21 20-22,29,56-63
+src/components/train/__tests__/WorkoutNotesSheet.test.tsx
+  s_b6a0f22c32fc5f::t_c37e342a74c469 35,38-41
+  s_b6a0f22c32fc5f::t_173b052133059b 1-34,36-37,42-44
+src/services/training/workoutHistory.ts
+  s_b6a0f22c32fc5f::t_31994542f57bb7 1-3,6-10,12-17,20-38,40-42,51-52,54-55
+  s_b6a0f22c32fc5f::t_ced4075d56a606 39
+  s_b6a0f22c32fc5f::t_e5d9a082a1a258 18-19
+  s_b6a0f22c32fc5f::t_1e068148653a70 4-5,11,43-44,47-49
+  s_b6a0f22c32fc5f::t_adb197ace8d523 45-46
+  s_b6a0f22c32fc5f::t_77ef330775340b 50,53
+output/performance/ios-1792677903-62794.json
+  s_58860a6dd107b9::t_1164bc32f74b3d 1-7779
+src/components/train/WorkoutNotesSheet.tsx
+  s_b6a0f22c32fc5f::t_dffa2c8bd06139 41
+  s_b6a0f22c32fc5f::t_a654a64dd488ea 8,10-11,19,22-24,33,40
+  s_b6a0f22c32fc5f::t_1952e9ec05bfaf 1-7,9,12-15,17-18,25-29,31-32,34-39,42-45,47-51
+  s_b6a0f22c32fc5f::t_0159f88dfb6c48 16,20-21
+  s_b6a0f22c32fc5f::t_7b643168abc43e 30,46
+src/services/training/__tests__/skipRoutineDay.test.ts
+  s_b6a0f22c32fc5f::t_47010864901ae9 1-2,6-17
+  s_b6a0f22c32fc5f::t_33a781569d8223 3-5
+src/services/training/mesocyclePlanner.ts
+  s_b6a0f22c32fc5f::t_e676ea3936d007 784-787
+  s_b6a0f22c32fc5f::t_ec8d129677bef6 790
+  s_b6a0f22c32fc5f::t_47b2b9bbc6c41a 56
+  s_b6a0f22c32fc5f::t_4e259959bd2255 407,418,444,459,495-515
+  s_b6a0f22c32fc5f::t_97c5f82156909a 516
+src/components/train/RoutineDayList.tsx
+  s_b6a0f22c32fc5f::t_03777ed1723999 1-2,4-7,9-12,14-15,17-19,21-23,25-26,29-32,34,36-38,43,57-62,64,67-68,70-74,76
+  s_b6a0f22c32fc5f::t_d748c2e2aeb40a 3,8,13,16,24,33,35,39-42,44-56,63,65-66,69,75
+  s_b6a0f22c32fc5f::t_cb32434664da06 20,27-28
+src/services/training/__tests__/splitAdherence.test.ts
+  s_b6a0f22c32fc5f::t_cf0c69f6ae80aa 1-16,19-25
+  s_b6a0f22c32fc5f::t_e890b4f1af1645 17-18
+src/services/repositories/index.ts
+  s_b6a0f22c32fc5f::t_dc2973d09545e2 189-190,192
+  s_b6a0f22c32fc5f::t_a8dd5959e02693 25,186-188,191,193-200
+  s_b6a0f22c32fc5f::t_a6f3472c339af3 27,111
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 172-185,201-202
+src/components/train/WorkoutExerciseStrip.tsx
+  s_b6a0f22c32fc5f::t_8b083d6fbaee35 6,24,31
+  s_b6a0f22c32fc5f::t_7b643168abc43e 38,112
+src/components/train/RoutineDayFixture.tsx
+  s_b6a0f22c32fc5f::t_b0dee0d5073bb7 1-48
+src/services/training/__tests__/historyEditing.test.ts
+  s_b6a0f22c32fc5f::t_6fe314d0d46ed8 1-15,17-51
+  s_b6a0f22c32fc5f::t_0cd2f82c671e3c 16
+modules/vigor-health/package.json
+  s_b6a0f22c32fc5f::t_d84d335060b442 1-5
+src/components/train/WorkoutHistoryEditor.tsx
+  s_b6a0f22c32fc5f::t_a8dd5959e02693 12,27,36-38
+  s_b6a0f22c32fc5f::t_4263c8d25cd00e 1-11,13-26,28-35,39-61
+src/services/training/__tests__/routineRestDays.test.ts
+  s_b6a0f22c32fc5f::t_cf0c69f6ae80aa 1,4-16
+  s_b6a0f22c32fc5f::t_d967fac28434ce 2-3,17-48
+src/theme/__tests__/navigationTheme.test.tsx
+  s_b6a0f22c32fc5f::t_dc84177fb567c2 57-67
+src/services/training/__tests__/sessionMapper.test.ts
+  s_b6a0f22c32fc5f::t_b02a332eb1153b 2,93-100
+  s_b6a0f22c32fc5f::t_d80f5d73de1867 101-106
+src/components/home/HomeHeader.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 113
+src/services/training/restPrescription.ts
+  s_b6a0f22c32fc5f::t_495121afe3e39c 1-5,11
+  s_b6a0f22c32fc5f::t_ed22f44a539df2 6-10
+src/services/training/__tests__/swapEngine-test.ts
+  s_b6a0f22c32fc5f::t_e11887507a6793 27-34
+  s_b6a0f22c32fc5f::t_c37e342a74c469 54,59,93,96
+src/hooks/useRestAlert.ts
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 1,11-13,15-23,53
+  s_b6a0f22c32fc5f::t_2905e05d7b7197 8,14,36-37,49,72
+src/components/train/__tests__/RoutineCreation.test.tsx
+  s_b6a0f22c32fc5f::t_95095d1c6d4d1f 101-106
+  s_b6a0f22c32fc5f::t_53193a0a0fd7bb 77
+  s_b6a0f22c32fc5f::t_0623955ef31035 28
+  s_b6a0f22c32fc5f::t_8e0530d1e3f7ed 10-11,86-93
+  s_b6a0f22c32fc5f::t_48b90f35a209c9 94-95
+src/components/train/__tests__/MesocycleHistoryFlow.test.tsx
+  s_b6a0f22c32fc5f::t_1850c92686b32b 1-43
+src/components/train/generate/GenerateControls.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 280
+  s_b6a0f22c32fc5f::t_3607b5c818d5b2 132,146,211
+src/app/(tabs)/(train)/mesocycle.tsx
+  s_b6a0f22c32fc5f::t_a05791d63f6c02 26,103
+  s_b6a0f22c32fc5f::t_8b083d6fbaee35 17,35
+  s_b6a0f22c32fc5f::t_824c8f02acc7c8 347-349
+  s_b6a0f22c32fc5f::t_307fa88b717bda 269
+  s_b6a0f22c32fc5f::t_7b643168abc43e 107
+  s_b6a0f22c32fc5f::t_bd800da0e4cade 246-249,288
+  s_b6a0f22c32fc5f::t_98999e69066084 11,45,48-51,65-68,224,251,257-258,260-261,286,289,298
+src/hooks/__tests__/trainingNotes.test.tsx
+  s_b6a0f22c32fc5f::t_0d10da150a6370 12
+  s_b6a0f22c32fc5f::t_173b052133059b 1-11,13-22,24-60
+  s_b6a0f22c32fc5f::t_06c434c77eedfc 23
+PRD.md
+  s_b6a0f22c32fc5f::t_32624378017a02 13
+  s_b6a0f22c32fc5f::t_4ec5501176047f 64
+  s_b6a0f22c32fc5f::t_a225c8853a6a88 122-123
+  s_b6a0f22c32fc5f::t_1f86dee9ce43a5 108-113
+  s_b6a0f22c32fc5f::t_ac88945f1e49f9 80-83
+  s_b6a0f22c32fc5f::t_0300ce8e941bae 3-4,29-36
+  s_b6a0f22c32fc5f::t_4682fe51727bb7 114-116
+  s_b6a0f22c32fc5f::t_d0a8f6f3d71c57 120,136-139
+  s_b6a0f22c32fc5f::t_e4be36e6ee1dba 51-53
+  s_b6a0f22c32fc5f::t_8fd796d1c10220 121,126-135,143,174
+  s_b6a0f22c32fc5f::t_6ad718ab595516 57,65
+  s_b6a0f22c32fc5f::t_cefc0ae3c7d591 76
+  s_b6a0f22c32fc5f::t_edc1ae66aa89e2 124-125
+  s_b6a0f22c32fc5f::t_9621ada153f5db 144-147
+  s_b6a0f22c32fc5f::t_2982f8c7440c58 17-24,28
+  s_b6a0f22c32fc5f::t_f0e4b4572cf35b 40,98-105,107
+  s_b6a0f22c32fc5f::t_1c09e3b42cbd16 156-167,176-177
+  s_b6a0f22c32fc5f::t_74701591b1acd9 140-142
+  s_b6a0f22c32fc5f::t_271ab8eaa3eedf 154-155
+  s_b6a0f22c32fc5f::t_20d0cbc09b9a75 86,95-96
+  s_b6a0f22c32fc5f::t_df4753091c20ae 150-153
+  s_b6a0f22c32fc5f::t_836c665fef6848 187-190
+  s_b6a0f22c32fc5f::t_69008bc3cf59cc 168-169
+  s_b6a0f22c32fc5f::t_033a82b828024e 88-89
+  s_b6a0f22c32fc5f::t_948a5f9943ee3a 94,97
+  s_b6a0f22c32fc5f::t_1f9a9392316bae 175
+  s_b6a0f22c32fc5f::t_deb52cbdf0d59e 221
+  s_b6a0f22c32fc5f::t_0b67e9d4c9463c 234
+  s_b6a0f22c32fc5f::t_34938ff63e9688 220
+  s_b6a0f22c32fc5f::t_e5d9a082a1a258 178-186,191,194
+  s_b6a0f22c32fc5f::t_97a6c1596dd832 192-193,195-203
+  s_b6a0f22c32fc5f::t_9b4a635a8f1c2d 55-56
+  s_b6a0f22c32fc5f::t_0b3a6820e323ff 170-173
+  s_b6a0f22c32fc5f::t_d7e726ca4b0e15 235
+  s_b6a0f22c32fc5f::t_d3c022d2073d70 25-27
+  s_b6a0f22c32fc5f::t_88ee545b6b54f9 90,93
+  s_b6a0f22c32fc5f::t_8f337cc013e6a2 148-149
+  s_b6a0f22c32fc5f::t_8174970acbc757 66
+  s_b6a0f22c32fc5f::t_eb618e17922890 5-12,14
+  s_b6a0f22c32fc5f::t_d893b2c1c6abb0 15-16
+  s_b6a0f22c32fc5f::t_1a92f2c1d6d133 41-50,54
+  s_b6a0f22c32fc5f::t_0d1f9638131081 106
+  s_b6a0f22c32fc5f::t_01757775459748 58-63,67
+  s_b6a0f22c32fc5f::t_839421c8260346 37-39
+  s_b6a0f22c32fc5f::t_55241dde1632d1 68-75,77-79,84-85,87
+  s_b6a0f22c32fc5f::t_10aae0c01ad239 91-92
+scripts/check-oct22-generator.ts
+  s_b6a0f22c32fc5f::t_689d3aa4cb8a70 32
+  s_b6a0f22c32fc5f::t_6d2e1c97499ac8 2-3,33-34
+  s_b6a0f22c32fc5f::t_2d7c7b3a555aff 1,4-6,8-14,17,20-31,35
+  s_b6a0f22c32fc5f::t_60d39ab2a8c40a 7,15-16,18-19,36
+src/services/training/routineView.ts
+  s_b6a0f22c32fc5f::t_0300ce8e941bae 168-169,175,178
+  s_b6a0f22c32fc5f::t_a6f3472c339af3 37,94-95,276,288,328
+  s_b6a0f22c32fc5f::t_f1ae9c5b2c256f 13,256,362,364-366
+  s_b6a0f22c32fc5f::t_843c1e7555d16e 23,38-39,72-74,123,126-128,130-132,135-138,141,148,159-167,170-174,176-177,179-184,261,289-293
+src/components/train/generate/ExperienceLevelGuide.tsx
+  s_b6a0f22c32fc5f::t_e292a2718392e5 1-80
+src/services/training/splitAdherence.ts
+  s_b6a0f22c32fc5f::t_00e966a6094697 1-19
+scripts/deploy-iphone.sh
+  s_b6a0f22c32fc5f::t_e6f9f52ddf7a55 1-78
+src/services/training/__tests__/prescriptionEntry.test.ts
+  s_b6a0f22c32fc5f::t_dc5c59a6c82359 23-24
+  s_b6a0f22c32fc5f::t_ddeb0a245a811a 1-22,25-54
+src/services/training/workoutWriteGate.ts
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 1-19
+src/components/train/__tests__/NumericKeypad.test.tsx
+  s_b6a0f22c32fc5f::t_d9b588dfa24d40 1-4,6-12,14-23
+  s_b6a0f22c32fc5f::t_5067fa17f973af 5,13
+docs/audits/2026-10-22-auto-matrix.json
+  s_b6a0f22c32fc5f::t_1a4cb0f0a82349 1-3896
+src/theme/useTheme.ts
+  s_b6a0f22c32fc5f::t_249169c214f97f 27
+src/services/training/__tests__/setSwipe.test.ts
+  s_b6a0f22c32fc5f::t_ddeb0a245a811a 4-5,8-9
+  s_b6a0f22c32fc5f::t_6fe314d0d46ed8 1-3,6-7,10-11
+src/hooks/useTrainingNotes.tsx
+  s_b6a0f22c32fc5f::t_1952e9ec05bfaf 1-25,27-40
+  s_b6a0f22c32fc5f::t_06c434c77eedfc 26
+src/services/training/routineImport.ts
+  s_b6a0f22c32fc5f::t_9aa55e2abb7091 4,28
+src/components/train/__tests__/WorkoutPersistenceNotice.test.tsx
+  s_b6a0f22c32fc5f::t_b83930062ef5e0 1-17
+src/data/exercise-names-en.json
+  s_b6a0f22c32fc5f::t_d94787648c3d50 1-387
+src/app/(tabs)/(train)/rehab.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 27,36,55
+src/components/train/__tests__/SetEntrySheet.test.tsx
+  s_b6a0f22c32fc5f::t_f8a5fbfb495a1d 35
+  s_b6a0f22c32fc5f::t_d9b588dfa24d40 27-34,36-48
+src/services/training/__tests__/numericDraft.test.ts
+  s_b6a0f22c32fc5f::t_628885db8637d5 1-7
+src/components/train/__tests__/RerollFeedback.test.tsx
+  s_b6a0f22c32fc5f::t_cefc0ae3c7d591 1-19
+src/i18n/locales/en.json
+  s_b6a0f22c32fc5f::t_9da08f68361745 40
+  s_b6a0f22c32fc5f::t_69008bc3cf59cc 30
+  s_b6a0f22c32fc5f::t_8a61cb380aa6cc 5-7,10-13,15-18,71-73
+  s_b6a0f22c32fc5f::t_a05791d63f6c02 19-29,31-38
+  s_b6a0f22c32fc5f::t_a8dd5959e02693 4
+  s_b6a0f22c32fc5f::t_199091bbda478f 51
+  s_b6a0f22c32fc5f::t_53193a0a0fd7bb 575
+  s_b6a0f22c32fc5f::t_4b4e6bf5b0de6c 39,65-66,74-76
+  s_b6a0f22c32fc5f::t_6d81b21d50e856 49-50,52-55,57-64,67-68
+  s_b6a0f22c32fc5f::t_edbbe291350d0c 8-9,14,70,301,570-574,577-578
+  s_b6a0f22c32fc5f::t_98999e69066084 463
+  s_b6a0f22c32fc5f::t_782c349f4b05a8 2-3
+  s_b6a0f22c32fc5f::t_b8d658a850a824 503-568
+  s_b6a0f22c32fc5f::t_cefc0ae3c7d591 576
+  s_b6a0f22c32fc5f::t_da969c47068e84 600-601,604-607
+  s_b6a0f22c32fc5f::t_5992149860fe21 41-48,56
+src/services/settings/__tests__/appSettings.test.ts
+  s_b6a0f22c32fc5f::t_f8fdaf775de2ae 1-31
+src/hooks/useWorkoutActivity.ts
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 6
+src/services/repositories/__tests__/localWrite.test.ts
+  s_b6a0f22c32fc5f::t_d9b588dfa24d40 13-17
+src/services/training/__tests__/tabNavigation.test.ts
+  s_b6a0f22c32fc5f::t_2e84cb28ac8f1b 1-7
+src/components/train/RIRProgressionPreview.tsx
+  s_b6a0f22c32fc5f::t_4a59d1dbda8e04 14-15,31
+  s_b6a0f22c32fc5f::t_c48a4a669ec990 9,24
+  s_b6a0f22c32fc5f::t_be8e262305c6db 21
+  s_b6a0f22c32fc5f::t_4a6f2c1c2baddc 1-8,10-13,16-20,22-23,25-30,32-35
+src/services/training/__tests__/rirReplanning.test.ts
+  s_b6a0f22c32fc5f::t_869060aff4200c 1-80
+  s_b6a0f22c32fc5f::t_dc5c59a6c82359 81-90
+src/services/training/__tests__/personalTeamCapabilities.test.ts
+  s_b6a0f22c32fc5f::t_7463af70c76561 36,39,41
+  s_b6a0f22c32fc5f::t_173314c188cadd 2,7,9-14,18-19,34-35,37-38,42-43
+  s_b6a0f22c32fc5f::t_fb36a9946e632a 40
+  s_b6a0f22c32fc5f::t_1fe52793475dec 1,3-6,8,15-17,20-33
+jest.setup.js
+  s_b6a0f22c32fc5f::t_1d98a628be1632 2-20
+  s_b6a0f22c32fc5f::t_297e7ce181c735 1,21-28
+src/services/training/__tests__/exercisePreferences.test.ts
+  s_b6a0f22c32fc5f::t_cda821d6c36aab 1-22
+src/services/training/restFeedbackStatus.ts
+  s_b6a0f22c32fc5f::t_4203159e9ee2a6 1-13
+src/components/icons/ActionIcons.tsx
+  s_b6a0f22c32fc5f::t_0159f88dfb6c48 1-14
+src/services/training/rirReplanning.ts
+  s_b6a0f22c32fc5f::t_dd9392cf93a82e 38
+  s_b6a0f22c32fc5f::t_be8e262305c6db 4,36
+  s_b6a0f22c32fc5f::t_ed0562e5fb36af 1-3,5-10,17-35,37,39-61,74
+  s_b6a0f22c32fc5f::t_dc5c59a6c82359 62-73
+  s_b6a0f22c32fc5f::t_4a59d1dbda8e04 11-16
+src/hooks/__tests__/workoutActivity.test.tsx
+  s_b6a0f22c32fc5f::t_a226b5883f9f92 2,64-69
+  s_b6a0f22c32fc5f::t_7c9ad73352a44b 70
+src/app/(tabs)/(train)/session.tsx
+  s_b6a0f22c32fc5f::t_f21c1548459061 41,152,399
+  s_b6a0f22c32fc5f::t_8169b4ee3dd28c 188-189
+  s_b6a0f22c32fc5f::t_e9dde8b2f8a269 602
+  s_b6a0f22c32fc5f::t_b83930062ef5e0 27,495
+  s_b6a0f22c32fc5f::t_49fe073c64f571 139,273-277,474,476
+  s_b6a0f22c32fc5f::t_495121afe3e39c 39-40,97,141,160,195,329,334,439-453,456-457,504-505
+  s_b6a0f22c32fc5f::t_d748c2e2aeb40a 454-455
+  s_b6a0f22c32fc5f::t_9da08f68361745 15,577
+  s_b6a0f22c32fc5f::t_6d81b21d50e856 44-46,153,394-396,414-415,592
+  s_b6a0f22c32fc5f::t_dc154df64e395e 75-78,125,127-129,200,219-221,240-242,246,258-260,538-539,575,578-579,581-582,589-590
+  s_b6a0f22c32fc5f::t_5d264a85765334 25-26,103,526,555
+  s_b6a0f22c32fc5f::t_7b643168abc43e 464,475,489,520
+  s_b6a0f22c32fc5f::t_300cbe5520adf9 47,427,432-435
+  s_b6a0f22c32fc5f::t_0159f88dfb6c48 549-552
+  s_b6a0f22c32fc5f::t_5f9553d08ce6e9 576
+  s_b6a0f22c32fc5f::t_a654a64dd488ea 580,583
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 42-43,137-138,267,558,566-569,594-601
+  s_b6a0f22c32fc5f::t_99df6f91986f05 95
+  s_b6a0f22c32fc5f::t_76051a1cb05e69 541
+  s_b6a0f22c32fc5f::t_2a0cb2755a79b7 584-588
+src/components/train/WorkoutPersistenceNotice.tsx
+  s_b6a0f22c32fc5f::t_b83930062ef5e0 1-11
+src/components/train/MusclePicture.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 11
+  s_b6a0f22c32fc5f::t_76051a1cb05e69 8
+src/components/train/TrainingCalendarCard.tsx
+  s_b6a0f22c32fc5f::t_7f081fdf1388fc 1-2,6-7,11-12,14,17,19-21,24-31,33,38-44,47-52,54-55,57-61,63,66,68-69,71-82,84,86-93,95
+  s_b6a0f22c32fc5f::t_94d67a57cac903 53,62,64-65
+  s_b6a0f22c32fc5f::t_d748c2e2aeb40a 15,18,22,85
+  s_b6a0f22c32fc5f::t_5d264a85765334 70
+  s_b6a0f22c32fc5f::t_87a3f462820d6e 34-37,46
+src/components/train/__tests__/PrescriptionEditor.test.tsx
+  s_b6a0f22c32fc5f::t_95095d1c6d4d1f 1-9,11-22,24-25,33-34,36-41,43,45-52,69-85
+  s_b6a0f22c32fc5f::t_b83930062ef5e0 10
+  s_b6a0f22c32fc5f::t_64c73be2ad5366 23
+  s_b6a0f22c32fc5f::t_869060aff4200c 26-32,35,42,44,53-68
+src/components/train/ActionMenuSheet.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 37
+src/components/train/WorkoutHistoryCard.tsx
+  s_b6a0f22c32fc5f::t_b029247d8caad7 15,24-25
+  s_b6a0f22c32fc5f::t_7b643168abc43e 20,28
+  s_b6a0f22c32fc5f::t_1e068148653a70 1-14,16-19,21-23,26-27,29-30
+src/services/repositories/BaseRepository.ts
+  s_b6a0f22c32fc5f::t_b101d088506077 97-102
+src/components/train/__tests__/RestTimerControls.test.tsx
+  s_b6a0f22c32fc5f::t_47010864901ae9 3,21-30
+  s_b6a0f22c32fc5f::t_357143a627106d 5-6
+  s_b6a0f22c32fc5f::t_d9b588dfa24d40 1-2,4,7-20,31
+src/app/(tabs)/_layout.tsx
+  s_b6a0f22c32fc5f::t_d6ce90afb5eaa4 6,14-15
+src/components/train/ExercisePage.tsx
+  s_b6a0f22c32fc5f::t_edc8ee1f95d0fd 102-104,107,110,191
+  s_b6a0f22c32fc5f::t_06c434c77eedfc 201-202
+  s_b6a0f22c32fc5f::t_ced4075d56a606 75,113,134-136
+  s_b6a0f22c32fc5f::t_dc154df64e395e 17,34-35,51-52,142-148
+  s_b6a0f22c32fc5f::t_7777fee3ae76ba 18,99
+  s_b6a0f22c32fc5f::t_da257377cc4c39 19,57,96
+  s_b6a0f22c32fc5f::t_76051a1cb05e69 22,54,70
+src/services/health/__tests__/healthCapabilities.test.ts
+  s_b6a0f22c32fc5f::t_affb912f3a30e5 1-17
+src/services/training/experienceGuidance.ts
+  s_b6a0f22c32fc5f::t_e292a2718392e5 1-30
+src/app/(tabs)/(train)/manual-routine.tsx
+  s_b6a0f22c32fc5f::t_2e589b90a6df75 20,100-103
+  s_b6a0f22c32fc5f::t_be8e262305c6db 21,82
+  s_b6a0f22c32fc5f::t_7b643168abc43e 110
+src/services/training/__tests__/exerciseName.test.ts
+  s_b6a0f22c32fc5f::t_d967fac28434ce 1-19,23
+  s_b6a0f22c32fc5f::t_2403138832d518 20-22
+src/hooks/__tests__/appSettings.test.tsx
+  s_b6a0f22c32fc5f::t_773e69a95e1d94 6,8
+  s_b6a0f22c32fc5f::t_e5113c4036abdc 1-5,7,9-48
+src/i18n/locales/es.json
+  s_b6a0f22c32fc5f::t_5992149860fe21 41-48,56
+  s_b6a0f22c32fc5f::t_a05791d63f6c02 19-29,31-38
+  s_b6a0f22c32fc5f::t_69008bc3cf59cc 30
+  s_b6a0f22c32fc5f::t_e26567adf0f74d 600-601,604-607
+  s_b6a0f22c32fc5f::t_782c349f4b05a8 2-3
+  s_b6a0f22c32fc5f::t_4b4e6bf5b0de6c 39,65-66,74-76
+  s_b6a0f22c32fc5f::t_edbbe291350d0c 8-9,14,70,301,570-574,577-578
+  s_b6a0f22c32fc5f::t_6f097d90767149 5-7,10-13,15-18,71-73
+  s_b6a0f22c32fc5f::t_acbf3d7ddafc3b 503-568
+  s_b6a0f22c32fc5f::t_53193a0a0fd7bb 575
+  s_b6a0f22c32fc5f::t_cefc0ae3c7d591 576
+  s_b6a0f22c32fc5f::t_a8dd5959e02693 4
+  s_b6a0f22c32fc5f::t_6d81b21d50e856 49-50,52-55,57-64,67-68
+  s_b6a0f22c32fc5f::t_9da08f68361745 40
+  s_b6a0f22c32fc5f::t_98999e69066084 463
+  s_b6a0f22c32fc5f::t_199091bbda478f 51
+src/hooks/useWorkoutActivity.ios.ts
+  s_b6a0f22c32fc5f::t_307fa88b717bda 41-42,44-45
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 11-23
+  s_b6a0f22c32fc5f::t_abea72fc529667 46
+src/services/training/swapEngine.ts
+  s_b6a0f22c32fc5f::t_c37e342a74c469 9-10,23-26
+  s_b6a0f22c32fc5f::t_07090f9d9de714 15,19-21,29-34,50
+  s_b6a0f22c32fc5f::t_76051a1cb05e69 35
+  s_b6a0f22c32fc5f::t_ac57334e955c16 27
+src/hooks/useHealthExport.tsx
+  s_b6a0f22c32fc5f::t_d84d335060b442 1-27
+src/services/training/routineRestDays.ts
+  s_b6a0f22c32fc5f::t_e11a5aa3a4ecc9 44
+  s_b6a0f22c32fc5f::t_a6f3472c339af3 4,7-34
+  s_b6a0f22c32fc5f::t_b101d088506077 1-3,5-6,35-43,45-58
+src/services/training/workoutReview.ts
+  s_b6a0f22c32fc5f::t_76051a1cb05e69 18,33-35,37,47,49,54
+  s_b6a0f22c32fc5f::t_ba735fda39575c 29-32,36,41-42,44
+  s_b6a0f22c32fc5f::t_6e72af962128b4 45
+src/services/training/__tests__/capacityRecommendation.test.ts
+  s_b6a0f22c32fc5f::t_0cd2f82c671e3c 29,35,38,40,44-45
+src/services/training/__tests__/customExercises.test.ts
+  s_b6a0f22c32fc5f::t_4ed61dd3a0c08c 2,13-16,18-32
+  s_b6a0f22c32fc5f::t_e11a5aa3a4ecc9 17
+output/performance/ios-1792677826-62279.json
+  s_58860a6dd107b9::t_20a503f6df2aea 1-7754
+src/app/(tabs)/(train)/performance.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 83,97
+src/services/training/__tests__/generationPhase.test.ts
+  s_b6a0f22c32fc5f::t_154d486f2de38c 27,42-43,65
+docs/ui-performance.md
+  s_b6a0f22c32fc5f::t_033a82b828024e 15-16
+  s_b6a0f22c32fc5f::t_4ce1b874f61d48 5-6
+  s_b6a0f22c32fc5f::t_0b3a6820e323ff 76-77
+  s_b6a0f22c32fc5f::t_10aae0c01ad239 11
+  s_b6a0f22c32fc5f::t_836c665fef6848 78-79
+  s_b6a0f22c32fc5f::t_4682fe51727bb7 33-35
+  s_b6a0f22c32fc5f::t_a225c8853a6a88 74
+  s_b6a0f22c32fc5f::t_20d0cbc09b9a75 21-23
+  s_b6a0f22c32fc5f::t_17f3d26258d691 9-10,12-14,17-18
+  s_b6a0f22c32fc5f::t_948a5f9943ee3a 19-20,24
+  s_b6a0f22c32fc5f::t_1f86dee9ce43a5 25-32,36
+  s_b6a0f22c32fc5f::t_9621ada153f5db 72-73,75
+src/services/repositories/__tests__/workoutDiscard.test.ts
+  s_b6a0f22c32fc5f::t_a226b5883f9f92 1-27
+src/components/train/NumericField.tsx
+  s_b6a0f22c32fc5f::t_5f7340525dcce6 22-23
+  s_b6a0f22c32fc5f::t_013c08cef98e23 20-21,36,46,51,66-72
+  s_b6a0f22c32fc5f::t_ffe58620cb5203 73
+src/services/training/previewEditing.ts
+  s_b6a0f22c32fc5f::t_f86d47225fbd29 228
+  s_b6a0f22c32fc5f::t_a8aad062303ee0 87,167
+  s_b6a0f22c32fc5f::t_c1dbdc2be7e5ff 88,145-146,152
+  s_b6a0f22c32fc5f::t_7777fee3ae76ba 47,180
+  s_b6a0f22c32fc5f::t_e890b4f1af1645 4,193
+src/hooks/useAppSettings.tsx
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 21
+  s_b6a0f22c32fc5f::t_5992149860fe21 1-18,20,22-26,29-45,48-49,51-66
+  s_b6a0f22c32fc5f::t_e5113c4036abdc 19,27-28,46-47,50
+output/performance/ios-1792616754-36447.json
+  s_58860a6dd107b9::t_3280436aeee192 1-6004
+src/app/(tabs)/(train)/history.tsx
+  s_b6a0f22c32fc5f::t_1e068148653a70 2,10-11,13,16-26,28,30-32,34-40
+  s_b6a0f22c32fc5f::t_7b643168abc43e 33
+src/services/training/trainingNotes.ts
+  s_b6a0f22c32fc5f::t_1952e9ec05bfaf 1-22
+src/components/home/RoutineCard.tsx
+  s_b6a0f22c32fc5f::t_905074a35846d0 21
+  s_b6a0f22c32fc5f::t_ec8d129677bef6 153
+  s_b6a0f22c32fc5f::t_e11887507a6793 168
+  s_b6a0f22c32fc5f::t_84f0dd86ae9a18 226,229,231-232,245,247-248,258-259,261
+  s_b6a0f22c32fc5f::t_dc56c3e74294b2 236
+  s_b6a0f22c32fc5f::t_c5945b75f39491 59,77,127,135,189-190
+  s_b6a0f22c32fc5f::t_a6f3472c339af3 53,72,139,169,182-183,186
+src/services/training/setSwipe.ts
+  s_b6a0f22c32fc5f::t_0159f88dfb6c48 2-4,6-7
+  s_b6a0f22c32fc5f::t_5d264a85765334 1,5
+src/services/health/__tests__/workoutExport.test.ts
+  s_b6a0f22c32fc5f::t_4ebd61bc3b2eef 2,8,15
+  s_b6a0f22c32fc5f::t_7ce1df6ea954da 1,3-7,9-14,16-37,39-144,189-224,236-253
+  s_b6a0f22c32fc5f::t_b387b4691fd66f 145-188,225-235
+  s_b6a0f22c32fc5f::t_ec6e2910b1f6ee 38
+src/components/train/WorkoutPagerGesture.tsx
+  s_b6a0f22c32fc5f::t_5d264a85765334 1-6
+src/services/training/mesocycleEditing.ts
+  s_b6a0f22c32fc5f::t_87a3f462820d6e 102,104-108,121,132
+  s_b6a0f22c32fc5f::t_ed22f44a539df2 42-43,48
+  s_b6a0f22c32fc5f::t_ccffaa9f64a4df 73-81,103,129-130
+  s_b6a0f22c32fc5f::t_495121afe3e39c 44-47,49
+  s_b6a0f22c32fc5f::t_ed0562e5fb36af 6,71,83-89,91,101,110-117
+  s_b6a0f22c32fc5f::t_be8e262305c6db 82,90
+  s_b6a0f22c32fc5f::t_6cd3de1f10ce86 72
+src/services/training/exerciseName.ts
+  s_b6a0f22c32fc5f::t_da257377cc4c39 1-11
+src/components/train/generate/ExerciseSwapSheet.tsx
+  s_58860a6dd107b9::t_ad4de1bf369bce 238,250
+  s_b6a0f22c32fc5f::t_b4e101e357b146 120-126,131,135-136,139-141,143-150,284
+  s_b6a0f22c32fc5f::t_da257377cc4c39 20,51,189
+  s_b6a0f22c32fc5f::t_16e898093e55f7 34,48,112-113,130,133,182,186
+  s_b6a0f22c32fc5f::t_7acabb5857b893 73-74,76,255
+  s_b6a0f22c32fc5f::t_96fe8bfc362265 1-3,66-68,70-72,75,77-80,82-86,157-158,161,171,173-174,178,252
+  s_b6a0f22c32fc5f::t_0159f88dfb6c48 210-215
+  s_b6a0f22c32fc5f::t_9da08f68361745 4,142
+  s_b6a0f22c32fc5f::t_0d10da150a6370 101
+  s_b6a0f22c32fc5f::t_79051a11c7f1d3 21,52-55
+  s_b6a0f22c32fc5f::t_b02c142cf03f29 69,81
+  s_b6a0f22c32fc5f::t_3607b5c818d5b2 230
+  s_b6a0f22c32fc5f::t_a06bb9e2b60ef8 26,65,102,176,209,216,241
+  s_b6a0f22c32fc5f::t_7b643168abc43e 222,242,245
+  s_b6a0f22c32fc5f::t_cb32434664da06 87-88,172
+src/i18n/locales/ja.json
+  s_b6a0f22c32fc5f::t_214f3fb3663fe3 277-278,281-284
+  s_b6a0f22c32fc5f::t_1850c92686b32b 163
+  s_b6a0f22c32fc5f::t_698ed20cd82711 201-266
+  s_b6a0f22c32fc5f::t_9da08f68361745 390
+output/performance/ios-1792616822-36979.json
+  s_58860a6dd107b9::t_703887da3d3bd3 1-6009
+src/components/train/__tests__/WorkoutControls.test.tsx
+  s_b6a0f22c32fc5f::t_5229f3b6af1133 7,28-29,33
+  s_b6a0f22c32fc5f::t_1d98a628be1632 18,24
+  s_b6a0f22c32fc5f::t_2e84cb28ac8f1b 23,27
+  s_b6a0f22c32fc5f::t_e0cf34b94c8f47 30-32
+  s_b6a0f22c32fc5f::t_ba735fda39575c 12
+src/services/training/__tests__/workoutHistory.test.ts
+  s_b6a0f22c32fc5f::t_9cde3f16cc6418 2-18,20-43,45-46,57
+  s_b6a0f22c32fc5f::t_b02a332eb1153b 19
+  s_b6a0f22c32fc5f::t_fa91127b1ef5f9 44
+  s_b6a0f22c32fc5f::t_b44294c57b0d9a 1,47-56
+src/services/training/historyEditing.ts
+  s_b6a0f22c32fc5f::t_66b5fe4eace4ae 27-35
+  s_b6a0f22c32fc5f::t_4263c8d25cd00e 1-26,36-43
+src/components/train/ScheduleTemplateView.tsx
+  s_b6a0f22c32fc5f::t_71aa1a988e95cb 14-18,22-24
+src/app/exercise-details.tsx
+  s_b6a0f22c32fc5f::t_16e898093e55f7 66
+  s_b6a0f22c32fc5f::t_f839e56addff97 1-5,7-12,15-16,18,20-29,31-33,37-47,58-59,61-62,64-65,68-76
+  s_b6a0f22c32fc5f::t_7b643168abc43e 30,35-36,57,63,67
+  s_b6a0f22c32fc5f::t_5f9553d08ce6e9 49-56
+  s_b6a0f22c32fc5f::t_a654a64dd488ea 13
+  s_b6a0f22c32fc5f::t_99df6f91986f05 19
+  s_b6a0f22c32fc5f::t_69008bc3cf59cc 14,60
+  s_b6a0f22c32fc5f::t_8b083d6fbaee35 6,17,34,48
+src/services/training/__tests__/restPrescription.test.ts
+  s_b6a0f22c32fc5f::t_cf0c69f6ae80aa 1-11,13,15-24
+  s_b6a0f22c32fc5f::t_47010864901ae9 12,14
+src/components/train/__tests__/RoutineDayList.test.tsx
+  s_b6a0f22c32fc5f::t_e890b4f1af1645 29-40
+  s_b6a0f22c32fc5f::t_cb32434664da06 1-28
+src/components/train/RehabBlockEditor.tsx
+  s_b6a0f22c32fc5f::t_3607b5c818d5b2 72
+  s_b6a0f22c32fc5f::t_7b643168abc43e 101,118
+  s_58860a6dd107b9::t_ad4de1bf369bce 65
+src/services/training/__tests__/routineView.test.ts
+  s_b6a0f22c32fc5f::t_47010864901ae9 132-140
+  s_b6a0f22c32fc5f::t_5ae3aebbd81bdc 8-9,28-84,97
+  s_b6a0f22c32fc5f::t_f57ba8c4c9a420 85-96
+  s_b6a0f22c32fc5f::t_c0e2edd53b1bea 98
+src/services/training/__tests__/sessionDistribution.test.ts
+  s_b6a0f22c32fc5f::t_dc84177fb567c2 85-93
+src/components/train/RehabRunner.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 72,81
+src/services/training/__tests__/sessionProgression.test.ts
+  s_b6a0f22c32fc5f::t_f57ba8c4c9a420 40-42
+src/components/train/ExerciseOrderSheet.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 34,53
+src/services/training/sessionMapper.ts
+  s_b6a0f22c32fc5f::t_77ef330775340b 84-86,123-124,133-134
+src/hooks/useExerciseCatalogue.tsx
+  s_b6a0f22c32fc5f::t_99df6f91986f05 79
+  s_b6a0f22c32fc5f::t_9aa55e2abb7091 20,31,33-37,41-44,68,71,89,94-96,98,100
+  s_b6a0f22c32fc5f::t_16e898093e55f7 92
+  s_b6a0f22c32fc5f::t_8169b4ee3dd28c 2,11,28,38-40,90-91,93,97,99
+  s_b6a0f22c32fc5f::t_dd2e5dde8d929f 22,74
+  s_b6a0f22c32fc5f::t_79051a11c7f1d3 121-123
+  s_b6a0f22c32fc5f::t_e30f6f47091a06 10,21,23,32,45-54,69-70,73,75-78,80-88
+src/services/training/exercisePreferences.ts
+  s_b6a0f22c32fc5f::t_e30f6f47091a06 1-24
+plugins/withFreePersonalTeam.js
+  s_b6a0f22c32fc5f::t_7463af70c76561 7-8,11
+  s_b6a0f22c32fc5f::t_173314c188cadd 9-10,16
+src/components/train/SwipeableSet.tsx
+  s_b6a0f22c32fc5f::t_ced4075d56a606 1,5-6,10,45
+  s_b6a0f22c32fc5f::t_5d264a85765334 9,12,16,27,35,43
+  s_b6a0f22c32fc5f::t_94d67a57cac903 17-26
+  s_b6a0f22c32fc5f::t_03777ed1723999 40
+  s_b6a0f22c32fc5f::t_0159f88dfb6c48 2-4,7-8,11,13-15,28-34,36-39,41-42,44
+src/services/training/__tests__/exerciseMuscles.test.ts
+  s_b6a0f22c32fc5f::t_311022c6a4e38e 45
+src/components/train/SetEntrySheet.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 45,47
+  s_b6a0f22c32fc5f::t_69c45a3333b098 53
+  s_b6a0f22c32fc5f::t_ec8d129677bef6 59
+  s_b6a0f22c32fc5f::t_f8a5fbfb495a1d 58
+  s_b6a0f22c32fc5f::t_013c08cef98e23 11-12,15,19-21,26-27,29,43-44,46,49,60-61,63,65-66,69-74
+  s_b6a0f22c32fc5f::t_49023205f2f51c 32
+  s_b6a0f22c32fc5f::t_5f7340525dcce6 8
+src/components/train/WorkoutFinishSheet.tsx
+  s_b6a0f22c32fc5f::t_76051a1cb05e69 11,43
+  s_b6a0f22c32fc5f::t_6d81b21d50e856 10,14,16,48
+  s_b6a0f22c32fc5f::t_7b643168abc43e 21,33
+  s_b6a0f22c32fc5f::t_ec8d129677bef6 12,18,44
+src/services/health/healthClient.ts
+  s_b6a0f22c32fc5f::t_b387b4691fd66f 12
+  s_b6a0f22c32fc5f::t_d84d335060b442 1-11,13-18
+src/models/biomechanics.ts
+  s_b6a0f22c32fc5f::t_9aa55e2abb7091 259-260
+src/services/training/nativeRestFeedback.ts
+  s_b6a0f22c32fc5f::t_4203159e9ee2a6 3-4
+  s_b6a0f22c32fc5f::t_2905e05d7b7197 1-2
+src/services/training/tabNavigation.ts
+  s_b6a0f22c32fc5f::t_d6ce90afb5eaa4 1-6
+src/services/training/generationPhase.ts
+  s_b6a0f22c32fc5f::t_dd2e5dde8d929f 43,65
+src/services/training/__tests__/trainingNotes.test.ts
+  s_b6a0f22c32fc5f::t_b44294c57b0d9a 1-20,22-26
+  s_b6a0f22c32fc5f::t_b02a332eb1153b 21
+src/services/training/__tests__/workoutExecution.test.ts
+  s_b6a0f22c32fc5f::t_d967fac28434ce 3,13-33
+  s_b6a0f22c32fc5f::t_271a7316bf6bd8 34
+src/services/training/__tests__/workoutActivityState.test.ts
+  s_b6a0f22c32fc5f::t_357143a627106d 38-45
+src/components/train/PrescriptionEditor.tsx
+  s_b6a0f22c32fc5f::t_93fd244f4f4aa7 1-2,71-72,74,126
+  s_b6a0f22c32fc5f::t_a8aad062303ee0 3-9,11-45,50-70,75-88,90-102,106-110,114,127,130-132
+  s_b6a0f22c32fc5f::t_782c349f4b05a8 46,103,115
+  s_b6a0f22c32fc5f::t_f86d47225fbd29 125
+  s_b6a0f22c32fc5f::t_c1dbdc2be7e5ff 10,47-49,73,89,104-105,111-113,116-124,128-129
+src/models/training.ts
+  s_b6a0f22c32fc5f::t_be8e262305c6db 60
+  s_b6a0f22c32fc5f::t_495121afe3e39c 72-73
+  s_b6a0f22c32fc5f::t_3dbbad3623c98c 220-221
+  s_b6a0f22c32fc5f::t_b101d088506077 68-69,74-75
+  s_b6a0f22c32fc5f::t_a6f3472c339af3 70-71
+  s_b6a0f22c32fc5f::t_77ef330775340b 198-199,217-219
+  s_b6a0f22c32fc5f::t_4263c8d25cd00e 215-216
+  s_b6a0f22c32fc5f::t_ced4075d56a606 176-177
+src/components/train/generate/RerollFeedback.tsx
+  s_b6a0f22c32fc5f::t_cefc0ae3c7d591 1-16
+src/components/train/SharedNoteButton.tsx
+  s_b6a0f22c32fc5f::t_a654a64dd488ea 1-13,15-21
+  s_b6a0f22c32fc5f::t_7b643168abc43e 14
+src/components/train/PreWorkoutRehab.tsx
+  s_b6a0f22c32fc5f::t_7b643168abc43e 30,34
+src/services/repositories/__tests__/BaseRepository.test.ts
+  s_b6a0f22c32fc5f::t_d9b588dfa24d40 134-138
+src/components/train/__tests__/ExperienceLevelGuide.test.tsx
+  s_b6a0f22c32fc5f::t_29de64023ccc8b 1-40
+src/services/training/__tests__/workoutWriteGate.test.ts
+  s_b6a0f22c32fc5f::t_773e69a95e1d94 7
+  s_b6a0f22c32fc5f::t_9cde3f16cc6418 1-6,8-17
+src/services/training/customExercises.ts
+  s_b6a0f22c32fc5f::t_013c08cef98e23 26
+  s_b6a0f22c32fc5f::t_7777fee3ae76ba 23-25,27
+src/components/train/__tests__/GenerationWizardPresentation.test.tsx
+  s_b6a0f22c32fc5f::t_88ee545b6b54f9 13-14,17,32,93-94,101-102
+  s_b6a0f22c32fc5f::t_29de64023ccc8b 9,33-54,104
+  s_b6a0f22c32fc5f::t_1d98a628be1632 23
+  s_b6a0f22c32fc5f::t_52128932397245 28
+  s_b6a0f22c32fc5f::t_5229f3b6af1133 12,95-100,103
+src/services/health/__tests__/healthClient.test.ts
+  s_b6a0f22c32fc5f::t_affb912f3a30e5 14-15,17,24,30
+  s_b6a0f22c32fc5f::t_0e2b07018d80e6 1-4,8-13,16,18-23,25-29,31-32
+  s_b6a0f22c32fc5f::t_0aacc862916545 5-7
+output/performance/ios-1792677062-52590.json
+  s_58860a6dd107b9::t_43b0e7c09aac06 1-7799
+src/services/training/workoutActivityState.ts
+  s_b6a0f22c32fc5f::t_307fa88b717bda 4,8,16-18,23
+  s_b6a0f22c32fc5f::t_c5893b64eca33f 20
+src/components/train/__tests__/RoutineRestDays.test.tsx
+  s_b6a0f22c32fc5f::t_cdf23d315273b0 2,61-78,80-81,83,85-91
+  s_b6a0f22c32fc5f::t_47010864901ae9 4,6,92-112
+  s_b6a0f22c32fc5f::t_f8a5fbfb495a1d 1,3,7-16,20-24,26-48
+  s_b6a0f22c32fc5f::t_33a781569d8223 17-19
+  s_b6a0f22c32fc5f::t_409bd9cfb9d40e 49-60,113
+  s_b6a0f22c32fc5f::t_b83930062ef5e0 5,25
+  s_b6a0f22c32fc5f::t_1d98a628be1632 79,82,84
+src/services/repositories/localWrite.ts
+  s_b6a0f22c32fc5f::t_b101d088506077 5,20-22
+scripts/configure-workout-widgets.cjs
+  s_b6a0f22c32fc5f::t_7463af70c76561 12
+src/components/train/__tests__/RoutineProgressionFlow.test.tsx
+  s_b6a0f22c32fc5f::t_dd9392cf93a82e 1,3-9,11-16,18-30,36-63,77
+  s_b6a0f22c32fc5f::t_4a59d1dbda8e04 2
+  s_b6a0f22c32fc5f::t_486cba7ea15396 31,33-35
+  s_b6a0f22c32fc5f::t_5ae3aebbd81bdc 10,17,64-76
+  s_b6a0f22c32fc5f::t_7b6e132dab9974 32
+src/services/training/skipRoutineDay.ts
+  s_b6a0f22c32fc5f::t_87a3f462820d6e 1-14
+src/services/training/workoutExecution.ts
+  s_b6a0f22c32fc5f::t_ced4075d56a606 7-9
+  s_b6a0f22c32fc5f::t_300cbe5520adf9 33-49
+src/services/training/capacityRecommendation.ts
+  s_b6a0f22c32fc5f::t_00e966a6094697 17,257,279-280
+  s_b6a0f22c32fc5f::t_60d39ab2a8c40a 11,299-309
+  s_b6a0f22c32fc5f::t_f1ae9c5b2c256f 235-236,240
+  s_b6a0f22c32fc5f::t_0d1f9638131081 5-7,22,60,63-66,277
+  s_b6a0f22c32fc5f::t_026a7ccd8cf769 16,23,223,225,278
+  s_b6a0f22c32fc5f::t_c1f057a0ec2cda 54-55,227,229-230,261-262,264-271,274
+  s_b6a0f22c32fc5f::t_e3b05240c08cc8 253,260,263,272
+  s_b6a0f22c32fc5f::t_56552defbef19f 24,121,166,232-234
+  s_b6a0f22c32fc5f::t_a68f2dc6777124 310
+src/hooks/__tests__/sessionPersistence.test.tsx
+  s_b6a0f22c32fc5f::t_38b8084652b7e5 91-101
+  s_b6a0f22c32fc5f::t_9cde3f16cc6418 8,11,21
+  s_b6a0f22c32fc5f::t_2a0cb2755a79b7 102-106,108
+  s_b6a0f22c32fc5f::t_f9341322c8acfb 107
+src/services/settings/profileName.ts
+  s_b6a0f22c32fc5f::t_5992149860fe21 1-12
+src/components/train/__tests__/RoutineDayFixture.test.tsx
+  s_b6a0f22c32fc5f::t_ac88945f1e49f9 1-6,11-28
+  s_b6a0f22c32fc5f::t_142ba89e2f4061 7-10
+src/services/training/__tests__/nativeRestFeedback.test.ts
+  s_b6a0f22c32fc5f::t_e24e18a4bb4e51 3
+  s_b6a0f22c32fc5f::t_cdf23d315273b0 1-2,6-25
+  s_b6a0f22c32fc5f::t_7460429ba8d634 4-5
+src/components/train/WorkoutHealthExport.tsx
+  s_b6a0f22c32fc5f::t_6d81b21d50e856 1-22,26-40,42-49,51-53
+  s_b6a0f22c32fc5f::t_199091bbda478f 23-25,41
+  s_b6a0f22c32fc5f::t_7b643168abc43e 50
+output/performance/ios-1792581221-72876.json
+  s_b6a0f22c32fc5f::t_a3d2e4c61c6f35 1-5909
+output/performance/ios-1792591496-45134.json
+  s_b6a0f22c32fc5f::t_4dc5fb76ffe9b3 1-5984
+output/performance/ios-1792662129-34824.json
+  s_b6a0f22c32fc5f::t_b90f6bc417a731 1-5984
+output/performance/ios-1792661971-33522.json
+  s_58860a6dd107b9::t_a0316a4394f042 1-5989
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fcd6beed1fbfaa5d6ab31c224126ddd3388c894c",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6-luna"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
