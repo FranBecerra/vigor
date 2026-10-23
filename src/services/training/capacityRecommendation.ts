@@ -2,23 +2,26 @@
  * Recommend a practical calendar for a provisional fixed muscle-volume budget.
  * Hypertrophy selects three fixed dose samples once and evaluates placement,
  * realistic duration, concentration and balance without squeezing that budget.
- * This is a scheduling estimate, not a generated routine, measured recovery,
- * individual MEV/MRV, or a claim of injury prevention. Full generation remains
- * responsible for the final roster, prescriptions and feasibility diagnostics.
+ * Auto reuses the evaluated target-covered allocation, then varies identities at
+ * fixed dose. These are modelled targets/durations, never measured recovery,
+ * individual MEV/MRV or a claim of injury prevention.
  * Strength keeps the validated lift-specific legacy search for now.
  */
 import { SplitStructure, type Exercise, type ExperienceLevel } from '@/models';
-import { planMesocycle } from './mesocyclePlanner';
+import { planMesocycle, refreshPlacement, rerollMesocycle, type MesocyclePlan, type MesocyclePlanInput } from './mesocyclePlanner';
 import { TOTAL_SETS_RANGE, TrainingGoal, RegionEmphasis, buildVolumePlan, type VolumeRegion, type VolumePlanInput } from './volumePlan';
 import { selectExercises, SECONDARY_CREDIT } from './exerciseSelection';
 import { distributeSelection, type SessionDistribution } from './sessionDistribution';
 import { MINUTES_PER_WORKING_SET_FLOOR, SESSION_OVERHEAD_MINUTES } from './trainingCapacity';
+import { completeTargetCoverage } from './targetCoverage';
+import { splitAdherence } from './splitAdherence';
 
 /** Session counts considered. Below two there is no frequency to speak of. */
 export const RECOMMENDED_SESSION_COUNTS: readonly number[] = [2, 3, 4, 5, 6];
 
-/** Session lengths considered, warm-up included. See the 75-minute note above. */
-export const RECOMMENDED_SESSION_MINUTES: readonly number[] = [45, 60, 75];
+/** Warm-up included; longer sessions are searched only after the practical frontier fails. */
+export const RECOMMENDED_SESSION_MINUTES: readonly number[] = [45, 60, 75, 90, 105, 120];
+const PRACTICAL_MINUTES = RECOMMENDED_SESSION_MINUTES.filter((minutes) => minutes <= 75);
 
 /**
  * Seeds each capacity is scored across. Fixed, so the recommendation is a function of
@@ -48,17 +51,19 @@ export interface CapacityRecommendationInput extends VolumePlanInput {
 }
 
 export interface CapacityRecommendation {
+  /** Exact fixed-target allocation, reused by Auto generation while settings remain unchanged. */
+  preparedPlan?: MesocyclePlan;
   sessionsPerMicrocycle: number;
   minutesPerSession: number;
   /** Total commitment per microcycle, which is what the athlete actually spends. */
   weeklyMinutes: number;
-  /** Estimated performed sets from fixed-dose samples; final generation may differ. */
+  /** Exact performed sets in the prepared allocation, or an honest fallback estimate. */
   sets: number;
   /**
-   * Legacy compatibility name. True only when the fixed dose samples cover all
-   * muscle targets within one-set rounding tolerance and fit the recommended
-   * calendar. False can mean catalogue/selector shortfall or schedule limits;
-   * it is never a measurement of individual recovery or a final-plan guarantee.
+   * Legacy compatibility name. Hypertrophy is true only when the chosen allocation
+   * covers every target within the existing one-set rounding tolerance and fits
+   * its actual calendar. False can mean catalogue/ceiling/selector or time limits.
+   * Reuse the prepared allocation to retain this guarantee after Continue.
    */
   reachesRecoverableVolume: boolean;
 }
@@ -113,7 +118,7 @@ export function recommendCapacityExhaustive(
   input: CapacityRecommendationInput,
 ): CapacityRecommendation {
   const candidates = RECOMMENDED_SESSION_COUNTS.flatMap((sessions) =>
-    RECOMMENDED_SESSION_MINUTES.map((minutes) => score(input, sessions, minutes)),
+    PRACTICAL_MINUTES.map((minutes) => score(input, sessions, minutes)),
   );
 
   return choose(candidates);
@@ -158,7 +163,7 @@ function choose(candidates: readonly ScoredCapacity[]): CapacityRecommendation {
 
 /** Yield between real plans; prune only configurations that cannot qualify. */
 function* legacyRecommendationSearch(input: CapacityRecommendationInput): Generator<void, CapacityRecommendation> {
-  const records = RECOMMENDED_SESSION_COUNTS.flatMap((sessions) => RECOMMENDED_SESSION_MINUTES
+  const records = RECOMMENDED_SESSION_COUNTS.flatMap((sessions) => PRACTICAL_MINUTES
     .map((minutes) => ({ sessions, minutes, samples: [] as CapacitySample[] })));
   const qualified: ScoredCapacity[] = [];
   const [minimum] = TOTAL_SETS_RANGE[input.goal][input.level];
@@ -215,19 +220,24 @@ function* recommendationSearch(input: CapacityRecommendationInput): Generator<vo
   if (input.goal === TrainingGoal.STRENGTH) return yield* legacyRecommendationSearch(input);
   yield;
   const target = buildVolumePlan(input);
-  const selections = RECOMMENDATION_SEEDS.map((seed) => selectExercises({
+  const selections = RECOMMENDATION_SEEDS.map((seed) => completeTargetCoverage(selectExercises({
     volumePlan: target, catalogue: input.catalogue, seed, rankingPolicy: 'accessory-aware',
-  }));
+  }), target, input.catalogue));
   const sets = Math.round(selections.reduce((sum, selection) => sum + selection.performedSets, 0) / selections.length);
-  const targetsCovered = selections.every((selection) => target.muscles.every((muscle) =>
+  const coverage = selections.map((selection) => target.muscles.every((muscle) =>
     (selection.attributedByMuscle[muscle.muscle] ?? 0) >= muscle.meav - 1))
-    && sets >= TOTAL_SETS_RANGE[input.goal][input.level][0];
+    .map((covered, index) => covered && selections[index].performedSets >= TOTAL_SETS_RANGE[input.goal][input.level][0]);
+  const targetsCovered = coverage.some(Boolean);
   const candidates: (ScoredCapacity & { overflow: number; quality: number })[] = [];
-  for (const sessions of RECOMMENDED_SESSION_COUNTS) {
-    for (const minutes of RECOMMENDED_SESSION_MINUTES) {
+  const calendars = [PRACTICAL_MINUTES, RECOMMENDED_SESSION_MINUTES.filter((minutes) => minutes > 75)]
+    .flatMap((lengths) => RECOMMENDED_SESSION_COUNTS.flatMap((sessions) => lengths.map((minutes) => ({ sessions, minutes }))));
+  for (const { sessions, minutes } of calendars) {
+      if (minutes > 75 && (!targetsCovered || candidates.some((candidate) => candidate.reachesRecoverableVolume
+        && candidate.preparedPlan && splitAdherence(candidate.preparedPlan.distribution).light))) break;
       yield;
       const distributions = selections.map((selection) => distributeSelection({
         selection, split: input.split ?? SplitStructure.AUTO, sessionsPerMicrocycle: sessions,
+        preserveSplitSequence: true,
         maxWorkMinutesPerSession: minutes - SESSION_OVERHEAD_MINUTES,
         capacityPacking: input.capacityPacking !== false,
         deprioritizedMuscles: target.muscles.filter((muscle) => muscle.emphasis === RegionEmphasis.DEPRIORITIZED)
@@ -240,22 +250,34 @@ function* recommendationSearch(input: CapacityRecommendationInput): Generator<vo
       const empty = distributions.some((distribution) => distribution.sessions.some((session) => !session.exercises.length));
       // Ignore blanket frequency-one warnings: low-dose muscles need not be
       // split merely to satisfy a universal frequency rule.
-      const quality = distributions.reduce((sum, distribution) => {
+      const qualities = distributions.map((distribution) => {
         const loads = distribution.sessions.map((session) => session.exercises.reduce((total, entry) => total + entry.sets, 0));
         const mean = loads.reduce((total, load) => total + load, 0) / sessions;
         const thin = loads.filter((load) => load < Math.min(12, mean * 0.65)).length;
-        return sum + concentrationCost(distribution) + thin * 2
+        return concentrationCost(distribution) + thin * 2 + splitAdherence(distribution).penalty
           + distribution.structureWarnings.filter((warning) => warning.kind === 'session-volume-cap').length
           + distribution.sequencingWarnings.length;
-      }, 0) / distributions.length;
+      });
+      const eligible = distributions.flatMap((distribution, index) => coverage[index] && !distribution.unassigned.length
+        && distribution.sessions.every((session) => session.exercises.length && session.estimatedWorkMinutes + SESSION_OVERHEAD_MINUTES <= minutes + 0.01) ? [index] : []);
+      const chosen = eligible.sort((a, b) => qualities[a] - qualities[b]
+        || distributions[a].sequencingWarnings.length - distributions[b].sequencingWarnings.length || a - b)[0];
+      const distribution = chosen === undefined ? undefined : distributions[chosen];
+      const preparedPlan: MesocyclePlan | undefined = distribution && chosen !== undefined ? {
+        plan: target, uncappedPlan: target, selection: selections[chosen], distribution, squeeze: 0, limitedBy: 'recovery',
+        availableWorkMinutes: (minutes - SESSION_OVERHEAD_MINUTES) * sessions, availableWorkMinutesPerSession: minutes - SESSION_OVERHEAD_MINUTES,
+        estimatedWorkMinutes: distribution.sessions.reduce((sum, session) => sum + session.estimatedWorkMinutes, 0),
+        maxSessionWorkMinutes: Math.max(...distribution.sessions.map((session) => session.estimatedWorkMinutes)),
+      } : undefined;
+      const quality = chosen === undefined ? qualities.reduce((sum, value) => sum + value, 0) / qualities.length : qualities[chosen];
       candidates.push({ sessionsPerMicrocycle: sessions, minutesPerSession: minutes,
-        weeklyMinutes: sessions * minutes, sets, reachesRecoverableVolume: targetsCovered && overflow <= 0.01 && !empty,
+        weeklyMinutes: sessions * minutes, sets: preparedPlan?.selection.performedSets ?? sets, reachesRecoverableVolume: !!preparedPlan, preparedPlan,
         meanStructureWarnings: quality, hasEmptySession: empty, overflow, quality });
-    }
   }
-  // Catalogue shortfalls do not justify searching for a different volume.
-  // Rank schedules that fit the fixed roster even when targets are unavailable.
-  const feasible = candidates.filter((candidate) => candidate.overflow <= 0.01 && !candidate.hasEmptySession);
+  // Never shrink the original targets to make a calendar look successful.
+  const qualified = candidates.filter((candidate) => candidate.reachesRecoverableVolume);
+  const faithful = qualified.filter((candidate) => candidate.preparedPlan && splitAdherence(candidate.preparedPlan.distribution).light);
+  const feasible = faithful.length ? faithful : qualified.length ? qualified : candidates.filter((candidate) => candidate.overflow <= 0.01 && !candidate.hasEmptySession);
   let pool = feasible;
   if (pool.length) {
     const bestQuality = Math.min(...pool.map((candidate) => candidate.quality));
@@ -273,6 +295,18 @@ export function recommendCapacity(input: CapacityRecommendationInput): CapacityR
   let step = search.next();
   while (!step.done) step = search.next();
   return step.value;
+}
+
+/** Auto's promise uses the actual evaluated allocation, not a different draw after Continue. */
+export function generateFromCapacityRecommendation(input: MesocyclePlanInput, recommendation: CapacityRecommendation | null): MesocyclePlan | null {
+  const plan = recommendation?.preparedPlan;
+  if (!plan || input.goal !== TrainingGoal.HYPERTROPHY || recommendation.sessionsPerMicrocycle !== input.capacity.sessionsPerMicrocycle
+    || recommendation.minutesPerSession !== input.capacity.minutesPerSession
+    || JSON.stringify(buildVolumePlan(input)) !== JSON.stringify(plan.uncappedPlan)
+    || plan.selection.selected.some((entry) => !input.catalogue.includes(entry.exercise))) return null;
+  const prepared = refreshPlacement(plan, plan.distribution.sessions.map((session) => ({ ...session,
+    exercises: session.exercises.map((entry) => ({ ...entry })) })), input.previousSession);
+  return rerollMesocycle(input, prepared);
 }
 export interface RecommendationScheduling {
   /** Cooperative scheduling, not a background thread. */

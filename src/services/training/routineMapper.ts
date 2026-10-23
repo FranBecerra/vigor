@@ -58,6 +58,8 @@ export const DEFAULT_TARGET_REPS = 10;
 
 /** Optional inputs that only some plans have. */
 export interface PlannedSessionOptions {
+  /** Keep an explicit split's intended label; disclose any spillover separately. */
+  preserveFocus?: boolean;
   /**
    * Estimated 1RM per exercise, from the athlete's history. Only then does a
    * strength set carry a load: without history the first session is where the load
@@ -104,7 +106,7 @@ export function toPlannedSession(
 ): PlannedSession {
   return {
     index: session.index,
-    focus: (goal === TrainingGoal.HYPERTROPHY ? sessionPresentationFocus(session) : session.focus) as PlannedSessionFocus,
+    focus: (goal === TrainingGoal.HYPERTROPHY && !options.preserveFocus ? sessionPresentationFocus(session) : session.focus) as PlannedSessionFocus,
     estimatedWorkMinutes: session.estimatedWorkMinutes,
     exercises: session.exercises.map((entry, order): PlannedExercise => {
       if (entry.strength !== undefined) {

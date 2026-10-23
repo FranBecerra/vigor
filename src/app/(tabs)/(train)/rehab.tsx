@@ -24,7 +24,7 @@ export default function RehabScreen() {
   return <>
     <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ flexGrow: 1, padding: spacing.lg, backgroundColor: colors.bg,
       paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + 120 }}>
-      <Pressable onPress={() => backToTraining(router)}><Text style={{ color: sectionAccent.train }}>{t('rehab.back')}</Text></Pressable>
+      <Pressable onPress={() => backToTraining(router)}><Text style={{ color: colors.accentText }}>{t('rehab.back')}</Text></Pressable>
       <Text style={{ color: colors.textPrimary, fontSize: 27, fontWeight: '700', marginVertical: 18 }}>{t('rehab.title')}</Text>
       <Text style={{ color: colors.textMuted }}>{t('rehab.userPrescription')}</Text>
       {(!ready || error || failed) && <Text style={{ color: colors.textPrimary }}>{t(error || failed ? 'rehab.saveFailed' : 'custom.loading')}</Text>}
@@ -33,7 +33,7 @@ export default function RehabScreen() {
         onPause={() => { void saveBlock({ ...block, active: !block.active, updatedAt: Date.now() }).catch(() => setFailed(true)); }} />)}
       <Pressable onPress={() => setEditing('new')} style={{ padding: 18, marginVertical: 16,
         backgroundColor: sectionAccent.train, borderRadius: radius.md }}>
-        <Text style={{ color: colors.bg, textAlign: 'center', fontWeight: '700' }}>{t('rehab.newBlock')}</Text>
+        <Text style={{ color: colors.onAccent, textAlign: 'center', fontWeight: '700' }}>{t('rehab.newBlock')}</Text>
       </Pressable>
     </ScrollView>
     {editing !== null && <RehabBlockEditor initial={editing === 'new' ? undefined : editing} onClose={() => setEditing(null)} />}
@@ -52,7 +52,7 @@ function ReactBlock({ block, completed, onEdit, onStart, onPause }: {
       {block.schedule.kind === 'WEEKLY' ? ` / ${block.schedule.target}` : block.schedule.kind === 'DAYS' ? ` · ${block.schedule.days.map((day) => t(`rehab.day${day}`)).join(' · ')}` : ` · ${t('rehab.ROUTINE')}`}</Text>
     {[['start', onStart], ['edit', onEdit], [block.active ? 'pause' : 'activate', onPause]].map(([label, action]) =>
       <Pressable key={label as string} onPress={action as () => void} style={{ paddingVertical: 10 }}>
-        <Text style={{ color: sectionAccent.train }}>{t(`rehab.${label}`)}</Text>
+        <Text style={{ color: colors.accentText }}>{t(`rehab.${label}`)}</Text>
       </Pressable>)}
   </View>;
 }

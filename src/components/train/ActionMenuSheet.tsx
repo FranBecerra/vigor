@@ -34,7 +34,7 @@ export function ActionMenuSheet({ title, subtitle, actions, onClose }: ActionMen
           style={[styles.action, { borderTopColor: colors.surfaceBorder }]}>
           <Text style={[typography.body, { color: action.tone === 'danger'
             ? semantic.danger : colors.textPrimary }]}>{action.label}</Text>
-          <Text style={[typography.body, { color: sectionAccent.train }]}>›</Text>
+          <Text style={[typography.body, { color: colors.accentText }]}>›</Text>
         </Pressable>)}
       </View>
     </View>

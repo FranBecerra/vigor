@@ -8,6 +8,19 @@ import { workoutActivityState } from '@/services/training/workoutActivityState';
 
 let activityQueue: Promise<unknown> = Promise.resolve();
 
+/** Explicit discard must end its activity before navigation unmounts the hook. */
+export function endWorkoutActivity(owner: string, sessionId: string): Promise<void> {
+  const ending = activityQueue.catch(() => undefined).then(async () => {
+    const file = new File(Paths.document, 'vigor-workout-activity.json'); if (!file.exists) return;
+    const mapping = JSON.parse(file.textSync());
+    if (mapping.owner !== owner || mapping.sessionId !== sessionId) return;
+    const instance = Activity.getInstances().find((item) => item.getId() === mapping.activityId);
+    if (instance) await instance.end('immediate');
+    file.delete();
+  });
+  activityQueue = ending; return ending;
+}
+
 /** Never leave a previous account's workout visible after sign-out/account switching. */
 export function useWorkoutActivityOwner(owner: string | null, loading: boolean) {
   useEffect(() => {
@@ -25,9 +38,12 @@ export function useWorkoutActivityOwner(owner: string | null, loading: boolean) 
 
 /** Reuse the OS activity across relaunch; screen unmount does not end a paused workout. */
 export function useWorkoutActivity(context: SessionContext | null, exercises: readonly Exercise[], sets: SessionSetsByExercise, finished: boolean) {
-  const { t } = useTranslation(); const [unavailable, setUnavailable] = useState(false);
+  const { t, i18n } = useTranslation(); const [unavailable, setUnavailable] = useState(false);
+  const activity = workoutActivityState(exercises, sets, context?.activeExerciseId, context?.restTimer ?? { startedAt: null, durationSeconds: 0, anchorSetId: null }, i18n?.language ?? 'es');
   const signature = JSON.stringify(context ? { id: context.sessionId, owner: context.userId, finished,
-    props: { ...workoutActivityState(exercises, sets, context.activeExerciseId, context.restTimer ?? { startedAt: null, durationSeconds: 0, anchorSetId: null }),
+    props: { ...activity,
+      setLabel: activity.nextSet === 'W' ? t('setType.WARMUP') : t('workout.setOf', { number: activity.nextSet, total: activity.nextSetTotal }),
+      restLabel: t('calendar.rest'),
       title: context.sessionName ?? 'Vigor', nextLabel: t('workout.nextSet'), doneLabel: t('workout.allSetsDone') } } : null);
   useEffect(() => {
     if (!context) return;

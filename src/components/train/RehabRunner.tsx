@@ -69,7 +69,7 @@ export function RehabRunner({ block, workoutKey, embedded = false, onClose }: { 
               try { commit(updateRehabSet(latest.current, item.id, set.index,
                 { actual: set.actual ?? item.max, ...(set.recording.load === 'NONE' ? {} : { load: set.load ?? item.load }), completed: !set.completed }, Date.now())); }
               catch { setError(t('rehab.invalidActual')); }
-            }} style={{ padding: 12 }}><Text style={{ color: sectionAccent.train, fontSize: 22 }}>{set.completed ? '✓' : '○'}</Text></Pressable>
+            }} style={{ padding: 12 }}><Text style={{ color: colors.accentText, fontSize: 22 }}>{set.completed ? '✓' : '○'}</Text></Pressable>
         </View>)}
       </View>)}
       {!!error && <Text accessibilityRole="alert" style={text}>{error}</Text>}
@@ -78,7 +78,7 @@ export function RehabRunner({ block, workoutKey, embedded = false, onClose }: { 
         try { const completed = finishRehabLog(latest.current, Date.now()); commit(completed); if (await persist(completed)) onClose(); }
         catch { setError(t('rehab.incompleteBlock')); }
         finally { setBusy(false); }
-      }}><Text style={{ color: colors.bg, textAlign: 'center', fontWeight: '700' }}>{t('rehab.finish')}</Text></Pressable>}
+      }}><Text style={{ color: colors.onAccent, textAlign: 'center', fontWeight: '700' }}>{t('rehab.finish')}</Text></Pressable>}
       <Pressable disabled={busy} style={button} onPress={() => { void close(); }}><Text style={{ ...text, textAlign: 'center' }}>{t('rehab.saveProgress')}</Text></Pressable>
       {log.status !== 'COMPLETED' && <Pressable disabled={busy} style={button} onPress={async () => {
         setBusy(true); const skipped = skipRehabLog({ ...latest.current, ...(workoutKey ? { workoutKey } : {}) }, Date.now());

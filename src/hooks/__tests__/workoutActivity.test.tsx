@@ -1,5 +1,5 @@
 import React from 'react';
-import { useWorkoutActivity, useWorkoutActivityOwner } from '../useWorkoutActivity.ios';
+import { endWorkoutActivity, useWorkoutActivity, useWorkoutActivityOwner } from '../useWorkoutActivity.ios';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
 import { SetType } from '@/models';
 const { create, act } = require('react-test-renderer');
@@ -60,4 +60,11 @@ it('reports unavailable activities without rejecting or losing a workout', async
   await act(async () => { tree = create(<Probe />); }); await act(drain);
   expect(unavailable).toBe(true); expect(mockFile).toBeNull();
   await act(async () => tree.unmount());
+});
+it('ends only the explicitly discarded workout activity before navigation', async () => {
+  await endWorkoutActivity('owner', 'workout'); expect(mockEnd).not.toHaveBeenCalled();
+  mockFile = JSON.stringify({ owner: 'owner', sessionId: 'workout', activityId: 'activity' });
+  mockInstances = [{ getId: () => 'activity', end: mockEnd }];
+  await endWorkoutActivity('other', 'workout'); await endWorkoutActivity('owner', 'other'); expect(mockEnd).not.toHaveBeenCalled();
+  await endWorkoutActivity('owner', 'workout'); expect(mockEnd).toHaveBeenCalledWith('immediate'); expect(mockFile).toBeNull();
 });

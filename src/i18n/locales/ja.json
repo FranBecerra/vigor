@@ -160,6 +160,7 @@
     "chartHint": "1本のバー = 1マイクロサイクル。1セグメント = 1セット。色はRIR、記号はセット種別。",
     "average": "平均",
     "perSetIntensity": "セット別RIR",
+    "recordedSession": "記録したワークアウト",
     "volume": "ボリューム",
     "deloadShort": "調整"
   },
@@ -197,6 +198,72 @@
     "reps": "回",
     "applyExerciseChanges": "下書きに反映"
   },
+  "experienceGuide": {
+    "open": "レベル選びをサポート",
+    "close": "レベル選択ガイドを閉じる",
+    "step": "質問 {{current}} / {{total}}",
+    "result": "おすすめのレベル",
+    "apply": "このレベルを使う",
+    "resultHint": "このルーティンの開始時点の目安です。合わなければ別のレベルを選べます。",
+    "questions": {
+      "consistency": {
+        "title": "どのくらい継続していますか？",
+        "hint": "最近の状況と、計画に沿って取り組んだ期間を考えてください。"
+      },
+      "technique": {
+        "title": "フォームは安定していますか？",
+        "hint": "普段行う種目について考えてください。"
+      },
+      "progress": {
+        "title": "普段どのように向上していますか？",
+        "hint": "同じフォームで重量や回数を比べてください。一時的な停滞だけでレベルは決まりません。"
+      }
+    },
+    "options": {
+      "STARTING_RETURNING": {
+        "title": "始めたばかり・再開したところ",
+        "description": "初めて取り組む、または数か月間定期的に運動せず再開しました。"
+      },
+      "REGULAR": {
+        "title": "定期的に取り組んでいる",
+        "description": "習慣はありますが、数年間続けて計画的に取り組んではいません。"
+      },
+      "CONSISTENT_YEARS": {
+        "title": "長年継続している",
+        "description": "ここ数か月も含め、数年間計画に沿って取り組み、記録しています。"
+      },
+      "LEARNING": {
+        "title": "まだ学んでいる",
+        "description": "普段の種目のフォームを身につけている段階です。"
+      },
+      "ESTABLISHED": {
+        "title": "フォームが安定している",
+        "description": "普段の種目を安定したフォームで行えます。"
+      },
+      "FREQUENT": {
+        "title": "頻繁に向上する",
+        "description": "多くのセッションで回数や重量を増やせます。"
+      },
+      "GRADUAL": {
+        "title": "少しずつ向上する",
+        "description": "向上を実感するまで数週間かかります。"
+      },
+      "SLOW": {
+        "title": "とてもゆっくり向上する",
+        "description": "数か月間計画的に取り組み記録しても、向上は小幅です。"
+      },
+      "UNSURE": {
+        "title": "わからない",
+        "description": "まだ記録や比較をしていません。"
+      }
+    },
+    "reasons": {
+      "returning": "開始・再開時は、継続するために控えめな初期ボリュームを提案します。",
+      "foundation": "回答から、フォームと継続の基礎を固める段階を提案します。",
+      "established": "継続状況と安定したフォームから、中級を開始時点の目安として提案します。",
+      "experienced": "長年の継続、安定したフォーム、ゆっくりした進歩から、上級を開始時点の目安として提案します。"
+    }
+  },
   "generate": {
     "title": "新しいルーティン",
     "subtitle": "ここでの設定からプランを生成します。あとからすべて編集できます。",
@@ -207,13 +274,14 @@
     "goal": "目的",
     "goalHypertrophy": "筋肥大",
     "goalStrength": "筋力",
-    "level": "レベル",
-    "levelBEGINNER": "初級",
+    "level": "現在のトレーニング経験",
+    "levelBEGINNER": "初級・再開",
     "levelINTERMEDIATE": "中級",
     "levelADVANCED": "上級",
-    "levelHintBEGINNER": "トレーニング歴1年未満",
-    "levelHintINTERMEDIATE": "1〜3年",
-    "levelHintADVANCED": "3年以上の継続的な進歩",
+    "levelHintBEGINNER": "フォームを学んでいる、または長い休止後に再開する段階です。",
+    "levelHintINTERMEDIATE": "定期的に取り組み、フォームが安定し、少しずつ向上しています。",
+    "levelHintADVANCED": "長年継続して計画的に取り組み、向上には慎重な調整が必要です。",
+    "levelExplanation": "定期的に取り組んだ期間を考慮し、現在の継続状況と進歩に合うものを選んでください。",
     "capacity": "トレーニングできる量",
     "sessions": "マイクロサイクルあたりのセッション数",
     "sessionsHint": "曜日ではなくセッションの数です。",
@@ -319,6 +387,7 @@
     "previewTopSingle": "RPE 8の重いシングルから開始",
     "previewRest": "休憩 {{minutes}} 分"
   },
+  "exercisePreference": { "notRecommend": "この種目をおすすめしない", "recommend": "再びおすすめする", "notRecommended": "自動ルーティンの候補から除外", "notRecommendShort": "おすすめしない", "notRecommendedShort": "除外済み", "saveFailed": "設定を保存できませんでした。接続を確認して再試行してください。" },
   "region": {
     "CHEST": "胸",
     "BACK": "背中",

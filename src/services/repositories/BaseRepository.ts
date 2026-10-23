@@ -94,6 +94,12 @@ export class BaseRepository<T extends WithId> {
     await updateDoc(this.ref(id), patch as DocumentData);
   }
 
+  /** Merge a bounded patch offline without replacing unrelated document fields. */
+  async updateLocally(id: string, patch: Partial<Omit<T, 'id'>>, onRejected?: (error: unknown) => void) {
+    const clean = JSON.parse(JSON.stringify(patch)) as Record<string, unknown>;
+    return writeLocally(this.ref(id), clean, `${Date.now()}:${Math.random().toString(36).slice(2)}`, undefined, onRejected, true);
+  }
+
   /** Elimina un documento por id. */
   async delete(id: string): Promise<void> {
     await deleteDoc(this.ref(id));

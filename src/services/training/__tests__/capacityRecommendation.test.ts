@@ -26,22 +26,23 @@ const bodyweightOnly = filterCatalogue(EXERCISE_CATALOGUE, {
 });
 
 describe('recommendCapacity', () => {
-  it('fits the advanced PPL biceps-priority fixed dose in five days without changing its estimated sets', () => {
+  it('does not lower the filled dose to preserve a shorter advanced PPL calendar', () => {
     const input = { level: ExperienceLevel.ADVANCED, goal: TrainingGoal.HYPERTROPHY, catalogue: EXERCISE_CATALOGUE,
       split: SplitStructure.PUSH_PULL_LEGS, priorityRegions: [VolumeRegion.BICEPS] };
     const before = recommendCapacity({ ...input, capacityPacking: false });
     const after = recommendCapacity(input);
     expect(before.sessionsPerMicrocycle).toBe(6);
-    expect(after.sessionsPerMicrocycle).toBe(5);
+    expect(after.sessionsPerMicrocycle).toBeLessThanOrEqual(before.sessionsPerMicrocycle);
     expect(after.minutesPerSession).toBe(75);
     expect(after.sets).toBe(before.sets);
-    expect(after.weeklyMinutes).toBeLessThan(before.weeklyMinutes);
+    expect(after.weeklyMinutes).toBeLessThanOrEqual(before.weeklyMinutes);
   });
-  it('retains the production five-day balanced recommendation without lowering the dose', () => {
+  it('preserves target coverage over the preceding lower-dose five-day estimate', () => {
     const input = { level: ExperienceLevel.ADVANCED, goal: TrainingGoal.HYPERTROPHY, catalogue: EXERCISE_CATALOGUE };
     const before = recommendCapacity({ ...input, capacityPacking: false });
     const after = recommendCapacity(input);
-    expect(after.sessionsPerMicrocycle).toBe(5);
+    expect(after.reachesRecoverableVolume).toBe(true);
+    expect(after.sets).toBeGreaterThan(111);
     expect(after.sets).toBe(before.sets);
     expect(after.weeklyMinutes).toBeLessThanOrEqual(before.weeklyMinutes);
   });

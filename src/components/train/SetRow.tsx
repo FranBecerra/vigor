@@ -11,6 +11,7 @@
 import { memo, useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, {
+  FadeIn,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -21,6 +22,9 @@ import { supportsExtensions } from '@/services/training/advancedSets';
 import { useTheme } from '@/theme/useTheme';
 import { setTypeLabel } from './setTypeLabel';
 import { SetEntrySheet } from './SetEntrySheet';
+import type { SetEntryValues } from './SetEntrySheet';
+import { SwipeableSet } from './SwipeableSet';
+import { TrophyIcon } from '@/components/icons/ActionIcons';
 import { useTranslation } from 'react-i18next';
 import { SetExtensionsEditor } from './SetExtensionsEditor';
 import { intensityLabel, type IntensityScale, type IntensityValue } from '@/services/training/intensityScale';
@@ -36,11 +40,13 @@ export const COLUMN_WIDTHS = {
 } as const;
 
 export interface SetRowData {
+  personalRecord?: boolean;
   id: string;
   setType: SetType;
   displayNumber?: number;
   weight: number | undefined;
   reps: number | undefined;
+  partialReps?: number;
   intensity: IntensityValue | undefined;
   /** Tramos extra de Drop Set / Rest Pause / Myo-Rep. */
   extensions?: SetExtension[];
@@ -61,6 +67,8 @@ interface SetRowProps {
   onChangeReps: (value: number | undefined) => void;
   onChangeIntensity: (value: IntensityValue) => void;
   onChangeExtensions: (extensions: SetExtension[]) => void;
+  onChangePartialReps?: (value: number | undefined) => void;
+  onComplete?: (values: SetEntryValues) => void;
   onRemove?: () => void;
 }
 
@@ -74,6 +82,8 @@ function SetRowComponent({
   onChangeIntensity,
   onChangeExtensions,
   onRemove,
+  onChangePartialReps,
+  onComplete,
 }: SetRowProps) {
   const { colors, sectionAccent, motion } = useTheme();
   const accent = sectionAccent.train;
@@ -95,18 +105,18 @@ function SetRowComponent({
 
   const animatedCheckbox = useAnimatedStyle(() => ({
     backgroundColor: interpolateColor(done.value, [0, 1], ['rgba(155,227,23,0)', accent]),
-    borderColor: interpolateColor(done.value, [0, 1], [colors.surfaceBorder, accent]),
+    borderColor: interpolateColor(done.value, [0, 1], [colors.controlBorder, accent]),
   }));
 
   const hasExtraFields = supportsExtensions(data.setType);
 
   return (
+    <SwipeableSet onRemove={onRemove}>
     <View>
       <Animated.View style={[styles.row, animatedRow]}>
         {/* SET */}
         <Pressable
           onPress={onPressSetType}
-          onLongPress={onRemove}
           style={{ width: COLUMN_WIDTHS.set }}
           accessibilityRole="button"
           accessibilityLabel="Tipo de serie">
@@ -114,7 +124,7 @@ function SetRowComponent({
             <Text
               style={[
                 styles.setBadgeText,
-                { color: data.setType === SetType.NORMAL ? accent : colors.textSecondary },
+                { color: data.setType === SetType.NORMAL ? colors.accentText : colors.textSecondary },
               ]}>
               {data.setType === SetType.NORMAL
                 ? (data.displayNumber ?? '-')
@@ -151,32 +161,32 @@ function SetRowComponent({
         <View style={{ width: COLUMN_WIDTHS.reps, alignItems: 'center' }}>
           <Pressable onPress={() => setEditing('reps')} accessibilityRole="button" accessibilityLabel={t('train.reps')}
             style={{ paddingVertical: 10, width: '92%', borderRadius: 8, backgroundColor: colors.surface }}>
-            <Text style={{ textAlign: 'center', color: data.repsIsPlanned ? colors.textMuted : colors.textPrimary, fontWeight: '700' }}>{data.reps ?? '—'}</Text>
+            <Text style={{ textAlign: 'center', color: data.repsIsPlanned ? colors.textMuted : colors.textPrimary, fontWeight: '700' }}>{data.reps ?? '—'}{data.partialReps ? ` +${data.partialReps}P` : ''}</Text>
           </Pressable>
         </View>
 
         {/* INTENSIDAD — sigue editable incluso en una serie completada */}
         <View style={{ width: COLUMN_WIDTHS.intensity, alignItems: 'center' }}>
-          <Pressable onPress={() => setEditing('intensity')} accessibilityRole="button" accessibilityLabel={scale} style={{ paddingVertical: 10 }}>
-            <Text style={{ color: accent, fontWeight: '700' }}>{intensityLabel(data.intensity ?? null, scale)}</Text>
+          <Pressable onPress={() => setEditing('intensity')} accessibilityRole="button" accessibilityLabel={scale} style={{ minHeight: 44, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
+            <Text style={{ color: colors.accentText, fontWeight: '700' }}>{intensityLabel(data.intensity ?? null, scale)}</Text>
           </Pressable>
         </View>
 
         {/* ✓ */}
         <Pressable
           onPress={onToggleDone}
-          style={{ width: COLUMN_WIDTHS.done, alignItems: 'center' }}
+          style={{ width: COLUMN_WIDTHS.done, minHeight: 44, justifyContent: 'center', alignItems: 'center' }}
           accessibilityRole="button"
-          accessibilityLabel="Completar serie">
+          accessibilityLabel={data.personalRecord && data.isCompleted ? t('workout.recordSet') : t('workout.completeSet')}>
           <Animated.View style={[styles.checkbox, animatedCheckbox]}>
-            {data.isCompleted ? <Text style={styles.checkMark}>✓</Text> : null}
+            {data.isCompleted ? data.personalRecord
+              ? <Animated.View key="record" entering={FadeIn.duration(180)} accessibilityLabel="PR"><TrophyIcon size={18} color={colors.onAccent} /></Animated.View>
+              : <Text style={styles.checkMark}>✓</Text> : null}
           </Animated.View>
         </Pressable>
-        {onRemove && <Pressable onPress={onRemove} accessibilityRole="button" accessibilityLabel={t('workout.removeSet')}
-          hitSlop={6} style={{ width: COLUMN_WIDTHS.remove, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.textMuted, fontSize: 18 }}>−</Text></Pressable>}
       </Animated.View>
-      {editing && <SetEntrySheet initialField={editing} weight={data.weight} reps={data.reps} intensity={data.intensity} scale={scale}
-        onWeight={onChangeWeight} onReps={onChangeReps} onIntensity={onChangeIntensity} onClose={() => setEditing(null)} />}
+      {editing && <SetEntrySheet initialField={editing} weight={data.weight} reps={data.reps} intensity={data.intensity} partialReps={data.partialReps} scale={scale}
+        onWeight={onChangeWeight} onReps={onChangeReps} onIntensity={onChangeIntensity} onPartialReps={onChangePartialReps} onComplete={onComplete} onClose={() => setEditing(null)} />}
 
       {/* Los parámetros aparecen justo al seleccionar un tipo avanzado. */}
       {hasExtraFields ? (
@@ -189,6 +199,7 @@ function SetRowComponent({
         />
       ) : null}
     </View>
+    </SwipeableSet>
   );
 }
 

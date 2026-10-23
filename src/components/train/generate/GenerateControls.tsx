@@ -129,7 +129,7 @@ export const Chip = memo(function Chip({
         style={[
           typography.body,
           {
-            color: selected ? accent : colors.textPrimary,
+            color: selected ? colors.accentText : colors.textPrimary,
             fontWeight: selected ? '600' : '400',
             textAlign: centerLabel ? 'center' : 'left',
             ...(centerLabelProp ? { lineHeight: 18 } : {}),
@@ -143,7 +143,7 @@ export const Chip = memo(function Chip({
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
-          style={[typography.caption, { color: selected ? accent : colors.textMuted, marginTop: 2, textAlign: centerLabel ? 'center' : 'left' }]}
+          style={[typography.caption, { color: selected ? colors.accentText : colors.textMuted, marginTop: 2, textAlign: centerLabel ? 'center' : 'left' }]}
         >
           {sublabel}
         </Text>
@@ -208,7 +208,7 @@ export const Chip = memo(function Chip({
           <Text
             style={[
               styles.cornerBadgeText,
-              { color: selected ? accent : colors.textSecondary },
+              { color: selected ? colors.accentText : colors.textSecondary },
             ]}
           >
             {cornerBadge}
@@ -277,7 +277,7 @@ export function Stepper({ label, value, min, max, step = 1, unit, onChange }: St
       </Pressable>
       {/* Fixed width so the row does not shift when the value gains a digit. */}
       <View style={styles.stepperValue}>
-        <Text style={[typography.title, { color: sectionAccent.train }]}>
+        <Text style={[typography.title, { color: colors.accentText }]}>
           {unit === undefined ? value : `${value}${unit}`}
         </Text>
       </View>

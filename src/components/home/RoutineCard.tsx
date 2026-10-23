@@ -18,6 +18,7 @@ import { MesoRail } from './HomeHeader';
 import { useTheme } from '@/theme/useTheme';
 import { rankedMuscleVolume } from '@/services/training/sessionSummary';
 import type { MockRoutine } from '@/mocks/home';
+import type { ReactNode } from 'react';
 
 /** Formatea `2026-09-16` como `16 SEP`, en el idioma activo. */
 export function formatSessionDate(iso: string, locale: string): string {
@@ -49,11 +50,13 @@ interface RoutineCardProps {
   onPressDetail: () => void;
   /** Absent on an inactive routine: its sessions are shown, not started. */
   onSelectSession?: (sessionId: string) => void;
+  onLongPressSession?: (sessionIndex: number) => void;
   onPressMesocycle: () => void;
   /** Absent on the active routine. */
   onActivate?: () => void;
   onRename: () => void;
   onRemove: () => void;
+  renderSessionList?: (rows: readonly { index: number; content: ReactNode }[]) => ReactNode;
 }
 
 export function RoutineCard({
@@ -66,10 +69,12 @@ export function RoutineCard({
   onToggle,
   onPressDetail,
   onSelectSession,
+  onLongPressSession,
   onPressMesocycle,
   onActivate,
   onRename,
   onRemove,
+  renderSessionList,
 }: RoutineCardProps) {
   const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const RoutineIcon = ROUTINE_ICONS[routine.icon];
@@ -119,7 +124,7 @@ export function RoutineCard({
           </View>
 
           <View style={[styles.sessionList, { borderTopColor: colors.surfaceBorder }]}>
-            {current.sessions.map((session) => {
+            {(() => { const rows = current.sessions.map((session) => {
               const isCompleted = session.completedOn !== undefined;
               const isSkipped = session.skippedOn !== undefined;
               const isSelected = session.id === selectedSessionId;
@@ -127,10 +132,11 @@ export function RoutineCard({
                 .map((entry) => muscleLabel(entry.muscle))
                 .join(' · ');
 
-              return (
+              return { index: session.plannedSessionIndex, content: (
                 <Pressable
                   key={session.id}
                   onPress={onSelectSession === undefined ? undefined : () => onSelectSession(session.id)}
+                  onLongPress={onLongPressSession && !isCompleted && !isSkipped ? () => onLongPressSession(session.plannedSessionIndex) : undefined}
                   disabled={onSelectSession === undefined}
                   accessibilityRole="button"
                   accessibilityState={{ selected: isSelected, disabled: onSelectSession === undefined }}
@@ -144,7 +150,7 @@ export function RoutineCard({
                   <Text
                     style={[
                       styles.sessionDate,
-                      { color: isSelected ? accent : colors.textMuted },
+                      { color: isSelected ? colors.accentText : colors.textMuted },
                     ]}>
                     {isSelected
                       ? labels.today
@@ -159,7 +165,8 @@ export function RoutineCard({
                     <Text
                       style={[
                         styles.sessionName,
-                        { color: isSelected ? accent : colors.textPrimary },
+                        { color: isSelected ? colors.accentText : colors.textPrimary },
+                        isSkipped && { textDecorationLine: 'line-through' },
                       ]}>
                       {session.name}
                     </Text>
@@ -172,15 +179,15 @@ export function RoutineCard({
                     style={[
                       styles.checkbox,
                       {
-                        borderColor: isCompleted || isSelected ? accent : colors.surfaceBorder,
-                        backgroundColor: isCompleted ? accent : 'transparent',
+                        borderColor: isCompleted || isSkipped || isSelected ? accent : colors.surfaceBorder,
+                        backgroundColor: isCompleted || isSkipped ? accent : 'transparent',
                       },
                     ]}>
-                    {isCompleted ? <Text style={styles.checkMark}>✓</Text> : null}
+                    {isCompleted || isSkipped ? <Text style={styles.checkMark}>✓</Text> : null}
                   </View>
                 </Pressable>
-              );
-            })}
+              ) };
+            }); return renderSessionList ? renderSessionList(rows) : rows.map((row) => row.content); })()}
           </View>
 
           <View style={[styles.actions, { marginTop: spacing.sm }]}>
@@ -216,16 +223,17 @@ export function RoutineCard({
 }
 
 const styles = StyleSheet.create({
-  card: { padding: 12 },
+  card: { padding: 16 },
   collapsed: { opacity: 0.72 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  iconBadge: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
+  iconBadge: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   headerText: { flex: 1 },
-  routineName: { fontSize: 13.5, fontWeight: '700' },
-  routineMeta: { fontSize: 10.5, marginTop: 1 },
+  routineName: { fontSize: 19, fontWeight: '700' },
+  routineMeta: { fontSize: 13, marginTop: 4 },
   chevron: { fontSize: 10 },
   sessionList: { borderTopWidth: 1, marginTop: 10 },
   sessionRow: {
+    minHeight: 64,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -234,10 +242,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   sessionCompleted: { opacity: 0.45 },
-  sessionDate: { width: 44, fontSize: 9, fontWeight: '800', letterSpacing: 0.3 },
+  sessionDate: { width: 48, fontSize: 11, fontWeight: '800', letterSpacing: 0.3 },
   sessionText: { flex: 1 },
-  sessionName: { fontSize: 12.5, fontWeight: '600' },
-  sessionMuscles: { fontSize: 9.5, marginTop: 1 },
+  sessionName: { fontSize: 16, fontWeight: '600' },
+  sessionMuscles: { fontSize: 12, marginTop: 4 },
   checkbox: {
     width: 18,
     height: 18,
@@ -247,8 +255,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkMark: { fontSize: 11, fontWeight: '900', color: '#16191C' },
-  actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 },
-  actionButton: { borderWidth: 1, paddingVertical: 7, paddingHorizontal: 12 },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8 },
+  actionButton: { borderWidth: 1, minHeight: 44, justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 12 },
   removeButton: { marginRight: 'auto' },
-  actionText: { fontSize: 11.5, fontWeight: '700' },
+  actionText: { fontSize: 16, fontWeight: '700' },
 });

@@ -24,6 +24,7 @@ const base: GenerationSettings = {
   availableEquipment: [Equipment.BARBELL, Equipment.DUMBBELL],
   priorityRegions: [VolumeRegion.BACK],
   deprioritizedRegions: [],
+  vetoedExerciseIds: [],
 };
 
 describe('settingsSignature', () => {
@@ -38,6 +39,8 @@ describe('settingsSignature', () => {
         availableEquipment: [Equipment.DUMBBELL, Equipment.BARBELL],
       }),
     ).toBe(settingsSignature(base));
+    expect(settingsSignature({ ...base, vetoedExerciseIds: ['a', 'b'] }))
+      .toBe(settingsSignature({ ...base, vetoedExerciseIds: ['b', 'a'] }));
   });
 
   it('separates a region moved from priority to maintenance', () => {
@@ -59,6 +62,7 @@ describe('settingsSignature', () => {
     { availableEquipment: [Equipment.BARBELL] },
     { priorityRegions: [VolumeRegion.CHEST] },
     { deprioritizedRegions: [VolumeRegion.BICEPS] },
+    { vetoedExerciseIds: ['press-banca'] },
   ])('changes when a generator input moves: %o', (change) => {
     expect(settingsSignature({ ...base, ...change })).not.toBe(settingsSignature(base));
   });

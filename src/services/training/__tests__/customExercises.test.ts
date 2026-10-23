@@ -1,5 +1,5 @@
 import { Equipment, ExerciseGenerationTier, ExerciseProfile, MovementVector, MuscleGroup, SetType, type WorkoutSession } from '@/models';
-import { createCustomExercise, mergeExerciseCatalogue, normalizedExerciseName, recordingOf, supportsEstimatedMax } from '../customExercises';
+import { createCustomExercise, mergeExerciseCatalogue, normalizedExerciseName, recordingOf, supportsEstimatedMax, usesCustomRecording } from '../customExercises';
 import { customCompletionPatch } from '../customRecording';
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
 import { appendPreviewExercises, applyPreviewEdits, previewVolumeBreakdownByMuscle } from '../previewEditing';
@@ -10,6 +10,26 @@ import { isSetCompleted, isSessionEmpty, toWorkoutSession, toSessionSetsByExerci
 import { e1RMByExerciseFromHistory } from '../e1rmHistory';
 import { prescriptionForMicrocycle } from '../microcyclePrescription';
 import { averageTargetRIR } from '../sessionProgression';
+
+it('routes edited builtin recording units through custom controls and preserves them through microcycles', () => {
+  const original = EXERCISE_CATALOGUE[0];
+  expect(usesCustomRecording(original)).toBe(false);
+  expect(usesCustomRecording({ isCustom: true })).toBe(false);
+  expect(usesCustomRecording({ isCustom: false, recording: { measure: 'REPETITIONS', load: 'LEVEL' } })).toBe(true);
+  const edited = { ...original, isPersonalized: true, recording: { measure: 'SECONDS' as const, load: 'NONE' as const } };
+  expect(usesCustomRecording(edited)).toBe(true);
+  const map = new Map([[edited.id, edited]]);
+  const base = { index: 0, focus: 'UPPER' as const, estimatedWorkMinutes: 0, exercises: [] };
+  const added = appendPreviewExercises([base], [{ sessionIndex: 0, exerciseId: edited.id }], map, TrainingGoal.HYPERTROPHY);
+  expect(added[0].exercises[0].exerciseSnapshot).toEqual(edited);
+  expect(initialSetsForPlannedSession(added[0])[edited.id][0]).toMatchObject({ recording: edited.recording, targetDurationSeconds: 30, targetReps: 0 });
+  for (const goal of [TrainingGoal.HYPERTROPHY, TrainingGoal.STRENGTH]) for (const index of [0, 3, 5]) {
+    expect(prescriptionForMicrocycle(added, goal, index, 6)[0].exercises[0].sets).toEqual(added[0].exercises[0].sets);
+  }
+  const other = { ...base, exercises: [{ exerciseId: 'old', order: 0, isEdited: false, sets: [{ setType: SetType.NORMAL, targetReps: 8, targetRIR: 2 }] }] };
+  const swapped = applyPreviewEdits([other], { '0:0': { exerciseId: edited.id } }, map);
+  expect(swapped[0].exercises[0].exerciseSnapshot).toEqual(edited);
+});
 import { isValidCustomExercise } from '../customExercises';
 
 const input = { name: '  Elbow   hold ', recording: { measure: 'SECONDS', load: 'NONE' } } as const;

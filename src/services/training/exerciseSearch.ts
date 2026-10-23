@@ -1,6 +1,8 @@
 import { MuscleGroup, type Exercise } from '@/models';
 import { primaryMusclesOf } from './exerciseMuscles';
 import { EXERCISE_NAME_ALIASES } from './exerciseIdentity';
+import englishNames from '@/data/exercise-names-en.json';
+import { rankSwapCandidates } from './swapEngine';
 
 /**
  * Search vocabulary is deliberately multilingual and domain-based. Exercise
@@ -84,6 +86,7 @@ export function searchExercises(
       [
         exercise.name,
         ...(EXERCISE_NAME_ALIASES[exercise.id] ?? []),
+        (englishNames as Record<string, string>)[exercise.id] ?? '',
         exercise.primaryMuscle,
         ...EXERCISE_KEYWORDS.filter(([pattern]) => pattern.test(normalizedName)).map(([, words]) => words),
         exercise.equipment,
@@ -102,7 +105,7 @@ export function partitionSwapCandidates(
 ): { related: Exercise[]; other: Exercise[] } {
   const related: Exercise[] = [];
   const other: Exercise[] = [];
-  candidates.forEach((candidate) => {
+  rankSwapCandidates(current, [...candidates]).forEach((candidate) => {
     (primaryMusclesOf(candidate).some((muscle) => primaryMusclesOf(current).includes(muscle))
       || candidate.primaryMuscle === current.primaryMuscle ? related : other).push(candidate);
   });

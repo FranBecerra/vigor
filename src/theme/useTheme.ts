@@ -24,7 +24,7 @@ export function useTheme() {
     scheme,
     colors: palette[scheme],
     sectionAccent,
-    semantic,
+    semantic: scheme === 'light' ? { ...semantic, danger: '#B82822', warning: '#805000', success: '#365E00' } : semantic,
     typography,
     spacing,
     radius,

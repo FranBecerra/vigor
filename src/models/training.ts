@@ -57,7 +57,7 @@ export interface Mesocycle {
   plannedSessions?: PlannedSession[];
   /** Whole-plan revisions effective from a microcycle, preserving earlier history. */
   prescriptionRevisions?: { fromMicrocycleIndex: number; plannedSessions: PlannedSession[] }[];
-  /** One-off session edits, keyed by `microcycleIndex:sessionIndex`. */
+  /** Explicit session prescriptions (one-off or reviewed RIR replanning), keyed by microcycle/session. */
   sessionOverrides?: Record<string, PlannedSession>;
   /** Explicit skips; a skipped session is not counted as a completed workout. */
   skippedSessions?: Record<string, number>;
@@ -65,6 +65,14 @@ export interface Mesocycle {
   trainingCalendar?: Record<string, import('./routine').TrainingCalendarEntry>;
   /** Repeatable workout/rest slots independent of civil dates. */
   scheduleTemplate?: import('./routine').ScheduleTemplate;
+  /** Stable undated rest markers, independent of completed workout progression. */
+  restDays?: { id: string; afterSessionIndex: number | null }[];
+  /** Athlete-selected execution order; stable prescription IDs never change. */
+  sessionOrder?: number[];
+  /** Exercise-specific rest duration for this plan; actual workout history is immutable. */
+  exerciseRestOverrides?: Record<string, number>;
+  /** Microcycle-index:rest-id -> completion, never credits a workout. */
+  restDayChecks?: Record<string, boolean>;
   /** MEAV inicial: volumen objetivo por grupo muscular (PRD §3, MuscleGroup -> nº series). */
   targetVolumePerGroup: Record<string, number>;
   /** Índice del microciclo actualmente en curso dentro del mesociclo (0-based). */
@@ -165,6 +173,8 @@ export interface WorkoutSet {
   targetRIR: number;
   targetWeight: number;
   actualReps?: number;
+  /** Additional partial repetitions, separate from full-ROM reps; never used for e1RM/PRs. */
+  actualPartialReps?: number;
   /**
    * RIR real registrado. Puede ser **null** = intensidad no registrada
    * (p. ej. en calentamientos donde no se sabe cuántas reps quedan).
@@ -185,6 +195,8 @@ export interface WorkoutSet {
 
 /** Un ejercicio ejecutado dentro de una sesión, con sus series. */
 export interface WorkoutExercise {
+  /** Personal exercise note captured at execution time. */
+  exerciseNote?: string;
   notes?: string;
   exerciseSnapshot?: import('./biomechanics').Exercise;
   id: string;
@@ -200,6 +212,13 @@ export interface WorkoutExercise {
 
 /** Sesión de entrenamiento completa dentro de un microciclo del mesociclo. */
 export interface WorkoutSession {
+  /** Explicit execution correction; never changes the original completion timestamp. */
+  editedAt?: number;
+  /** Personal session note and mesocycle note captured at execution time. */
+  sessionNote?: string;
+  mesocycleNote?: string;
+  /** Local-first discard tombstone; excluded from history, progression and exports. */
+  discardedAt?: Timestampish;
   /** Optional runtime metadata; older history documents remain readable. */
   trainingGoal?: string;
   sessionName?: string;

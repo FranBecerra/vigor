@@ -1,6 +1,6 @@
 import { SetType } from '@/models';
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
-import { editNumericDraft, nextExerciseAfterCompletion, updateWorkoutSet } from '../workoutExecution';
+import { editNumericDraft, nextExerciseAfterCompletion, replacementWorkoutSets, updateWorkoutSet } from '../workoutExecution';
 import { sessionProgress, toSessionSetsByExercise, toWorkoutSession, type SessionSetState } from '../sessionMapper';
 import { workoutReview } from '../workoutReview';
 
@@ -9,6 +9,28 @@ const row = (id: string, patch: Partial<SessionSetState> = {}): SessionSetState 
   isAutoFilled: false, isCompleted: false, ...patch,
 });
 const context = { sessionId: 'test-only', userId: 'fixture', mesocycleId: 'm', microcycleId: 'm0', microcycleIndex: 0, performedAt: 1 };
+
+it('keeps partial reps distinct through save/resume and never inflates full-rep tonnage', () => {
+  const set = row('s', { actualWeight: 35, actualReps: 8, actualRIR: 2, actualPartialReps: 4, isCompleted: true });
+  const saved = toWorkoutSession(context, ['ex'], { ex: [set] });
+  expect(toSessionSetsByExercise(saved).ex[0].actualPartialReps).toBe(4);
+  expect(workoutReview([{ ...EXERCISE_CATALOGUE[0], id: 'ex' }], { ex: [set] }, [], 's').tonnage).toBe(280);
+  for (const bad of [-1, 1.5, NaN, Infinity, 1000]) expect(updateWorkoutSet(set, { actualPartialReps: bad }).actualPartialReps).toBe(4);
+  expect(updateWorkoutSet(set, { actualPartialReps: 0 }).actualPartialReps).toBe(0);
+  expect(updateWorkoutSet(set, { actualPartialReps: undefined }).actualPartialReps).toBeUndefined();
+});
+it('swaps unfinished dose and effort but never copies achieved loads, prior results or completion', () => {
+  const old = [row('done', { isCompleted: true, actualWeight: 80, actualReps: 8 }), row('pending', { targetReps: 12, targetRIR: 1, actualWeight: 60 })];
+  const next = replacementWorkoutSets(old, [row('default', { targetWeight: 0 })], 'new');
+  expect(next).toHaveLength(1); expect(next[0]).toMatchObject({ id: 'new:0', targetWeight: 0, targetReps: 12, targetRIR: 1, isCompleted: false, completionState: 'PENDING' });
+  expect(next[0].actualWeight).toBeUndefined(); expect(next[0].previous).toBeUndefined(); expect(old[1].actualWeight).toBe(60);
+  expect(replacementWorkoutSets([], [row('default')], 'new')).toHaveLength(1);
+  expect(replacementWorkoutSets([], [], 'new')).toEqual([]);
+  expect(() => replacementWorkoutSets([row('s')], [], 'new')).toThrow('missingReplacementPrescription');
+  const timed = row('t', { recording: { measure: 'SECONDS', load: 'NONE' }, targetDurationSeconds: 30 });
+  expect(replacementWorkoutSets([timed], [row('default')], 'new')[0].targetDurationSeconds).toBeUndefined();
+  expect(replacementWorkoutSets([timed], [timed], 'new')[0].targetDurationSeconds).toBe(30);
+});
 
 it('keeps valid actual corrections complete but unchecks a row when a required actual is cleared', () => {
   const done = row('s', { isCompleted: true, actualWeight: 35, actualReps: 8, completionState: 'PENDING' });

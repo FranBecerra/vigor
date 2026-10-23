@@ -17,7 +17,10 @@
  * automático por fatiga).
  */
 import { useEffect, useRef, useState } from 'react';
-import { Platform, TextInput, StyleSheet, type KeyboardTypeOptions } from 'react-native';
+import { Platform, Pressable, Text, TextInput, StyleSheet, type KeyboardTypeOptions } from 'react-native';
+import { NumericKeypad } from './NumericKeypad';
+import { parseNumericText } from '@/services/training/numericDraft';
+export { parseNumericText } from '@/services/training/numericDraft';
 import { useTheme } from '@/theme/useTheme';
 
 interface NumericFieldProps {
@@ -30,14 +33,7 @@ interface NumericFieldProps {
   /** true cuando el valor mostrado es el previsto, no uno introducido. */
   isPlanned?: boolean;
   accessibilityLabel: string;
-}
-
-/** Convierte el texto a número; devuelve undefined si está vacío o no es válido. */
-export function parseNumericText(text: string, decimal: boolean): number | undefined {
-  const normalized = text.replace(',', '.').trim();
-  if (normalized === '') return undefined;
-  const parsed = decimal ? Number(normalized) : parseInt(normalized, 10);
-  return Number.isFinite(parsed) ? parsed : undefined;
+  compact?: boolean;
 }
 
 export function NumericField({
@@ -47,10 +43,12 @@ export function NumericField({
   editable = true,
   isPlanned = false,
   accessibilityLabel,
+  compact = false,
 }: NumericFieldProps) {
   const { colors, radius } = useTheme();
   const [text, setText] = useState(value === undefined ? '' : String(value));
   const focused = useRef(false);
+  const [open, setOpen] = useState(false);
 
   // Resincroniza si el valor externo cambia y no coincide con lo escrito.
   useEffect(() => {
@@ -64,6 +62,14 @@ export function NumericField({
   }, [value]);
 
   const keyboardType: KeyboardTypeOptions = decimal || Platform.OS === 'ios' ? 'decimal-pad' : 'number-pad';
+
+  if (compact) return <>
+    <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} disabled={!editable} onPress={() => setOpen(true)}
+      style={[styles.input, { minHeight: 44, justifyContent: 'center', borderRadius: radius.sm, backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
+      <Text style={{ color: isPlanned ? colors.textMuted : colors.textPrimary, textAlign: 'center', fontSize: 16, fontWeight: '700', fontVariant: ['tabular-nums'] }}>{value ?? '—'}</Text>
+    </Pressable>
+    {open && <NumericKeypad label={accessibilityLabel} value={value} decimal={decimal} onSave={onChangeValue} onClose={() => setOpen(false)} />}
+  </>;
 
   return (
     <TextInput

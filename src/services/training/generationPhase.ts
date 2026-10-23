@@ -40,6 +40,7 @@ export interface GenerationSettings {
   availableEquipment: readonly Equipment[];
   priorityRegions: readonly VolumeRegion[];
   deprioritizedRegions: readonly VolumeRegion[];
+  vetoedExerciseIds: readonly string[];
 }
 
 /**
@@ -61,6 +62,7 @@ export function settingsSignature(settings: GenerationSettings): string {
     [...settings.availableEquipment].sort().join(','),
     [...settings.priorityRegions].sort().join(','),
     [...settings.deprioritizedRegions].sort().join(','),
+    [...settings.vetoedExerciseIds].sort().join(','),
   ].join('|');
 }
 

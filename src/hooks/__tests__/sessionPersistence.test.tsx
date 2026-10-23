@@ -5,8 +5,10 @@ import { SetType } from '@/models';
 const { create, act } = require('react-test-renderer');
 const mockGet = jest.fn();
 const mockWrite = jest.fn();
+const mockDiscard = jest.fn();
 jest.mock('@/services/repositories', () => ({ workoutSessionRepository: {
   listByUser: (...args: unknown[]) => mockGet(...args).then((saved: unknown) => saved ? [saved] : []), createLocally: (...args: unknown[]) => mockWrite(...args),
+  discardLocally: (...args: unknown[]) => mockDiscard(...args),
 } }));
 let result: ReturnType<typeof useSessionPersistence>;
 const restore = jest.fn();
@@ -16,6 +18,7 @@ const sets = { hold: [{ id: 'one', setType: SetType.NORMAL, targetWeight: 0, tar
 const context = { sessionId: 'workout', userId: 'owner', mesocycleId: 'meso', microcycleId: 'micro', microcycleIndex: 0, performedAt: 1 };
 function Probe() { result = useSessionPersistence({ context, exerciseOrder: ['hold'], setsByExercise: sets, onRestore: restore }); return null; }
 beforeEach(() => {
+  mockDiscard.mockResolvedValue(undefined);
   jest.clearAllMocks(); mockGet.mockResolvedValue(null); mockWrite.mockResolvedValue('pending');
   jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() });
 });
@@ -84,4 +87,22 @@ it('does not report a cloud rejection during local acceptance as a successful sa
   await act(async () => { expect(await result.flush()).toBe(false); });
   expect(result.status).toBe('error');
   await act(async () => tree.unmount());
+});
+it('discards a restored workout without resurrecting it on unmount and allows retry on failure', async () => {
+  let tree: any; await act(async () => { tree = create(<Probe />); });
+  mockDiscard.mockRejectedValueOnce(Error('local failure'));
+  await act(async () => { expect(await result.discard()).toBe(false); }); expect(result.status).toBe('error');
+  await act(async () => { expect(await result.flush()).toBe(true); });
+  await act(async () => { expect(await result.discard()).toBe(true); });
+  expect(mockDiscard).toHaveBeenCalledWith(expect.objectContaining({ id: 'workout', userId: 'owner' }));
+  const writes = mockWrite.mock.calls.length;
+  await act(async () => { expect(await result.flush()).toBe(false); tree.unmount(); });
+  expect(mockWrite).toHaveBeenCalledTimes(writes);
+});
+it('accepts an explicit note save with fresh text instead of the previous render context', async () => {
+  let tree: any; await act(async () => { tree = create(<Probe />); });
+  await act(async () => { expect(await result.flush(undefined, { sessionNote: 'Today only', exerciseNotes: { hold: 'Seat 4' } })).toBe(true); });
+  expect(mockWrite.mock.calls.at(-1)[0]).toMatchObject({ sessionNote: 'Today only', exercises: [{ notes: 'Seat 4' }] });
+  await act(async () => tree.unmount());
+  expect(mockWrite.mock.calls.at(-1)[0]).toMatchObject({ sessionNote: 'Today only', exercises: [{ notes: 'Seat 4' }] });
 });

@@ -256,6 +256,8 @@ export enum ExerciseGenerationTier {
  * y carecen de mapeo biomecánico profundo (isCustom = true).
  */
 export interface Exercise {
+  /** Runtime marker for a private catalogue override, not a global rating change. */
+  isPersonalized?: boolean;
   id: string;
   name: string;
   primaryMuscle: MuscleGroup;

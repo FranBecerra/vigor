@@ -80,7 +80,7 @@ export default function PerformanceScreen() {
   return <View style={{ flex: 1, backgroundColor: colors.bg, padding: spacing.lg, paddingTop: insets.top + spacing.lg }}>
     <Text style={[typography.emphasis, { color: colors.textPrimary }]}>UI PERFORMANCE</Text>
     <Text style={{ color: colors.textSecondary, marginVertical: 16 }}>Fixture-only · Release · 30 warm samples per action</Text>
-    {running && <Text style={{ color: sectionAccent.train, marginBottom: 12 }}>{scene} · {iteration}</Text>}
+    {running && <Text style={{ color: colors.accentText, marginBottom: 12 }}>{scene} · {iteration}</Text>}
     {scene === 'button.commit' && <GenerationChoice title="Selection feedback" selected={iteration % 2 === 0} onPress={() => {}} compact />}
     {scene === 'wizard.commit' && <ScrollView key={iteration}>
       {iteration % 3 === 0 ? ['Hypertrophy', 'Strength'].map((title, index) => <GenerationChoice key={title}
@@ -94,7 +94,7 @@ export default function PerformanceScreen() {
     </ScrollView>}
     {!running && <><Text selectable style={{ color: colors.textPrimary, marginVertical: 20 }}>{result}</Text>
       <Pressable onPress={() => { void run(`${Date.now()}-manual`); }} style={{ padding: 18, backgroundColor: colors.surface, borderRadius: 16 }}>
-        <Text style={{ color: sectionAccent.train }}>Run benchmark</Text></Pressable>
+        <Text style={{ color: colors.accentText }}>Run benchmark</Text></Pressable>
       <Pressable onPress={() => router.replace('/(tabs)/(train)')} style={{ padding: 18 }}><Text style={{ color: colors.textSecondary }}>Back</Text></Pressable>
     </>}
     <ExerciseSwapSheet open={pickerOpen} current={EXERCISE_CATALOGUE[0]} candidates={EXERCISE_CATALOGUE.slice(1)} onSelect={() => {}}

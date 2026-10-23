@@ -1,6 +1,7 @@
 /** Import an authored baseline; mesocycle policy separately controls continuation. */
 import { SetType, type Exercise, type PlannedSession, type PlannedSessionFocus } from '@/models';
 import { timeManualSessions } from './manualRoutine';
+import { cleanImportedExerciseNotes } from './exerciseEditing';
 
 export interface AuthoredMicrocycle {
   source: string;
@@ -24,7 +25,7 @@ export function importAuthoredMicrocycle(source: AuthoredMicrocycle, catalogue: 
           || entry.rir.some((rir) => !Number.isInteger(rir) || rir < 0 || rir > 5)) throw new Error('invalidPrescription');
         used.add(entry.exerciseId);
         // Snapshots allow an already-installed app to resolve new catalogue IDs.
-        const snapshot = { ...exercise, notes: [exercise.notes, `Source: ${source.source} / ${entry.sourceName}`, entry.notes].filter(Boolean).join('\n') };
+        const snapshot = { ...exercise, notes: [cleanImportedExerciseNotes(exercise.notes), entry.notes].filter(Boolean).join('\n') };
         return { exerciseId: exercise.id, order, isEdited: true, exerciseSnapshot: snapshot,
           sets: entry.rir.map((rir) => ({ setType: SetType.NORMAL, targetRepsMin: entry.min, targetReps: entry.max, targetRIR: rir })) };
       }) };

@@ -1,0 +1,3896 @@
+{
+  "date": "2026-10-22",
+  "engineFingerprint": "b0ea107d10b2d67876dc69a89b639412c25dfbc86ee39b023118c9e56b0c165a",
+  "reports": [
+    {
+      "level": "BEGINNER",
+      "seed": 0,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 3,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-inclinado-mancuernas",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-bayesian",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "buenos-dias",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "sentadilla-smith",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "BEGINNER",
+      "seed": 1,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 3,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-inclinado-mancuernas",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "sentadilla-hack",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "BEGINNER",
+      "seed": 2,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 4
+          },
+          {
+            "id": "aperturas-inclinadas",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "buenos-dias",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "BEGINNER",
+      "seed": 3,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 1,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-bayesian",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "buenos-dias",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "BEGINNER",
+      "seed": 4,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 1,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-inclinado-barra",
+            "sets": 4
+          },
+          {
+            "id": "aperturas-inclinadas",
+            "sets": 3
+          },
+          {
+            "id": "curl-bayesian",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "buenos-dias",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "sentadilla-hack",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "BEGINNER",
+      "seed": 5,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-inclinado-barra",
+            "sets": 4
+          },
+          {
+            "id": "aperturas-inclinadas",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "buenos-dias",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "pallof-press",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "sentadilla-hack",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "BEGINNER",
+      "seed": 6,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-inclinado-mancuernas",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "buenos-dias",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "sentadilla-hack",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "BEGINNER",
+      "seed": 7,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 1,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "buenos-dias",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "pallof-press",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "BEGINNER",
+      "seed": 8,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-inclinado-barra",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "buenos-dias",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "pallof-press",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "BEGINNER",
+      "seed": 9,
+      "recommendation": {
+        "sessionsPerMicrocycle": 3,
+        "minutesPerSession": 60,
+        "weeklyMinutes": 180,
+        "sets": 50,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 1,
+      "sets": 50,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 57,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 3
+          },
+          {
+            "id": "press-inclinado-barra",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "buenos-dias",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 4
+          },
+          {
+            "id": "sentadilla-hack",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 0,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 3,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-banda",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "face-pull",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 1,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 1,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-maquina",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-inclinado-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "face-pull",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 2,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "pallof-press",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-banda",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "face-pull",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 3,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-hack",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-banda",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "face-pull",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 4,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-banda",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 5,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-banda",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "face-pull",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 6,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 3,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "pallof-press",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-maquina",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "face-pull",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 7,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-banda",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-inclinado-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "face-pull",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 8,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "prensa-45",
+            "sets": 3
+          },
+          {
+            "id": "pallof-press",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-banda",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "face-pull",
+            "sets": 3
+          },
+          {
+            "id": "curl-bayesian",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "INTERMEDIATE",
+      "seed": 9,
+      "recommendation": {
+        "sessionsPerMicrocycle": 4,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 300,
+        "sets": 85,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 1,
+      "sets": 85,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-hack",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 3
+          },
+          {
+            "id": "abduccion-cadera-banda",
+            "sets": 2
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "face-pull",
+            "sets": 3
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-barra",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "extension-triceps-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 0,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "aperturas-inclinadas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "face-pull",
+            "sets": 4
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "curl-bayesian",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "prensa-45",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "pullover-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 1,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 5,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "face-pull",
+            "sets": 4
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "prensa-45",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-inclinado-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "pullover-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "pallof-press",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 2,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 3,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "curl-bayesian",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "prensa-45",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "pullover-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 3,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 1,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "aperturas-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "face-pull",
+            "sets": 4
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "curl-bayesian",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "prensa-45",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "pullover-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 4,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "aperturas-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "face-pull",
+            "sets": 4
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "prensa-45",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "pullover-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 5,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "sentadilla-hack",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "extension-hombro-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 6,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "face-pull",
+            "sets": 4
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "sentadilla-smith",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "pullover-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 7,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 3,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-polea",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "face-pull",
+            "sets": 4
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "curl-bayesian",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "prensa-45",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "extension-hombro-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 8,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-sentado-polea",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "pec-deck-invertido",
+            "sets": 4
+          },
+          {
+            "id": "curl-bayesian",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "prensa-45",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-inclinado-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "pullover-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "rueda-abdominal",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    },
+    {
+      "level": "ADVANCED",
+      "seed": 9,
+      "recommendation": {
+        "sessionsPerMicrocycle": 6,
+        "minutesPerSession": 75,
+        "weeklyMinutes": 450,
+        "sets": 115,
+        "reachesRecoverableVolume": true
+      },
+      "generationMs": 2,
+      "sets": 115,
+      "verticalPull": true,
+      "horizontalPull": true,
+      "unassigned": 0,
+      "empty": false,
+      "maxMinutes": 75,
+      "targetShortfalls": [],
+      "sessions": [
+        [
+          {
+            "id": "bulgara",
+            "sets": 4
+          },
+          {
+            "id": "extension-sobre-cabeza-mancuerna",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-maquina",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-baja",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "pushdown-cuerda",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "remo-maquina",
+            "sets": 3
+          },
+          {
+            "id": "pullover-mancuerna",
+            "sets": 3
+          },
+          {
+            "id": "y-raise-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "face-pull",
+            "sets": 4
+          },
+          {
+            "id": "curl-femoral-sentado",
+            "sets": 4
+          },
+          {
+            "id": "curl-inclinado",
+            "sets": 3
+          },
+          {
+            "id": "curl-predicador",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "prensa-45",
+            "sets": 4
+          },
+          {
+            "id": "press-banca-cerrado",
+            "sets": 3
+          },
+          {
+            "id": "extension-cuadriceps",
+            "sets": 4
+          },
+          {
+            "id": "crunch-polea",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "press-banca-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "elevacion-lateral-inclinado",
+            "sets": 4
+          },
+          {
+            "id": "elevacion-lateral-polea",
+            "sets": 4
+          },
+          {
+            "id": "cruces-polea-media",
+            "sets": 3
+          },
+          {
+            "id": "press-frances",
+            "sets": 3
+          },
+          {
+            "id": "pec-deck",
+            "sets": 3
+          }
+        ],
+        [
+          {
+            "id": "jalon-al-pecho",
+            "sets": 4
+          },
+          {
+            "id": "remo-pecho-apoyado",
+            "sets": 3
+          },
+          {
+            "id": "extension-hombro-polea",
+            "sets": 3
+          },
+          {
+            "id": "curl-polea-baja",
+            "sets": 4
+          },
+          {
+            "id": "pajaros-polea",
+            "sets": 4
+          }
+        ],
+        [
+          {
+            "id": "hip-thrust",
+            "sets": 4
+          },
+          {
+            "id": "peso-muerto-rumano-mancuernas",
+            "sets": 3
+          },
+          {
+            "id": "sentadilla-goblet",
+            "sets": 3
+          },
+          {
+            "id": "pallof-press",
+            "sets": 3
+          },
+          {
+            "id": "curl-femoral-tumbado",
+            "sets": 3
+          },
+          {
+            "id": "crunch-maquina",
+            "sets": 3
+          }
+        ]
+      ]
+    }
+  ]
+}

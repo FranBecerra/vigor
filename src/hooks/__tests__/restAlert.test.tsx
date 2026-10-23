@@ -1,9 +1,11 @@
 import React from 'react';
 import { AppState } from 'react-native';
-import { useRestAlert } from '../useRestAlert';
+import { clearWorkoutRestAlerts, useRestAlert } from '../useRestAlert';
 import type { RestTimerState } from '@/services/training/restTimer';
 const { create, act } = require('react-test-renderer');
 const mockPlayer = { seekTo: jest.fn().mockResolvedValue(undefined), play: jest.fn() };
+const mockNativeFeedback = jest.fn().mockResolvedValue(false);
+jest.mock('@/services/training/nativeRestFeedback', () => ({ scheduleNativeRestFeedback: (...args: unknown[]) => mockNativeFeedback(...args) }));
 const mockMode = jest.fn().mockResolvedValue(undefined);
 const mockHaptic = jest.fn().mockResolvedValue(undefined);
 const mockSchedule = jest.fn().mockResolvedValue('vigor-rest');
@@ -35,8 +37,23 @@ beforeEach(() => {
   Object.defineProperty(AppState, 'currentState', { configurable: true, value: 'active' });
   jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() });
   mockPermission.mockResolvedValue({ granted: true, ios: { allowsSound: true } });
+  mockNativeFeedback.mockResolvedValue(false);
 });
 afterEach(() => { jest.useRealTimers(); jest.restoreAllMocks(); });
+
+it('uses the native absolute deadline without duplicate Expo feedback and falls back if native preparation fails', async () => {
+  mockNativeFeedback.mockResolvedValue(true); let tree: any;
+  await act(async () => { tree = create(<Probe state={{ startedAt: 10000, durationSeconds: 2, anchorSetId: 'native' }} />); await drain(); });
+  expect(mockNativeFeedback).toHaveBeenCalledWith(12000);
+  await act(async () => { jest.advanceTimersByTime(2000); await drain(); });
+  expect(mockPlayer.play).not.toHaveBeenCalled(); expect(mockHaptic).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+  mockNativeFeedback.mockRejectedValue(Error('audio unavailable'));
+  await act(async () => { tree = create(<Probe state={{ startedAt: 12000, durationSeconds: 2, anchorSetId: 'fallback' }} />); await drain(); });
+  await act(async () => { jest.advanceTimersByTime(2000); await drain(); });
+  expect(mockPlayer.play).toHaveBeenCalledTimes(1); expect(mockHaptic).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount());
+});
 
 it('plays one foreground chime and haptic, suppresses its banner and removes only rest notifications', async () => {
   let tree: any;
@@ -83,6 +100,10 @@ it('keeps an accepted OS alarm on navigation but cancels it on explicit idle', a
   await act(async () => { tree = create(<Probe state={{ startedAt: null, durationSeconds: 0, anchorSetId: null }} />); }); await act(drain);
   expect(mockCancel).toHaveBeenCalledWith('vigor-rest');
   await act(async () => tree.unmount());
+});
+it('explicit discard cancels only rest alarms and clears their delivered notifications', async () => {
+  await clearWorkoutRestAlerts(); expect(mockCancel).toHaveBeenCalledWith('legacy');
+  expect(mockCancel).not.toHaveBeenCalledWith('other'); expect(mockDismiss).toHaveBeenCalledWith('old');
 });
 
 it('keeps foreground feedback when notification permission is denied and warns about background alerts', async () => {

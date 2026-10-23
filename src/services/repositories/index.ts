@@ -22,7 +22,9 @@ import {
 } from '@react-native-firebase/firestore';
 import { db } from '../firebase';
 import { BaseRepository } from './BaseRepository';
+import { editWorkoutHistory, type HistoryEdit } from '../training/historyEditing';
 import { validateScheduleTemplate, type ScheduleTemplate } from '../training/scheduleTemplate';
+import { orderedRoutineSessions } from '../training/routineRestDays';
 import type {
   Exercise,
   Mesocycle,
@@ -106,7 +108,7 @@ class MesocycleRepository extends BaseRepository<Mesocycle> {
       const snapshot = await transaction.get(reference);
       if (!snapshot.exists()) throw new Error('Missing mesocycle');
       const current = { ...snapshot.data(), id } as Mesocycle;
-      validateScheduleTemplate(template, (current.plannedSessions ?? []).map((s) => s.index));
+      validateScheduleTemplate(template, orderedRoutineSessions(current.plannedSessions ?? [], current.sessionOrder).map((s) => s.index));
       transaction.update(reference, { scheduleTemplate: template, updatedAt: now });
       return { ...current, scheduleTemplate: template, updatedAt: now };
     });
@@ -165,6 +167,37 @@ export const microcycleRepository = new MicrocycleRepository();
 class WorkoutSessionRepository extends BaseRepository<WorkoutSession> {
   constructor() {
     super('workoutSessions');
+  }
+
+  override async listWhere(field: string, value: unknown): Promise<WorkoutSession[]> {
+    return (await super.listWhere(field, value)).filter((session) => session.discardedAt === undefined);
+  }
+  override async list(): Promise<WorkoutSession[]> {
+    return (await super.list()).filter((session) => session.discardedAt === undefined);
+  }
+  override async get(id: string): Promise<WorkoutSession | null> {
+    const session = await super.get(id); return session?.discardedAt === undefined ? session : null;
+  }
+  async discardLocally(session: WorkoutSession): Promise<void> {
+    if (!session.id || !session.userId) throw Error('Missing workout identity');
+    let rejected = false;
+    await this.createLocally({ ...session, discardedAt: Date.now() }, undefined, () => { rejected = true; });
+    if (rejected) throw Error('Discard rejected');
+  }
+
+  /** Bounded local-first correction; reject stale editors rather than overwrite newer work. */
+  async editCompletedLocally(original: WorkoutSession, owner: string, draft: HistoryEdit, isCurrent = () => true): Promise<WorkoutSession> {
+    if (!isCurrent()) throw Error('staleHistoryOwner');
+    const latest = await this.get(original.id);
+    if (!isCurrent() || !latest || latest.userId !== owner || latest.editedAt !== original.editedAt
+      || JSON.stringify(latest.exercises) !== JSON.stringify(original.exercises)
+      || latest.sessionNote !== original.sessionNote || latest.sessionName !== original.sessionName) throw Error('staleHistory');
+    const edited = editWorkoutHistory(latest, owner, draft, Date.now());
+    let rejected = false;
+    await this.updateLocally(edited.id, { exercises: edited.exercises, sessionName: edited.sessionName,
+      sessionNote: edited.sessionNote, editedAt: edited.editedAt }, () => { rejected = true; });
+    if (rejected) throw Error('historyEditRejected');
+    return edited;
   }
 
   /** Todas las sesiones de un mesociclo, para reconstruir el historial. */

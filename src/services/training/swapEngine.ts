@@ -6,27 +6,33 @@
  *   1. Vector de Movimiento Exacto (mismo MovementVector).           [tier 1]
  *   2. Grupo Muscular Principal (mismo primaryMuscle).               [tier 2]
  *   3. Resto (misma región pero sin coincidencia fuerte).            [tier 3]
- * Los ejercicios PERSONALIZADOS (isCustom) se apilan SIEMPRE al final,
- * aunque coincidan en vector o músculo, por carecer de mapeo biomecánico
- * profundo (§3.5.3).
+ * Private variants use their actual classification, never a blanket penalty.
+ * Within each tier, match recording convention, equipment, profile and laterality.
  *
  * Funciones puras (objetivo 100% cobertura).
  */
 import type { Exercise } from '@/models';
+import { primaryMusclesOf } from './exerciseMuscles';
 
 /** Puntuación de prioridad de un candidato (menor = mejor). */
 function tierOf(target: Exercise, candidate: Exercise): number {
-  const sameVector = candidate.movementVector === target.movementVector;
-  const sameMuscle = candidate.primaryMuscle === target.primaryMuscle;
+  const vectors = target.movementVectors ?? [target.movementVector];
+  const sameVector = (candidate.movementVectors ?? [candidate.movementVector]).some((vector) => vector !== 'UNCLASSIFIED' && vectors.includes(vector));
+  const sameMuscle = primaryMusclesOf(candidate).some((muscle) => muscle !== 'UNCLASSIFIED' && primaryMusclesOf(target).includes(muscle));
 
-  // Personalizados: al final de su franja natural. Se les suma un offset grande
-  // para que queden por detrás de cualquier no-personalizado.
-  const customOffset = candidate.isCustom ? 10 : 0;
+  if (sameVector && sameMuscle) return 0;
+  if (sameVector) return 1;
+  if (sameMuscle) return 2;
+  return 3;
+}
 
-  if (sameVector && sameMuscle) return 0 + customOffset;
-  if (sameVector) return 1 + customOffset; // vector exacto (§3.5.1)
-  if (sameMuscle) return 2 + customOffset; // grupo muscular principal (§3.5.2)
-  return 3 + customOffset; // resto
+/** Similarity, not a hypertrophy effectiveness score. Never penalise a useful private variant out of its natural tier. */
+function similarity(target: Exercise, candidate: Exercise): number {
+  return Number(target.equipment !== candidate.equipment) * 4
+    + Number(target.profile !== candidate.profile) * 2
+    + Number((target.recording?.measure ?? 'REPETITIONS') !== (candidate.recording?.measure ?? 'REPETITIONS')) * 8
+    + Number((target.recording?.load ?? 'TOTAL_KG') !== (candidate.recording?.load ?? 'TOTAL_KG')) * 4
+    + Number(target.laterality !== candidate.laterality);
 }
 
 /**
@@ -41,7 +47,7 @@ export function rankSwapCandidates(target: Exercise, candidates: Exercise[]): Ex
   return candidates
     .filter((c) => c.id !== target.id)
     .map((c, index) => ({ c, index, tier: tierOf(target, c) }))
-    .sort((a, b) => (a.tier !== b.tier ? a.tier - b.tier : a.index - b.index))
+    .sort((a, b) => a.tier - b.tier || similarity(target, a.c) - similarity(target, b.c) || a.index - b.index)
     .map((x) => x.c);
 }
 

@@ -53,6 +53,7 @@ import {
   type SessionExercise,
 } from './sessionDistribution';
 import { redundantSessionPair } from './exerciseFamilies';
+import { missingRequiredPatterns } from './targetCoverage';
 
 /** Qué techo ha limitado el volumen del plan. */
 export type LimitingFactor =
@@ -403,7 +404,7 @@ export function completeDoseWithinCapacity(input: MesocyclePlanInput, baseline: 
 }
 
 /** Variation is subordinate to the existing dose, not another capacity search. */
-export function rerollMesocycle(input: MesocyclePlanInput, baseline: MesocyclePlan): MesocyclePlan {
+function* mesocycleVariation(input: MesocyclePlanInput, baseline: MesocyclePlan): Generator<void, MesocyclePlan, unknown> {
   if (!Number.isFinite(input.seed)) throw new RangeError('Invalid reroll seed');
   if (input.goal === TrainingGoal.STRENGTH && baseline.strength) {
     const signature = (plan: MesocyclePlan) => JSON.stringify(plan.distribution.sessions.map((session) => ({
@@ -414,6 +415,7 @@ export function rerollMesocycle(input: MesocyclePlanInput, baseline: MesocyclePl
         entry.strength?.role === 'MAIN' ? entry.exercise.id : null]).sort(),
     })));
     for (const offset of [0, -1, 1]) {
+      yield;
       const candidate = planMesocycle({ ...input, seed: input.seed + offset });
       if (signature(candidate) !== signature(baseline) || JSON.stringify(candidate.plan) !== JSON.stringify(baseline.plan)) continue;
       if (JSON.stringify(candidate.distribution.sessions.map((s) => s.exercises.map((e) => e.exercise.id)))
@@ -439,6 +441,7 @@ export function rerollMesocycle(input: MesocyclePlanInput, baseline: MesocyclePl
     .map((_, order) => ({ sessionIndex, order, draw: random() }))).sort((a, b) => a.draw - b.draw);
   // One accepted substitution per visit; bounded even on a large custom catalogue.
   for (const position of positions) {
+    yield;
     const outgoing = baseline.distribution.sessions[position.sessionIndex].exercises[position.order];
     const used = new Set(best.selection.selected.map((entry) => entry.exercise.id));
     const alternatives = input.catalogue.filter((exercise) => !used.has(exercise.id)
@@ -453,6 +456,7 @@ export function rerollMesocycle(input: MesocyclePlanInput, baseline: MesocyclePl
       && !hypertrophyDominates(outgoing.exercise, exercise))
       .map((exercise) => ({ exercise, draw: random() })).sort((a, b) => a.draw - b.draw);
     for (const { exercise } of alternatives) {
+      yield;
       if (++attempts > 80) return best;
       const sessions = best.distribution.sessions.map((session) => ({ ...session,
         exercises: session.exercises.map((entry) => entry.exercise.id === outgoing.exercise.id ? { ...entry, exercise } : { ...entry }) }));
@@ -486,6 +490,28 @@ export function rerollMesocycle(input: MesocyclePlanInput, baseline: MesocyclePl
     if (changes >= 3) break;
   }
   return best;
+}
+
+/** Synchronous planner compatibility: exactly the same deterministic variation path. */
+export function rerollMesocycle(input: MesocyclePlanInput, baseline: MesocyclePlan): MesocyclePlan {
+  const task = mesocycleVariation(input, baseline);
+  let result = task.next();
+  while (!result.done) result = task.next();
+  return result.value;
+}
+
+/** Native UI driver yields between bounded candidate checks and supports cancellation. */
+export async function rerollMesocycleAsync(input: MesocyclePlanInput, baseline: MesocyclePlan, options: {
+  isCancelled?: () => boolean; yieldControl?: () => Promise<void>;
+} = {}): Promise<MesocyclePlan> {
+  const task = mesocycleVariation(input, baseline);
+  const yieldControl = options.yieldControl ?? (() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+  for (;;) {
+    await yieldControl();
+    if (options.isCancelled?.()) return baseline;
+    const result = task.next();
+    if (result.done) return result.value;
+  }
 }
 
 /** Promote the coupled candidate only when it preserves the baseline constraints. */
@@ -755,9 +781,13 @@ function promoteCandidate(input: MesocyclePlanInput, baseline: MesocyclePlan, ca
 
 export function refreshPlacement(plan: MesocyclePlan, sessions: SessionDistribution['sessions'], previous?: readonly SessionExercise[],
   evaluateSequencing = sessionSequencingWarnings): MesocyclePlan {
+  const missing = missingRequiredPatterns(plan.selection, plan.plan);
+  if (missing.join(',') !== plan.selection.missingFoundationalPatterns.join(',')) {
+    plan = { ...plan, selection: { ...plan.selection, missingFoundationalPatterns: missing } };
+  }
   const frequencyByMuscle: SessionDistribution['frequencyByMuscle'] = {};
   sessions.forEach((session) => {
-    session.exercises = orderSessionExercises(session.exercises);
+    session.exercises = orderSessionExercises(session.exercises, plan.plan.muscles.filter((muscle) => muscle.emphasis === RegionEmphasis.PRIORITY).map((muscle) => muscle.muscle));
     new Set(session.exercises.map((entry) => entry.exercise.primaryMuscle)).forEach((muscle) => {
       frequencyByMuscle[muscle] = (frequencyByMuscle[muscle] ?? 0) + 1;
     });

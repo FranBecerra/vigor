@@ -35,6 +35,8 @@ export interface SessionMicrocycleMetric {
   isProjected: boolean;
   volumeSets: number;
   averageRIR: number;
+  /** Completed work without reported effort must display a dash, not RIR zero. */
+  hasRecordedRIR?: boolean;
 }
 
 /** RIR objetivo medio, ponderado por las series de trabajo de cada ejercicio. */
@@ -66,17 +68,21 @@ export function clampRIR(value: number): number {
  * Si un microciclo no contiene la sesión seleccionada (datos incompletos), se
  * emite volumen 0 y RIR 0 en lugar de inventar datos.
  */
-export function sessionMicrocycleMetrics<TSession extends { exercises: readonly PlannedExercise[] }>(
+export function sessionMicrocycleMetrics<TSession extends { exercises: readonly PlannedExercise[]; performedExercises?: readonly PlannedExercise[] }>(
   microcycles: readonly MicrocyclePrescription<TSession>[],
   sessionIndex: number,
 ): SessionMicrocycleMetric[] {
   return microcycles.map((microcycle) => {
     const session = microcycle.sessions[sessionIndex];
-    const baseVolume = session ? session.exercises.reduce(
+    const exercises = session?.performedExercises ?? session?.exercises ?? [];
+    const efforts = session?.performedExercises?.flatMap((exercise) => exercise.isTimed ? [] : exercise.sets
+      .flatMap((set) => set.setType !== SetType.WARMUP && set.targetRIR !== undefined ? [set.targetRIR] : []));
+    const baseVolume = exercises.reduce(
       (sum, exercise) => sum + countWorkingSets(exercise.sets),
       0,
-    ) : 0;
-    const baseRIR = session ? averageTargetRIR(session.exercises) : 0;
+    );
+    const baseRIR = efforts === undefined ? averageTargetRIR(exercises)
+      : efforts.reduce((sum, value) => sum + value, 0) / Math.max(1, efforts.length);
 
     return {
       id: microcycle.id,
@@ -85,6 +91,7 @@ export function sessionMicrocycleMetrics<TSession extends { exercises: readonly 
       isProjected: microcycle.isProjected,
       volumeSets: baseVolume,
       averageRIR: clampRIR(baseRIR),
+      ...(efforts !== undefined ? { hasRecordedRIR: efforts.length > 0 } : {}),
     };
   });
 }

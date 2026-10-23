@@ -2,7 +2,7 @@
 import { onSnapshot, setDoc, type DocumentReference } from '@react-native-firebase/firestore';
 
 export function writeLocally(ref: DocumentReference, data: Record<string, unknown>, token: string,
-  onSynced?: () => void, onRejected?: (error: unknown) => void): Promise<'pending' | 'synced'> {
+  onSynced?: () => void, onRejected?: (error: unknown) => void, merge = false): Promise<'pending' | 'synced'> {
   return new Promise((resolve, reject) => {
     let accepted = false;
     let unsubscribe: (() => void) | undefined;
@@ -17,7 +17,9 @@ export function writeLocally(ref: DocumentReference, data: Record<string, unknow
     }, fail);
     if (stopRequested) unsubscribe();
     try {
-      void setDoc(ref, { ...data, _clientWriteId: token }).then(() => {
+      const payload = { ...data, _clientWriteId: token };
+      const writing = merge ? setDoc(ref, payload, { merge: true }) : setDoc(ref, payload);
+      void writing.then(() => {
         stop();
         if (!accepted) { accepted = true; resolve('synced'); }
         onSynced?.();

@@ -15,6 +15,7 @@ export function workoutReview(exercises: readonly Exercise[], sets: SessionSetsB
   let completed = 0; let pending = 0; let tonnage = 0;
   const muscles = new Map<MuscleGroup, number>();
   const records: { exerciseId: string; weight: number; reps: number }[] = [];
+  const recordSetIds: string[] = [];
   for (const exercise of exercises) {
     const rows = sets[exercise.id] ?? [];
     pending += rows.filter((set) => set.setType !== SetType.WARMUP && !isLiveSetCompleted(set)).length;
@@ -25,24 +26,32 @@ export function workoutReview(exercises: readonly Exercise[], sets: SessionSetsB
       if (working.length) muscles.set(muscle, (muscles.get(muscle) ?? 0) + working.length * 0.5);
     }
     // Compare same-exercise load/repetition performances only, never different machines or assisted loads.
-    const comparable = !exercise.recording || ['TOTAL_KG', 'PER_HAND_KG', 'ADDED_KG'].includes(exercise.recording.load);
-    const previous = history.filter((session) => session.id !== sessionId && session.completedAt !== undefined)
-      .flatMap((session) => session.exercises.filter((entry) => entry.exerciseId === exercise.id).flatMap((entry) => entry.sets))
-      .filter((set) => isSetCompleted(set) && set.setType !== SetType.WARMUP && (set.actualWeight ?? 0) > 0 && (set.actualReps ?? 0) > 0);
+    const comparable = exercise.recording?.measure !== 'SECONDS' && (!exercise.recording || ['TOTAL_KG', 'PER_HAND_KG', 'ADDED_KG'].includes(exercise.recording.load));
+    const validPerformance = (weight: number | undefined, reps: number | undefined) => typeof weight === 'number' && Number.isFinite(weight) && weight > 0
+      && typeof reps === 'number' && Number.isInteger(reps) && reps > 0 && reps <= 999;
+    const previous = history.filter((session) => session.id !== sessionId && session.completedAt !== undefined && session.discardedAt === undefined)
+      .flatMap((session) => session.exercises.filter((entry) => entry.exerciseId === exercise.id).flatMap((entry) => entry.sets.filter((set) =>
+        (set.recording?.measure ?? entry.exerciseSnapshot?.recording?.measure ?? 'REPETITIONS') === (exercise.recording?.measure ?? 'REPETITIONS')
+        && (set.recording?.load ?? entry.exerciseSnapshot?.recording?.load ?? 'TOTAL_KG') === (exercise.recording?.load ?? 'TOTAL_KG'))))
+      .filter((set) => isSetCompleted(set) && set.setType !== SetType.WARMUP && validPerformance(set.actualWeight, set.actualReps));
+    const hasBaseline = previous.length > 0;
     for (const set of working) {
       if (comparable && set.recording?.measure !== 'SECONDS') {
         const weight = set.actualWeight ?? 0; const reps = set.actualReps ?? 0;
-        tonnage += weight * reps + (set.extensions ?? []).reduce((sum, extra) => sum + (extra.weight ?? weight) * (extra.reps ?? 0), 0);
+        if (!Number.isFinite(weight) || !Number.isFinite(reps) || weight < 0 || reps < 0) continue;
+        tonnage += weight * reps + (set.extensions ?? []).reduce((sum, extra) => sum + (Number.isFinite(extra.weight ?? weight) && Number.isFinite(extra.reps) ? (extra.weight ?? weight) * (extra.reps ?? 0) : 0), 0);
         // First observation establishes a baseline; it is not reported as a PR.
-        if (previous.length && weight > 0 && reps > 0 && !previous.some((old) => old.actualWeight! >= weight && old.actualReps! >= reps)
-          && previous.some((old) => (old.actualWeight === weight && old.actualReps! < reps) || (old.actualReps! >= reps && old.actualWeight! < weight))) {
+        if (hasBaseline && validPerformance(weight, reps) && !previous.some((old) => old.actualWeight! >= weight && old.actualReps! >= reps)
+          && previous.some((old) => (old.actualWeight === weight && old.actualReps! < reps) || old.actualWeight! < weight)) {
           records.push({ exerciseId: exercise.id, weight, reps });
+          recordSetIds.push(`${exercise.id}:${set.id}`);
         }
+        previous.push({ ...set, completionState: 'DONE' });
       }
     }
   }
   return { completed, pending, tonnage, volumes: [...muscles].map(([muscle, sets]) => ({ muscle, sets })),
-    records: records.filter((record, index, all) => all.findIndex((other) => other.exerciseId === record.exerciseId) === index) };
+    recordSetIds, records: records.filter((record, index, all) => all.findIndex((other) => other.exerciseId === record.exerciseId) === index) };
 }
 
 /** Explicit finish-time opt-in: persist roster/dose edits, never today's kg or achieved RIR as a future target. */

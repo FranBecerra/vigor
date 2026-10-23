@@ -131,6 +131,11 @@ describe('BaseRepository', () => {
   });
 
   describe('update', () => {
+    it('queues a partial merge locally without deleting unrelated fields', async () => {
+      const rejected = jest.fn(); (writeLocally as jest.Mock).mockResolvedValue('pending');
+      await expect(repo.updateLocally('w1', { label: 'New' }, rejected)).resolves.toBe('pending');
+      expect(writeLocally).toHaveBeenCalledWith(expect.objectContaining({ path: 'widgets/w1' }), { label: 'New' }, expect.any(String), undefined, rejected, true);
+    });
     it('aplica un parche sobre el documento indicado', async () => {
       mockUpdateDoc.mockResolvedValue(undefined);
       await repo.update('w1', { label: 'Nuevo' });

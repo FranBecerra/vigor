@@ -71,7 +71,11 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
     "collectCoverageFrom": [
+      "src/services/health/workoutExport.ts",
+      "src/services/settings/appSettings.ts",
+      "src/services/settings/profileName.ts",
       "src/services/analytics/**/*.ts",
       "src/services/training/**/*.ts",
       "src/services/repositories/BaseRepository.ts",

@@ -42,7 +42,7 @@ it('attributes direct credit to each primary and never adds duplicate indirect c
 });
 it('searches and groups swaps using any direct target, not only the legacy first target', () => {
   const ex = make({ secondaryMuscles: [] });
-  const triceps = make({ primaryMuscles: [MuscleGroup.TRICEPS], secondaryMuscles: [] });
+  const triceps = { ...make({ primaryMuscles: [MuscleGroup.TRICEPS], secondaryMuscles: [] }), id: 'triceps-target' };
   expect(searchExercises('triceps', [ex], (muscle) => muscle)).toEqual([ex]);
   expect(partitionSwapCandidates(triceps, [ex]).related).toEqual([ex]);
 });

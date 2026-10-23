@@ -9,19 +9,17 @@ import type { Timestampish } from './common';
 import type { Equipment, MuscleGroup } from './biomechanics';
 
 /**
- * Nivel de experiencia. Determina los valores de MAV y MRV por defecto, de los
- * que se infiere el MEAV del mesociclo (PRD §3).
- *
- * Se declara por años de entrenamiento continuado, no por fuerza absoluta: la
- * capacidad de tolerar volumen depende de la exposición acumulada, no de cuánto
- * levantas.
+ * Starting-plan experience category used for default volume estimates (PRD §3).
+ * Self-selected or suggested from current consistency, familiar-exercise
+ * technique and progression. Calendar years alone do not determine the category;
+ * it is not a measured recovery capacity or a permanent athlete ranking.
  */
 export enum ExperienceLevel {
-  /** Menos de ~1 año. Tolera poco volumen y progresa con poco estímulo. */
+  /** Building technique or resuming consistent training after a long break. */
   BEGINNER = 'BEGINNER',
-  /** ~1-3 años. */
+  /** An established base of regular training and familiar-exercise technique. */
   INTERMEDIATE = 'INTERMEDIATE',
-  /** Más de ~3 años con progresión consistente. */
+  /** Years of structured consistency, established technique and slow tracked progress. */
   ADVANCED = 'ADVANCED',
 }
 

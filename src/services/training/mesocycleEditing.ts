@@ -3,6 +3,7 @@ import { SetType, type Exercise, type Mesocycle, type PlannedExercise, type Plan
 import { DEFAULT_PROJECTED_MICROCYCLES, prescriptionForMicrocycle } from './microcyclePrescription';
 import { exerciseMinutes } from './trainingCapacity';
 import { TrainingGoal } from './volumePlan';
+import { replanSessionRIR, type ProgressionStep } from './rirReplanning';
 
 export function sessionKey(microcycleIndex: number, sessionIndex: number): string {
   return `${microcycleIndex}:${sessionIndex}`;
@@ -38,8 +39,14 @@ export function sessionsForMicrocycle(
   goal: string,
   index: number,
 ): PlannedSession[] {
-  return baseSessionsForMicrocycle(mesocycle, goal, index).map((session) =>
-    mesocycle.sessionOverrides?.[sessionKey(index, session.index)] ?? session);
+  return baseSessionsForMicrocycle(mesocycle, goal, index).map((session) => {
+    const resolved = { ...session, exercises: session.exercises.map((exercise) => {
+      const seconds = mesocycle.exerciseRestOverrides?.[exercise.exerciseId];
+      return seconds !== undefined && Number.isFinite(seconds) && seconds >= 0 && seconds <= 3600
+        ? { ...exercise, restSeconds: seconds } : exercise;
+    }) };
+    return mesocycle.sessionOverrides?.[sessionKey(index, session.index)] ?? resolved;
+  });
 }
 
 export function withSessionOverride(
@@ -61,7 +68,27 @@ export function withPlanRevision(
     .sort((a, b) => a.fromMicrocycleIndex - b.fromMicrocycleIndex);
 }
 
-export type SessionEditScope = 'microcycle' | 'remaining-mesocycle';
+export type SessionEditScope = 'microcycle' | 'remaining-mesocycle' | 'recalculate-progression';
+
+/** A later plan revision supersedes pending overrides, including reviewed effort schedules. */
+export function pendingOverridesAfterRevision(mesocycle: Mesocycle, fromIndex: number, sessionIndex?: number, protectedKeys: readonly string[] = []): NonNullable<Mesocycle['sessionOverrides']> {
+  return Object.fromEntries(Object.entries(mesocycle.sessionOverrides ?? {}).filter(([key]) => {
+    const [micro, session] = key.split(':').map(Number);
+    return !Number.isInteger(micro) || !Number.isInteger(session) || micro < fromIndex || (sessionIndex !== undefined && session !== sessionIndex)
+      || protectedKeys.includes(key) || mesocycle.skippedSessions?.[key] !== undefined;
+  }));
+}
+
+export function sessionProgressionProposal(mesocycle: Mesocycle, goal: string, index: number, edited: PlannedSession, completed: readonly number[] = []): ProgressionStep[] {
+  const horizon = mesocycle.projectedMicrocycles ?? DEFAULT_PROJECTED_MICROCYCLES;
+  const steps = Array.from({ length: horizon - index }, (_, offset) => {
+    const position = index + offset;
+    const session = sessionsForMicrocycle(mesocycle, goal, position).find((entry) => entry.index === edited.index);
+    if (!session) throw new Error('Missing progression session');
+    return { index: position, session };
+  });
+  return replanSessionRIR(steps, edited, index, horizon).filter((step) => !completed.includes(step.index) && mesocycle.skippedSessions?.[sessionKey(step.index, edited.index)] === undefined);
+}
 
 /** Persist a session edit without changing completed work or unrelated sessions. */
 export function changesForSessionEdit(
@@ -71,13 +98,27 @@ export function changesForSessionEdit(
   session: PlannedSession,
   scope: SessionEditScope,
   currentMicrocycleHasHistory: boolean,
-): Pick<Mesocycle, 'sessionOverrides' | 'prescriptionRevisions'> {
-  const overrides = withSessionOverride(mesocycle, microcycleIndex, session);
+  completedMicrocycleIndexes: readonly number[] = [],
+): Pick<Mesocycle, 'sessionOverrides' | 'prescriptionRevisions' | 'exerciseRestOverrides'> {
+  let overrides = withSessionOverride(mesocycle, microcycleIndex, session);
+  // A later explicit plan edit must not remain hidden behind a workout-time default.
+  const exerciseRestOverrides = mesocycle.exerciseRestOverrides ? { ...mesocycle.exerciseRestOverrides } : undefined;
+  for (const exercise of session.exercises) if (exerciseRestOverrides && exercise.restSeconds !== undefined
+    && exerciseRestOverrides[exercise.exerciseId] !== undefined) exerciseRestOverrides[exercise.exerciseId] = exercise.restSeconds;
+  const rest = exerciseRestOverrides ? { exerciseRestOverrides } : {};
   if (scope === 'microcycle') return { sessionOverrides: overrides };
+  if (scope === 'recalculate-progression') {
+    const planned = { ...mesocycle.sessionOverrides };
+    for (const step of sessionProgressionProposal(mesocycle, goal, microcycleIndex, session)) {
+      const key = sessionKey(step.index, session.index);
+      if (!completedMicrocycleIndexes.includes(step.index) && mesocycle.skippedSessions?.[key] === undefined) planned[key] = step.session;
+    }
+    return { ...rest, sessionOverrides: planned };
+  }
 
   const horizon = mesocycle.projectedMicrocycles ?? DEFAULT_PROJECTED_MICROCYCLES;
   const revisionIndex = currentMicrocycleHasHistory ? microcycleIndex + 1 : microcycleIndex;
-  if (revisionIndex >= horizon) return { sessionOverrides: overrides };
+  if (revisionIndex >= horizon) return { ...rest, sessionOverrides: overrides };
 
   const base = baseSessionsForMicrocycle(mesocycle, goal, revisionIndex);
   const revised = base.map((candidate) => candidate.index === session.index ? session : candidate);
@@ -85,7 +126,10 @@ export function changesForSessionEdit(
     // A stale one-off override for this session must not hide the new revision.
     delete overrides[sessionKey(microcycleIndex, session.index)];
   }
+  overrides = pendingOverridesAfterRevision({ ...mesocycle, sessionOverrides: overrides }, revisionIndex, session.index,
+    completedMicrocycleIndexes.map((index) => sessionKey(index, session.index)));
   return {
+    ...rest,
     sessionOverrides: overrides,
     prescriptionRevisions: withPlanRevision(mesocycle, revisionIndex, revised),
   };

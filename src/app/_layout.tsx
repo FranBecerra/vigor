@@ -25,6 +25,9 @@ import '@/i18n';
 import { ExerciseCatalogueProvider } from '@/hooks/useExerciseCatalogue';
 import { RehabilitationProvider } from '@/hooks/useRehabilitation';
 import { useWorkoutActivityOwner } from '@/hooks/useWorkoutActivity';
+import { HealthExportProvider } from '@/hooks/useHealthExport';
+import { AppSettingsProvider } from '@/hooks/useAppSettings';
+import { TrainingNotesProvider } from '@/hooks/useTrainingNotes';
 
 /**
  * Decide qué mostrar según el estado de sesión.
@@ -61,14 +64,20 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaProvider>
         <AuthProvider>
+          <AppSettingsProvider>
+          <HealthExportProvider>
           <ExerciseCatalogueProvider>
+          <TrainingNotesProvider>
           <RehabilitationProvider>
           <ThemeProvider value={navigationThemeFor(scheme)}>
             <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
             <AuthGate />
           </ThemeProvider>
           </RehabilitationProvider>
+          </TrainingNotesProvider>
           </ExerciseCatalogueProvider>
+          </HealthExportProvider>
+          </AppSettingsProvider>
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

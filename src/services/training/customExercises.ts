@@ -20,6 +20,11 @@ export const normalizedExerciseName = (name: string) => name.normalize('NFKC').t
 export function recordingOf(exercise: Pick<Exercise, 'recording'>): ExerciseRecording {
   return exercise.recording ?? { measure: 'REPETITIONS', load: 'TOTAL_KG' };
 }
+/** Recording controls follow units, not whether an exercise originated in the shared catalogue. */
+export function usesCustomRecording(exercise: Pick<Exercise, 'isCustom' | 'recording'>): boolean {
+  const mode = recordingOf(exercise);
+  return mode.measure !== 'REPETITIONS' || mode.load !== 'TOTAL_KG';
+}
 export function supportsEstimatedMax(exercise: Exercise): boolean {
   const mode = recordingOf(exercise);
   return !exercise.isCustom && mode.measure === 'REPETITIONS' && mode.load === 'TOTAL_KG';

@@ -62,14 +62,14 @@ export function RehabBlockEditor({ initial, onClose }: { initial?: RehabBlock; o
           onPress={() => setRoutineSessions((old) => old.includes(session.plannedSessionIndex) ? old.filter((index) => index !== session.plannedSessionIndex) : [...old, session.plannedSessionIndex])}>
           <View style={{ width: 24, height: 24, borderRadius: 6, borderWidth: 1.5, borderColor: routineSessions.includes(session.plannedSessionIndex) ? sectionAccent.train : colors.textMuted,
             backgroundColor: routineSessions.includes(session.plannedSessionIndex) ? sectionAccent.train : 'transparent', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ color: colors.bg }}>{routineSessions.includes(session.plannedSessionIndex) ? '✓' : ''}</Text>
+            <Text style={{ color: colors.onAccent }}>{routineSessions.includes(session.plannedSessionIndex) ? '✓' : ''}</Text>
           </View>
           <Text style={{ color: colors.textPrimary, flex: 1 }}>{session.name}</Text>
         </Pressable>)}
       </View> : <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
         {[1, 2, 3, 4, 5, 6, 7].map((day) => <Pressable key={day} onPress={() => setDays((old) => old.includes(day) ? old.filter((value) => value !== day) : [...old, day])}
           accessibilityRole="checkbox" accessibilityState={{ checked: days.includes(day) }} style={button}>
-          <Text style={{ color: days.includes(day) ? sectionAccent.train : colors.textPrimary }}>{t(`rehab.day${day}`)}</Text>
+          <Text style={{ color: days.includes(day) ? colors.accentText : colors.textPrimary }}>{t(`rehab.day${day}`)}</Text>
         </Pressable>)}
       </View>}
       {items.map((item, position) => {
@@ -98,7 +98,7 @@ export function RehabBlockEditor({ initial, onClose }: { initial?: RehabBlock; o
           </View>
         </View>;
       })}
-      <Pressable style={button} onPress={() => setPicker(true)}><Text style={{ color: sectionAccent.train }}>{t('generate.addExercise')}</Text></Pressable>
+      <Pressable style={button} onPress={() => setPicker(true)}><Text style={{ color: colors.accentText }}>{t('generate.addExercise')}</Text></Pressable>
       <Text style={{ color: colors.textMuted }}>{t('rehab.inlineHint')}</Text>
       {!!error && <Text accessibilityRole="alert" style={text}>{t(`rehab.${error}`, { defaultValue: t('rehab.saveFailed') })}</Text>}
       <Pressable disabled={busy} style={{ ...button, backgroundColor: sectionAccent.train }} onPress={async () => {
@@ -115,7 +115,7 @@ export function RehabBlockEditor({ initial, onClose }: { initial?: RehabBlock; o
           onClose();
         } catch (cause) { setError(cause instanceof Error ? cause.message : 'saveFailed'); }
         finally { setBusy(false); }
-      }}><Text style={{ color: colors.bg, textAlign: 'center', fontWeight: '700' }}>{t(busy ? 'custom.saving' : 'custom.save')}</Text></Pressable>
+      }}><Text style={{ color: colors.onAccent, textAlign: 'center', fontWeight: '700' }}>{t(busy ? 'custom.saving' : 'custom.save')}</Text></Pressable>
       <Pressable disabled={busy} onPress={onClose} style={button}><Text style={{ ...text, textAlign: 'center' }}>{t('generate.cancel')}</Text></Pressable>
     </ScrollView>}
   </Modal>;

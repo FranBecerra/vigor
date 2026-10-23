@@ -9,6 +9,7 @@ const configured = Object.values(nativeProject.pbxNativeTargetSection()).some((t
 const widgetConfig = config.plugins.find((entry) => Array.isArray(entry) && entry[0] === 'expo-widgets')[1];
 const selectedPlugins = configured ? [] : [['expo-widgets', widgetConfig]];
 selectedPlugins.push('./plugins/withWorkoutWidgetEmbedding');
+selectedPlugins.unshift('./plugins/withFreePersonalTeam');
 compileModsAsync(withPlugins({ ...config, _internal: { projectRoot } }, selectedPlugins), {
   projectRoot, platforms: ['ios'], assertMissingModProviders: true,
 }).catch((error) => { console.error(error); process.exitCode = 1; });

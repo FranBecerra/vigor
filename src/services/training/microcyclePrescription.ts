@@ -10,6 +10,7 @@
  *  - both goals: the deload, the last microcycle of the horizon.
  */
 import { SetType, type PlannedSession, type PlannedSet } from '@/models';
+import { usesCustomRecording } from './customExercises';
 import { LOAD_INCREMENT_KG, strengthRIR } from './exercisePrescription';
 import { MAX_RIR } from './setIntensity';
 import { TrainingGoal } from './volumePlan';
@@ -48,19 +49,24 @@ export function reloadForRIR(kg: number, reps: number, fromRIR: number, toRIR: n
   return roundLoad((kg * (1 + (reps + fromRIR) / 30)) / (1 + (reps + toRIR) / 30));
 }
 
-function deloadSets(sets: readonly PlannedSet[]): PlannedSet[] {
+export function deloadSets(sets: readonly PlannedSet[]): PlannedSet[] {
   // The heavy single is exposure to near-maximal load, the one thing a deload removes.
-  const working = sets.filter((set) => set.setType !== SetType.TOP_SINGLE);
-  const kept = Math.max(1, Math.round(working.length * DELOAD_SET_FACTOR));
-  return working.slice(0, kept).map((set) => {
+  const working = sets.filter((set) => set.setType !== SetType.TOP_SINGLE && set.setType !== SetType.WARMUP);
+  const kept = Math.round(working.length * DELOAD_SET_FACTOR) || (working.length ? 1 : 0);
+  let count = 0;
+  return sets.flatMap((set) => {
+    if (set.setType === SetType.TOP_SINGLE) return [];
+    if (set.setType === SetType.WARMUP) return [{ ...set }];
+    if (count++ >= kept) return [];
     const deloaded: PlannedSet = {
       ...set,
+      setType: SetType.NORMAL,
       targetRIR: Math.min(MAX_RIR, set.targetRIR + DELOAD_RIR_INCREASE),
     };
     if (set.targetWeightKg !== undefined) {
       deloaded.targetWeightKg = roundLoad(set.targetWeightKg * DELOAD_LOAD_FACTOR);
     }
-    return deloaded;
+    return [deloaded];
   });
 }
 
@@ -79,7 +85,7 @@ export function prescriptionForMicrocycle(
       const before = session.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
       const exercises = session.exercises.map((exercise) => ({
         ...exercise,
-        sets: exercise.exerciseSnapshot?.isCustom || exercise.exerciseId.startsWith('custom:')
+        sets: (exercise.exerciseSnapshot && usesCustomRecording(exercise.exerciseSnapshot)) || exercise.exerciseId.startsWith('custom:')
           ? exercise.sets.map((set) => ({ ...set })) : deloadSets(exercise.sets),
       }));
       const after = exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0);
@@ -96,10 +102,10 @@ export function prescriptionForMicrocycle(
     return sessions.map((session) => ({
       ...session,
       exercises: session.exercises.map((exercise) => {
-        if (exercise.exerciseSnapshot?.isCustom || exercise.exerciseId.startsWith('custom:')) return exercise;
-        const working = exercise.sets.filter((set) => set.setType !== SetType.TOP_SINGLE);
+        if ((exercise.exerciseSnapshot && usesCustomRecording(exercise.exerciseSnapshot)) || exercise.exerciseId.startsWith('custom:')) return exercise;
+        const working = exercise.sets.filter((set) => set.setType !== SetType.TOP_SINGLE && set.setType !== SetType.WARMUP);
         const workingIndexes = exercise.sets.flatMap((set, setIndex) =>
-          set.setType === SetType.TOP_SINGLE ? [] : [setIndex]);
+          set.setType === SetType.TOP_SINGLE || set.setType === SetType.WARMUP ? [] : [setIndex]);
         const reductions = Math.min(
           workingIndexes.filter((setIndex) => exercise.manualRIRBySet?.[setIndex] === undefined).length,
           Math.ceil((Math.max(0, index) * working.length) / Math.max(1, accumulation - 1)),
@@ -127,7 +133,9 @@ export function prescriptionForMicrocycle(
           ...exercise,
           sets: exercise.sets.map((set, setIndex): PlannedSet => {
             if (set.setType === SetType.TOP_SINGLE) return { ...set };
+            if (set.setType === SetType.WARMUP) return { ...set };
             const projectedRIR = rir[position++];
+            if (set.setType === SetType.FAILURE) return { ...set, targetRIR: 0 };
             const nextRIR = exercise.manualRIRBySet?.[setIndex] ?? projectedRIR;
             const next = { ...set, targetRIR: nextRIR };
             if (set.targetWeightKg !== undefined) {
@@ -146,14 +154,15 @@ export function prescriptionForMicrocycle(
   return sessions.map((session) => ({
     ...session,
     exercises: session.exercises.map((exercise) => {
-      if (exercise.exerciseSnapshot?.isCustom || exercise.exerciseId.startsWith('custom:')) return exercise;
+      if ((exercise.exerciseSnapshot && usesCustomRecording(exercise.exerciseSnapshot)) || exercise.exerciseId.startsWith('custom:')) return exercise;
       const role = exercise.strengthRole;
       if (role === undefined) return exercise;
       const current = strengthRIR(role, index, accumulation);
       return {
         ...exercise,
         sets: exercise.sets.map((set, setIndex): PlannedSet => {
-          if (set.setType === SetType.TOP_SINGLE) return { ...set };
+          if (set.setType === SetType.TOP_SINGLE || set.setType === SetType.WARMUP) return { ...set };
+          if (set.setType === SetType.FAILURE) return { ...set, targetRIR: 0 };
           const nextRIR = exercise.manualRIRBySet?.[setIndex] ?? current;
           const next: PlannedSet = { ...set, targetRIR: nextRIR };
           if (set.targetWeightKg !== undefined) {

@@ -1,6 +1,7 @@
 /** Runtime adapter from a persisted prescription to the live workout screen. */
 import { SetType, type Exercise, type PlannedSession } from '@/models';
 import type { SessionSetsByExercise } from './sessionMapper';
+import { supportsExtensions } from './advancedSets';
 
 /**
  * A stable id is crucial: reopening a live session restores its exact rows
@@ -42,6 +43,7 @@ export function initialSetsForPlannedSession(session: PlannedSession): SessionSe
         targetWeight: set.targetWeightKg ?? 0,
         targetReps: set.targetReps,
         targetRIR: set.targetRIR,
+        ...(supportsExtensions(set.setType) ? { extensions: [{}] } : {}),
         ...(exercise.exerciseSnapshot?.recording ? { recording: exercise.exerciseSnapshot.recording } : {}),
         ...(set.targetDurationSeconds === undefined ? {} : { targetDurationSeconds: set.targetDurationSeconds }),
         ...(set.targetLoadLevel === undefined ? {} : { targetLoadLevel: set.targetLoadLevel }),

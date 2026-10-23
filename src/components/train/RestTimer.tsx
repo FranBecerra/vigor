@@ -1,222 +1,77 @@
-/**
- * Temporizador de descanso con controles (PRD §3.4, §8.5).
- *
- * Al pulsar el temporizador se despliegan los controles: **−10 s**, **+10 s**,
- * **reiniciar**, **editar** (duración absoluta) y **descartar**.
- *
- * El componente solo PINTA: toda la aritmética vive en
- * `src/services/training/restTimer.ts` (lógica pura, 100 % cubierta). Aquí solo
- * hay un tick de un segundo para repintar, y el tiempo restante se deriva del
- * reloj — no se va acumulando error.
- */
 import { useEffect, useState } from 'react';
-import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
+import { Modal, Pressable, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GlassSurface } from '@/components/GlassSurface';
 import { useRestAlert } from '@/hooks/useRestAlert';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
-import {
-  REST_STEP_SECONDS,
-  formatRest,
-  isRestFinished,
-  remainingSeconds,
-  type RestTimerState,
-} from '@/services/training/restTimer';
+import { REST_STEP_SECONDS, formatRest, isRestFinished, remainingSeconds, type RestTimerState } from '@/services/training/restTimer';
+import { NumericField } from './NumericField';
 
-interface RestTimerProps {
-  state: RestTimerState;
-  onAdjust: (deltaSeconds: number) => void;
-  onRestart: () => void;
-  onSetDuration: (seconds: number) => void;
-  onCancel: () => void;
-}
-
-export function RestTimer({
-  state,
-  onAdjust,
-  onRestart,
-  onSetDuration,
-  onCancel,
-}: RestTimerProps) {
-  const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
-  const { t } = useTranslation();
-  const alertUnavailable = useRestAlert(state);
-  const [now, setNow] = useState(() => Date.now());
-  const [controlsOpen, setControlsOpen] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [editText, setEditText] = useState('');
-
-  const isActive = state.startedAt !== null;
-
-  // Tick de 1 s solo mientras hay un descanso activo: sin temporizador no se
-  // programa nada, para no repintar en balde.
+/** Fixed header footprint. Closing controls never cancels or resets the clock. */
+export function RestTimer({ state, onAdjust, onRestart, onSetDuration, onCancel, prescribedSeconds, exerciseName, onSetPrescription }: {
+  state: RestTimerState; onAdjust: (seconds: number) => void; onRestart: () => void;
+  onSetDuration: (seconds: number) => void; onCancel: () => void;
+  prescribedSeconds?: number; exerciseName?: string; onSetPrescription?: (seconds: number) => Promise<void>;
+}) {
+  const { colors, semantic, sectionAccent, radius } = useTheme(); const { t } = useTranslation();
+  const insets = useSafeAreaInsets(); const alertUnavailable = useRestAlert(state);
+  const [now, setNow] = useState(Date.now); const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false); const [saveError, setSaveError] = useState(false);
+  const active = state.startedAt !== null;
   useEffect(() => {
-    if (!isActive) return;
-    setNow(Date.now());
-    const id = setInterval(() => setNow(Date.now()), 200);
-    return () => clearInterval(id);
-  }, [isActive, state.startedAt]);
-
-  // Al desaparecer el descanso, recoge los controles.
-  useEffect(() => {
-    if (!isActive) {
-      setControlsOpen(false);
-      setEditing(false);
-    }
-  }, [isActive]);
-
+    if (!active) return;
+    setNow(Date.now()); const timer = setInterval(() => setNow(Date.now()), 200);
+    return () => clearInterval(timer);
+  }, [active, state.startedAt]);
   const remaining = remainingSeconds(state, now);
-  const finished = isRestFinished(state, now);
-  // Verde mientras corre, ámbar cuando se agota: el color semántico manda.
-  const tint = !isActive ? colors.textMuted : finished ? semantic.warning : sectionAccent.train;
-
-  function commitEdit() {
-    const minutesAndSeconds = editText.trim();
-    if (minutesAndSeconds !== '') {
-      // Admite "90" (segundos) y "2:30" (minutos:segundos).
-      const parts = minutesAndSeconds.split(':');
-      const seconds =
-        parts.length === 2
-          ? Number(parts[0]) * 60 + Number(parts[1])
-          : Number(minutesAndSeconds);
-      if (Number.isFinite(seconds)) onSetDuration(seconds);
-    }
-    setEditing(false);
-    setEditText('');
-  }
-
-  return (
-    <View style={styles.container}>
-      {controlsOpen && isActive ? (
-        <Animated.View
-          entering={FadeIn.duration(120)}
-          exiting={FadeOut.duration(100)}
-          style={[
-            styles.controls,
-            {
-              backgroundColor: colors.bgElevated,
-              borderColor: colors.surfaceBorder,
-              borderRadius: radius.lg,
-              gap: spacing.xs,
-            },
-          ]}>
-          {alertUnavailable && <Text style={{ color: semantic.warning, maxWidth: 240 }}>{t('workout.alertUnavailable')}</Text>}
-          {editing ? (
-            <View style={styles.editRow}>
-              <TextInput
-                value={editText}
-                onChangeText={setEditText}
-                onSubmitEditing={commitEdit}
-                onBlur={commitEdit}
-                placeholder="2:30"
-                placeholderTextColor={colors.textMuted}
-                keyboardType="numbers-and-punctuation"
-                autoFocus
-                accessibilityLabel="Duración del descanso"
-                style={[
-                  styles.editInput,
-                  {
-                    color: colors.textPrimary,
-                    borderColor: colors.surfaceBorder,
-                    borderRadius: radius.sm,
-                  },
-                ]}
-              />
-              <ControlButton label="OK" onPress={commitEdit} tint={sectionAccent.train} />
-            </View>
-          ) : (
-            <View style={styles.controlRow}>
-              <ControlButton label={`−${REST_STEP_SECONDS}`} onPress={() => onAdjust(-REST_STEP_SECONDS)} />
-              <ControlButton label={`+${REST_STEP_SECONDS}`} onPress={() => onAdjust(REST_STEP_SECONDS)} />
-              <ControlButton label="↺" onPress={onRestart} accessibilityLabel="Reiniciar descanso" />
-              <ControlButton
-                label="✎"
-                onPress={() => {
-                  setEditText(formatRest(state.durationSeconds));
-                  setEditing(true);
-                }}
-                accessibilityLabel="Editar duración"
-              />
-              <ControlButton
-                label="✕"
-                onPress={onCancel}
-                tint={semantic.danger}
-                accessibilityLabel="Descartar descanso"
-              />
-            </View>
-          )}
-        </Animated.View>
-      ) : null}
-
-      <Pressable
-        onPress={() => isActive && setControlsOpen((open) => !open)}
-        accessibilityRole="button"
-        accessibilityLabel={
-          isActive ? `Descanso ${formatRest(remaining)}. Pulsa para ajustar.` : 'Sin descanso'
-        }>
-        <GlassSurface
-          glassEffectStyle="regular"
-          style={[styles.timer, { borderRadius: radius.md }]}>
-          <Text style={[styles.timerText, { color: tint }]}>
-            {isActive ? formatRest(remaining) : '—:—'}
-          </Text>
-        </GlassSurface>
-      </Pressable>
-    </View>
-  );
-}
-
-interface ControlButtonProps {
-  label: string;
-  onPress: () => void;
-  tint?: string;
-  accessibilityLabel?: string;
-}
-
-function ControlButton({ label, onPress, tint, accessibilityLabel }: ControlButtonProps) {
-  const { colors, radius } = useTheme();
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? label}
-      style={[styles.controlButton, { backgroundColor: colors.surface, borderRadius: radius.sm }]}>
-      <Text style={[styles.controlLabel, { color: tint ?? colors.textPrimary }]}>{label}</Text>
+  const tint = !active ? colors.textMuted : isRestFinished(state, now) ? semantic.warning : sectionAccent.train;
+  return <>
+    <Pressable accessibilityRole="button" accessibilityLabel={t('restControls.open', { time: formatRest(remaining) })}
+      onPress={() => (active || onSetPrescription) && setOpen((value) => !value)} style={{ minWidth: 88, minHeight: 48 }}>
+      <GlassSurface glassEffectStyle="regular" style={{ minWidth: 88, height: 48, justifyContent: 'center', alignItems: 'center', borderRadius: radius.lg }}>
+        <Animated.Text key={active ? 'active' : 'idle'} entering={FadeIn.duration(220)} exiting={FadeOut.duration(100)}
+          style={{ color: tint, fontSize: 18, fontWeight: '700', fontVariant: ['tabular-nums'] }}>{active ? formatRest(remaining) : '—:—'}</Animated.Text>
+      </GlassSurface>
     </Pressable>
-  );
+    <Modal visible={open && (active || !!onSetPrescription)} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+      <Pressable accessibilityLabel={t('restControls.close')} onPress={() => setOpen(false)} style={{ flex: 1, backgroundColor: '#0007' }} />
+      <View accessibilityViewIsModal style={{ backgroundColor: colors.bgElevated, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl,
+        padding: 20, paddingBottom: insets.bottom + 16, gap: 16 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={{ color: colors.textPrimary, fontSize: 24, fontWeight: '700' }}>{formatRest(remaining)}</Text>
+          <Pressable onPress={() => setOpen(false)} accessibilityRole="button" accessibilityLabel={t('restControls.close')}
+            style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.textPrimary, fontSize: 22 }}>×</Text></Pressable>
+        </View>
+        {active && <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('restControls.thisRestOnly')}</Text>}
+        {alertUnavailable && <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('workout.alertUnavailable')}</Text>}
+        {active && <View style={{ flexDirection: 'row', gap: 10 }}>
+          {[{ label: '−' + REST_STEP_SECONDS + 's', press: () => onAdjust(-REST_STEP_SECONDS) },
+            { label: '+' + REST_STEP_SECONDS + 's', press: () => onAdjust(REST_STEP_SECONDS) },
+            { label: t('restControls.restart'), press: onRestart }].map((item) => <Pressable key={item.label} accessibilityRole="button"
+              onPress={item.press} style={{ flex: 1, minHeight: 48, backgroundColor: colors.surface, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ color: colors.textPrimary, fontSize: 16, fontWeight: '600' }}>{item.label}</Text>
+            </Pressable>)}
+        </View>}
+        {onSetPrescription && <View style={{ gap: 8 }}>
+          <Text style={{ color: colors.textPrimary, fontSize: 17, fontWeight: '600' }}>{exerciseName}</Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('restControls.inPlan')}</Text>
+        </View>}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 16, flex: 1 }}>{t('calendar.restSeconds')}</Text>
+          <View style={{ width: 100, opacity: saving ? 0.5 : 1 }} pointerEvents={saving ? 'none' : 'auto'}><NumericField compact value={onSetPrescription ? prescribedSeconds : state.durationSeconds} accessibilityLabel={t('calendar.restSeconds')}
+            onChangeValue={(value) => {
+              if (value === undefined || saving) return;
+              if (!onSetPrescription) { onSetDuration(value); return; }
+              setSaving(true); setSaveError(false);
+              void onSetPrescription(value).catch(() => setSaveError(true)).finally(() => setSaving(false));
+            }} /></View>
+        </View>
+        {saveError && <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('calendar.saveFailed')}</Text>}
+        {active && <Pressable accessibilityRole="button" accessibilityLabel={t('restControls.cancel')} onPress={() => { onCancel(); setOpen(false); }}
+          style={{ minHeight: 48, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: semantic.danger, fontSize: 16, fontWeight: '600' }}>{t('restControls.cancel')}</Text></Pressable>}
+      </View>
+    </Modal>
+  </>;
 }
-
-const styles = StyleSheet.create({
-  container: { alignItems: 'flex-end' },
-  timer: { width: 82, height: 36, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  timerText: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  controls: {
-    position: 'absolute',
-    top: 34,
-    right: 0,
-    borderWidth: 1,
-    padding: 8,
-    zIndex: 30,
-  },
-  controlRow: { flexDirection: 'row', gap: 6 },
-  editRow: { flexDirection: 'row', gap: 6, alignItems: 'center' },
-  controlButton: {
-    minWidth: 38,
-    height: 32,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  controlLabel: { fontSize: 13, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  editInput: {
-    width: 72,
-    height: 32,
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    textAlign: 'center',
-    fontSize: 13,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
-});

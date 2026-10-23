@@ -7,7 +7,8 @@ import { ExerciseSwapSheet } from '../generate/ExerciseSwapSheet';
 import { Stepper } from '../generate/GenerateControls';
 import { NumericField } from '../NumericField';
 import { MusclePicture } from '../MusclePicture';
-import { Equipment, MuscleGroup } from '@/models';
+import { ScheduleTemplateView } from '../ScheduleTemplateView';
+import { Equipment, MuscleGroup, SetType } from '@/models';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
 import { createCustomExercise } from '@/services/training/customExercises';
 const { create, act } = require('react-test-renderer');
@@ -24,7 +25,7 @@ jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string, op
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: 'u' }) }));
 jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: mockCatalogue,
-  exercisesById: new Map(mockCatalogue.map((ex) => [ex.id, ex])), create: jest.fn() }) }));
+  exercisesById: new Map(mockCatalogue.map((ex) => [ex.id, ex])), create: jest.fn() }), useOptionalExerciseCatalogue: () => null }));
 jest.mock('@/services/repositories', () => ({
   routineRepository: { listByUser: (...args: unknown[]) => mockList(...args), create: (...args: unknown[]) => mockRoutine(...args) },
   mesocycleRepository: { create: (...args: unknown[]) => mockMesocycle(...args) },
@@ -73,7 +74,7 @@ it('shows only the selected session or overview, and recovers when the selected 
   const render = (entries: typeof sessions) => <PlanPreview sessionTabs sessions={entries} performedSets={0} exercisesById={new Map()} onAdd={add} />;
   await act(async () => { tree = create(render(sessions)); });
   expect(leafMatches(tree.root, (node) => node.props.accessibilityRole === 'tab' && node.props.accessibilityState.selected)).toHaveLength(1);
-  await act(async () => button(tree.root, 'Session 2').props.onPress());
+  await act(async () => button(tree.root, 'generate.focusFULL_BODY B').props.onPress());
   const addButtons = leafMatches(tree.root, (node) => node.props.accessibilityLabel === 'generate.addExercise');
   expect(addButtons).toHaveLength(1);
   await act(async () => tree.root.findAll((node: any) => node.props.accessibilityLabel === 'generate.addExercise' && typeof node.props.onPress === 'function')[0].props.onPress());
@@ -82,12 +83,27 @@ it('shows only the selected session or overview, and recovers when the selected 
   expect(leafMatches(tree.root, (node) => node.props.accessibilityRole === 'tab' && node.props.accessibilityState.selected)).toHaveLength(1);
   await act(async () => tree.unmount());
 });
+it('does not invent rest days for a single session and displays its actual default rest rather than zero', async () => {
+  const exercise = EXERCISE_CATALOGUE[0]; let tree: any;
+  await act(async () => { tree = create(<PlanPreview sessions={[{ index: 0, focus: 'UPPER', estimatedWorkMinutes: 15,
+    exercises: [{ exerciseId: exercise.id, order: 0, isEdited: false, sets: [{ setType: SetType.NORMAL, targetReps: 10, targetRIR: 2 }] }] }]}
+    performedSets={1} exercisesById={new Map([[exercise.id, exercise]])} onChangeRest={jest.fn()} />); });
+  expect(tree.root.findAllByType(ScheduleTemplateView)).toHaveLength(0);
+  expect(tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === 'exerciseEditor.restSeconds').props.value)
+    .toBe(require('@/services/training/restTimer').restDurationFor(exercise.profile));
+  await act(async () => tree.unmount());
+});
 it('keeps a minimum of six while typing twelve, and edits each manual RIR independently', async () => {
   let tree: any;
   await act(async () => { tree = create(<ManualRoutineScreen />); });
   await act(async () => tree.root.findByType(PlanPreview).props.onAdd(0));
   await act(async () => tree.root.findByType(ExerciseSwapSheet).props.onSelect(mockCatalogue[0]));
-  const field = (label: string) => tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === label).findByType(TextInput);
+  const field = (label: string) => ({ props: { onChangeText: (text: string) => {
+    const preview = tree.root.findByType(PlanPreview).props;
+    if (label.startsWith('RIR')) preview.onChangeSet(0, 0, Number(label.split(' ')[1]) - 1, { targetRIR: Number(text) });
+    else if (label === 'exerciseEditor.restSeconds') preview.onChangeRest(0, 0, Number(text));
+    else preview.onChangeSet(0, 0, 0, { targetReps: Number(text) });
+  } } });
   const prescription = () => tree.root.findByType(PlanPreview).props.sessions[0].exercises[0];
   expect(prescription().sets[0].targetRepsMin).toBe(6);
   await act(async () => field('generate.previewRepMax').props.onChangeText('1'));

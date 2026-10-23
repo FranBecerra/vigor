@@ -12,6 +12,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
+  Alert,
   ScrollView,
   Pressable,
   Modal,
@@ -21,6 +22,9 @@ import {
   type NativeScrollEvent,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { WorkoutPagerGestureContext } from '@/components/train/WorkoutPagerGesture';
+import { WorkoutPersistenceNotice } from '@/components/train/WorkoutPersistenceNotice';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { backToTraining } from '@/services/training/backNavigation';
 import { useTranslation } from 'react-i18next';
@@ -32,9 +36,15 @@ import { SELECTABLE_SET_TYPES, setTypeLabel } from '@/components/train/setTypeLa
 import { useTheme } from '@/theme/useTheme';
 import { useAuth } from '@/hooks/useAuth';
 import { useSessionPersistence } from '@/hooks/useSessionPersistence';
-import { useWorkoutActivity } from '@/hooks/useWorkoutActivity';
-import { sessionProgress, type SessionSetsByExercise } from '@/services/training/sessionMapper';
-import { nextExerciseAfterCompletion, updateWorkoutSet } from '@/services/training/workoutExecution';
+import { changeExerciseRest } from '@/services/training/restPrescription';
+import { useExerciseName } from '@/hooks/useExerciseName';
+import { useWorkoutRecordHistory } from '@/hooks/useWorkoutRecordHistory';
+import { endWorkoutActivity, useWorkoutActivity } from '@/hooks/useWorkoutActivity';
+import { clearWorkoutRestAlerts } from '@/hooks/useRestAlert';
+import { sessionProgress, toWorkoutSession, type SessionSetsByExercise } from '@/services/training/sessionMapper';
+import { useHealthExport } from '@/hooks/useHealthExport';
+import { WorkoutHealthExport } from '@/components/train/WorkoutHealthExport';
+import { nextExerciseAfterCompletion, replacementWorkoutSets, updateWorkoutSet } from '@/services/training/workoutExecution';
 import { SetType, type Exercise, type PlannedSession, type SetExtension, type WorkoutSession } from '@/models';
 import {
   type MockSetRow,
@@ -62,6 +72,10 @@ import {
 import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import { PreWorkoutRehab } from '@/components/train/PreWorkoutRehab';
 import { sessionsForMicrocycle } from '@/services/training/mesocycleEditing';
+import { useTrainingNotes } from '@/hooks/useTrainingNotes';
+import { WorkoutNotesSheet } from '@/components/train/WorkoutNotesSheet';
+import { visibleWorkoutNotes, type WorkoutNoteScope } from '@/services/training/trainingNotes';
+import { cleanImportedExerciseNotes } from '@/services/training/exerciseEditing';
 import { supportsExtensions } from '@/services/training/advancedSets';
 import { targetRIR } from '@/services/training/rirAutoregulation';
 import {
@@ -78,13 +92,15 @@ import {
 import type { IntensityScale } from '@/services/training/intensityScale';
 
 export default function EntrenamientoScreen() {
-  const { catalogue, exercisesById: exerciseById, ready: catalogueReady } = useExerciseCatalogue();
+  const { catalogue, exercisesById: exerciseById, ready: catalogueReady, notRecommendedExerciseIds = new Set<string>(), setExerciseNotRecommended = async () => {} } = useExerciseCatalogue();
   const { t } = useTranslation();
+  const exerciseName = useExerciseName();
   const { colors, sectionAccent, semantic, spacing, radius, typography } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const accent = sectionAccent.train;
   const pagerRef = useRef<ScrollView>(null);
+  const pagerGesture = useMemo(() => Gesture.Native(), []);
   const router = useRouter();
   const params = useLocalSearchParams<{
     mesocycleId?: string;
@@ -106,8 +122,11 @@ export default function EntrenamientoScreen() {
   );
   const [restTimer, setRestTimer] = useState(IDLE_REST_TIMER);
   const [picker, setPicker] = useState<string | 'ADD' | null>(null);
-  const [detail, setDetail] = useState<{ id: string; mode: 'info' | 'note' } | null>(null);
+  const [detail, setDetail] = useState<{ id: string; mode: 'info' | 'note'; scope?: WorkoutNoteScope } | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [sessionNote, setSessionNote] = useState('');
+  const persistentNotes = useTrainingNotes();
+  const noteSnapshots = useRef({ mesocycleNote: '', exerciseNotes: {} as Record<string, string> });
   const [swappedFrom, setSwappedFrom] = useState<Record<string, string>>({});
   const [finishing, setFinishing] = useState(false);
   const [finished, setFinished] = useState(false);
@@ -115,10 +134,11 @@ export default function EntrenamientoScreen() {
   const [performedAt, setPerformedAt] = useState(Date.now);
   const [busy, setBusy] = useState(false);
   const [finishError, setFinishError] = useState(false);
-  const [history, setHistory] = useState<WorkoutSession[]>([]);
-  const [historyReady, setHistoryReady] = useState(false);
-  const [removeSet, setRemoveSet] = useState<{ exerciseId: string; setId: string } | null>(null);
+  const [discardConfirm, setDiscardConfirm] = useState(false);
+  const [discardError, setDiscardError] = useState(false);
+  const [restoreNotice, setRestoreNotice] = useState(false);
   const [routineId, setRoutineId] = useState<string | undefined>();
+  const [restOverrides, setRestOverrides] = useState<Record<string, number>>({});
 
   // Espeja el estado para poder leerlo dentro de callbacks ESTABLES sin meterlo
   // en sus dependencias (lo que rompería la memoización de ExercisePage).
@@ -129,12 +149,15 @@ export default function EntrenamientoScreen() {
 
   // --- Persistencia -------------------------------------------------------
   const { uid } = useAuth();
+  const { history, ready: historyReady } = useWorkoutRecordHistory(uid);
+  const health = useHealthExport();
   const mesocycleId = typeof params.mesocycleId === 'string' ? params.mesocycleId : '';
   const goal = typeof params.goal === 'string' ? params.goal : '';
   const loadedIdentity = useRef('');
   const microcycleIndex = Number(params.microcycleIndex);
   const plannedSessionIndex = Number(params.plannedSessionIndex);
   const routeIdentity = `${uid}:${mesocycleId}:${goal}:${microcycleIndex}:${plannedSessionIndex}`;
+  const activeRoute = useRef(routeIdentity); activeRoute.current = routeIdentity;
   const validRoute =
     mesocycleId !== '' && goal !== '' && Number.isInteger(microcycleIndex) && microcycleIndex >= 0 &&
     Number.isInteger(plannedSessionIndex) && plannedSessionIndex >= 0;
@@ -162,16 +185,19 @@ export default function EntrenamientoScreen() {
         setLoadError(true);
         return;
       }
-      const resolved = exercisesForPlannedSession(session, exerciseById);
+      const resolved = exercisesForPlannedSession(session, exerciseById).map((exercise) =>
+        exercise.notes ? { ...exercise, notes: cleanImportedExerciseNotes(exercise.notes) } : exercise);
       if (resolved.length === 0) {
         setLoadError(true);
         return;
       }
       setPlannedSession(session);
+      setRestOverrides(mesocycle?.exerciseRestOverrides ?? {});
       setRoutineId(mesocycle?.routineId);
       loadedIdentity.current = identity;
       setPerformedAt(Date.now()); setCompletedAt(undefined); setFinished(false); setFinishing(false);
       setRestTimer(IDLE_REST_TIMER); setNotes({}); setSwappedFrom({}); setPageIndex(0);
+      setSessionNote(''); noteSnapshots.current = { mesocycleNote: '', exerciseNotes: {} };
       setExercises(resolved);
       setSessionName(session.name || session.focus);
       const initial = initialSetsForPlannedSession(session);
@@ -190,6 +216,9 @@ export default function EntrenamientoScreen() {
    * `performedAt` se fija UNA vez al montar: si se recalculara en cada render,
    * cada guardado cambiaría la fecha del entrenamiento.
    */
+  const liveNotes = useMemo(() => ({ mesocycleNote: persistentNotes.get('MESOCYCLE', mesocycleId),
+    exerciseNotes: Object.fromEntries(exercises.map((exercise) => [exercise.id, persistentNotes.get('EXERCISE', exercise.id)])) }), [persistentNotes, mesocycleId, exercises]);
+  if (!finished && completedAt === undefined && persistentNotes.ready && !persistentNotes.error) noteSnapshots.current = liveNotes;
   const sessionContext = useMemo(
     () =>
       uid === null || plannedSession === null || loadedIdentity.current !== routeIdentity
@@ -208,10 +237,13 @@ export default function EntrenamientoScreen() {
             restTimer,
             exerciseSnapshots: Object.fromEntries(exercises.map((exercise) => [exercise.id, exercise])),
             exerciseNotes: notes,
+            sessionNote,
+            mesocycleNote: noteSnapshots.current.mesocycleNote,
+            persistentExerciseNotes: noteSnapshots.current.exerciseNotes,
             swappedFrom,
             persistDraft: true,
           },
-    [uid, mesocycleId, microcycleIndex, plannedSession, plannedSessionIndex, exercises, notes, swappedFrom, goal, performedAt, sessionName, pageIndex, restTimer, routeIdentity],
+    [uid, mesocycleId, microcycleIndex, plannedSession, plannedSessionIndex, exercises, notes, sessionNote, liveNotes, swappedFrom, goal, performedAt, sessionName, pageIndex, restTimer, routeIdentity],
   );
 
   const restoreSets = useCallback((restored: SessionSetsByExercise, saved: WorkoutSession) => {
@@ -223,19 +255,26 @@ export default function EntrenamientoScreen() {
     const index = Math.max(0, restoredExercises.findIndex((entry) => entry.id === saved.activeExerciseId));
     setPageIndex(index);
     requestAnimationFrame(() => pagerRef.current?.scrollTo({ x: index * width, animated: false }));
-    setNotes(Object.fromEntries(saved.exercises.filter((entry) => entry.notes !== undefined).map((entry) => [entry.exerciseId, entry.notes!])));
+    setNotes(Object.fromEntries(saved.exercises.filter((entry) => entry.notes !== undefined).map((entry) => [entry.exerciseId, cleanImportedExerciseNotes(entry.notes)])));
+    setSessionNote(saved.sessionNote ?? '');
+    noteSnapshots.current = { mesocycleNote: saved.mesocycleNote ?? '', exerciseNotes: Object.fromEntries(saved.exercises.map((entry) => [entry.exerciseId, entry.exerciseNote ?? ''])) };
     setSwappedFrom(Object.fromEntries(saved.exercises.filter((entry) => entry.swappedFromExerciseId).map((entry) => [entry.exerciseId, entry.swappedFromExerciseId!])));
     setPerformedAt(timestampMillis(saved.performedAt));
     if (saved.restTimer) setRestTimer(saved.restTimer);
     if (saved.completedAt !== undefined) { setCompletedAt(timestampMillis(saved.completedAt)); setFinished(true); setFinishing(true); }
   }, [exerciseById, width]);
 
-  const { status: saveStatus, hasRestored, flush, restoreError, retryRestore } = useSessionPersistence({
+  const { status: saveStatus, hasRestored, flush, discard, restoreError, retryRestore } = useSessionPersistence({
     context: sessionContext,
     exerciseOrder,
     setsByExercise,
     onRestore: restoreSets,
   });
+  useEffect(() => {
+    if (hasRestored) { setRestoreNotice(false); return; }
+    const timer = setTimeout(() => setRestoreNotice(true), 650);
+    return () => clearTimeout(timer);
+  }, [hasRestored, routeIdentity]);
 
   const { totalSets, completedSets } = useMemo(() => {
     const progress = sessionProgress(setsByExercise);
@@ -287,12 +326,12 @@ export default function EntrenamientoScreen() {
         );
         if (shouldRestartRest(order, setId)) {
           const exercise = exercises.find((e) => e.id === exerciseId);
-          const duration = plannedSession?.exercises.find((entry) => entry.exerciseId === exerciseId)?.restSeconds ?? (exercise ? restDurationFor(exercise.profile) : 180);
+          const duration = restOverrides[exerciseId] ?? plannedSession?.exercises.find((entry) => entry.exerciseId === exerciseId)?.restSeconds ?? (exercise ? restDurationFor(exercise.profile) : 180);
           setRestTimer(startRest(setId, duration, Date.now()));
         }
       }
     },
-    [exercises, plannedSession, goToExercise],
+    [exercises, plannedSession, restOverrides, goToExercise],
   );
 
   const addSet = useCallback((exerciseId: string) => {
@@ -352,10 +391,12 @@ export default function EntrenamientoScreen() {
   );
 
   const summary = useMemo(() => workoutReview(exercises, setsByExercise, history, sessionContext?.sessionId ?? ''), [exercises, setsByExercise, history, sessionContext]);
+  const completedSession = useMemo(() => completedAt !== undefined && sessionContext
+    ? toWorkoutSession({ ...sessionContext, completedAt }, exerciseOrder, setsByExercise) : null,
+  [completedAt, sessionContext, exerciseOrder, setsByExercise]);
   const changed = plannedSession ? hasWorkoutPlanChanges(plannedSession, exercises, setsByExercise) : false;
   const openFinish = () => {
-    setFinishing(true); setFinishError(false); setHistoryReady(false);
-    if (uid) workoutSessionRepository.listByUser(uid).then((items) => { setHistory(items); setHistoryReady(true); }).catch(() => setHistoryReady(false));
+    setFinishing(true); setFinishError(false);
   };
   const finishWorkout = async (savePlan: boolean) => {
     if (!sessionContext || !plannedSession || busy || !summary.completed) return;
@@ -370,6 +411,8 @@ export default function EntrenamientoScreen() {
       const ended = Date.now();
       if (!await flush(ended)) throw new Error('Save failed');
       setCompletedAt(ended); setRestTimer(cancelRest()); setFinished(true);
+      // Health failures never roll back or block the athlete's primary save.
+      void health.service.export(toWorkoutSession({ ...sessionContext, completedAt: ended }, exerciseOrder, setsRef.current));
     } catch { setFinishError(true); } finally { setBusy(false); }
   };
   const chooseExercises = (chosen: Exercise[]) => {
@@ -381,13 +424,36 @@ export default function EntrenamientoScreen() {
     Object.entries(added).forEach(([id, rows]) => rows.forEach((row, index) => { row.id = `${id}:${Date.now()}:${index}`; }));
     const next = { ...setsRef.current };
     if (picker && picker !== 'ADD') {
+      added[chosen[0].id] = replacementWorkoutSets(next[picker] ?? [], added[chosen[0].id] ?? [], `${chosen[0].id}:${Date.now()}`);
       // Preserve completed work on the original exercise; replacement starts as its own entry.
       const completed = (next[picker] ?? []).filter((row) => row.isCompleted);
       if (completed.length) next[picker] = completed; else delete next[picker];
       setSwappedFrom((old) => ({ ...old, [chosen[0].id]: old[picker] ?? picker }));
-      setExercises((old) => old.flatMap((ex) => ex.id !== picker ? [ex] : completed.length ? [ex, chosen[0]] : [chosen[0]]));
+      const updated = exercises.flatMap((ex) => ex.id !== picker ? [ex] : completed.length ? [ex, chosen[0]] : [chosen[0]]);
+      setExercises(updated);
+      const index = updated.findIndex((ex) => ex.id === chosen[0].id); setPageIndex(index);
+      requestAnimationFrame(() => pagerRef.current?.scrollTo({ x: index * width, animated: true }));
     } else setExercises((old) => [...old, ...chosen.filter((ex) => !old.some((item) => item.id === ex.id))]);
     Object.assign(next, added); setsRef.current = next; setSetsByExercise(next); setPicker(null);
+  };
+  // Auto-advancing the exercise rail must not change which exercise owns a running rest.
+  const restExercise = exercises.find((exercise) => (setsByExercise[exercise.id] ?? []).some((set) => set.id === restTimer.anchorSetId)) ?? exercises[pageIndex];
+  const prescribedRest = restExercise ? restOverrides[restExercise.id]
+    ?? plannedSession?.exercises.find((entry) => entry.exerciseId === restExercise.id)?.restSeconds
+    ?? restDurationFor(restExercise.profile) : 150;
+  const saveRestPrescription = async (seconds: number) => {
+    if (!uid || !restExercise || finished) throw Error('unavailableRestPrescription');
+    const identity = routeIdentity, exerciseId = restExercise.id;
+    const fresh = await mesocycleRepository.get(mesocycleId);
+    if (!fresh || activeRoute.current !== identity) throw Error('staleRestPrescription');
+    const patch = changeExerciseRest(fresh, uid, exerciseId, seconds);
+    let rejected = false;
+    await mesocycleRepository.updateLocally(mesocycleId, { ...patch, updatedAt: Date.now() }, () => { rejected = true; });
+    if (rejected || activeRoute.current !== identity) throw Error('restPrescriptionFailed');
+    setRestOverrides(patch.exerciseRestOverrides);
+    setPlannedSession((session) => session ? { ...session, exercises: session.exercises.map((entry) =>
+      entry.exerciseId === exerciseId ? { ...entry, restSeconds: seconds } : entry) } : session);
+    setRestTimer((state) => setRestDuration(state, seconds));
   };
 
   if (loadError) {
@@ -395,7 +461,7 @@ export default function EntrenamientoScreen() {
       <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
         <Text style={[styles.sessionName, { color: colors.textPrimary }]}>{t('train.sessionUnavailable')}</Text>
         <Pressable onPress={() => backToTraining(router)} style={{ marginTop: spacing.md }}>
-          <Text style={{ color: accent }}>{t('generate.back')}</Text>
+          <Text style={{ color: colors.accentText }}>{t('generate.back')}</Text>
         </Pressable>
       </View>
     );
@@ -405,9 +471,9 @@ export default function EntrenamientoScreen() {
     return <View style={[styles.screen, { backgroundColor: colors.bg }]} />;
   }
   if (!hasRestored) return <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top + 32, paddingHorizontal: spacing.lg }]}>
-    <Text style={[typography.title, { color: colors.textPrimary }]}>{t(restoreError ? 'workout.restoreError' : 'workout.restoring')}</Text>
-    {restoreError && <Pressable onPress={retryRestore} style={{ paddingVertical: 20 }}><Text style={{ color: accent }}>{t('home.retry')}</Text></Pressable>}
-    <Pressable onPress={() => backToTraining(router)} style={{ paddingVertical: 16 }}><Text style={{ color: colors.textSecondary }}>{t('generate.back')}</Text></Pressable>
+    {(restoreError || restoreNotice) && <Text style={[typography.title, { color: colors.textPrimary }]}>{t(restoreError ? 'workout.restoreError' : 'workout.restoring')}</Text>}
+    {restoreError && <Pressable onPress={retryRestore} style={{ paddingVertical: 20 }}><Text style={{ color: colors.accentText }}>{t('home.retry')}</Text></Pressable>}
+    {(restoreError || restoreNotice) && <Pressable onPress={() => backToTraining(router)} style={{ paddingVertical: 16 }}><Text style={{ color: colors.textSecondary }}>{t('generate.back')}</Text></Pressable>}
   </View>;
 
   return (
@@ -420,24 +486,13 @@ export default function EntrenamientoScreen() {
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Pressable onPress={() => { void flush().then((saved) => { if (saved) backToTraining(router); }); }} accessibilityRole="button" accessibilityLabel={t('workout.pause')} style={{ paddingVertical: 8 }}>
-              <Text style={{ color: accent, fontSize: 24 }}>‹</Text>
+              <Text style={{ color: colors.accentText, fontSize: 24 }}>‹</Text>
             </Pressable>
             <Text numberOfLines={1} style={[typography.emphasis, { color: colors.textPrimary, flex: 1 }]}>{sessionName}</Text>
           </View>
           <WorkoutClock startedAt={performedAt} completedAt={completedAt} />
           <View style={{ height: 18 }}>
-          {/* Solo se muestra cuando hay algo que decir: un "guardado" permanente
-              sería ruido. El error sí es persistente, porque implica riesgo. */}
-          {saveStatus === 'saving' ? (
-            <Text style={[styles.saveStatus, { color: colors.textMuted }]}>
-              {t('train.saving')}
-            </Text>
-          ) : saveStatus === 'error' ? (
-            <Text style={[styles.saveStatus, { color: semantic.warning }]}>
-              {t('train.saveError')}
-            </Text>
-          ) : saveStatus === 'queued' ? <Text style={[styles.saveStatus, { color: colors.textMuted }]}>{t('custom.pending')}</Text>
-            : activityUnavailable ? <Text style={[styles.saveStatus, { color: semantic.warning }]}>{t('workout.activityUnavailable')}</Text> : null}
+          <WorkoutPersistenceNotice status={saveStatus} activityUnavailable={activityUnavailable} />
           </View>
         </View>
         <RestTimer
@@ -446,6 +501,8 @@ export default function EntrenamientoScreen() {
           onRestart={() => setRestTimer((s) => restartRest(s, Date.now()))}
           onSetDuration={(seconds) => setRestTimer((s) => setRestDuration(s, seconds))}
           onCancel={() => setRestTimer(cancelRest())}
+          prescribedSeconds={prescribedRest} exerciseName={restExercise ? exerciseName(restExercise) : ''}
+          onSetPrescription={finished ? undefined : saveRestPrescription}
         />
       </View>
 
@@ -460,13 +517,13 @@ export default function EntrenamientoScreen() {
           {t('train.sets')}
         </Text>
         <Text style={styles.summaryValue}>
-          <Text style={{ color: accent }}>{completedSets}</Text>
+          <Text style={{ color: colors.accentText }}>{completedSets}</Text>
           <Text style={{ color: colors.textMuted }}>/{totalSets}</Text>
         </Text>
       </View>
 
       {/* Paginado por ejercicio */}
-      <ScrollView
+      <WorkoutPagerGestureContext.Provider value={pagerGesture}><GestureDetector gesture={pagerGesture}><ScrollView
         ref={pagerRef}
         horizontal
         pagingEnabled
@@ -478,8 +535,10 @@ export default function EntrenamientoScreen() {
             key={exercise.id}
             active={exerciseIndex === pageIndex}
             exercise={exercise}
-            note={notes[exercise.id] ?? exercise.notes}
+            scopedNotes={visibleWorkoutNotes(sessionNote, noteSnapshots.current.exerciseNotes[exercise.id] ?? '', noteSnapshots.current.mesocycleNote, notes[exercise.id] ?? '')}
+            onPressNote={(scope) => setDetail({ id: exercise.id, mode: 'note', scope })}
             sets={setsByExercise[exercise.id] ?? []}
+            recordSetIds={historyReady ? summary.recordSetIds : []}
             scale={scale}
             width={width}
             bottomInset={insets.bottom}
@@ -487,12 +546,16 @@ export default function EntrenamientoScreen() {
             onAddSet={addSet}
             onPressSetType={openTypePicker}
             onAction={(id, action) => { if (action === 'swap') { uiPerformance.begin('picker.ready'); setPicker(id); } else setDetail({ id, mode: action }); }}
-            onRemoveSet={(exerciseId, setId) => setRemoveSet({ exerciseId, setId })}
+            onRemoveSet={(exerciseId, setId) => {
+              const next = { ...setsRef.current, [exerciseId]: (setsRef.current[exerciseId] ?? []).filter((row) => row.id !== setId) };
+              setsRef.current = next; setSetsByExercise(next);
+            }}
           />
         ))}
-      </ScrollView>
+      </ScrollView></GestureDetector></WorkoutPagerGestureContext.Provider>
 
       <View style={[styles.finishBar, { paddingBottom: insets.bottom + 8, backgroundColor: colors.bg }]}>
+        {discardError && <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('workout.discardError')}</Text>}
         <Pressable
           disabled={!hasRestored}
           onPress={openFinish}
@@ -500,19 +563,43 @@ export default function EntrenamientoScreen() {
           style={[styles.finishButton, { backgroundColor: accent, borderRadius: radius.md }]}>
           <Text style={styles.finishText}>{t('train.finishWorkout')}</Text>
         </Pressable>
+        <Pressable accessibilityRole="button" disabled={busy || !hasRestored} onPress={() => setDiscardConfirm(true)}
+          style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center', marginTop: 4 }}>
+          <Text style={{ color: semantic.danger, fontWeight: '700' }}>{t('workout.discard')}</Text>
+        </Pressable>
       </View>
 
       <ExerciseSwapSheet open={picker !== null} mode={picker === 'ADD' ? 'add' : 'swap'} current={exercises.find((ex) => ex.id === picker) ?? null}
         candidates={catalogue.filter((ex) => !ex.archivedAt && !exercises.some((item) => item.id === ex.id))}
         onSelect={(exercise) => chooseExercises([exercise])} onSelectMany={chooseExercises} onClose={() => setPicker(null)} />
-      <ExerciseDetailSheet exercise={exercises.find((ex) => ex.id === detail?.id) ?? null} mode={detail?.mode ?? 'info'} note={notes[detail?.id ?? ''] ?? exercises.find((ex) => ex.id === detail?.id)?.notes ?? ''}
-        onNote={(note) => { if (detail) setNotes((old) => ({ ...old, [detail.id]: note })); }} onClose={() => setDetail(null)} />
+      <ExerciseDetailSheet exercise={detail?.mode === 'info' ? exercises.find((ex) => ex.id === detail.id) ?? null : null} mode="info" note=""
+        notRecommended={detail?.mode === 'info' ? notRecommendedExerciseIds.has(detail.id) : false}
+        onToggleRecommendation={(exercise, value) => { void setExerciseNotRecommended(exercise.id, value).catch(() => Alert.alert(t('exercisePreference.saveFailed'))); }}
+        onNote={() => {}} onClose={() => setDetail(null)} />
+      {detail?.mode === 'note' && <WorkoutNotesSheet open exerciseName={exercises.find((ex) => ex.id === detail.id)?.name ?? ''} initialScope={detail.scope}
+        executionNote={notes[detail.id] ?? ''}
+        values={{ SESSION: sessionNote, EXERCISE: persistentNotes.get('EXERCISE', detail.id), MESOCYCLE: persistentNotes.get('MESOCYCLE', mesocycleId) }}
+        unavailable={!persistentNotes.ready || persistentNotes.error || finished}
+        onSave={async (scope, text, executionNote) => {
+          if (scope === 'SESSION') {
+            const next = executionNote === undefined ? notes : { ...notes, [detail.id]: executionNote };
+            if (!await flush(undefined, { sessionNote: text, exerciseNotes: next })) throw Error('saveFailed');
+            setSessionNote(text); setNotes(next);
+          }
+          else await persistentNotes.save(scope, scope === 'EXERCISE' ? detail.id : mesocycleId, text);
+        }} onClose={() => setDetail(null)} />}
       <WorkoutFinishSheet open={finishing} saved={finished} busy={busy} error={finishError} summary={summary} exercises={exercises} changed={changed} historyReady={historyReady} startedAt={performedAt} completedAt={completedAt}
+        healthContent={completedSession ? <WorkoutHealthExport session={completedSession} /> : undefined}
         onFinish={(savePlan) => { void finishWorkout(savePlan); }} onClose={() => { if (finished) backToTraining(router); else setFinishing(false); }} />
-      <ActionMenuSheet title={removeSet ? t('workout.removeSet') : null} onClose={() => setRemoveSet(null)}
-        actions={[{ label: t('workout.removeSet'), tone: 'danger', onPress: () => { if (!removeSet) return;
-          const next = { ...setsRef.current, [removeSet.exerciseId]: setsRef.current[removeSet.exerciseId].filter((row) => row.id !== removeSet.setId) };
-          setsRef.current = next; setSetsByExercise(next); } }]} />
+      <ActionMenuSheet title={discardConfirm ? t('workout.discard') : null} subtitle={t('workout.discardHint')} onClose={() => setDiscardConfirm(false)}
+        actions={[{ label: t('workout.discardConfirm'), tone: 'danger', onPress: async () => {
+          if (busy || !sessionContext) return;
+          setBusy(true); setDiscardError(false);
+          if (!await discard()) { setDiscardError(true); setBusy(false); return; }
+          setRestTimer(cancelRest()); setFinished(true);
+          await Promise.allSettled([clearWorkoutRestAlerts(), endWorkoutActivity(sessionContext.userId, sessionContext.sessionId)]);
+          backToTraining(router);
+        } }, { label: t('generate.cancel'), onPress: () => {} }]} />
 
       {/* Selector de tipo de serie */}
       <Modal
@@ -556,7 +643,6 @@ const styles = StyleSheet.create({
     paddingTop: 6,
   },
   sessionName: { fontSize: 30, fontWeight: '800', letterSpacing: -0.5 },
-  saveStatus: { fontSize: 10, marginTop: 1 },
   thumbWrapper: { width: 84 },
   thumb: {
     width: 84,

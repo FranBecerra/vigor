@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -7,53 +7,36 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/theme/useTheme';
 import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import { workoutSessionRepository } from '@/services/repositories';
-import type { Exercise, WorkoutSession } from '@/models';
-import { toSessionSetsByExercise } from '@/services/training/sessionMapper';
-import { workoutReview } from '@/services/training/workoutReview';
-import { ActionMenuSheet } from '@/components/train/ActionMenuSheet';
-import { BodyMap } from '@/components/train/BodyMap';
-import { heatPaint } from '@/services/training/bodyMap';
+import type { WorkoutSession } from '@/models';
+import { WorkoutHistoryCard } from '@/components/train/WorkoutHistoryCard';
 import { backToTraining } from '@/services/training/backNavigation';
+import { timestampMillis } from '@/services/training/workoutRuntime';
 
 export default function HistoryScreen() {
-  const { uid } = useAuth(); const { exercisesById } = useExerciseCatalogue(); const { t, i18n } = useTranslation();
-  const { colors, typography, sectionAccent, radius, spacing } = useTheme(); const insets = useSafeAreaInsets(); const router = useRouter();
-  const [history, setHistory] = useState<WorkoutSession[]>([]); const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false); const [deleting, setDeleting] = useState<WorkoutSession | null>(null);
-  const [busy, setBusy] = useState(false); const [expanded, setExpanded] = useState<string | null>(null);
-  useFocusEffect(useCallback(() => { let alive = true; if (!uid) return;
-    workoutSessionRepository.listByUser(uid).then((items) => { if (alive) { setHistory(items); setError(false); setLoading(false); } })
-      .catch(() => { if (alive) { setError(true); setLoading(false); } }); return () => { alive = false; };
+  const { uid } = useAuth(); const { exercisesById } = useExerciseCatalogue(); const { t } = useTranslation();
+  const { colors, typography, sectionAccent, spacing } = useTheme(); const insets = useSafeAreaInsets(); const router = useRouter();
+  const [state, setState] = useState<{ owner: string | null; items: WorkoutSession[]; loading: boolean; error: boolean }>({ owner: null, items: [], loading: true, error: false });
+  useFocusEffect(useCallback(() => {
+    let alive = true; setState({ owner: uid, items: [], loading: true, error: false });
+    if (!uid) return () => { alive = false; };
+    workoutSessionRepository.listByUser(uid).then((items) => {
+      if (alive) setState({ owner: uid, items: items.filter((item) => item.userId === uid)
+        .sort((a, b) => timestampMillis(b.performedAt) - timestampMillis(a.performedAt)), loading: false, error: false });
+    }).catch(() => { if (alive) setState({ owner: uid, items: [], loading: false, error: true }); });
+    return () => { alive = false; };
   }, [uid]));
-  const timestamp = (session: WorkoutSession) => typeof session.performedAt === 'number' ? session.performedAt : session.performedAt.seconds * 1000;
+  const visible = state.owner === uid ? state.items : [];
   return <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
-    <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 110 }}>
-      <Pressable onPress={() => backToTraining(router)} style={{ paddingVertical: 12 }}><Text style={{ color: sectionAccent.train }}>{t('generate.back')}</Text></Pressable>
-      <Text style={[typography.emphasis, { color: colors.textPrimary, marginBottom: 20 }]}>{t('workout.history')}</Text>
-      {loading && <ActivityIndicator color={sectionAccent.train} />}
-      {error && <Text accessibilityRole="alert" style={{ color: colors.textPrimary }}>{t('workout.historyError')}</Text>}
-      {!loading && !history.length && <Text style={{ color: colors.textMuted }}>{t('workout.historyEmpty')}</Text>}
-      {[...history].sort((a, b) => timestamp(b) - timestamp(a)).map((session) => {
-        const exercises = [...session.exercises].sort((a, b) => a.order - b.order).map((entry) => entry.exerciseSnapshot ?? exercisesById.get(entry.exerciseId)).filter((ex): ex is Exercise => !!ex);
-        const summary = workoutReview(exercises, toSessionSetsByExercise(session), history.filter((other) => timestamp(other) < timestamp(session)), session.id);
-        return <View key={session.id} style={{ padding: 18, marginBottom: 14, borderRadius: radius.lg, backgroundColor: colors.surface }}>
-          <Pressable onPress={() => setExpanded(expanded === session.id ? null : session.id)}>
-            <Text style={[typography.title, { color: colors.textPrimary }]}>{new Date(timestamp(session)).toLocaleDateString(i18n.language)} · M{session.microcycleIndex + 1}</Text>
-            <Text style={{ color: colors.textSecondary, marginTop: 6 }}>{summary.completed} {t('workout.workingSets')} · {Math.round(summary.tonnage)} kg × reps</Text>
-            <Text numberOfLines={2} style={{ color: colors.textMuted, marginTop: 6 }}>{exercises.map((ex) => ex.name).join(' · ')}</Text>
-            {!session.completedAt && <Text style={{ color: sectionAccent.train }}>{t('workout.inProgress')}</Text>}
-          </Pressable>
-          {expanded === session.id && <BodyMap height={200} paint={heatPaint(summary.volumes, sectionAccent.train)} />}
-          <Pressable disabled={busy} onPress={() => setDeleting(session)} style={{ paddingTop: 18 }}><Text style={{ color: colors.textSecondary }}>{t('workout.delete')}</Text></Pressable>
-        </View>;
-      })}
-    </ScrollView>
-    <ActionMenuSheet title={deleting ? t('workout.delete') : null} subtitle={t('workout.deleteHint')} onClose={() => setDeleting(null)}
-      actions={[{ label: t('workout.deleteConfirm'), tone: 'danger', onPress: async () => {
-        if (!deleting || !uid || deleting.userId !== uid || busy) return;
-        setBusy(true); setError(false);
-        try { await workoutSessionRepository.delete(deleting.id); setHistory((old) => old.filter((item) => item.id !== deleting.id)); }
-        catch { setError(true); } finally { setBusy(false); }
-      } }]} />
+    <FlatList data={visible} keyExtractor={(item) => item.id} initialNumToRender={8} maxToRenderPerBatch={6} windowSize={5}
+      contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 110 }}
+      ListHeaderComponent={<>
+        <Pressable accessibilityRole="button" onPress={() => backToTraining(router)} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={[typography.body, { color: colors.accentText }]}>{t('generate.back')}</Text></Pressable>
+        <Text style={[typography.emphasis, { color: colors.textPrimary, marginBottom: 20 }]}>{t('workout.history')}</Text>
+        {(state.loading || state.owner !== uid) && <ActivityIndicator color={sectionAccent.train} />}
+        {state.error && <Text accessibilityRole="alert" style={[typography.body, { color: colors.textPrimary }]}>{t('workout.historyError')}</Text>}
+      </>}
+      ListEmptyComponent={!state.loading && !state.error ? <Text style={[typography.body, { color: colors.textMuted }]}>{t('workout.historyEmpty')}</Text> : null}
+      renderItem={({ item }) => <WorkoutHistoryCard session={item} catalogue={exercisesById}
+        onPress={() => router.push({ pathname: '/workout-history', params: { id: item.id } })} />} />
   </View>;
 }

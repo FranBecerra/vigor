@@ -14,8 +14,12 @@ import { SetType, type Exercise } from '@/models';
 import type { MockSetRow } from '@/mocks/session';
 import type { IntensityScale, IntensityValue } from '@/services/training/intensityScale';
 import { CustomRecordingRows } from './CustomRecordingRows';
+import type { WorkoutNoteScope } from '@/services/training/trainingNotes';
+import { usesCustomRecording } from '@/services/training/customExercises';
+import { useExerciseName } from '@/hooks/useExerciseName';
 
 interface ExercisePageProps {
+  recordSetIds?: readonly string[];
   exercise: Exercise;
   sets: MockSetRow[];
   scale: IntensityScale;
@@ -27,6 +31,8 @@ interface ExercisePageProps {
   onAction?: (exerciseId: string, action: 'swap' | 'info' | 'note') => void;
   onRemoveSet?: (exerciseId: string, setId: string) => void;
   note?: string;
+  scopedNotes?: readonly { scope: WorkoutNoteScope; text: string }[];
+  onPressNote?: (scope: WorkoutNoteScope) => void;
   active?: boolean;
 }
 
@@ -42,9 +48,13 @@ function ExercisePageComponent({
   onAction,
   onRemoveSet,
   note,
+  scopedNotes,
+  onPressNote,
   active = true,
+  recordSetIds = [],
 }: ExercisePageProps) {
   const { t } = useTranslation();
+  const name = useExerciseName();
   const { colors, spacing, radius } = useTheme();
 
   const update = useCallback(
@@ -57,10 +67,12 @@ function ExercisePageComponent({
     if (s.setType === SetType.NORMAL) normalCount += 1;
     return {
       id: s.id,
+      personalRecord: recordSetIds.includes(`${exercise.id}:${s.id}`),
       setType: s.setType,
       displayNumber: s.setType === SetType.NORMAL ? normalCount : undefined,
       weight: s.actualWeight ?? s.targetWeight,
       reps: s.actualReps ?? s.targetReps,
+      partialReps: s.actualPartialReps,
       intensity: s.actualRIR !== undefined ? s.actualRIR : s.targetRIR,
       extensions: s.extensions,
       // Gris atenuado mientras el valor sea el previsto y no uno introducido.
@@ -81,28 +93,24 @@ function ExercisePageComponent({
       contentContainerStyle={{ paddingBottom: bottomInset + 110 }}
       keyboardShouldPersistTaps="handled">
       <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}>
-        <Text style={[styles.exerciseName, { color: colors.textPrimary }]}>{exercise.name}</Text>
-        {!!note?.trim() && <Pressable accessibilityRole="button" accessibilityLabel={t('train.note')} onPress={() => onAction?.(exercise.id, 'note')}
-          style={{ padding: spacing.md, marginTop: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface }}>
-          <Text style={{ color: colors.textSecondary, lineHeight: 21 }}>{note}</Text>
-        </Pressable>}
+        <Text style={[styles.exerciseName, { color: colors.textPrimary }]}>{name(exercise)}</Text>
       </View>
 
-      {exercise.isCustom ? <CustomRecordingRows exercise={exercise} sets={sets} update={update} onRemoveSet={onRemoveSet} /> : <>
+      {usesCustomRecording(exercise) ? <CustomRecordingRows exercise={exercise} sets={sets} update={update} onRemoveSet={onRemoveSet} /> : <>
       {/* Cabecera de columnas */}
       <View style={[styles.columnHeader, { paddingHorizontal: spacing.lg }]}>
-        <Text style={[styles.columnLabel, { width: COLUMN_WIDTHS.set }]}>SET</Text>
-        <Text style={[styles.columnLabel, { flex: 1, paddingLeft: 4 }]}>{t('train.previous')}</Text>
-        <Text style={[styles.columnLabel, styles.centered, { width: COLUMN_WIDTHS.weight }]}>
+        <Text style={[styles.columnLabel, { color: colors.textSecondary, width: COLUMN_WIDTHS.set }]}>SET</Text>
+        <Text style={[styles.columnLabel, { color: colors.textSecondary, flex: 1, paddingLeft: 4 }]}>{t('train.previous')}</Text>
+        <Text style={[styles.columnLabel, styles.centered, { color: colors.textSecondary, width: COLUMN_WIDTHS.weight }]}>
           {t('train.weight')}
         </Text>
-        <Text style={[styles.columnLabel, styles.centered, { width: COLUMN_WIDTHS.reps }]}>
+        <Text style={[styles.columnLabel, styles.centered, { color: colors.textSecondary, width: COLUMN_WIDTHS.reps }]}>
           {t('train.reps')}
         </Text>
-        <Text style={[styles.columnLabel, styles.centered, { width: COLUMN_WIDTHS.intensity }]}>
+        <Text style={[styles.columnLabel, styles.centered, { color: colors.textSecondary, width: COLUMN_WIDTHS.intensity }]}>
           {scale}
         </Text>
-        <View style={{ width: COLUMN_WIDTHS.done + (onRemoveSet ? COLUMN_WIDTHS.remove : 0) }} />
+        <View style={{ width: COLUMN_WIDTHS.done }} />
       </View>
 
       {rows.map((row) => (
@@ -123,11 +131,21 @@ function ExercisePageComponent({
           onChangeReps={(value) => update(row.id, { actualReps: value })}
           onChangeIntensity={(value: IntensityValue) => update(row.id, { actualRIR: value })}
           onChangeExtensions={(extensions) => update(row.id, { extensions })}
+          onChangePartialReps={(value) => update(row.id, { actualPartialReps: value })}
+          onComplete={(values) => update(row.id, { actualWeight: values.weight, actualReps: values.reps, actualRIR: values.intensity,
+            actualPartialReps: values.partialReps, isCompleted: true })}
           onRemove={onRemoveSet ? () => onRemoveSet(exercise.id, row.id) : undefined}
         />
       ))}
       </>}
 
+      {(scopedNotes ?? (note?.trim() ? [{ scope: 'SESSION' as const, text: note }] : [])).map((entry, index) =>
+        <Pressable key={`${entry.scope}:${index}`} accessibilityRole="button" accessibilityLabel={t('train.note')}
+          onPress={() => onPressNote ? onPressNote(entry.scope) : onAction?.(exercise.id, 'note')}
+          style={{ padding: spacing.md, margin: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface }}>
+          <Text style={{ color: colors.textMuted, fontSize: 13, marginBottom: 5 }}>{t(`notes.${entry.scope}`)}</Text>
+          <Text numberOfLines={3} style={{ color: colors.textSecondary, fontSize: 16, lineHeight: 23 }}>{entry.text}</Text>
+        </Pressable>)}
       {/* + para añadir serie */}
       <Pressable
         onPress={() => onAddSet(exercise.id)}
@@ -170,7 +188,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 8,
   },
-  columnLabel: { fontSize: 10, fontWeight: '600', color: '#DCE8C4', letterSpacing: 0.4 },
+  columnLabel: { fontSize: 10, fontWeight: '600', letterSpacing: 0.4 },
   centered: { textAlign: 'center' },
   addSetBadge: {
     width: 30,
@@ -180,6 +198,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actions: { flexDirection: 'row', justifyContent: 'center', gap: 10, paddingTop: 4 },
-  actionChip: { paddingHorizontal: 18, paddingVertical: 8 },
-  actionText: { fontSize: 12, fontWeight: '600' },
+  actionChip: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 18, paddingVertical: 10 },
+  actionText: { fontSize: 15, fontWeight: '600' },
 });

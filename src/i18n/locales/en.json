@@ -1,5 +1,79 @@
 {
+  "progression": { "keepFixed": "Keep these RIR values for the remaining block", "stale": "The plan changed. Reopen the progression preview before applying.", "title": "Review RIR progression", "hint": "Your adjusted RIR is the new starting point. Review the remaining microcycles and deload before applying.", "recalculate": "Recalculate progression…", "apply": "Apply progression", "failed": "Could not prepare the progression. Reopen the session and try again." },
+  "prescription": { "setType": "Set type", "minReps": "Min reps", "maxReps": "Max reps", "failureRIR": "Failure · RIR 0", "previousSet": "Previous set", "nextSet": "Next set", "removeSet": "Remove last set", "setOf": "Set {{current}} of {{total}}" },
+  "historyEdit": { "title": "Edit workout", "name": "Session name", "warmup": "Warmup", "completed": "Completed", "failed": "Could not save. Check the values or reopen the workout if it changed elsewhere." },
+  "restControls": {
+    "open": "Rest {{time}} · Adjust",
+    "close": "Close controls",
+    "thisRestOnly": "± adjusts this rest only.",
+    "inPlan": "Rest between sets · saved for this exercise in this plan",
+    "restart": "Restart",
+    "cancel": "Cancel rest"
+  },
+  "restDays": {
+    "add": "Add rest day",
+    "after": "After {{session}}",
+    "beforeFirst": "Before the first session",
+    "remove": "Remove rest day"
+  },
+  "notes": {
+    "SESSION": "Session", "EXERCISE": "Exercise", "MESOCYCLE": "Mesocycle",
+    "SESSIONHint": "Only this workout. Saved with its history, not repeated in future sessions.",
+    "EXERCISEHint": "Your personal note for this exercise, across routines and future workouts.",
+    "MESOCYCLEHint": "Shown throughout this mesocycle, not carried into the next block.",
+    "execution": "{{name}} · only this execution", "saveFailed": "The note could not be saved or loaded. Your draft is kept; retry when the connection is available."
+  },
+  "library": {
+    "title": "Exercise library", "tools": "Training library", "description": "Description", "edit": "Edit exercise",
+    "noDescription": "No execution description yet. You can add one in Edit exercise.",
+    "ratings": "Programming criteria", "apparatus": "Additional equipment",
+    "manualOnlyHint": "Available in manual routines. This configuration is not used by the automatic selector.",
+    "privateHint": "Changes apply only to your catalogue. Existing workout history keeps its recorded snapshots.",
+    "ratingHint": "Ordinal estimates, not measured hypertrophy or CNS fatigue. Higher is more favorable on every criterion; 5 means low systemic cost. Unrated criteria stay blank.",
+    "personalRatingHint": "Your personal assessments. They do not change Vigor's shared catalogue or turn a manual exercise into an automatic recommendation.",
+    "clearRatings": "Leave unrated", "addRatings": "Add personal ratings · start at 3/5", "invalidCriteria": "Use a whole number from 1 to 5 for each criterion, or leave the exercise unrated.",
+    "criteria": { "stretchedPositionLoading": "Lengthened-position loading", "rangeOfMotion": "Useful range of motion", "resistanceProfileMatch": "Resistance profile", "stabilityCost": "Stability", "loadProgressability": "Load progression", "systemicFatigueCost": "Low systemic cost" },
+    "criteriaHints": { "stretchedPositionLoading": "Estimated demand on the target muscle at longer lengths.", "rangeOfMotion": "Useful active movement, not simply the longest visible travel.", "resistanceProfileMatch": "Estimated match between resistance and force capacity across the movement.", "stabilityCost": "5: support or guidance lets you focus on force; 1: balance is a major limitation.", "loadProgressability": "Ease of tracking and increasing resistance in manageable steps.", "systemicFatigueCost": "5: lower whole-body demand; 1: higher systemic demand. Not a CNS fatigue measurement." },
+    "apparatusNames": { "SEAT": "Seat", "FLAT_BENCH": "Flat bench", "ADJUSTABLE_BENCH": "Adjustable bench", "PREACHER_BENCH": "Preacher bench", "DUAL_CABLE": "Dual cable", "WIDE_CABLE_PORTAL": "Wide cable crossover", "ROMAN_BAR": "Neutral-grip bar", "PARALLEL_BARS": "Parallel bars", "BAR_ATTACHMENT": "Cable bar", "SINGLE_HANDLE": "Single handle", "HANDLE_PAIR": "Handle pair", "ROPE_ATTACHMENT": "Rope", "ROPE_PAIR": "Rope pair", "LONG_ROPE": "Long rope", "LONG_ROPE_PAIR": "Long rope pair", "CUFF_PAIR": "Cuff pair", "MAT": "Mat", "BICEPS_PREACHER_MACHINE": "Preacher curl machine", "BICEPS_BEHIND_BODY_MACHINE": "Behind-body curl machine", "HIGH_CURL_MACHINE": "High curl machine", "TRICEPS_EXTENSION_MACHINE": "Triceps extension machine" }
+  },
+  "historyDetails": { "workout": "Workout", "exercises": "exercises", "set": "Set", "performed": "Performed", "notCompleted": "Not completed", "unknownExercise": "Unavailable exercise", "exerciseSets": "{{count}} completed working sets" },
+  "exercisePreference": { "notRecommend": "Don't recommend this exercise", "recommend": "Recommend again", "notRecommended": "Excluded from automatic routines", "notRecommendShort": "Don't recommend", "notRecommendedShort": "Excluded", "saveFailed": "This preference could not be saved. Check your connection and try again." },
+  "settings": {
+    "title": "SETTINGS", "account": "Account", "displayName": "Username", "namePlaceholder": "Your name in Vigor",
+    "nameHint": "A visible name, not a unique reserved handle. Saving your name requires a connection; appearance and language are saved on this device for this account.",
+    "invalidName": "Use 1–40 characters without line breaks or control characters.", "nameSaved": "Name saved.", "saveName": "Save name",
+    "appearance": "Appearance", "system": "Follow system", "dark": "Dark", "light": "Light",
+    "language": "Language", "language_system": "Follow system", "language_es": "Español", "language_en": "English", "language_fr": "Français", "language_ja": "日本語",
+    "connections": "Connections", "error": "Could not save or load these settings. Your previous choices are preserved. Check your connection when saving your name, then retry.", "retry": "Reload settings"
+  },
+  "health": {
+    "title": "Apple Health",
+    "retrySettings": "Retry local Health settings",
+    "enable": "Save workouts to Apple Health",
+    "consent": "Save future completed strength workouts with their start and end times. No calorie estimates or Health data reading. Turn off to stop future exports; existing entries stay in Health.",
+    "unavailable": "Apple Health requires an iPhone and an updated Vigor installation.",
+    "settingsError": "Could not enable workout export or read its local settings. Check Vigor's workout-write permission in Health and try again.",
+    "enableInProfile": "Connect Apple Health in Profile → Settings → Connections. Previous workouts are only exported when you choose them here.",
+    "idle": "Not exported.",
+    "queued": "Saving to Health…",
+    "saved": "Saved to Health.",
+    "denied": "Workout-write permission is disabled. Enable it in Health, then retry.",
+    "failed": "Not saved to Health. Your Vigor workout is safe; you can retry.",
+    "deleted": "Removed from Health.",
+    "kept": "Not synchronized. Any previously exported Health entry was kept.",
+    "export": "Save / retry in Health",
+    "deleteVigor": "Discard only in Vigor",
+    "deleteBoth": "Discard in Vigor and delete from Apple Health",
+    "deleteHint": "Deleting only from Vigor keeps its Health entry. Deleting from both removes only the matching workout created by Vigor. If Health fails, the Vigor record stays available to retry."
+  },
   "workout": {
+    "recordSet": "Personal record · tap to unmark set",
+    "partialReps": "Partial reps",
+    "completeSet": "Complete set",
+    "setOf": "Set {{number}} of {{total}}",
+    "discard": "Discard workout", "discardConfirm": "Yes, discard workout",
+    "discardHint": "Discard this record so you can perform the planned session again. Your routine and rehabilitation records stay unchanged.",
+    "discardError": "Could not discard. Your workout is still saved; retry.",
     "duration": "Duration",
     "resume": "Resume workout",
     "pause": "Save and return to training",
@@ -224,6 +298,7 @@
     "loadingFailed": "Rehabilitation could not be loaded. You can continue strength and retry from Rehabilitation."
   },
   "calendar": {
+    "cycleOrder": "Cycle order",
     "templateSummary": "Suggested cycle: {{days}} days · {{rest}} rest days",
     "templateDescription": "This sequence works without dates. Move rest days if needed; workout order stays the same. Changes do not move existing calendar dates.",
     "moveRestEarlier": "Move rest one day earlier",
@@ -385,6 +460,7 @@
     "chartHint": "One bar = one microcycle. One segment = one set; its colour is the RIR and the code is the set type.",
     "average": "average",
     "perSetIntensity": "RIR per set",
+    "recordedSession": "Recorded workout",
     "volume": "Volume",
     "deloadShort": "DELOAD"
   },
@@ -424,7 +500,82 @@
     "reps": "reps",
     "applyExerciseChanges": "Apply to draft"
   },
+  "experienceGuide": {
+    "open": "Help me choose",
+    "close": "Close experience guide",
+    "step": "Question {{current}} of {{total}}",
+    "result": "Suggested level",
+    "apply": "Use this level",
+    "resultHint": "This is a starting point for this routine. You can choose another level if it does not fit.",
+    "questions": {
+      "consistency": {
+        "title": "How consistently have you trained?",
+        "hint": "Consider your recent training and the periods when you followed a plan."
+      },
+      "technique": {
+        "title": "How comfortable is your technique?",
+        "hint": "Think about the exercises you usually perform."
+      },
+      "progress": {
+        "title": "How do you usually progress?",
+        "hint": "Compare load or repetitions with consistent technique. An isolated plateau does not define your level."
+      }
+    },
+    "options": {
+      "STARTING_RETURNING": {
+        "title": "I am starting or returning",
+        "description": "I am new or returning after several months without regular training."
+      },
+      "REGULAR": {
+        "title": "I train regularly",
+        "description": "I have built the habit, but have not followed a plan consistently for several years."
+      },
+      "CONSISTENT_YEARS": {
+        "title": "I have been consistent for years",
+        "description": "I have followed a plan and tracked my training for several years, including recent months."
+      },
+      "LEARNING": {
+        "title": "I am still learning",
+        "description": "I am building consistent technique in my usual exercises."
+      },
+      "ESTABLISHED": {
+        "title": "My technique is established",
+        "description": "I perform my usual exercises with consistent technique."
+      },
+      "FREQUENT": {
+        "title": "Frequently",
+        "description": "I add repetitions or load in many sessions."
+      },
+      "GRADUAL": {
+        "title": "Gradually",
+        "description": "It takes several weeks to notice improvements."
+      },
+      "SLOW": {
+        "title": "Very slowly",
+        "description": "Even with months of structured, tracked training, improvements are small."
+      },
+      "UNSURE": {
+        "title": "I am not sure",
+        "description": "I have not tracked or compared my progress yet."
+      }
+    },
+    "reasons": {
+      "returning": "For starting or returning, we suggest a modest initial volume to build consistency.",
+      "foundation": "Your answers suggest starting with an emphasis on establishing technique and regular training.",
+      "established": "Your consistency and established technique suggest an intermediate starting point.",
+      "experienced": "Your years of consistency, established technique and slow progress suggest an advanced starting point."
+    }
+  },
   "generate": {
+    "closePicker": "Close exercise picker · drag down",
+    "cancelCreation": "Cancel routine creation",
+    "cancelCreationHint": "Discard the unsaved routine and leave creation? Your existing routines are unchanged.",
+    "keepCreating": "Keep creating",
+    "reviewDistribution": "Review distribution options",
+    "rerollFailed": "Could not prepare another combination. Your current plan is unchanged.",
+    "rerollUpdated": "Combination updated. Your volume and targets are unchanged.",
+    "lightOverlap": "A little work sits outside its session focus to retain your target volume. Your chosen split is kept.",
+    "largeOverlap": "This volume needs substantial overlap with the chosen split and time. Increase session time or adjust priorities for a clearer split; Vigor has not switched you to Auto.",
     "goalHypertrophyDescription": "Build muscle with editable volume and effort targets.",
     "goalStrengthDescription": "Prioritise squat, bench press and deadlift performance.",
     "priorityBudget": "Budget",
@@ -446,13 +597,14 @@
     "goal": "Goal",
     "goalHypertrophy": "Hypertrophy",
     "goalStrength": "Strength",
-    "level": "Level",
-    "levelBEGINNER": "Beginner",
+    "level": "Your current experience",
+    "levelBEGINNER": "Beginner or returning",
     "levelINTERMEDIATE": "Intermediate",
     "levelADVANCED": "Advanced",
-    "levelHintBEGINNER": "Under a year of training",
-    "levelHintINTERMEDIATE": "One to three years",
-    "levelHintADVANCED": "Over three years of progress",
+    "levelHintBEGINNER": "You are learning technique or returning after a long break.",
+    "levelHintINTERMEDIATE": "You train regularly, have established technique and make gradual progress.",
+    "levelHintADVANCED": "You have years of consistent, structured training; progress requires careful adjustments.",
+    "levelExplanation": "Choose based on your current consistency and progress, counting periods of regular training.",
     "capacity": "How much you can train",
     "sessions": "Sessions per microcycle",
     "sessionsHint": "A number of sessions, not weekdays.",

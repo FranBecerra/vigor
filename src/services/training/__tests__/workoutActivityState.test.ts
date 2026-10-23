@@ -35,3 +35,11 @@ it('keeps timed/no-load rehabilitation units distinct from kg and repetition tar
   expect(workoutActivityState([exercise], { [exercise.id]: [row({ recording: { measure: 'REPETITIONS', load: 'TOTAL_KG' }, actualReps: 8, actualWeight: 35 })] }, undefined, idle))
     .toMatchObject({ nextReps: '8 reps', nextWeight: '35 kg' });
 });
+
+it('localizes the next shared exercise and exposes its own working-set count and effort', () => {
+  const ex = exercises[0];
+  const sets = { [ex.id]: [row({ id: 'w', setType: SetType.WARMUP, isCompleted: true, actualReps: 8, actualWeight: 10 }), row({ id: 'one', targetRIR: 1 }), row({ id: 'two' })] };
+  expect(workoutActivityState([ex], sets, ex.id, idle, 'en')).toMatchObject({ nextExercise: 'Barbell bench press', nextSet: '1', nextSetTotal: 2, nextIntensity: 1, completed: 0, total: 2 });
+  sets[ex.id][1].actualRIR = 0;
+  expect(workoutActivityState([ex], sets, ex.id, idle, 'en').nextIntensity).toBe(0);
+});

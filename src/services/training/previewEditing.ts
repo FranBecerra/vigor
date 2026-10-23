@@ -1,7 +1,7 @@
 import { MuscleGroup, SetType, type Exercise, type PlannedSession, type PlannedSet } from '@/models';
 import { exercisePrescription, loadForTarget } from './exercisePrescription';
 import { TrainingGoal } from './volumePlan';
-import { restDurationFor } from './restTimer';
+import { MAX_REST_SECONDS, restDurationFor } from './restTimer';
 import { recordingOf } from './customExercises';
 import { primaryMusclesOf } from './exerciseMuscles';
 
@@ -44,7 +44,7 @@ export function appendPreviewExercises(
         exerciseId: exercise.id,
         order: Math.max(-1, ...exercises.map((entry) => entry.order)) + 1,
         isEdited: true,
-        ...(exercise.isCustom ? { exerciseSnapshot: exercise,
+        ...(exercise.isCustom || exercise.isPersonalized ? { exerciseSnapshot: exercise,
           manualRIRBySet: Object.fromEntries(rir.map((targetRIR, index) => [index, targetRIR])) } : {}),
         restSeconds: restDurationFor(exercise.profile),
         sets: rir.map((targetRIR): PlannedSet => ({
@@ -84,6 +84,8 @@ export interface PreviewExerciseEdit {
   targetRepsMin?: number;
   targetReps?: number;
   repsBySet?: Readonly<Record<number, { min: number; max: number }>>;
+  secondsBySet?: Readonly<Record<number, number>>;
+  typeBySet?: Readonly<Record<number, SetType>>;
   rirBySet?: Readonly<Record<number, number>>;
 }
 
@@ -140,12 +142,14 @@ export function applyPreviewEdits(
               const { targetWeightKg: _oldWeight, ...withoutWeight } = base;
               return withoutWeight;
             }
-            const nextRIR = edit.rirBySet?.[index] ?? (swapped ? undefined : exercise.manualRIRBySet?.[index])
+            const nextType = edit.typeBySet?.[index] ?? base.setType;
+            const nextRIR = nextType === SetType.FAILURE ? 0 : edit.rirBySet?.[index] ?? (swapped ? undefined : exercise.manualRIRBySet?.[index])
               ?? base.targetRIR;
             const individualRange = edit.repsBySet?.[index];
             const nextReps = individualRange?.max ?? edit.targetReps ?? base.targetReps;
             const prescribed = {
               ...base,
+              setType: nextType,
               targetRIR: nextRIR,
               ...((swapped || base.targetWeightKg === undefined) ||
                 (nextRIR === base.targetRIR && nextReps === base.targetReps) ? {} : {
@@ -160,7 +164,7 @@ export function applyPreviewEdits(
                 : edit.targetReps === undefined ? {} : { targetReps: edit.targetReps }),
             };
             if (base.targetDurationSeconds !== undefined) {
-              prescribed.targetDurationSeconds = edit.targetReps ?? base.targetDurationSeconds;
+              prescribed.targetDurationSeconds = edit.secondsBySet?.[index] ?? edit.targetReps ?? base.targetDurationSeconds;
               prescribed.targetReps = 0; prescribed.targetRepsMin = 0;
             }
             if (!swapped) return prescribed;
@@ -173,7 +177,7 @@ export function applyPreviewEdits(
       }).filter(([index]) => Number(index) < sets.length &&
         sets[Number(index)]?.setType !== SetType.TOP_SINGLE));
       const { exerciseSnapshot: oldSnapshot, ...identity } = withoutManual;
-      const resolvedSnapshot = swapped ? replacement?.isCustom ? replacement : undefined : oldSnapshot;
+      const resolvedSnapshot = swapped ? replacement?.isCustom || replacement?.isPersonalized ? replacement : undefined : oldSnapshot;
       const mode = resolvedSnapshot?.recording;
       const typedSets = swapped && catalogue ? sets.map((set) => {
         const { targetDurationSeconds: _, targetLoadLevel: __, targetWeightKg: ___, ...base } = set;
@@ -186,7 +190,7 @@ export function applyPreviewEdits(
         exerciseId: edit.exerciseId ?? exercise.exerciseId,
         sets: typedSets,
         ...(edit.restSeconds !== undefined && Number.isFinite(edit.restSeconds)
-          ? { restSeconds: Math.max(0, Math.min(600, Math.round(edit.restSeconds))) } : {}),
+          ? { restSeconds: Math.max(0, Math.min(MAX_REST_SECONDS, Math.round(edit.restSeconds))) } : {}),
         ...(Object.keys(manualRIRBySet).length === 0 ? {} : { manualRIRBySet }),
         isEdited: true,
       };
@@ -221,7 +225,7 @@ export function previewVolumeBreakdownByMuscle(
       const exercise = planned.exerciseSnapshot ?? exercisesById.get(planned.exerciseId);
       if (exercise === undefined || exercise.primaryMuscle === MuscleGroup.UNCLASSIFIED
         || exercise.recording?.measure === 'SECONDS') return;
-      const sets = planned.sets.length;
+      const sets = planned.sets.filter((set) => set.setType !== SetType.WARMUP).length;
       const primaries = primaryMusclesOf(exercise);
       primaries.forEach((muscle) => add(muscle, sets, 0));
       new Set(exercise.secondaryMuscles).forEach((muscle) => {

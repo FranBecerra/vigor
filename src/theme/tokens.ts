@@ -54,6 +54,9 @@ export const palette = {
     textPrimary: '#F0F2F4',
     textSecondary: '#9AA1A8',
     textMuted: '#6B7279',
+    accentText: BRAND_LIME,
+    onAccent: '#16191C',
+    controlBorder: '#606870',
     /** Body-map muscle with no volume or no emphasis. */
     muscleNeutral: '#3A3F45',
   },
@@ -64,7 +67,10 @@ export const palette = {
     surfaceBorder: 'rgba(0,0,0,0.07)',
     textPrimary: '#16191C',
     textSecondary: '#5A6068',
-    textMuted: '#8E959C',
+    textMuted: '#656C73',
+    accentText: '#365E00',
+    onAccent: '#16191C',
+    controlBorder: '#838B92',
     muscleNeutral: '#DADDE1',
   },
 } as const;

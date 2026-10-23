@@ -86,7 +86,8 @@ describe('previewEditing', () => {
   it('persists rest changes with bounded seconds while ignoring non-finite input', () => {
     expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: 180 } })[0].exercises[0].restSeconds).toBe(180);
     expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: -1 } })[0].exercises[0].restSeconds).toBe(0);
-    expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: 1000 } })[0].exercises[0].restSeconds).toBe(600);
+    expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: 1000 } })[0].exercises[0].restSeconds).toBe(1000);
+    expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: 9999 } })[0].exercises[0].restSeconds).toBe(3600);
     expect(applyPreviewEdits(sessions, { '0:0': { restSeconds: NaN } })[0].exercises[0].restSeconds).toBeUndefined();
     expect(sessions[0].exercises[0].restSeconds).toBeUndefined();
   });

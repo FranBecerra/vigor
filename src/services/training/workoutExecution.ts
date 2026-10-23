@@ -4,6 +4,9 @@ import { isLiveSetCompleted, type SessionSetState, type SessionSetsByExercise } 
 /** Clearing a required actual cannot leave a checked-but-invalid completed row. */
 export function updateWorkoutSet(row: SessionSetState, patch: Partial<SessionSetState>): SessionSetState {
   const next = { ...row, ...patch };
+  if (next.actualPartialReps !== undefined && (!Number.isInteger(next.actualPartialReps) || next.actualPartialReps < 0 || next.actualPartialReps > 999)) {
+    next.actualPartialReps = row.actualPartialReps;
+  }
   return next.isCompleted && !isLiveSetCompleted(next) ? { ...next, isCompleted: false } : next;
 }
 
@@ -26,4 +29,21 @@ export function editNumericDraft(text: string, key: string, decimal: boolean): s
   if (key === '.') return decimal && !text.includes('.') ? `${text || '0'}.` : text;
   if (!/^\d$/.test(key)) return text;
   return `${text === '0' ? '' : text}${key}`.slice(0, 7);
+}
+
+/** Swap only unfinished work. Never transfer actuals or a load between different exercises. */
+export function replacementWorkoutSets(source: readonly SessionSetState[], defaults: readonly SessionSetState[], token: string): SessionSetState[] {
+  const pending = source.filter((set) => !isLiveSetCompleted(set));
+  const rows = pending.length ? pending : defaults;
+  return rows.map((set, index) => {
+    const fallback = defaults[index % Math.max(1, defaults.length)];
+    if (!fallback) throw Error('missingReplacementPrescription');
+    const sameMeasure = (set.recording?.measure ?? 'REPETITIONS') === (fallback.recording?.measure ?? 'REPETITIONS');
+    return { ...fallback, id: `${token}:${index}`, setType: set.setType,
+      ...(sameMeasure ? { targetReps: set.targetReps, targetRIR: set.targetRIR,
+        ...(set.targetDurationSeconds === undefined ? {} : { targetDurationSeconds: set.targetDurationSeconds }) } : {}),
+      actualWeight: undefined, actualReps: undefined, actualRIR: undefined, actualPartialReps: undefined,
+      actualDurationSeconds: undefined, actualLoadLevel: undefined, extensions: undefined, previous: undefined,
+      isCompleted: false, completionState: 'PENDING' as const, isAutoFilled: false };
+  });
 }

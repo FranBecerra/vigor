@@ -37,6 +37,9 @@ function micro(
 }
 
 describe('averageTargetRIR', () => {
+  it('omits timed work from the effort average', () => {
+    expect(averageTargetRIR([{ ...exercise(5, 3), isTimed: true }, exercise(2, 1)])).toBe(2);
+  });
   it('pondera el RIR por el número de series de trabajo', () => {
     expect(averageTargetRIR([exercise(1, 1), exercise(3, 3)])).toBe(2.5);
   });

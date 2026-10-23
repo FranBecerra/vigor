@@ -8,12 +8,13 @@
  * No mezcla las series de ejercicios distintos como si fueran una progresión
  * única: esa representación no explicaba nada y se retiró.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { backToTraining } from '@/services/training/backNavigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { useExerciseName } from '@/hooks/useExerciseName';
 import { useTheme } from '@/theme/useTheme';
 import { rirColor } from '@/components/train/rirColor';
 import { countWorkingSets } from '@/services/training/sessionSummary';
@@ -22,6 +23,7 @@ import { deriveSetRIRs } from '@/services/training/setIntensity';
 import { SetType } from '@/models';
 import { useRoutines } from '@/hooks/useRoutines';
 import { MuscleTags } from '@/components/train/MuscleTags';
+import { SharedNoteButton } from '@/components/train/SharedNoteButton';
 
 const PROJECTED_OPACITY = 0.4;
 const COMPLETED_OPACITY = 0.62;
@@ -30,6 +32,7 @@ const MAX_BAR_HEIGHT = 56;
 
 export default function MesocycleScreen() {
   const { t } = useTranslation();
+  const name = useExerciseName();
   const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -39,9 +42,13 @@ export default function MesocycleScreen() {
 
   const [sessionIndex, setSessionIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const initializedRoutine = useRef<string | null>(null);
 
   useEffect(() => {
-    if (routine !== null) setSelectedIndex(routine.currentMicrocycleIndex);
+    if (routine !== null && initializedRoutine.current !== routine.id) {
+      initializedRoutine.current = routine.id;
+      setSelectedIndex(routine.currentMicrocycleIndex);
+    }
   }, [routine]);
 
   const sessionNames = routine?.microcycles[0]?.sessions.map((session) => session.name) ?? [];
@@ -55,6 +62,10 @@ export default function MesocycleScreen() {
   const selectedSession = selectedMicrocycle?.sessions[sessionIndex] ?? null;
   const openSelectedSession = () => {
     if (routine === null || selectedSession === null) return;
+    if (selectedSession.completedWorkoutId) {
+      router.push({ pathname: '/workout-history', params: { id: selectedSession.completedWorkoutId, edit: '1' } });
+      return;
+    }
     router.push({ pathname: '/routine', params: {
       mesocycleId: routine.mesocycleId,
       microcycleIndex: String(selectedIndex),
@@ -89,10 +100,11 @@ export default function MesocycleScreen() {
           </Pressable>
           <Text style={[styles.title, { color: colors.textPrimary }]}>{routine.objective}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>{routine.name}</Text>
+          <SharedNoteButton scope="MESOCYCLE" targetId={routine.mesocycleId} title={routine.name} />
 
           <View style={[styles.statRow, { marginTop: spacing.md }]}>
             <View style={[styles.stat, { backgroundColor: colors.bgElevated, borderRadius: radius.md }]}>
-              <Text style={[styles.statValue, { color: sectionAccent.train }]}>{completedSessions}</Text>
+              <Text style={[styles.statValue, { color: colors.accentText }]}>{completedSessions}</Text>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>
                 {t('meso.ofSessions', { total: totalSessions })}
               </Text>
@@ -209,7 +221,7 @@ export default function MesocycleScreen() {
                         styles.rirBadge,
                         { backgroundColor: rirColor(metric.averageRIR), borderRadius: radius.sm },
                       ]}>
-                      <Text style={styles.rirText}>{metric.averageRIR.toFixed(1)}</Text>
+                      <Text style={styles.rirText}>{metric.hasRecordedRIR === false ? '—' : metric.averageRIR.toFixed(1)}</Text>
                     </View>
                   </Pressable>
                 );
@@ -231,19 +243,22 @@ export default function MesocycleScreen() {
                 : `${t('home.microcycle')} ${selectedMicrocycle.number}`}
             </Text>
           </Pressable>
+          {selectedSession.completedWorkoutId && <Pressable onPress={openSelectedSession} accessibilityRole="button"
+            style={{ minHeight: 44, justifyContent: 'center', marginBottom: spacing.md }}>
+            <Text style={{ color: colors.accentText }}>{t('meso.recordedSession')} · {t('historyEdit.title')} ›</Text>
+          </Pressable>}
 
-          {selectedSession.exercises.map((exercise) => {
+          {(selectedSession.performedExercises ?? selectedSession.exercises).map((exercise, exerciseIndex) => {
             const workingSets = countWorkingSets(exercise.sets);
             // `routineView` already resolves this microcycle's prescription;
             // applying its delta again would make the strength RIR ramp twice as steep.
             const setRIRs = exercise.sets
               .filter((set) => set.setType !== SetType.WARMUP)
-              .map((set, index) => set.targetRIR ?? deriveSetRIRs(exercise.targetRIR, workingSets)[index]);
+              .map((set, index) => selectedSession.performedExercises !== undefined ? set.targetRIR
+                : set.targetRIR ?? deriveSetRIRs(exercise.targetRIR, workingSets)[index]);
             return (
-              <Pressable
-                key={exercise.exerciseId}
-                onPress={openSelectedSession}
-                accessibilityRole="button"
+              <View
+                key={`${exercise.exerciseId}:${exerciseIndex}`}
                 style={[
                   styles.exerciseCard,
                   { backgroundColor: colors.bgElevated, borderRadius: radius.md },
@@ -251,7 +266,7 @@ export default function MesocycleScreen() {
                 <View style={styles.exerciseTop}>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.exerciseName, { color: colors.textPrimary }]}>
-                      {exercise.name}
+                      {name({ id: exercise.exerciseId, name: exercise.name })}
                     </Text>
                     <MuscleTags exercise={exercise} />
                   </View>
@@ -268,10 +283,10 @@ export default function MesocycleScreen() {
                       <View
                         style={[
                           styles.setRirBadge,
-                          { backgroundColor: rirColor(rir), borderRadius: radius.sm },
+                          { backgroundColor: rir === undefined ? colors.surface : rirColor(rir), borderRadius: radius.sm },
                         ]}>
-                        <Text style={styles.rirText}>
-                          {Number.isInteger(rir) ? rir : rir.toFixed(1)}
+                        <Text style={[styles.rirText, rir === undefined && { color: colors.textMuted }]}>
+                          {rir === undefined ? '—' : Number.isInteger(rir) ? rir : rir.toFixed(1)}
                         </Text>
                       </View>
                     </View>
@@ -280,7 +295,7 @@ export default function MesocycleScreen() {
                     {t('meso.perSetIntensity')}
                   </Text>
                 </View>
-              </Pressable>
+              </View>
             );
           })}
         </View>
@@ -329,8 +344,8 @@ const styles = StyleSheet.create({
   exerciseName: { fontSize: 12.5, fontWeight: '600' },
   prescription: { fontSize: 11, fontWeight: '700', fontVariant: ['tabular-nums'] },
   setRirRow: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 9, flexWrap: 'wrap' },
-  setRir: { alignItems: 'center', gap: 2 },
-  setIndex: { fontSize: 8, fontWeight: '700' },
-  setRirBadge: { minWidth: 26, paddingVertical: 2, alignItems: 'center' },
+  setRir: { width: 32, alignItems: 'center', gap: 4 },
+  setIndex: { width: '100%', textAlign: 'center', fontSize: 11, lineHeight: 16, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  setRirBadge: { width: 32, height: 24, justifyContent: 'center', alignItems: 'center' },
   setRirCaption: { fontSize: 8.5, marginLeft: 2 },
 });

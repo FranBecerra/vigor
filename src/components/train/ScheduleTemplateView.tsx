@@ -11,24 +11,22 @@ export function ScheduleTemplateView({ template, sessions, onMoveRest }: {
   const { t } = useTranslation(); const { colors, spacing, typography } = useTheme();
   const names = sessionNames(sessions, (focus) => t(`generate.focus${focus}`));
   return <View style={{ gap: spacing.sm, marginVertical: spacing.sm }}>
-    <Text style={[typography.caption, { color: colors.textSecondary }]}>{t('calendar.templateSummary', {
-      days: template.days, rest: template.slots.filter((s) => s.kind === 'rest').length,
-    })}</Text>
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
-      {template.slots.map((slot, index) => <View key={index} style={{ borderWidth: 1,
-        borderColor: colors.surfaceBorder, borderRadius: 10, padding: spacing.sm, flexDirection: 'row', gap: spacing.sm }}>
+    <Text style={[typography.title, { color: colors.textPrimary }]}>{t('calendar.cycleOrder')}</Text>
+    <View style={{ borderRadius: 16, backgroundColor: colors.bgElevated, paddingHorizontal: spacing.md }}>
+      {template.slots.map((slot, index) => <View key={index} style={{ minHeight: 52, alignItems: 'center',
+        borderBottomWidth: index === template.days - 1 ? 0 : 1, borderColor: colors.surfaceBorder, flexDirection: 'row', gap: spacing.md }}>
+        <Text style={{ width: 28, color: colors.textMuted, fontVariant: ['tabular-nums'], fontSize: 14 }}>{index + 1}</Text>
         {slot.kind === 'rest' && onMoveRest && index > 0 && <Pressable accessibilityRole="button"
           accessibilityLabel={t('calendar.moveRestEarlier')} onPress={() => onMoveRest(index, index - 1)}>
           <Text style={{ color: colors.textPrimary }}>‹</Text></Pressable>}
-        <Text style={[typography.caption, { color: slot.kind === 'rest' ? colors.textMuted : colors.textPrimary }]}>
-          {index + 1} · {slot.kind === 'rest' ? t('calendar.rest')
-            : names[slot.sessionIndex] ?? t('calendar.session', { number: slot.sessionIndex + 1 })}
+        <Text style={{ flex: 1, fontSize: 16, fontWeight: slot.kind === 'rest' ? '400' : '600', color: slot.kind === 'rest' ? colors.textMuted : colors.textPrimary }}>
+          {slot.kind === 'rest' ? t('calendar.rest')
+            : names[sessions.findIndex((session) => session.index === slot.sessionIndex)] ?? t('calendar.session', { number: slot.sessionIndex + 1 })}
         </Text>
         {slot.kind === 'rest' && onMoveRest && index < template.days - 1 && <Pressable accessibilityRole="button"
           accessibilityLabel={t('calendar.moveRestLater')} onPress={() => onMoveRest(index, index + 1)}>
           <Text style={{ color: colors.textPrimary }}>›</Text></Pressable>}
       </View>)}
     </View>
-    <Text style={[typography.caption, { color: colors.textMuted }]}>{t('calendar.templateDescription')}</Text>
   </View>;
 }

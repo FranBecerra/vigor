@@ -1,5 +1,79 @@
 {
+  "progression": { "keepFixed": "Mantener estos RIR en el resto del mesociclo", "stale": "El plan ha cambiado. Vuelve a revisar la progresión antes de aplicar.", "title": "Revisar progresión de RIR", "hint": "Tu RIR ajustado es el nuevo punto de partida. Revisa los microciclos restantes y la descarga antes de aplicar.", "recalculate": "Recalcular progresión…", "apply": "Aplicar progresión", "failed": "No se pudo preparar la progresión. Vuelve a abrir la sesión e inténtalo otra vez." },
+  "prescription": { "setType": "Tipo de serie", "minReps": "Mín. reps", "maxReps": "Máx. reps", "failureRIR": "Al fallo · RIR 0", "previousSet": "Serie anterior", "nextSet": "Siguiente serie", "removeSet": "Quitar última serie", "setOf": "Serie {{current}} de {{total}}" },
+  "historyEdit": { "title": "Editar entrenamiento", "name": "Nombre de la sesión", "warmup": "Calentamiento", "completed": "Completada", "failed": "No se pudo guardar. Revisa los valores o vuelve a abrir el entrenamiento si ha cambiado." },
+  "restControls": {
+    "open": "Descanso {{time}} · Ajustar",
+    "close": "Cerrar ajustes",
+    "thisRestOnly": "± ajusta sólo este descanso.",
+    "inPlan": "Descanso entre series · se guarda para este ejercicio en este plan",
+    "restart": "Reiniciar",
+    "cancel": "Cancelar descanso"
+  },
+  "restDays": {
+    "add": "Añadir día de descanso",
+    "after": "Después de {{session}}",
+    "beforeFirst": "Antes de la primera sesión",
+    "remove": "Quitar día de descanso"
+  },
+  "notes": {
+    "SESSION": "Sesión", "EXERCISE": "Ejercicio", "MESOCYCLE": "Mesociclo",
+    "SESSIONHint": "Sólo este entrenamiento. Se guarda en su historial, sin repetirse en futuras sesiones.",
+    "EXERCISEHint": "Tu nota personal de este ejercicio, en cualquier rutina y entrenamiento futuro.",
+    "MESOCYCLEHint": "Se muestra durante este mesociclo, sin pasar al siguiente bloque.",
+    "execution": "{{name}} · sólo esta ejecución", "saveFailed": "No se pudo guardar o cargar la nota. Tu borrador se conserva; reintenta cuando haya conexión."
+  },
+  "library": {
+    "title": "Biblioteca de ejercicios", "tools": "Biblioteca de entrenamiento", "description": "Descripción", "edit": "Editar ejercicio",
+    "noDescription": "Aún no hay una descripción de ejecución. Puedes añadirla en Editar ejercicio.",
+    "ratings": "Criterios de programación", "apparatus": "Material adicional",
+    "manualOnlyHint": "Disponible en rutinas manuales. Esta configuración no participa en la selección automática.",
+    "privateHint": "Los cambios sólo afectan a tu catálogo. El historial mantiene los datos registrados en su momento.",
+    "ratingHint": "Estimaciones ordinales, no mediciones de hipertrofia ni fatiga del SNC. Más alto es más favorable en cada criterio; 5 indica bajo coste sistémico. Lo no valorado queda en blanco.",
+    "personalRatingHint": "Tus valoraciones personales. No modifican el catálogo común de Vigor ni convierten un ejercicio manual en recomendación automática.",
+    "clearRatings": "Dejar sin valorar", "addRatings": "Añadir valoraciones personales · partir de 3/5", "invalidCriteria": "Usa un entero del 1 al 5 en cada criterio, o deja el ejercicio sin valorar.",
+    "criteria": { "stretchedPositionLoading": "Carga en posición estirada", "rangeOfMotion": "Rango de movimiento útil", "resistanceProfileMatch": "Perfil de resistencia", "stabilityCost": "Estabilidad", "loadProgressability": "Progresión de carga", "systemicFatigueCost": "Bajo coste sistémico" },
+    "criteriaHints": { "stretchedPositionLoading": "Demanda estimada del músculo objetivo en posiciones alargadas.", "rangeOfMotion": "Recorrido activo útil, no simplemente el mayor desplazamiento visible.", "resistanceProfileMatch": "Ajuste estimado entre resistencia y capacidad de producir fuerza durante el recorrido.", "stabilityCost": "5: el apoyo o guiado permite centrarse en producir fuerza; 1: el equilibrio limita mucho.", "loadProgressability": "Facilidad para medir e incrementar la resistencia en pasos manejables.", "systemicFatigueCost": "5: menor demanda global; 1: mayor demanda sistémica. No mide fatiga del SNC." },
+    "apparatusNames": { "SEAT": "Asiento", "FLAT_BENCH": "Banco plano", "ADJUSTABLE_BENCH": "Banco ajustable", "PREACHER_BENCH": "Banco predicador", "DUAL_CABLE": "Doble polea", "WIDE_CABLE_PORTAL": "Cruce de poleas amplio", "ROMAN_BAR": "Barra de agarre neutro", "PARALLEL_BARS": "Paralelas", "BAR_ATTACHMENT": "Barra para polea", "SINGLE_HANDLE": "Asa individual", "HANDLE_PAIR": "Par de asas", "ROPE_ATTACHMENT": "Cuerda", "ROPE_PAIR": "Par de cuerdas", "LONG_ROPE": "Cuerda larga", "LONG_ROPE_PAIR": "Par de cuerdas largas", "CUFF_PAIR": "Par de brazaletes", "MAT": "Esterilla", "BICEPS_PREACHER_MACHINE": "Máquina de curl predicador", "BICEPS_BEHIND_BODY_MACHINE": "Máquina de curl con brazo retrasado", "HIGH_CURL_MACHINE": "Máquina de curl alto", "TRICEPS_EXTENSION_MACHINE": "Máquina de extensión de tríceps" }
+  },
+  "historyDetails": { "workout": "Entrenamiento", "exercises": "ejercicios", "set": "Serie", "performed": "Realizado", "notCompleted": "No completada", "unknownExercise": "Ejercicio no disponible", "exerciseSets": "{{count}} series de trabajo completadas" },
+  "exercisePreference": { "notRecommend": "No recomendar este ejercicio", "recommend": "Volver a recomendar", "notRecommended": "No se sugerirá en rutinas automáticas", "notRecommendShort": "No recomendar", "notRecommendedShort": "No recomendar", "saveFailed": "No se pudo guardar esta preferencia. Comprueba la conexión e inténtalo de nuevo." },
+  "settings": {
+    "title": "CONFIGURACIÓN", "account": "Cuenta", "displayName": "Nombre de usuario", "namePlaceholder": "Tu nombre en Vigor",
+    "nameHint": "Un nombre visible, no un alias único reservado. Guardar el nombre requiere conexión; apariencia e idioma se guardan en este dispositivo para esta cuenta.",
+    "invalidName": "Usa entre 1 y 40 caracteres, sin saltos de línea ni caracteres de control.", "nameSaved": "Nombre guardado.", "saveName": "Guardar nombre",
+    "appearance": "Apariencia", "system": "Seguir el sistema", "dark": "Oscuro", "light": "Claro",
+    "language": "Idioma", "language_system": "Seguir el sistema", "language_es": "Español", "language_en": "English", "language_fr": "Français", "language_ja": "日本語",
+    "connections": "Conexiones", "error": "No se pudieron guardar o cargar estos ajustes. Tus opciones anteriores se conservan. Revisa la conexión si estabas guardando el nombre y reintenta.", "retry": "Recargar ajustes"
+  },
+  "health": {
+    "title": "Apple Salud",
+    "retrySettings": "Reintentar ajustes locales de Salud",
+    "enable": "Guardar entrenamientos en Apple Salud",
+    "consent": "Guarda futuros entrenamientos de fuerza finalizados con su hora de inicio y fin. Sin estimar calorías ni leer datos de Salud. Desactivar detiene futuros envíos; lo ya guardado permanece en Salud.",
+    "unavailable": "Apple Salud requiere un iPhone y una instalación actualizada de Vigor.",
+    "settingsError": "No se pudo activar el envío o leer sus ajustes locales. Revisa el permiso de escritura de entrenamientos de Vigor en Salud y reintenta.",
+    "enableInProfile": "Conecta Apple Salud en Perfil → Configuración → Conexiones. Los entrenamientos anteriores sólo se envían si los eliges aquí.",
+    "idle": "Sin enviar.",
+    "queued": "Guardando en Salud…",
+    "saved": "Guardado en Salud.",
+    "denied": "El permiso para escribir entrenamientos está desactivado. Actívalo en Salud y reintenta.",
+    "failed": "No se guardó en Salud. Tu entrenamiento de Vigor está a salvo; puedes reintentar.",
+    "deleted": "Eliminado de Salud.",
+    "kept": "Sin sincronizar. Se conserva cualquier entrada enviada anteriormente a Salud.",
+    "export": "Guardar / reintentar en Salud",
+    "deleteVigor": "Descartar sólo en Vigor",
+    "deleteBoth": "Descartar en Vigor y eliminar de Apple Salud",
+    "deleteHint": "Eliminar sólo de Vigor conserva la entrada de Salud. Eliminar de ambos borra únicamente el entrenamiento correspondiente creado por Vigor. Si Salud falla, el registro de Vigor se conserva para reintentar."
+  },
   "workout": {
+    "recordSet": "Récord personal · toca para desmarcar la serie",
+    "partialReps": "Reps parciales",
+    "completeSet": "Completar serie",
+    "setOf": "Serie {{number}} de {{total}}",
+    "discard": "Descartar entrenamiento", "discardConfirm": "Sí, descartar entrenamiento",
+    "discardHint": "Se descartará este registro y podrás volver a realizar la sesión prevista. No se modifica la rutina ni se borran los registros de rehabilitación.",
+    "discardError": "No se pudo descartar. Tu entrenamiento sigue guardado; reintenta.",
     "duration": "Duración",
     "resume": "Retomar entrenamiento",
     "pause": "Guardar y volver a Entrenamiento",
@@ -224,6 +298,7 @@
     "loadingFailed": "No se ha podido cargar la rehabilitación. Puedes seguir con fuerza y volver a intentarlo desde Rehabilitación."
   },
   "calendar": {
+    "cycleOrder": "Orden del ciclo",
     "templateSummary": "Ciclo sugerido: {{days}} días · {{rest}} días de descanso",
     "templateDescription": "Esta secuencia funciona sin fechas. Puedes mover los descansos manteniendo el orden de entrenamiento. Los cambios no mueven las fechas ya asignadas.",
     "moveRestEarlier": "Adelantar el descanso un día",
@@ -385,6 +460,7 @@
     "chartHint": "Una barra = un microciclo. Un segmento = una serie; su color es el RIR y la sigla, el tipo de serie.",
     "average": "medio",
     "perSetIntensity": "RIR por serie",
+    "recordedSession": "Entrenamiento realizado",
     "volume": "Volumen",
     "deloadShort": "DESC."
   },
@@ -424,7 +500,82 @@
     "reps": "reps",
     "applyExerciseChanges": "Aplicar al borrador"
   },
+  "experienceGuide": {
+    "open": "Ayúdame a elegir",
+    "close": "Cerrar la ayuda de nivel",
+    "step": "Pregunta {{current}} de {{total}}",
+    "result": "Nivel recomendado",
+    "apply": "Usar este nivel",
+    "resultHint": "Es una orientación para esta rutina. Puedes elegir otro nivel si no te representa.",
+    "questions": {
+      "consistency": {
+        "title": "¿Cómo ha sido tu constancia?",
+        "hint": "Piensa en tu entrenamiento reciente y en los periodos en los que has seguido un plan."
+      },
+      "technique": {
+        "title": "¿Cómo llevas la técnica?",
+        "hint": "Piensa en los ejercicios que realizas habitualmente."
+      },
+      "progress": {
+        "title": "¿Cómo sueles progresar?",
+        "hint": "Compara cargas o repeticiones con la misma técnica. Un estancamiento aislado no define tu nivel."
+      }
+    },
+    "options": {
+      "STARTING_RETURNING": {
+        "title": "Estoy empezando o retomando",
+        "description": "Empiezo o vuelvo después de varios meses sin entrenar con regularidad."
+      },
+      "REGULAR": {
+        "title": "Ya entreno con regularidad",
+        "description": "He construido el hábito, aunque no llevo varios años seguidos con un plan."
+      },
+      "CONSISTENT_YEARS": {
+        "title": "Llevo años siendo constante",
+        "description": "Llevo varios años siguiendo un plan y registrando mi entrenamiento, también en los últimos meses."
+      },
+      "LEARNING": {
+        "title": "Todavía estoy aprendiendo",
+        "description": "Estoy afianzando la ejecución de mis ejercicios habituales."
+      },
+      "ESTABLISHED": {
+        "title": "Tengo una técnica asentada",
+        "description": "Realizo mis ejercicios habituales con una técnica consistente."
+      },
+      "FREQUENT": {
+        "title": "Con frecuencia",
+        "description": "Añado repeticiones o carga en muchas sesiones."
+      },
+      "GRADUAL": {
+        "title": "Poco a poco",
+        "description": "Necesito varias semanas para apreciar mejoras."
+      },
+      "SLOW": {
+        "title": "Muy despacio",
+        "description": "Incluso con meses de entrenamiento estructurado y seguimiento, las mejoras son pequeñas."
+      },
+      "UNSURE": {
+        "title": "No lo sé",
+        "description": "Aún no lo registro o no he podido compararlo."
+      }
+    },
+    "reasons": {
+      "returning": "Para empezar o retomar, proponemos un volumen inicial contenido con el que construir continuidad.",
+      "foundation": "Tus respuestas apuntan a un punto de partida centrado en afianzar la técnica y la regularidad.",
+      "established": "Tu constancia y técnica asentada encajan con un punto de partida intermedio.",
+      "experienced": "Tus años de constancia, técnica asentada y progreso lento encajan con un punto de partida avanzado."
+    }
+  },
   "generate": {
+    "closePicker": "Cerrar selector de ejercicios · desliza hacia abajo",
+    "cancelCreation": "Cancelar creación de rutina",
+    "cancelCreationHint": "¿Descartar la rutina sin guardar y salir de la creación? Tus rutinas existentes no cambian.",
+    "keepCreating": "Seguir creando",
+    "reviewDistribution": "Revisar opciones de distribución",
+    "rerollFailed": "No se pudo preparar otra combinación. Tu plan actual no ha cambiado.",
+    "rerollUpdated": "Combinación actualizada. Se mantienen tu volumen y objetivos.",
+    "lightOverlap": "Parte del trabajo complementa otra sesión para mantener tu volumen objetivo. Se conserva la distribución elegida.",
+    "largeOverlap": "Este volumen necesita bastante solape con la distribución y el tiempo elegidos. Amplía los minutos o ajusta las prioridades para separar mejor las sesiones; Vigor no te ha cambiado a Automático.",
     "goalHypertrophyDescription": "Desarrolla músculo con objetivos editables de volumen y esfuerzo.",
     "goalStrengthDescription": "Prioriza el rendimiento en sentadilla, banca y peso muerto.",
     "priorityBudget": "Budget",
@@ -446,13 +597,14 @@
     "goal": "Objetivo",
     "goalHypertrophy": "Hipertrofia",
     "goalStrength": "Fuerza",
-    "level": "Nivel",
-    "levelBEGINNER": "Principiante",
+    "level": "Tu experiencia actual",
+    "levelBEGINNER": "Principiante o retomando",
     "levelINTERMEDIATE": "Intermedio",
     "levelADVANCED": "Avanzado",
-    "levelHintBEGINNER": "Menos de un año entrenando",
-    "levelHintINTERMEDIATE": "Entre uno y tres años",
-    "levelHintADVANCED": "Más de tres años progresando",
+    "levelHintBEGINNER": "Estás aprendiendo la técnica o retomando tras una pausa larga.",
+    "levelHintINTERMEDIATE": "Entrenas con regularidad, tienes una técnica asentada y progresas poco a poco.",
+    "levelHintADVANCED": "Llevas años de constancia y planificación; progresar requiere ajustes cuidadosos.",
+    "levelExplanation": "Elige según tu constancia y progresión actuales, contando los periodos de entrenamiento regular.",
     "capacity": "Cuánto puedes entrenar",
     "sessions": "Sesiones por microciclo",
     "sessionsHint": "Número de sesiones, no días de la semana.",

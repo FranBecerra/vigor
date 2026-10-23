@@ -24,6 +24,14 @@ function ex(
 const target = ex('bench', MovementVector.PUSH_HORIZONTAL, MuscleGroup.CHEST);
 
 describe('rankSwapCandidates', () => {
+  test('uses all primary muscles and movement patterns, then matches equipment and recording', () => {
+    const same = { ...target, id: 'same' };
+    const otherEquipment = { ...same, id: 'barbell', equipment: Equipment.BARBELL };
+    const timed = { ...same, id: 'timed', recording: { measure: 'SECONDS' as const, load: 'NONE' as const } };
+    const multi = { ...same, id: 'multi', primaryMuscle: MuscleGroup.TRICEPS, primaryMuscles: [MuscleGroup.TRICEPS, MuscleGroup.CHEST], movementVector: MovementVector.ELBOW_EXTENSION,
+      movementVectors: [MovementVector.ELBOW_EXTENSION, MovementVector.PUSH_HORIZONTAL] };
+    expect(rankSwapCandidates(target, [timed, otherEquipment, multi, same]).map((entry) => entry.id)).toEqual(['multi', 'same', 'barbell', 'timed']);
+  });
   test('catálogo vacío → []', () => {
     expect(rankSwapCandidates(target, [])).toEqual([]);
   });
@@ -43,13 +51,12 @@ describe('rankSwapCandidates', () => {
     expect(ranked.map((e) => e.id)).toEqual(['machine-press', 'row-error', 'fly', 'squat']);
   });
 
-  test('personalizados van al final aunque coincidan en vector+músculo', () => {
+  test('ranks a classified private variant above unrelated native movements', () => {
     const customPerfect = ex('custom-press', MovementVector.PUSH_HORIZONTAL, MuscleGroup.CHEST, true);
     const nativeMuscleOnly = ex('fly', MovementVector.ELBOW_FLEXION, MuscleGroup.CHEST);
 
     const ranked = rankSwapCandidates(target, [customPerfect, nativeMuscleOnly]);
-    // El nativo (aunque solo coincida en músculo) va antes que el custom perfecto.
-    expect(ranked.map((e) => e.id)).toEqual(['fly', 'custom-press']);
+    expect(ranked.map((e) => e.id)).toEqual(['custom-press', 'fly']);
   });
 
   test('solo personalizados: se ordenan entre sí por su cascada', () => {
@@ -83,9 +90,9 @@ describe('bestSwapCandidate', () => {
     expect(bestSwapCandidate(target, [muscleOnly, both])?.id).toBe('machine-press');
   });
 
-  test('prefiere nativo sobre custom perfecto', () => {
+  test('prefers the most similar candidate regardless of its source', () => {
     const custom = ex('c', MovementVector.PUSH_HORIZONTAL, MuscleGroup.CHEST, true);
     const nativeMuscle = ex('fly', MovementVector.ELBOW_FLEXION, MuscleGroup.CHEST);
-    expect(bestSwapCandidate(target, [custom, nativeMuscle])?.id).toBe('fly');
+    expect(bestSwapCandidate(target, [custom, nativeMuscle])?.id).toBe('c');
   });
 });

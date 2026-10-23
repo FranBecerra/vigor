@@ -1,138 +1,97 @@
-import { useCallback, useMemo, useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
+import { useAuth } from '@/hooks/useAuth';
+import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import { mesocycleRepository } from '@/services/repositories';
 import type { Mesocycle } from '@/models';
-import type { TrainingCalendarEntry } from '@/models/routine';
-import { calendarEntryKey, calendarRecovery, calendarVolumeRate, calendarFromTemplate, moveCalendarEntry, updateCalendar, type TrainingCalendar } from '@/services/training/trainingCalendar';
-import { buildScheduleTemplate, moveRestSlot, templateRecovery, type ScheduleTemplate } from '@/services/training/scheduleTemplate';
-import { ScheduleTemplateView } from './ScheduleTemplateView';
 import { sessionsForMicrocycle } from '@/services/training/mesocycleEditing';
-import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
-import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
-import { TrainingGoal } from '@/services/training/volumePlan';
-import { plannedPresentationFocus } from '@/services/training/sessionCoherence';
+import { buildScheduleTemplate } from '@/services/training/scheduleTemplate';
+import { moveRoutineDay, orderedRoutineSessions, restDayKey, restDaysTemplate, routineDays, routineRestDays, type RoutineRestDay } from '@/services/training/routineRestDays';
 import type { durationCalibration } from '@/services/training/sessionDuration';
-const today = () => {
-  const date = new Date();
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-};
+import { SwipeableSet } from './SwipeableSet';
+import { RoutineDayList, type DayListScroll } from './RoutineDayList';
 
-/** Optional schedule; workout completion stays exclusively in the workout runtime. */
-export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, durationFeedback, onChanged }: {
-  mesocycleId: string; microcycleIndex: number; goal: string;
-  durationFeedback?: ReturnType<typeof durationCalibration>;
-  onChanged?: () => void;
+/** One atomic workout/rest timeline. Incoming home metadata prevents deferred rest insertion. */
+export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, onChanged, sessionRows, initialMesocycle, onSessionHold, edgeScroll }: {
+  mesocycleId: string; microcycleIndex: number; goal: string; initialMesocycle?: Mesocycle;
+  sessionRows?: readonly { index: number; content: ReactNode }[]; onSessionHold?: (index: number) => void;
+  durationFeedback?: ReturnType<typeof durationCalibration>; onChanged?: () => void;
+  edgeScroll?: DayListScroll;
 }) {
-  const { t } = useTranslation();
-  const { exercisesById: CATALOGUE } = useExerciseCatalogue();
-  const { colors, spacing } = useTheme();
-  const [mesocycle, setMesocycle] = useState<Mesocycle | null>(null);
-  const [start, setStart] = useState(today);
-  const [days, setDays] = useState('7');
-  const [error, setError] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation(); const { uid } = useAuth();
+  const identity = `${uid}:${mesocycleId}:${microcycleIndex}`; const activeIdentity = useRef(identity); activeIdentity.current = identity;
+  const { colors, spacing, sectionAccent, semantic } = useTheme();
+  const { exercisesById } = useExerciseCatalogue();
+  const validInitial = initialMesocycle?.id === mesocycleId && initialMesocycle.userId === uid ? initialMesocycle : null;
+  const [loaded, setLoaded] = useState<{ identity: string; meso: Mesocycle | null }>({ identity, meso: validInitial });
+  const meso = loaded.identity === identity ? loaded.meso : validInitial;
+  const [busy, setBusy] = useState(false); const saving = useRef(false); const [error, setError] = useState(false);
   useFocusEffect(useCallback(() => {
-    let alive = true;
-    mesocycleRepository.get(mesocycleId).then((value) => { if (alive) {
-      setMesocycle(value); setDays(String(value?.scheduleTemplate?.days ?? 7));
-    } })
-      .catch(() => { if (alive) setError(t('calendar.saveFailed')); });
+    let alive = true; setError(false); setBusy(false); saving.current = false;
+    if (validInitial) {
+      setLoaded({ identity, meso: validInitial });
+      return () => { alive = false; };
+    }
+    mesocycleRepository.get(mesocycleId).then((value) => {
+      if (alive && value?.userId === uid) {
+        const sessions = orderedRoutineSessions(sessionsForMicrocycle(value, goal, microcycleIndex), value.sessionOrder);
+        restDaysTemplate(sessions, routineRestDays({ ...value, scheduleTemplate: value.scheduleTemplate ?? buildScheduleTemplate(sessions, exercisesById) }));
+        setLoaded({ identity, meso: value });
+      }
+    }).catch(() => { if (alive) setError(true); });
     return () => { alive = false; };
-  }, [mesocycleId, t]));
-  const trainingGoal = goal === TrainingGoal.STRENGTH ? TrainingGoal.STRENGTH : TrainingGoal.HYPERTROPHY;
-  const sessions = useMemo(() => mesocycle ? sessionsForMicrocycle(mesocycle, trainingGoal, microcycleIndex)
-    .map((session) => trainingGoal === TrainingGoal.HYPERTROPHY
-      ? { ...session, focus: plannedPresentationFocus(session, CATALOGUE) } : session) : [],
-    [mesocycle, trainingGoal, microcycleIndex, CATALOGUE]);
-  const calendar = mesocycle?.trainingCalendar ?? {};
-  const template = mesocycle?.scheduleTemplate ?? buildScheduleTemplate(sessions, CATALOGUE);
-  const templateWarnings = templateRecovery(template, sessions, CATALOGUE).filter((p) => p.reviewSuggested);
-  const entries = Object.values(calendar).filter((e) => e.microcycleIndex === microcycleIndex).sort((a, b) => a.date.localeCompare(b.date));
-  const recovery = mesocycle ? calendarRecovery(calendar, (index) => sessionsForMicrocycle(mesocycle, trainingGoal, index), CATALOGUE) : [];
-  const rate = calendarVolumeRate(calendar, microcycleIndex,
-    sessions.reduce((sum, s) => sum + s.exercises.reduce((n, e) => n + e.sets.length, 0), 0));
-  const persist = async (transform: (current: TrainingCalendar) => TrainingCalendar) => {
-    if (busy) return;
-    setBusy(true); setError('');
+  }, [mesocycleId, uid, microcycleIndex, goal, exercisesById, identity, validInitial]));
+  if (!meso || meso.userId !== uid) return <View style={{ minHeight: (sessionRows?.length ?? 1) * 64 }}>
+    {error && <Text style={{ color: semantic.warning }}>{t('calendar.saveFailed')}</Text>}</View>;
+  const sessions = orderedRoutineSessions(sessionsForMicrocycle(meso, goal, microcycleIndex), meso.sessionOrder);
+  const days = routineRestDays({ ...meso, scheduleTemplate: meso.scheduleTemplate ?? buildScheduleTemplate(sessions, exercisesById) });
+  const slots = routineDays(sessions, days);
+  const save = async (next: RoutineRestDay[], checks = meso.restDayChecks ?? {}, order = sessions.map((session) => session.index)) => {
+    if (saving.current || !uid) return false;
+    const scheduleTemplate = restDaysTemplate(orderedRoutineSessions(sessions, order), next);
+    saving.current = true; setBusy(true); setError(false);
     try {
-      const updated = await mesocycleRepository.updateTrainingCalendar(mesocycleId, transform, Date.now());
-      setMesocycle(updated);
-      onChanged?.();
-    } catch { setError(t('calendar.saveFailed')); }
-    finally { setBusy(false); }
+      let rejected = false;
+      const patch = { restDays: next, restDayChecks: checks, sessionOrder: order, scheduleTemplate, updatedAt: Date.now() };
+      await mesocycleRepository.updateLocally(mesocycleId, patch, () => {
+        rejected = true; if (activeIdentity.current === identity) setError(true);
+      });
+      if (activeIdentity.current !== identity || rejected) return false;
+      setLoaded({ identity, meso: { ...meso, ...patch } }); onChanged?.();
+      return true;
+    } catch { if (activeIdentity.current === identity) setError(true); return false; }
+    finally { if (activeIdentity.current === identity) { saving.current = false; setBusy(false); } }
   };
-  const setEntry = (entry: TrainingCalendarEntry) => void persist((current) => updateCalendar(current, entry));
-  const persistTemplate = async (next: ScheduleTemplate) => {
-    if (busy) return;
-    setBusy(true); setError('');
-    try {
-      setMesocycle(await mesocycleRepository.updateScheduleTemplate(mesocycleId, next, Date.now()));
-      setDays(String(next.days)); onChanged?.();
-    } catch { setError(t('calendar.saveFailed')); }
-    finally { setBusy(false); }
-  };
-  if (!mesocycle) return error ? <Text style={{ color: colors.textMuted }}>{error}</Text> : null;
-  const field = { color: colors.textPrimary, borderWidth: 1, borderColor: colors.surfaceBorder,
-    borderRadius: 8, padding: 8 };
-  return <View style={{ marginVertical: spacing.md, padding: spacing.md, borderWidth: 1,
-    borderColor: colors.surfaceBorder, borderRadius: 16, gap: spacing.sm }}>
-    <Pressable accessibilityRole="button" onPress={() => setExpanded(!expanded)}>
-      <Text style={{ color: colors.textPrimary, fontWeight: '600' }}>{t('calendar.title')} · M{microcycleIndex + 1} {expanded ? '−' : '+'}</Text>
-    </Pressable>
-    {expanded && <>
-      <Text style={{ color: colors.textMuted }}>{t('calendar.description')}</Text>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <Text style={{ color: colors.textSecondary }}>{t('calendar.days')}</Text>
-        <TextInput value={days} onChangeText={setDays} keyboardType="number-pad" editable={!busy}
-          style={[field, { width: 64 }]} accessibilityLabel={t('calendar.days')}
-          onEndEditing={() => {
-            if (Number(days) === template.days) return;
-            try { void persistTemplate(buildScheduleTemplate(sessions, CATALOGUE, Number(days))); }
-            catch { setError(t('calendar.saveFailed')); }
-          }} />
-      </View>
-      <ScheduleTemplateView template={template} sessions={sessions} onMoveRest={busy ? undefined : (from, to) =>
-        void persistTemplate(moveRestSlot(template, from, to))} />
-      {templateWarnings.map((p) => <Text key={`${p.from}:${p.to}`} style={{ color: colors.textSecondary }}>
-        {t('calendar.templateOverlap', { from: p.from + 1, to: p.to + 1 })}</Text>)}
-      {durationFeedback && <Text style={{ color: colors.textMuted }}>{durationFeedback.ready
-        ? t('calendar.calibration', { count: durationFeedback.sampleCount, percent: Math.round((durationFeedback.observedMultiplier ?? 1) * 100) })
-        : t('calendar.calibrationPending', { count: durationFeedback.sampleCount })}</Text>}
-      {entries.length === 0 ? <>
-        <TextInput value={start} onChangeText={setStart} placeholder="YYYY-MM-DD" accessibilityLabel={t('calendar.startDate')}
-          style={field} autoCapitalize="none" />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Pressable disabled={busy} accessibilityRole="button" onPress={() => void persist((current) => {
-            const proposed = calendarFromTemplate(start, microcycleIndex,
-              Number(days) === template.days ? template : buildScheduleTemplate(sessions, CATALOGUE, Number(days)));
-            return Object.values(proposed).reduce(updateCalendar, current);
-          })}><Text style={{ color: colors.textPrimary }}>{t('calendar.create')}</Text></Pressable>
+  const renderRestDay = (day: RoutineRestDay) => {
+    const checked = meso.restDayChecks?.[restDayKey(microcycleIndex, day.id)] === true;
+    return <SwipeableSet backgroundColor={colors.bgElevated} removeLabel={t('restDays.remove')} onRemove={busy ? undefined : () => save(days.filter((entry) => entry.id !== day.id))}>
+      <Pressable testID={`rest-day-${day.id}`} accessibilityRole="checkbox" accessibilityLabel={t('calendar.rest')} accessibilityState={{ checked }} disabled={busy}
+        onPress={() => void save(days, { ...meso.restDayChecks, [restDayKey(microcycleIndex, day.id)]: !checked })}
+        style={{ minHeight: 64, paddingVertical: 9, paddingHorizontal: 4, borderBottomWidth: 1, borderColor: colors.surfaceBorder,
+          flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.bgElevated, opacity: checked ? 0.45 : 1 }}>
+        <Text style={{ width: 48, color: colors.textMuted, fontSize: 11, fontWeight: '800' }}>—</Text>
+        <Text style={{ flex: 1, color: colors.textPrimary, fontSize: 16, fontWeight: '600' }}>{t('calendar.rest')}</Text>
+        <View style={{ width: 18, height: 18, borderWidth: 1.5, borderColor: checked ? sectionAccent.train : colors.controlBorder,
+          borderRadius: 6, backgroundColor: checked ? sectionAccent.train : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
+          {checked && <Text style={{ color: colors.onAccent, fontWeight: '900', fontSize: 11 }}>✓</Text>}
         </View>
-      </> : entries.map((entry) => <View key={entry.kind === 'rest' ? entry.date : entry.sessionIndex}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-        <TextInput defaultValue={entry.date} key={entry.date} editable={!busy}
-          style={[field, { flex: 1 }]} accessibilityLabel={t('calendar.startDate')}
-          onEndEditing={(event) => {
-            const date = event.nativeEvent.text;
-            if (date === entry.date) return;
-            void persist((current) => moveCalendarEntry(current, calendarEntryKey(entry), date));
-          }} />
-        {entry.kind === 'rest' ? <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: entry.checked }}
-          disabled={busy || entry.date > today()} onPress={() => setEntry({ ...entry, checked: !entry.checked })}>
-          <Text style={{ color: colors.textPrimary }}>{entry.checked ? '☑' : '☐'} {t('calendar.rest')}</Text>
-        </Pressable> : <Text style={{ color: colors.textPrimary }}>{t('calendar.session', { number: entry.sessionIndex + 1 })}</Text>}
-      </View>)}
-      {rate && <Text style={{ color: colors.textMuted }}>{t('calendar.volumeRate', { days: rate.days, sets: Math.round(rate.setsPerSevenDays) })}</Text>}
-      {recovery.filter((r) => r.reviewSuggested && r.next.microcycleIndex === microcycleIndex).map((r) =>
-        <Text key={r.next.date} style={{ color: colors.textSecondary }}>{t('calendar.overlap', {
-          from: r.previous.date, to: r.next.date,
-          muscles: r.sharedMuscles.map((m) => t(`muscles.${m}`, { defaultValue: m })).join(', '),
-        })}</Text>)}
-      {error !== '' && <Text accessibilityRole="alert" style={{ color: colors.textPrimary }}>{error}</Text>}
-    </>}
+      </Pressable>
+    </SwipeableSet>;
+  };
+  return <View>
+    <RoutineDayList items={slots} disabled={busy} edgeScroll={edgeScroll} onReorder={(from, to) => {
+      const next = moveRoutineDay(slots, from, to); void save(next.restDays, meso.restDayChecks ?? {}, next.sessionOrder);
+    }} onHold={onSessionHold ? (slot) => { if (slot.kind === 'workout') onSessionHold(slot.sessionIndex); } : undefined}
+      renderItem={(slot) => slot.kind === 'rest' ? renderRestDay(days.find((day) => day.id === slot.id)!)
+        : sessionRows?.find((row) => row.index === slot.sessionIndex)?.content ?? <Text style={{ color: colors.textPrimary }}>{sessions.find((session) => session.index === slot.sessionIndex)?.name}</Text>} />
+    <Pressable accessibilityRole="button" accessibilityLabel={t('restDays.add')} disabled={busy || slots.length >= 28}
+      onPress={() => void save([...days, { id: `rest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, afterSessionIndex: sessions.at(-1)?.index ?? null }])}
+      style={{ minHeight: 44, marginTop: spacing.sm, justifyContent: 'center' }}>
+      <Text style={{ color: colors.accentText, fontSize: 16, fontWeight: '600' }}>+ {t('calendar.rest')}</Text>
+    </Pressable>
+    {error && <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('calendar.saveFailed')}</Text>}
   </View>;
 }

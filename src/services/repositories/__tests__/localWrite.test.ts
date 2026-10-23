@@ -10,6 +10,11 @@ const ref = {} as Parameters<typeof writeLocally>[0];
 let next: (snapshot: unknown) => void;
 let failure: (error: unknown) => void;
 const snap = (token: string, pending = true) => ({ exists: () => true, data: () => ({ _clientWriteId: token }), metadata: { hasPendingWrites: pending } });
+it('merges bounded patches rather than replacing unrelated mesocycle data', async () => {
+  const result = writeLocally(ref, { restDayChecks: { '0:rest-1': true } }, 'merge', undefined, undefined, true);
+  next(snap('merge')); await expect(result).resolves.toBe('pending');
+  expect(mockSetDoc).toHaveBeenCalledWith(ref, { restDayChecks: { '0:rest-1': true }, _clientWriteId: 'merge' }, { merge: true });
+});
 beforeEach(() => {
   jest.clearAllMocks(); mockSnapshot.mockImplementation((_ref, _options, callback, error) => { next = callback; failure = error; return mockStop; });
   mockSetDoc.mockImplementation(() => new Promise(() => {}));

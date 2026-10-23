@@ -82,6 +82,15 @@ describe('orderSessionExercises', () => {
     })).toBe(true);
   });
 
+  it('puts priority compounds first without pre-fatiguing them with priority isolations', () => {
+    const entries = [
+      { exercise: exercise({ id: 'bench', primaryMuscle: MuscleGroup.CHEST }), sets: 4 },
+      { exercise: exercise({ id: 'row', primaryMuscle: MuscleGroup.MID_BACK, movementVector: MovementVector.PULL_HORIZONTAL, profile: ExerciseProfile.COMPOUND_SECONDARY }), sets: 3 },
+      { exercise: exercise({ id: 'curl', primaryMuscle: MuscleGroup.BICEPS, profile: ExerciseProfile.ISOLATION }), sets: 4 },
+    ];
+    expect(orderSessionExercises(entries, [MuscleGroup.MID_BACK, MuscleGroup.BICEPS]).map((entry) => entry.exercise.id)).toEqual(['row', 'bench', 'curl']);
+    expect(entries.map((entry) => entry.exercise.id)).toEqual(['bench', 'row', 'curl']);
+  });
   it('prefers primary compounds, then more sets, then higher fatigue and a stable id', () => {
     const ordered = orderSessionExercises([
       { exercise: exercise({ id: 'b', profile: ExerciseProfile.COMPOUND_SECONDARY }), sets: 3 },

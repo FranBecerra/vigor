@@ -17,12 +17,16 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/theme/useTheme';
 import { linkWithGoogle, SignInCancelledError } from '@/services/auth';
+import { useRouter } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
+import { useAppSettings } from '@/hooks/useAppSettings';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, isAnonymous, signOut } = useAuth();
+  const router = useRouter(); const { displayName } = useAppSettings();
 
   const [isLinking, setIsLinking] = useState(false);
   const [linkError, setLinkError] = useState<string | null>(null);
@@ -49,7 +53,14 @@ export default function ProfileScreen() {
           paddingHorizontal: spacing.lg,
           paddingBottom: insets.bottom + 110,
         }}>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>{t('tabs.profile')}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>{t('tabs.profile')}</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel={t('settings.title')} onPress={() => router.push('/settings')}
+            style={{ padding: 12, borderRadius: radius.pill, backgroundColor: colors.surface }}>
+            <SymbolView name="gearshape" tintColor={colors.textPrimary} size={24} />
+          </Pressable>
+        </View>
+        {!!displayName && <Text style={{ color: colors.textSecondary, fontSize: 20, marginTop: 18 }}>{displayName}</Text>}
 
         <View
           style={[

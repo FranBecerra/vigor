@@ -160,6 +160,7 @@
     "chartHint": "Une barre = un microcycle. Un segment = une série ; sa couleur est le RIR et le sigle, le type de série.",
     "average": "moyen",
     "perSetIntensity": "RIR par série",
+    "recordedSession": "Entraînement réalisé",
     "volume": "Volume",
     "deloadShort": "DÉCH."
   },
@@ -197,6 +198,72 @@
     "reps": "rép.",
     "applyExerciseChanges": "Appliquer au brouillon"
   },
+  "experienceGuide": {
+    "open": "Aidez-moi à choisir",
+    "close": "Fermer l’aide au choix du niveau",
+    "step": "Question {{current}} sur {{total}}",
+    "result": "Niveau suggéré",
+    "apply": "Utiliser ce niveau",
+    "resultHint": "C’est un point de départ pour cette routine. Vous pouvez choisir un autre niveau s’il vous correspond mieux.",
+    "questions": {
+      "consistency": {
+        "title": "Quelle a été votre régularité ?",
+        "hint": "Pensez à votre pratique récente et aux périodes où vous avez suivi un programme."
+      },
+      "technique": {
+        "title": "Êtes-vous à l’aise avec la technique ?",
+        "hint": "Pensez aux exercices que vous faites habituellement."
+      },
+      "progress": {
+        "title": "Comment progressez-vous ?",
+        "hint": "Comparez charges ou répétitions à technique égale. Un plateau isolé ne définit pas votre niveau."
+      }
+    },
+    "options": {
+      "STARTING_RETURNING": {
+        "title": "Je débute ou je reprends",
+        "description": "Je commence ou reprends après plusieurs mois sans pratique régulière."
+      },
+      "REGULAR": {
+        "title": "Je m’entraîne régulièrement",
+        "description": "J’ai pris l’habitude, mais sans suivre un programme pendant plusieurs années consécutives."
+      },
+      "CONSISTENT_YEARS": {
+        "title": "Je suis régulier depuis des années",
+        "description": "Je suis un programme et consigne mes séances depuis plusieurs années, y compris ces derniers mois."
+      },
+      "LEARNING": {
+        "title": "J’apprends encore",
+        "description": "Je consolide la technique de mes exercices habituels."
+      },
+      "ESTABLISHED": {
+        "title": "Ma technique est acquise",
+        "description": "Je réalise mes exercices habituels avec une technique régulière."
+      },
+      "FREQUENT": {
+        "title": "Fréquemment",
+        "description": "J’ajoute des répétitions ou de la charge lors de nombreuses séances."
+      },
+      "GRADUAL": {
+        "title": "Progressivement",
+        "description": "Il me faut plusieurs semaines pour constater une amélioration."
+      },
+      "SLOW": {
+        "title": "Très lentement",
+        "description": "Même après des mois de pratique structurée et suivie, les progrès restent modestes."
+      },
+      "UNSURE": {
+        "title": "Je ne sais pas",
+        "description": "Je n’ai pas encore suivi ou comparé mes progrès."
+      }
+    },
+    "reasons": {
+      "returning": "Pour débuter ou reprendre, nous suggérons un volume initial modéré afin de construire la régularité.",
+      "foundation": "Vos réponses suggèrent de commencer par consolider la technique et la régularité.",
+      "established": "Votre régularité et votre technique acquise suggèrent un point de départ intermédiaire.",
+      "experienced": "Vos années de régularité, votre technique acquise et vos progrès lents suggèrent un point de départ avancé."
+    }
+  },
   "generate": {
     "title": "Nouvelle routine",
     "subtitle": "Le plan est généré à partir de ces réglages. Tout reste modifiable ensuite.",
@@ -207,13 +274,14 @@
     "goal": "Objectif",
     "goalHypertrophy": "Hypertrophie",
     "goalStrength": "Force",
-    "level": "Niveau",
-    "levelBEGINNER": "Débutant",
+    "level": "Votre expérience actuelle",
+    "levelBEGINNER": "Débutant ou reprise",
     "levelINTERMEDIATE": "Intermédiaire",
     "levelADVANCED": "Avancé",
-    "levelHintBEGINNER": "Moins d'un an d'entraînement",
-    "levelHintINTERMEDIATE": "Un à trois ans",
-    "levelHintADVANCED": "Plus de trois ans de progression",
+    "levelHintBEGINNER": "Vous apprenez la technique ou reprenez après une longue pause.",
+    "levelHintINTERMEDIATE": "Vous vous entraînez régulièrement, maîtrisez la technique et progressez graduellement.",
+    "levelHintADVANCED": "Vous avez des années de pratique régulière et structurée ; progresser demande des ajustements précis.",
+    "levelExplanation": "Choisissez selon votre régularité et vos progrès actuels, en comptant les périodes de pratique régulière.",
     "capacity": "Ce que vous pouvez faire",
     "sessions": "Séances par microcycle",
     "sessionsHint": "Un nombre de séances, pas des jours de la semaine.",
@@ -319,6 +387,7 @@
     "previewTopSingle": "Commence par un single lourd à RPE 8",
     "previewRest": "Repos {{minutes}} min"
   },
+  "exercisePreference": { "notRecommend": "Ne pas recommander cet exercice", "recommend": "Recommander à nouveau", "notRecommended": "Exclu des routines automatiques", "notRecommendShort": "Ne pas recommander", "notRecommendedShort": "Exclu", "saveFailed": "Impossible d’enregistrer cette préférence. Vérifiez votre connexion et réessayez." },
   "region": {
     "CHEST": "Pectoraux",
     "BACK": "Dos",

@@ -1,4 +1,5 @@
 import { SetType, type WorkoutSession } from '@/models';
+import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
 import {
   cleanExtensions,
   exerciseOrderOf,
@@ -89,6 +90,20 @@ describe('toWorkoutExercises', () => {
 });
 
 describe('toWorkoutSession', () => {
+  it('keeps runtime identity, exercise snapshots and swap provenance alongside new notes', () => {
+    const restTimer = { startedAt: 1, durationSeconds: 120, anchorSetId: 's1' };
+    const saved = toWorkoutSession({ ...context, trainingGoal: 'HYPERTROPHY', sessionName: 'Upper', activeExerciseId: 'bench', restTimer,
+      exerciseSnapshots: { bench: EXERCISE_CATALOGUE[0] }, swappedFrom: { bench: 'previous' }, plannedSessionIndex: undefined }, ['bench'], { bench: [setState()] });
+    expect(saved).toMatchObject({ trainingGoal: 'HYPERTROPHY', sessionName: 'Upper', activeExerciseId: 'bench', restTimer,
+      exercises: [{ exerciseSnapshot: EXERCISE_CATALOGUE[0], isSwap: true, swappedFromExerciseId: 'previous' }] });
+    expect(saved).not.toHaveProperty('plannedSessionIndex');
+  });
+  it('captures scoped notes and explicit empty clears without fabricating them on legacy records', () => {
+    const saved = toWorkoutSession({ ...context, sessionNote: 'Today', mesocycleNote: 'Block', persistentExerciseNotes: { bench: 'Seat 4' }, exerciseNotes: { bench: '' } }, ['bench'], { bench: [setState()] });
+    expect(saved).toMatchObject({ sessionNote: 'Today', mesocycleNote: 'Block', exercises: [{ exerciseNote: 'Seat 4', notes: '' }] });
+    const legacy = toWorkoutSession(context, ['bench'], { bench: [setState()] });
+    expect(legacy).not.toHaveProperty('sessionNote'); expect(legacy).not.toHaveProperty('mesocycleNote'); expect(legacy.exercises[0]).not.toHaveProperty('exerciseNote');
+  });
   it('construye el documento con el contexto de la sesión', () => {
     const session = toWorkoutSession(context, ['bench'], { bench: [setState()] });
     expect(session.id).toBe('session-1');

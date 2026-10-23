@@ -5,6 +5,8 @@ import { planMesocycle } from '@/services/training/mesocyclePlanner';
 import { toMesocycleDraft, toRoutineDraft } from '@/services/training/routineMapper';
 import { restDurationFor } from '@/services/training/restTimer';
 import { TrainingGoal } from '@/services/training/volumePlan';
+import { sessionMicrocycleMetrics } from '../sessionProgression';
+import { editWorkoutHistory } from '../historyEditing';
 import {
   DEFAULT_PROJECTED_MICROCYCLES,
   defaultExpandedRoutineId,
@@ -22,6 +24,77 @@ const LABELS = {
   focus: (focus: string) => focus.toLowerCase(),
   goal: (goal: string) => `goal:${goal}`,
 };
+
+describe('recorded mesocycle sessions', () => {
+  const exercise = EXERCISE_CATALOGUE[0];
+  const planned: PlannedSession = { index: 4, focus: 'UPPER', estimatedWorkMinutes: 10,
+    exercises: [{ exerciseId: exercise.id, order: 0, isEdited: false,
+      sets: [2, 2, 2].map((targetRIR) => ({ setType: SetType.NORMAL, targetRIR, targetReps: 10 })) }] };
+  const recorded = (patch: Partial<WorkoutSession> = {}): WorkoutSession => ({
+    id: 'done', userId: 'u1', mesocycleId: 'r1-m0', microcycleId: 'r1-m0:m0',
+    microcycleIndex: 0, plannedSessionIndex: 4, performedAt: NOW, completedAt: NOW + 1000,
+    exercises: [{ id: 'entry', exerciseId: exercise.id, exerciseSnapshot: exercise, isSwap: false, order: 0,
+      sets: [3, 2, undefined].map((actualRIR, index) => ({ id: `set${index}`, setType: SetType.NORMAL,
+        targetRIR: 2, targetReps: 10, targetWeight: 20, actualRIR, actualWeight: 30, actualReps: 8 + index,
+        completionState: 'DONE', isAutoFilled: false })) }], ...patch,
+  });
+  const view = (history: WorkoutSession[]) => toRoutineView(routine(), mesocycle('r1-m0', { plannedSessions: [planned] }), BY_ID, LABELS, history)!;
+  it('keeps original plans separate, charts actual RIR and rereads explicit historical corrections', () => {
+    const original = recorded(); const result = view([original]); const slot = result.microcycles[0].sessions[0];
+    expect(slot.completedWorkoutId).toBe('done');
+    expect(slot.exercises[0].sets.map((set) => set.targetRIR)).toEqual([2, 2, 2]);
+    expect(slot.performedExercises![0].sets.map((set) => set.targetRIR)).toEqual([3, 2, undefined]);
+    expect(sessionMicrocycleMetrics(result.microcycles, 0)[0]).toMatchObject({ volumeSets: 3, averageRIR: 2.5, hasRecordedRIR: true });
+    const corrected = editWorkoutHistory(original, 'u1', { ...original,
+      exercises: original.exercises.map((entry) => ({ ...entry, sets: entry.sets.map((set) => ({ ...set, actualRIR: 4 })) })) }, NOW + 2000);
+    const refreshed = view([corrected]);
+    expect(sessionMicrocycleMetrics(refreshed.microcycles, 0)[0].averageRIR).toBe(4);
+    expect(refreshed.microcycles[1].sessions[0].exercises).toEqual(result.microcycles[1].sessions[0].exercises);
+    expect(refreshed.microcycles[0].sessions[0].exercises).toEqual(slot.exercises);
+  });
+  it('uses the executed swap and dose, excludes pending rows and never fills absent actual effort with planned RIR', () => {
+    const record = recorded(); const entry = record.exercises[0];
+    entry.exerciseId = 'deleted-custom'; entry.exerciseSnapshot = undefined;
+    entry.sets[0].setType = SetType.WARMUP; entry.sets[1].actualRIR = undefined;
+    entry.sets[2].completionState = 'PENDING';
+    const result = view([record]); const actual = result.microcycles[0].sessions[0].performedExercises![0];
+    expect(actual.exerciseId).toBe('deleted-custom'); expect(actual.name).toBe('deleted-custom');
+    expect(actual.sets).toHaveLength(2);
+    expect(sessionMicrocycleMetrics(result.microcycles, 0)[0]).toMatchObject({ volumeSets: 1, averageRIR: 0, hasRecordedRIR: false });
+  });
+  it.each([{ userId: 'other' }, { mesocycleId: 'other' }, { completedAt: undefined }, { completedAt: NaN },
+    { discardedAt: NOW }, { plannedSessionIndex: undefined }, { plannedSessionIndex: -1 }, { plannedSessionIndex: 1.5 },
+    { microcycleIndex: -1 }, { microcycleIndex: 0.5 }])('ignores unowned, incomplete or invalid links %j', (patch) => {
+    const slot = view([recorded(patch)]).microcycles[0].sessions[0];
+    expect(slot.completedWorkoutId).toBeUndefined(); expect(slot.performedExercises).toBeUndefined(); expect(slot.completedOn).toBeUndefined();
+  });
+  it('resolves duplicate links deterministically and supports completed past microcycles', () => {
+    const first = recorded({ id: 'a' }); const latest = recorded({ id: 'z', completedAt: NOW + 5000 });
+    for (const records of [[latest, first], [first, latest]]) expect(view(records).microcycles[0].sessions[0].completedWorkoutId).toBe('z');
+    expect(view([first, recorded({ id: 'z' })]).microcycles[0].sessions[0].completedWorkoutId).toBe('z');
+    expect(view([recorded({ microcycleIndex: 1 })]).microcycles[1].sessions[0].completedWorkoutId).toBe('done');
+  });
+  it('handles timed recording and completely empty performed sessions without inventing work', () => {
+    const record = recorded(); record.exercises[0].exerciseSnapshot = { ...exercise, recording: { measure: 'SECONDS', load: 'NONE' } };
+    record.exercises[0].sets = [{ ...record.exercises[0].sets[0], actualDurationSeconds: 30 }];
+    const result = view([record]);
+    expect(result.microcycles[0].sessions[0].performedExercises![0].isTimed).toBe(true);
+    expect(sessionMicrocycleMetrics(result.microcycles, 0)[0].hasRecordedRIR).toBe(false);
+    expect(sessionMicrocycleMetrics(view([recorded({ exercises: [] })]).microcycles, 0)[0]).toMatchObject({ volumeSets: 0, hasRecordedRIR: false });
+  });
+  it('retains a bounded current index when every exposure is complete and uses custom session names', () => {
+    const meso = mesocycle('r1-m0', { plannedSessions: [{ ...planned, name: ' Custom Upper ' }], projectedMicrocycles: 1 });
+    const result = toRoutineView(routine(), meso, BY_ID, LABELS, [recorded()])!;
+    expect(result.currentMicrocycleIndex).toBe(0);
+    expect(result.microcycles[0].sessions[0].name).toBe('Custom Upper');
+  });
+  it('does not calibrate duration from a matching dose whose catalogue exercise cannot be resolved', () => {
+    const record = recorded(); record.exercises[0].exerciseId = 'missing'; record.exercises[0].exerciseSnapshot = undefined;
+    const meso = mesocycle('r1-m0', { plannedSessions: [{ ...planned,
+      exercises: [{ ...planned.exercises[0], exerciseId: 'missing' }] }] });
+    expect(toRoutineView(routine(), meso, BY_ID, LABELS, [record])!.durationFeedback).toBeUndefined();
+  });
+});
 
 it('calibrates duration only from matching completed workout doses', () => {
   const exercise = EXERCISE_CATALOGUE[0];
@@ -55,6 +128,15 @@ it('recommends dated pending sessions in calendar order without completing a res
   expect(defaultSessionId([view])).toBe('r1-m0:m0:s1');
   expect(view.currentMicrocycleIndex).toBe(0);
   expect(view.microcycles[0].sessions).toHaveLength(4);
+});
+it('uses athlete execution order for pending days without renaming or relinking completed work', () => {
+  const meso = mesocycle('r1-m0', { sessionOrder: [2, 0, 3, 1], restDays: [{ id: 'rest', afterSessionIndex: 2 }] });
+  const view = toRoutineView(routine(), meso, BY_ID, LABELS)!;
+  const ordinary = toRoutineView(routine(), { ...meso, sessionOrder: undefined }, BY_ID, LABELS)!;
+  expect(view.microcycles[0].sessions.map((session) => session.plannedSessionIndex)).toEqual([2, 0, 3, 1]);
+  for (const session of view.microcycles[0].sessions) expect(session.name).toBe(ordinary.microcycles[0].sessions.find((other) => other.id === session.id)!.name);
+  expect(defaultSessionId([view])).toBe('r1-m0:m0:s2');
+  expect(view.mesocycleSnapshot?.restDays).toEqual(meso.restDays);
 });
 
 function routine(id = 'r1', overrides: Partial<Routine> = {}): Routine {

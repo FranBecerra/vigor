@@ -2,6 +2,7 @@ import React from 'react';
 import { ExerciseCatalogueProvider, useExerciseCatalogue } from '../useExerciseCatalogue';
 import { RehabilitationProvider, useRehabilitation } from '../useRehabilitation';
 import { createCustomExercise } from '@/services/training/customExercises';
+import { exerciseEditInput, createExerciseOverride } from '@/services/training/exerciseEditing';
 const { create, act } = require('react-test-renderer');
 let mockUid: string | null = 'owner';
 const mockListeners = new Map<string, { next: (value: unknown) => void; stop: jest.Mock }>();
@@ -32,6 +33,8 @@ it('loads only valid owned exercises, keeps archived identities, and discards st
   await act(async () => { tree = create(<Tree />); });
   expect(catalogue.ready).toBe(false);
   const previous = mockListeners.get('users/owner/customExercises')!;
+  await act(async () => mockListeners.get('users/owner/exerciseOverrides')!.next(snapshot([])));
+  await act(async () => mockListeners.get('users/owner/exercisePreferences')!.next(snapshot([])));
   await act(async () => previous.next(snapshot([exercise, { ...exercise, id: 'custom:owner:broken', recording: { measure: 'DISTANCE' } }])));
   expect(catalogue.ready).toBe(true); expect(catalogue.error).toBe(true);
   expect(catalogue.exercisesById.get(exercise.id)).toMatchObject({ name: 'Synthetic' });
@@ -64,5 +67,54 @@ it('accepts local pending creation and reports later cloud rejection without exp
   await act(async () => tree.update(<Tree />));
   expect(catalogue.exercisesById.has(created.id)).toBe(false);
   await expect(catalogue.create({ name: 'X', recording: { measure: 'SECONDS', load: 'NONE' } })).rejects.toThrow('invalidIdentity');
+  await act(async () => tree.unmount());
+});
+it('applies validated personal overrides without replacing the shared catalogue or leaking stale saves', async () => {
+  let tree: any; await act(async () => { tree = create(<Tree />); });
+  await act(async () => {
+    mockListeners.get('users/owner/customExercises')!.next(snapshot([]));
+    mockListeners.get('users/owner/exerciseOverrides')!.next(snapshot([]));
+    mockListeners.get('users/owner/exercisePreferences')!.next(snapshot([]));
+  });
+  const base = catalogue.catalogue[0]; const input = { ...exerciseEditInput(base), name: 'Personal name' };
+  await act(async () => catalogue.edit(base, input));
+  expect(mockWrite.mock.calls[0][0]).toBe('users/owner/exerciseOverrides');
+  expect(catalogue.exercisesById.get(base.id)).toMatchObject({ name: 'Personal name', isPersonalized: true });
+  expect(base.name).not.toBe('Personal name'); const oldEdit = catalogue.edit;
+  mockUid = 'other'; await act(async () => tree.update(<Tree />));
+  expect(catalogue.exercisesById.get(base.id)?.name).toBe(base.name);
+  await expect(oldEdit(base, input)).rejects.toThrow('invalidIdentity');
+  await act(async () => tree.unmount());
+});
+it('reports malformed overrides and local edit rejection instead of claiming a successful update', async () => {
+  let tree: any; await act(async () => { tree = create(<Tree />); });
+  await act(async () => mockListeners.get('users/owner/customExercises')!.next(snapshot([])));
+  const listener = mockListeners.get('users/owner/exerciseOverrides')!; const base = catalogue.catalogue[0];
+  await act(async () => mockListeners.get('users/owner/exercisePreferences')!.next(snapshot([])));
+  const foreign = createExerciseOverride(base, exerciseEditInput(base), 'other', 1);
+  await act(async () => listener.next(snapshot([foreign, { id: base.id, ownerId: 'owner', changes: {} }])));
+  expect(catalogue.error).toBe(true); await expect(catalogue.edit(base, exerciseEditInput(base))).rejects.toThrow('saveFailed');
+  await act(async () => listener.next(snapshot([])));
+  await act(async () => mockListeners.get('users/owner/exercisePreferences')!.next(snapshot([])));
+  mockWrite.mockImplementationOnce(async (_path, _item, _synced, rejected) => { rejected(Error('denied')); return 'pending'; });
+  await act(async () => { await expect(catalogue.edit(base, { ...exerciseEditInput(base), name: 'Must not publish' })).rejects.toThrow('saveFailed'); });
+  expect(catalogue.exercisesById.get(base.id)?.name).toBe(base.name);
+  await act(async () => tree.unmount());
+});
+
+it('persists exercise recommendation preferences privately and exposes live toggles', async () => {
+  let tree: any; await act(async () => { tree = create(<Tree />); });
+  const base = catalogue.catalogue[0];
+  await act(async () => {
+    mockListeners.get('users/owner/customExercises')!.next(snapshot([]));
+    mockListeners.get('users/owner/exerciseOverrides')!.next(snapshot([]));
+    mockListeners.get('users/owner/exercisePreferences')!.next(snapshot([]));
+  });
+  await act(async () => catalogue.setExerciseNotRecommended(base.id, true));
+  expect(mockWrite.mock.calls[0][0]).toBe('users/owner/exercisePreferences');
+  expect(catalogue.notRecommendedExerciseIds.has(base.id)).toBe(true);
+  await act(async () => catalogue.setExerciseNotRecommended(base.id, false));
+  expect(catalogue.notRecommendedExerciseIds.has(base.id)).toBe(false);
+  expect(mockWrite.mock.calls[1][1]).toMatchObject({ id: base.id, userId: 'owner', notRecommended: false });
   await act(async () => tree.unmount());
 });

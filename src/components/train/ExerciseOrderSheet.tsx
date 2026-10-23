@@ -31,7 +31,7 @@ function DragRow({ exercise, index, onMove, onDragging, last }: { exercise: Exer
       <Pressable disabled={index === 0} onPress={() => onMove(index, index - 1)} accessibilityLabel={t('workout.moveUp')} style={{ padding: 8 }}><Text style={{ color: colors.textSecondary }}>↑</Text></Pressable>
       <Pressable disabled={last} onPress={() => onMove(index, index + 1)} accessibilityLabel={t('workout.moveDown')} style={{ padding: 8 }}><Text style={{ color: colors.textSecondary }}>↓</Text></Pressable>
       <View {...responder.panHandlers} accessible accessibilityLabel={t('workout.dragExercise')} style={{ padding: 12 }}>
-        <Text style={{ color: sectionAccent.train, fontSize: 24 }}>≡</Text>
+        <Text style={{ color: colors.accentText, fontSize: 24 }}>≡</Text>
       </View>
     </View>
   </View>;
@@ -50,7 +50,7 @@ export function ExerciseOrderSheet({ open, exercises, onChange, onClose }: { ope
           onDragging={setDragging} onMove={(from, to) => onChange(moveItem(exercises, from, Math.max(0, Math.min(exercises.length - 1, to))))} />)}
       </ScrollView>
       <Pressable onPress={onClose} style={{ padding: 18, marginBottom: insets.bottom + 12, borderRadius: 24, backgroundColor: sectionAccent.train }}>
-        <Text style={{ textAlign: 'center', color: colors.bg, fontWeight: '700' }}>{t('workout.done')}</Text>
+        <Text style={{ textAlign: 'center', color: colors.onAccent, fontWeight: '700' }}>{t('workout.done')}</Text>
       </Pressable>
     </View>
   </Modal>;

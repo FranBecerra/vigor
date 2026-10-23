@@ -21,7 +21,7 @@ export function PlaceholderScreen({ title, subtitle, section = 'train' }: Placeh
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg, padding: spacing.xl }]}>
-      <Text style={[typography.h1, { color: accent }]}>{title}</Text>
+      <Text style={[typography.h1, { color: colors.accentText }]}>{title}</Text>
       {subtitle ? (
         <Text
           style={[

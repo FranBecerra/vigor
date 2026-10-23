@@ -1,6 +1,6 @@
 import { Equipment, ExperienceLevel, ExerciseGenerationTier, SplitStructure } from '@/models';
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
-import { evaluateFinalPlanRepair, planMesocycle, rerollMesocycle } from '../mesocyclePlanner';
+import { evaluateFinalPlanRepair, planMesocycle, rerollMesocycle, rerollMesocycleAsync } from '../mesocyclePlanner';
 import { TrainingGoal, VolumeRegion } from '../volumePlan';
 import { effectiveSetsByMuscle } from '../sessionDistribution';
 import { toPlannedSessions } from '../routineMapper';
@@ -8,6 +8,14 @@ import { toPlannedSessions } from '../routineMapper';
 const base = { level: ExperienceLevel.INTERMEDIATE, goal: TrainingGoal.HYPERTROPHY,
   capacity: { sessionsPerMicrocycle: 4, minutesPerSession: 75 }, split: SplitStructure.AUTO,
   catalogue: EXERCISE_CATALOGUE, seed: 11 };
+it('yields between candidate checks, matches synchronous variation and cancels without changing the incumbent', async () => {
+  const plan = planMesocycle(base); const yieldControl = jest.fn(async () => {});
+  expect(await rerollMesocycleAsync({ ...base, seed: 202 }, plan, { yieldControl })).toEqual(rerollMesocycle({ ...base, seed: 202 }, plan));
+  expect(yieldControl.mock.calls.length).toBeGreaterThan(1);
+  let cancelled = false;
+  expect(await rerollMesocycleAsync(base, plan, { yieldControl: async () => { cancelled = true; }, isCancelled: () => cancelled })).toBe(plan);
+  await expect(rerollMesocycleAsync({ ...base, seed: NaN }, plan, { yieldControl })).rejects.toThrow(RangeError);
+});
 const fingerprint = (plan: ReturnType<typeof planMesocycle>) => plan.distribution.sessions.map((session) => ({
   sets: session.exercises.reduce((sum, entry) => sum + entry.sets, 0),
   direct: Object.fromEntries([...new Set(session.exercises.map((entry) => entry.exercise.primaryMuscle))]

@@ -6,25 +6,52 @@ import { Stepper } from '../generate/GenerateControls';
 import { EquipmentIllustration } from '../generate/EquipmentIllustration';
 import { SplitDiagram } from '../generate/SplitDiagram';
 import { SplitStructure } from '@/models';
+import { ExperienceLevelGuide } from '../generate/ExperienceLevelGuide';
 const { create, act } = require('react-test-renderer');
 const mockPush = jest.fn();
+const mockReplace = jest.fn();
+const mockDismissTo = jest.fn();
+let mockCanGoBack = false;
 let mockDimensions = { width: 390, height: 844, scale: 3, fontScale: 1 };
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({ __esModule: true, default: () => mockDimensions }));
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, canGoBack: () => false, replace: jest.fn() }), Stack: { Screen: () => null } }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, canGoBack: () => mockCanGoBack, replace: mockReplace, dismissTo: mockDismissTo }), Stack: { Screen: () => null } }));
 jest.mock('react-native-reanimated', () => ({ __esModule: true,
   default: { View: require('react-native').View },
   useSharedValue: (value: unknown) => ({ value }), useAnimatedStyle: (style: () => unknown) => style(),
   withTiming: (value: unknown) => value,
 }));
+jest.mock('../generate/ExerciseSwapSheet', () => ({ ExerciseSwapSheet: () => null }));
 jest.mock('react-native-screens/experimental', () => ({ SafeAreaView: require('react-native').View }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }) }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: null }) }));
-jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: [], exercisesById: new Map() }) }));
+jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: [], exercisesById: new Map(), notRecommendedExerciseIds: new Set(), preferencesReady: true }) }));
 jest.mock('@/services/repositories', () => ({ mesocycleRepository: {}, routineRepository: {}, workoutSessionRepository: {} }));
 const press = (tree: any, key: string) => tree.root.findAll((node: any) => typeof node.props.onPress === 'function' &&
   node.findAllByType(RN.Text).some((text: any) => text.props.children === key))[0].props.onPress();
-beforeEach(() => { mockDimensions = { width: 390, height: 844, scale: 3, fontScale: 1 }; });
+beforeEach(() => { mockDimensions = { width: 390, height: 844, scale: 3, fontScale: 1 }; mockCanGoBack = false; jest.clearAllMocks(); });
+
+it('opens the optional experience guide, applies only accepted results and retains manual choice across steps', async () => {
+  let tree: any; await act(async () => { tree = create(<GenerateScreen />); });
+  await act(async () => press(tree, 'exerciseWizard.next'));
+  const levels = () => tree.root.findAllByType(GenerationChoice).filter((node: any) => node.props.title.startsWith('generate.level'));
+  const open = async () => act(async () => tree.root.findAll((node: any) => node.props.accessibilityLabel === 'experienceGuide.open' && typeof node.props.onPress === 'function')[0].props.onPress());
+  expect(levels().find((node: any) => node.props.selected).props.title).toBe('generate.levelINTERMEDIATE');
+  await open();
+  await act(async () => tree.root.findByType(ExperienceLevelGuide).props.onClose());
+  expect(levels().find((node: any) => node.props.selected).props.title).toBe('generate.levelINTERMEDIATE');
+  await open();
+  await act(async () => { const guide = tree.root.findByType(ExperienceLevelGuide).props; guide.onSelect('BEGINNER'); guide.onClose(); });
+  expect(levels().find((node: any) => node.props.selected).props.title).toBe('generate.levelBEGINNER');
+  await act(async () => levels().find((node: any) => node.props.title === 'generate.levelADVANCED').props.onPress());
+  await act(async () => press(tree, 'exerciseWizard.next'));
+  await act(async () => press(tree, 'generate.back'));
+  expect(levels().find((node: any) => node.props.selected).props.title).toBe('generate.levelADVANCED');
+  await open();
+  const next = tree.root.findByType(ExperienceLevelGuide).findAll((node: any) => node.props.accessibilityRole === 'button' && node.props.disabled === true);
+  expect(next.length).toBeGreaterThan(0);
+  await act(async () => tree.unmount());
+});
 
 it('keeps emphasis state across steps, aligns help inline and illustrates every equipment option', async () => {
   let tree: any;
@@ -62,4 +89,16 @@ it('falls back to a readable single column with large accessibility text', async
   const chip = tree.root.findAll((node: any) => node.props.cornerBadge && node.props.label && typeof node.props.onPress === 'function')[0];
   expect(chip.props.style.width).toBe('100%'); expect(chip.props.style.minHeight).toBe(82);
   await act(async () => tree.unmount());
+});
+it.each([false, true])('cancels the complete creation stack, not just its last screen (history: %s)', async (hasHistory) => {
+  mockCanGoBack = hasHistory;
+  const confirm = jest.spyOn(RN.Alert, 'alert'); let tree: any;
+  await act(async () => { tree = create(<GenerateScreen />); });
+  for (let step = 0; step < 3; step++) await act(async () => press(tree, 'exerciseWizard.next'));
+  await act(async () => tree.root.findAll((node: any) => node.props.accessibilityLabel === 'generate.cancelCreation' && typeof node.props.onPress === 'function')[0].props.onPress());
+  expect(confirm).toHaveBeenCalledWith('generate.cancelCreation', 'generate.cancelCreationHint', expect.any(Array));
+  await act(async () => confirm.mock.calls.at(-1)![2]![1].onPress!());
+  expect(mockDismissTo).toHaveBeenCalledWith('/(tabs)/(train)');
+  expect(mockReplace).not.toHaveBeenCalled();
+  await act(async () => tree.unmount()); confirm.mockRestore();
 });

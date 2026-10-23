@@ -31,6 +31,7 @@
       "typedRoutes": true
     },
     "plugins": [
+      "./plugins/withFreePersonalTeam",
       "expo-router",
       "./plugins/withRNFirebaseDisableSPM",
       "@react-native-firebase/app",
@@ -46,7 +47,8 @@
       ],
       "@react-native-google-signin/google-signin",
       "expo-localization",
-      "./plugins/withFreePersonalTeam",
+      "expo-notifications",
+      "./plugins/withWorkoutHealth",
       ["expo-widgets", { "groupIdentifier": "group.com.franciscobecerra.vigor", "enablePushNotifications": false }],
       "./plugins/withWorkoutWidgetEmbedding"
     ]

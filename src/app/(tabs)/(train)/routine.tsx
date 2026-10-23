@@ -1,5 +1,5 @@
 /** Saved routine overview and future-plan editor. */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { backToTraining } from '@/services/training/backNavigation';
@@ -9,7 +9,7 @@ import { useTheme } from '@/theme/useTheme';
 import { useRoutines } from '@/hooks/useRoutines';
 import { mesocycleRepository } from '@/services/repositories';
 import { EXERCISE_CATALOGUE, filterCatalogue } from '@/services/training/exerciseCatalogue';
-import { baseSessionsForMicrocycle, changesForSessionEdit, sessionsForMicrocycle, withPlanRevision,
+import { baseSessionsForMicrocycle, changesForSessionEdit, sessionsForMicrocycle, withPlanRevision, sessionProgressionProposal, pendingOverridesAfterRevision,
   type SessionEditScope } from '@/services/training/mesocycleEditing';
 import { applyPreviewEdits, appendPreviewExercises, previewEditKey, representativeSet, type PreviewAddition, type PreviewEdits, type PreviewExerciseEdit } from '@/services/training/previewEditing';
 import { exerciseMinutes } from '@/services/training/trainingCapacity';
@@ -17,8 +17,14 @@ import { rankSwapCandidates } from '@/services/training/swapEngine';
 import { PlanPreview } from '@/components/train/generate/PlanPreview';
 import { ExerciseSwapSheet } from '@/components/train/generate/ExerciseSwapSheet';
 import { ActionMenuSheet, type ActionMenuItem } from '@/components/train/ActionMenuSheet';
-import { NumericField } from '@/components/train/NumericField';
-import { TrainingCalendarCard } from '@/components/train/TrainingCalendarCard';
+import { PrescriptionEditor } from '@/components/train/PrescriptionEditor';
+import { RIRProgressionPreview } from '@/components/train/RIRProgressionPreview';
+import { hasSessionRIRChanges, progressionFingerprint, type ProgressionStep } from '@/services/training/rirReplanning';
+import { countWorkingSets } from '@/services/training/sessionSummary';
+import { setTypeLabel } from '@/components/train/setTypeLabel';
+import { mergePrescriptionEdit } from '@/services/training/prescriptionEntry';
+import { orderedRoutineSessions } from '@/services/training/routineRestDays';
+import { useExerciseName } from '@/hooks/useExerciseName';
 import { MuscleVolumeCard } from '@/components/train/MuscleVolumeCard';
 import { MuscleTags } from '@/components/train/MuscleTags';
 import type { Exercise, Mesocycle, PlannedExercise, PlannedSession } from '@/models';
@@ -36,6 +42,7 @@ import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 export default function RoutineDetailScreen() {
   const { catalogue, exercisesById: CATALOGUE } = useExerciseCatalogue();
   const { t } = useTranslation();
+  const name = useExerciseName();
   const { colors, typography, spacing, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -56,6 +63,7 @@ export default function RoutineDetailScreen() {
   const [draftExercise, setDraftExercise] = useState<PlannedExercise | null>(null);
   const [draftRIRBySet, setDraftRIRBySet] = useState<Record<number, number>>({});
   const [saving, setSaving] = useState(false);
+  const [progression, setProgression] = useState<ProgressionStep[] | null>(null);
   const [edits, setEdits] = useState<PreviewEdits>({});
   const [additions, setAdditions] = useState<PreviewAddition[]>([]);
   const [removed, setRemoved] = useState<string[]>([]);
@@ -91,7 +99,7 @@ export default function RoutineDetailScreen() {
       : sessionsForMicrocycle(mesocycle, goal, previewIndex),
   [mesocycle, goal, planEdit, previewIndex]);
   const sessions = useMemo<PlannedSession[]>(() => {
-    const filtered = base.map((session) => ({
+    const filtered = orderedRoutineSessions(base, mesocycle?.sessionOrder).map((session) => ({
       ...session,
       exercises: session.exercises.filter((exercise) =>
         !removed.includes(previewEditKey(session.index, exercise.order))),
@@ -104,7 +112,7 @@ export default function RoutineDetailScreen() {
           return sum + (exercise ? exerciseMinutes(exercise, entry.sets.length, entry.restSeconds) : 0);
         }, 0),
       }));
-  }, [additions, base, edits, goal, removed, CATALOGUE]);
+  }, [additions, base, edits, goal, removed, CATALOGUE, mesocycle?.sessionOrder]);
   const used = useMemo(() => new Set(sessions.flatMap((session) =>
     session.exercises.map((exercise) => exercise.exerciseId))), [sessions]);
   const available = routine ? filterCatalogue(catalogue.filter((exercise) => exercise.archivedAt === undefined), {
@@ -124,13 +132,19 @@ export default function RoutineDetailScreen() {
   const selectedView = selectedSessionIndex === null ? null
     : routine?.microcycles[previewIndex]?.sessions.find((session) =>
       session.plannedSessionIndex === selectedSessionIndex) ?? null;
+  const completedWorkoutId = selectedView?.completedWorkoutId;
+  useEffect(() => {
+    if (completedWorkoutId) router.replace({ pathname: '/workout-history', params: { id: completedWorkoutId, edit: '1' } });
+  }, [completedWorkoutId, router]);
   const pendingSelection = selectedView !== null && selectedView.completedOn === undefined &&
     selectedView.skippedOn === undefined;
   const selectedMicrocycleHasHistory = routine?.microcycles[previewIndex]?.sessions.some(
     (session) => session.completedOn !== undefined || session.skippedOn !== undefined) ?? false;
   const visibleSessions = selected === null ? sessions : [selected];
+  const rirChanged = !!selected && !!mesocycle && hasSessionRIRChanges(sessionsForMicrocycle(mesocycle, goal, previewIndex).find((entry) => entry.index === selected.index) ?? selected, selected);
+  const lockedMicrocycles = routine?.microcycles.flatMap((microcycle, index) => microcycle.sessions.some((entry) => entry.plannedSessionIndex === selected?.index && (entry.completedOn !== undefined || entry.skippedOn !== undefined)) ? [index] : []) ?? [];
   const resetDraft = () => { setEdits({}); setAdditions([]); setRemoved([]); setEditing(false);
-    setDraftExercise(null); };
+    setDraftExercise(null); setProgression(null); };
   const updateEdit = (sessionIndex: number, order: number, patch: PreviewExerciseEdit) => {
     const key = previewEditKey(sessionIndex, order);
     setEdits((currentEdits) => ({ ...currentEdits, [key]: { ...currentEdits[key], ...patch } }));
@@ -149,16 +163,24 @@ export default function RoutineDetailScreen() {
     setSaving(true);
     try {
       const fresh = await mesocycleRepository.get(mesocycle.id);
-      if (fresh === null) throw new Error('Mesocycle not found');
+      if (fresh === null || fresh.userId !== mesocycle.userId) throw new Error('Mesocycle not found');
+      if (scope === 'recalculate-progression' && selected && progressionFingerprint(sessionProgressionProposal(fresh, goal, previewIndex, selected, lockedMicrocycles)) !== progressionFingerprint(progression)) throw new Error(t('progression.stale'));
       if (selectedSessionIndex !== null && scope !== undefined && selected !== null && pendingSelection) {
         await mesocycleRepository.update(fresh.id, {
           ...changesForSessionEdit(fresh, goal, previewIndex, selected, scope,
-            selectedMicrocycleHasHistory),
+            selectedMicrocycleHasHistory,
+            lockedMicrocycles),
           updatedAt: Date.now(),
         });
       } else if (selectedSessionIndex === null) {
         await mesocycleRepository.update(fresh.id, {
           prescriptionRevisions: withPlanRevision(fresh, fromIndex, sessions),
+          sessionOverrides: pendingOverridesAfterRevision(fresh, fromIndex, undefined, routine.microcycles.flatMap((microcycle, index) =>
+            microcycle.sessions.flatMap((entry) => entry.completedOn !== undefined || entry.skippedOn !== undefined ? [sessionKey(index, entry.plannedSessionIndex)] : []))),
+          ...(fresh.exerciseRestOverrides ? { exerciseRestOverrides: {
+            ...fresh.exerciseRestOverrides, ...Object.fromEntries(sessions.flatMap((session) => session.exercises
+              .filter((exercise) => fresh.exerciseRestOverrides?.[exercise.exerciseId] !== undefined && exercise.restSeconds !== undefined)
+              .map((exercise) => [exercise.exerciseId, exercise.restSeconds!]))) } } : {}),
           updatedAt: Date.now(),
         });
       } else return;
@@ -227,7 +249,12 @@ export default function RoutineDetailScreen() {
     { label: t('routine.skipSession'), tone: 'danger', onPress: () => void skipSelected() },
   ] : menu === 'scope' ? [
     { label: t('routine.onlyThisMicrocycle'), onPress: () => void save('microcycle') },
-    { label: t('routine.remainingMesocycle'), onPress: () => void save('remaining-mesocycle') },
+    ...(selected && mesocycle && rirChanged
+      ? [{ label: t('progression.recalculate'), onPress: () => {
+        try { setProgression(sessionProgressionProposal(mesocycle, goal, previewIndex, selected, lockedMicrocycles)); }
+        catch { Alert.alert(t('routine.editError'), t('progression.failed')); }
+      } }] : []),
+    { label: t(rirChanged ? 'progression.keepFixed' : 'routine.remainingMesocycle'), onPress: () => void save('remaining-mesocycle') },
   ] : [];
 
   const saveExerciseDraft = () => {
@@ -240,13 +267,15 @@ export default function RoutineDetailScreen() {
       repsBySet: Object.fromEntries(draftExercise.sets.map((set, index) => [index, {
         min: set.targetRepsMin ?? set.targetReps, max: set.targetReps,
       }])),
+      secondsBySet: Object.fromEntries(draftExercise.sets.flatMap((set, index) => set.targetDurationSeconds === undefined ? [] : [[index, set.targetDurationSeconds]])),
+      typeBySet: Object.fromEntries(draftExercise.sets.map((set, index) => [index, set.setType])),
       ...(Object.keys(draftRIRBySet).length === 0 ? {} : { rirBySet: draftRIRBySet }),
     });
     setDraftExercise(null);
     setEditing(true);
   };
 
-  if (routine === undefined || mesocycle === null) {
+  if (routine === undefined || mesocycle === null || completedWorkoutId) {
     return <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
       {loadFinished && routines.length > 0
         ? <Text style={[typography.body, { color: colors.textSecondary, padding: spacing.lg }]}>
@@ -349,7 +378,7 @@ export default function RoutineDetailScreen() {
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={[typography.body, { color: colors.textPrimary,
               fontWeight: '700', flex: 1 }]}>
-              {CATALOGUE.get(planned.exerciseId)?.name ?? planned.exerciseId}
+              {name(planned.exerciseSnapshot ?? CATALOGUE.get(planned.exerciseId)) || planned.exerciseId}
             </Text>
             {pendingSelection && <Text style={[typography.title, { color: colors.textMuted }]}>⋮</Text>}
           </View>
@@ -357,31 +386,32 @@ export default function RoutineDetailScreen() {
           {planned.sets.map((set, setIndex) => <View key={setIndex}
             style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md,
               marginTop: spacing.xs }}>
-            <Text style={[typography.caption, { color: colors.textMuted, width: 22 }]}>
-              {setIndex + 1}
+            <Text style={[typography.body, { color: colors.textMuted, width: 22, lineHeight: 24, fontVariant: ['tabular-nums'] }]}>
+              {setTypeLabel(set.setType) || setIndex + 1}
             </Text>
             <Text style={[typography.body, { color: colors.textSecondary, flex: 1 }]}>
               {set.targetDurationSeconds !== undefined ? `${set.targetDurationSeconds} ${t('rehab.seconds')}` : `${set.targetRepsMin ?? set.targetReps}–${set.targetReps} ${t('routine.reps')}`}
             </Text>
-            {set.targetDurationSeconds === undefined && <Text style={[typography.caption, { color: sectionAccent.train }]}>
+            {set.targetDurationSeconds === undefined && <Text style={[typography.body, { color: colors.accentText, lineHeight: 24, fontVariant: ['tabular-nums'] }]}>
               RIR {set.targetRIR}
             </Text>}
           </View>)}
         </Pressable>)}
       </>}
-      {selectedSessionIndex === null && !editing && <TrainingCalendarCard mesocycleId={mesocycle.id}
-        microcycleIndex={previewIndex} goal={goal} durationFeedback={routine.durationFeedback} onChanged={reload} />}
       {(selectedSessionIndex === null || editing) && visibleSessions.length > 0 && <PlanPreview sessions={visibleSessions}
+          showCycle={selectedSessionIndex === null} scheduleTemplate={mesocycle.scheduleTemplate}
           editable={editing}
           summaryLabel={selectedSessionIndex === null ? undefined : t('generate.previewSetsShort', {
             count: visibleSessions.reduce((sum, session) => sum + session.exercises.reduce(
-              (inner, exercise) => inner + exercise.sets.length, 0), 0),
+              (inner, exercise) => inner + countWorkingSets(exercise.sets), 0), 0),
           })}
           onPressSession={!editing && selectedSessionIndex === null ? (index) => {
+            const completed = routine.microcycles[current]?.sessions.find((entry) => entry.plannedSessionIndex === index)?.completedWorkoutId;
+            if (completed) { router.push({ pathname: '/workout-history', params: { id: completed, edit: '1' } }); return; }
             resetDraft(); setSelectedSessionIndex(index);
           } : undefined}
           performedSets={visibleSessions.reduce((sum, session) => sum + session.exercises.reduce(
-            (inner, exercise) => inner + exercise.sets.length, 0), 0)} exercisesById={CATALOGUE}
+            (inner, exercise) => inner + countWorkingSets(exercise.sets), 0), 0)} exercisesById={CATALOGUE}
           onSwap={editing ? (sessionIndex, order) => setSwapTarget({ sessionIndex, order }) : undefined}
           onAdd={editing ? setAddTarget : undefined}
           isAdded={() => editing}
@@ -398,6 +428,11 @@ export default function RoutineDetailScreen() {
           } : undefined}
           onChangeSets={editing ? (sessionIndex, order, value) => {
             if (value !== undefined) updateEdit(sessionIndex, order, { sets: Math.max(1, Math.min(30, Math.trunc(value))) });
+          } : undefined}
+          onChangeSet={editing ? (sessionIndex, order, setIndex, patch) => {
+            const key = previewEditKey(sessionIndex, order);
+            const sets = sessions.find((session) => session.index === sessionIndex)?.exercises.find((exercise) => exercise.order === order)?.sets ?? [];
+            setEdits((currentEdits) => ({ ...currentEdits, [key]: mergePrescriptionEdit(currentEdits[key], sets, setIndex, patch) }));
           } : undefined}
           onChangeRepMin={editing ? (sessionIndex, order, value) => {
             const set = representativeSet(sessions.find((session) => session.index === sessionIndex)
@@ -443,6 +478,7 @@ export default function RoutineDetailScreen() {
       subtitle={menu === 'skip' ? t('routine.skipConfirm')
         : menu === 'scope' ? t('routine.saveScopeMessage') : undefined}
       actions={menuActions} onClose={() => setMenu(null)} />
+    <RIRProgressionPreview steps={progression} catalogue={CATALOGUE} busy={saving} onApply={() => void save('recalculate-progression')} onClose={() => setProgression(null)} />
     <Modal visible={draftExercise !== null} transparent animationType="slide"
       onRequestClose={() => setDraftExercise(null)}>
       <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.58)' }}
@@ -450,64 +486,18 @@ export default function RoutineDetailScreen() {
       <View style={{ backgroundColor: colors.bgElevated, borderTopLeftRadius: 20,
         borderTopRightRadius: 20, padding: spacing.lg, paddingBottom: insets.bottom + spacing.lg }}>
         <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.md }]}>
-          {CATALOGUE.get(draftExercise?.exerciseId ?? '')?.name ?? t('routine.editExercise')}
+          {name(draftExercise?.exerciseSnapshot ?? CATALOGUE.get(draftExercise?.exerciseId ?? '')) || t('routine.editExercise')}
         </Text>
         {draftExercise !== null && <>
-          <Text style={[typography.caption, { color: colors.textMuted }]}>{t('calendar.restSeconds')}</Text>
-          <View style={{ width: 80, marginBottom: spacing.md }}>
-            <NumericField value={draftExercise.restSeconds ?? restDurationFor(
-              CATALOGUE.get(draftExercise.exerciseId)?.profile ?? ExerciseProfile.ISOLATION)}
-              accessibilityLabel={t('calendar.restSeconds')}
-              onChangeValue={(value) => { if (value !== undefined) setDraftExercise({ ...draftExercise,
-                restSeconds: Math.max(0, Math.min(600, Math.round(value))) }); }} />
-          </View>
-          <Text style={[typography.caption, { color: colors.textMuted }]}>
-            {t('generate.previewSetsLabel')}
-          </Text>
-          <View style={{ width: 80, marginBottom: spacing.md }}>
-            <NumericField value={draftExercise.sets.filter((set) =>
-              set.setType !== SetType.TOP_SINGLE).length}
-              onChangeValue={(value) => {
-                if (value !== undefined) setDraftExercise(resizeExerciseSets(draftExercise, value));
-              }} accessibilityLabel={t('generate.previewSetsLabel')} />
-          </View>
-          <ScrollView style={{ maxHeight: 340 }} keyboardShouldPersistTaps="handled">
-            {draftExercise.sets.map((set, setIndex) => <View key={setIndex}
-              style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm,
-                marginBottom: spacing.md }}>
-              <Text style={[typography.caption, { color: colors.textMuted, width: 22 }]}>
-                {setIndex + 1}
-              </Text>
-              {(set.targetDurationSeconds !== undefined ? ['targetDurationSeconds'] as const : ['targetRepsMin', 'targetReps', 'targetRIR'] as const).map((field) =>
-                <View key={field} style={{ width: 72, alignItems: 'center' }}>
-                  <Text style={[typography.caption, { color: colors.textMuted }]}>
-                    {field === 'targetDurationSeconds' ? t('rehab.seconds') : field === 'targetRepsMin' ? t('generate.previewRepMin')
-                      : field === 'targetReps' ? t('generate.previewRepMax') : 'RIR'}
-                  </Text>
-                  <NumericField value={field === 'targetRepsMin'
-                    ? set.targetRepsMin ?? set.targetReps : set[field]}
-                    editable={set.setType !== SetType.TOP_SINGLE}
-                    accessibilityLabel={`${field} ${setIndex + 1}`}
-                    onChangeValue={(value) => {
-                      if (value === undefined) return;
-                      const bounded = field === 'targetRIR'
-                        ? Math.max(0, Math.min(5, Math.trunc(value)))
-                        : Math.max(1, Math.min(field === 'targetDurationSeconds' ? 3600 : 100, Math.trunc(value)));
-                      setDraftExercise({ ...draftExercise, sets: draftExercise.sets.map(
-                        (entry, position) => {
-                          if (position !== setIndex) return entry;
-                          if (field === 'targetDurationSeconds') return { ...entry, targetDurationSeconds: bounded };
-                          if (field === 'targetRIR') return { ...entry, targetRIR: bounded };
-                          if (field === 'targetRepsMin') return { ...entry,
-                            targetRepsMin: bounded, targetReps: Math.max(bounded, entry.targetReps) };
-                          return { ...entry, targetReps: bounded,
-                            targetRepsMin: Math.min(entry.targetRepsMin ?? entry.targetReps, bounded) };
-                        }) });
-                      if (field === 'targetRIR') setDraftRIRBySet((previous) => ({
-                        ...previous, [setIndex]: bounded }));
-                    }} />
-                </View>)}
-            </View>)}
+          <ScrollView style={{ maxHeight: 340 }}>
+            <PrescriptionEditor exercise={draftExercise} restSeconds={draftExercise.restSeconds ?? restDurationFor(
+              (draftExercise.exerciseSnapshot ?? CATALOGUE.get(draftExercise.exerciseId))?.profile ?? ExerciseProfile.ISOLATION)}
+              onChangeRest={(seconds) => setDraftExercise((previous) => previous ? { ...previous, restSeconds: seconds } : previous)}
+              onChangeCount={(count) => setDraftExercise((previous) => previous ? resizeExerciseSets(previous, count) : previous)}
+              onChangeSet={(index, patch) => {
+                setDraftExercise((previous) => previous ? { ...previous, sets: previous.sets.map((set, position) => position === index ? { ...set, ...patch } : set) } : previous);
+                if (patch.targetRIR !== undefined) setDraftRIRBySet((previous) => ({ ...previous, [index]: patch.targetRIR! }));
+              }} />
           </ScrollView>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: spacing.lg,
             marginTop: spacing.lg }}>
@@ -517,7 +507,7 @@ export default function RoutineDetailScreen() {
               </Text>
             </Pressable>
             <Pressable onPress={saveExerciseDraft} accessibilityRole="button">
-              <Text style={[typography.body, { color: sectionAccent.train }]}>
+              <Text style={[typography.body, { color: colors.accentText }]}>
                 {t('routine.applyExerciseChanges')}
               </Text>
             </Pressable>

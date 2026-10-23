@@ -121,6 +121,8 @@ export interface StructureWarning {
 }
 
 export interface DistributionInput {
+  /** Auto-capacity search must retain an explicitly chosen split's visible sequence. */
+  preserveSplitSequence?: boolean;
   selection: Pick<SelectionResult, 'selected'>;
   split: SplitStructure;
   sessionsPerMicrocycle: number;
@@ -255,6 +257,7 @@ function matches(focus: SessionFocus, muscle: MuscleGroup): boolean {
   if (focus === 'PUSH') return PUSH_MUSCLES.has(muscle);
   return PULL_MUSCLES.has(muscle);
 }
+export { matches as focusAcceptsMuscle };
 
 /** Finds the first donor exercise that naturally belongs to an empty focus. */
 export function matchingMoveForEmpty(
@@ -1227,6 +1230,7 @@ function focusMismatchCost(focus: SessionFocus, muscle: MuscleGroup): number {
  */
 export function orderSessionExercises(
   entries: readonly SessionExercise[],
+  priorityMuscles: readonly MuscleGroup[] = [],
 ): SessionExercise[] {
   const group = (entry: SessionExercise): number => {
     if (isSessionAnchor(entry)) return 0;
@@ -1242,6 +1246,7 @@ export function orderSessionExercises(
   return [...entries].sort(
     (a, b) =>
       group(a) - group(b) ||
+      Number(priorityMuscles.includes(b.exercise.primaryMuscle)) - Number(priorityMuscles.includes(a.exercise.primaryMuscle)) ||
       profile(a) - profile(b) ||
       b.sets - a.sets ||
       fatigueCost(b.exercise) - fatigueCost(a.exercise) ||
@@ -1280,12 +1285,15 @@ export function distributeSelection(input: DistributionInput): SessionDistributi
     minutesByMuscle.set(muscle, (minutesByMuscle.get(muscle) ?? 0) + minutes);
   });
 
-  const sessions: DistributedSession[] = buildFocusSequence(
+  const focuses = input.preserveSplitSequence && input.split === SplitStructure.UPPER_LOWER
+    ? Array.from({ length: count }, (_, index): SessionFocus => index % 2 ? 'LOWER' : 'UPPER')
+    : buildFocusSequence(
     resolvedSplit,
     count,
     minutesByMuscle,
     input.split !== SplitStructure.AUTO,
-  ).map((focus, index) => ({ index, focus, exercises: [], estimatedWorkMinutes: 0 }));
+  );
+  const sessions: DistributedSession[] = focuses.map((focus, index) => ({ index, focus, exercises: [], estimatedWorkMinutes: 0 }));
 
   const unassigned: SessionExercise[] = [];
   if (sessions.length === 0) {

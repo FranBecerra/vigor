@@ -17,7 +17,7 @@ let mockRehab: any;
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: 'owner' }) }));
-jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: [], create: mockCreate }) }));
+jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: [], create: mockCreate }), useOptionalExerciseCatalogue: () => null }));
 jest.mock('@/hooks/useRehabilitation', () => ({ useRehabilitation: () => mockRehab }));
 jest.mock('@/hooks/useRoutines', () => ({ useRoutines: () => ({ routines: [] }) }));
 

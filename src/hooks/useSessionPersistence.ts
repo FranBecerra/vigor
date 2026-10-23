@@ -24,6 +24,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import type { WorkoutSession } from '@/models';
 import { workoutSessionRepository } from '@/services/repositories';
+import { WorkoutWriteGate } from '@/services/training/workoutWriteGate';
 import {
   isSessionEmpty,
   toSessionSetsByExercise,
@@ -73,10 +74,14 @@ export function useSessionPersistence({
   currentSessionId.current = sessionId;
   const hasRestored = sessionId !== null && restoredSessionId === sessionId;
   const writeAttempt = useRef(0);
+  const writeGate = useRef(new WorkoutWriteGate());
+  const acceptedNoteIntent = useRef<Pick<SessionContext, 'sessionNote' | 'exerciseNotes'>>({});
 
   // --- Recuperación: una sola vez por sesión ------------------------------
   useEffect(() => {
     if (context === null) return;
+    writeGate.current = new WorkoutWriteGate();
+    acceptedNoteIntent.current = {};
     completedAtRef.current = undefined;
     setRestoreError(false);
     setStatus('idle');
@@ -111,24 +116,28 @@ export function useSessionPersistence({
   }, [sessionId, restoreAttempt]);
 
   /** Escribe ya, sin esperar al temporizador. Para cerrar o salir. */
-  const flush = useCallback(async (completedAt?: number): Promise<boolean> => {
-    if (context === null || !hasRestored || currentSessionId.current !== context.sessionId || (!context.persistDraft && isSessionEmpty(latestSets.current))) return false;
+  const flush = useCallback(async (completedAt?: number, notePatch?: Pick<SessionContext, 'sessionNote' | 'exerciseNotes'>): Promise<boolean> => {
+    if (context === null || writeGate.current.stopped || !hasRestored || currentSessionId.current !== context.sessionId || (!context.persistDraft && isSessionEmpty(latestSets.current))) return false;
     const finalCompletedAt = completedAt ?? completedAtRef.current;
+    // Explicit note saves must survive an immediate background/unmount before
+    // React commits the caller's updated context.
+    if (notePatch) acceptedNoteIntent.current = { ...acceptedNoteIntent.current, ...notePatch };
 
     setStatus('saving');
     const attempt = ++writeAttempt.current;
     let synced = false;
     let rejected = false;
     try {
-      const acceptance = await workoutSessionRepository.createLocally(
+      const acceptance = await writeGate.current.write(() => workoutSessionRepository.createLocally(
         toWorkoutSession(
-          finalCompletedAt === undefined ? context : { ...context, completedAt: finalCompletedAt },
+          { ...context, ...acceptedNoteIntent.current, ...(finalCompletedAt === undefined ? {} : { completedAt: finalCompletedAt }) },
           latestOrder.current,
           latestSets.current,
         ),
         () => { synced = true; if (attempt === writeAttempt.current) setStatus('saved'); },
         () => { rejected = true; if (attempt === writeAttempt.current) setStatus('error'); },
-      );
+      ));
+      if (acceptance === null) return false;
       if (attempt === writeAttempt.current) setStatus(rejected ? 'error' : synced || acceptance === 'synced' ? 'saved' : 'queued');
       if (!rejected && completedAt !== undefined) completedAtRef.current = completedAt;
       return !rejected;
@@ -136,6 +145,18 @@ export function useSessionPersistence({
       if (attempt === writeAttempt.current) setStatus('error');
       return false;
     }
+  }, [context, hasRestored]);
+
+  const discard = useCallback(async (): Promise<boolean> => {
+    if (!context || !hasRestored || currentSessionId.current !== context.sessionId) return false;
+    if (timer.current !== null) clearTimeout(timer.current);
+    ++writeAttempt.current;
+    const saved = await writeGate.current.discard(async () => {
+      await workoutSessionRepository.discardLocally(toWorkoutSession(
+        completedAtRef.current === undefined ? context : { ...context, completedAt: completedAtRef.current }, latestOrder.current, latestSets.current));
+    });
+    if (!saved) setStatus('error');
+    return saved;
   }, [context, hasRestored]);
 
   // --- Guardado diferido --------------------------------------------------
@@ -165,5 +186,5 @@ export function useSessionPersistence({
     return () => subscription.remove();
   }, [flush]);
 
-  return { status, hasRestored, flush, restoreError, retryRestore: () => setRestoreAttempt((old) => old + 1) };
+  return { status, hasRestored, flush, discard, restoreError, retryRestore: () => setRestoreAttempt((old) => old + 1) };
 }

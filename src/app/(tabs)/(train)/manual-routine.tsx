@@ -17,6 +17,8 @@ import { manualRoutineDocuments, resizeManualSessions, timeManualSessions } from
 import { routineNameProblem, shouldActivateNewRoutine, MAX_ROUTINE_NAME_LENGTH } from '@/services/training/routineMapper';
 import { mesocycleRepository, routineRepository } from '@/services/repositories';
 import { backToTraining } from '@/services/training/backNavigation';
+import { mergePrescriptionEdit } from '@/services/training/prescriptionEntry';
+import { countWorkingSets } from '@/services/training/sessionSummary';
 
 export default function ManualRoutineScreen() {
   const { t } = useTranslation(); const router = useRouter(); const insets = useSafeAreaInsets(); const { uid } = useAuth();
@@ -77,7 +79,7 @@ export default function ManualRoutineScreen() {
         }} />
         <Stepper label={t('routineCreation.microcycles')} value={microcycles} min={1} max={12} onChange={setMicrocycles} />
       </View>
-      <PlanPreview sessionTabs sessions={planned} performedSets={planned.reduce((sum, session) => sum + session.exercises.reduce((count, entry) => count + entry.sets.length, 0), 0)}
+      <PlanPreview sessionTabs sessions={planned} performedSets={planned.reduce((sum, session) => sum + session.exercises.reduce((count, entry) => count + countWorkingSets(entry.sets), 0), 0)}
         exercisesById={exercisesById} onAdd={(sessionIndex) => setPicker({ sessionIndex })} onSwap={(sessionIndex, order) => setPicker({ sessionIndex, order })}
         onChangeSessionName={(index, value) => setSessions((old) => old.map((session) => session.index === index ? { ...session, name: value } : session))}
         isAdded={() => true} onRemove={(index, order) => setSessions((old) => old.map((session) => session.index === index
@@ -95,13 +97,17 @@ export default function ManualRoutineScreen() {
             edit(index, order, { targetReps: max, targetRepsMin: set.targetRepsMin ?? set.targetReps }); }
         }}
         onChangeRest={(index, order, value) => { if (value !== undefined && Number.isFinite(value)) edit(index, order, { restSeconds: value }); }}
+        onChangeSet={(index, order, setIndex, patch) => setSessions((old) => {
+          const sets = old.find((session) => session.index === index)?.exercises.find((exercise) => exercise.order === order)?.sets ?? [];
+          return applyPreviewEdits(old, { [previewEditKey(index, order)]: mergePrescriptionEdit(undefined, sets, setIndex, patch) }, exercisesById);
+        })}
         onChangeSetRIR={(index, order, setIndex, value) => { if (value !== undefined && Number.isFinite(value)) edit(index, order, { rirBySet: { [setIndex]: Math.max(0, Math.min(5, Math.trunc(value))) } }); }} />
       {!!error && <Text accessibilityRole="alert" style={{ color: colors.textPrimary, marginVertical: spacing.md }}>{t(`routineCreation.${error}`, { defaultValue: t('routineCreation.saveFailed') })}</Text>}
     </ScrollView>
     <View style={{ flexDirection: 'row', gap: spacing.md, padding: spacing.lg }}>
       <Pressable disabled={busy} onPress={() => backToTraining(router)} style={{ padding: 16 }}><Text style={{ color: colors.textSecondary }}>{t('generate.cancel')}</Text></Pressable>
       <Pressable disabled={busy} onPress={() => { void save(); }} style={{ flex: 1, padding: 16, borderRadius: radius.pill, backgroundColor: sectionAccent.train }}>
-        <Text style={{ textAlign: 'center', color: colors.bg, fontWeight: '700' }}>{t(busy ? 'generate.saving' : 'generate.save')}</Text>
+        <Text style={{ textAlign: 'center', color: colors.onAccent, fontWeight: '700' }}>{t(busy ? 'generate.saving' : 'generate.save')}</Text>
       </Pressable>
     </View>
     <ExerciseSwapSheet open={picker !== null} current={current} mode={picker?.order === undefined ? 'add' : 'swap'} candidates={candidates} onSelect={choose}

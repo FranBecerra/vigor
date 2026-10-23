@@ -12,11 +12,12 @@
  * Solo orquesta: los cálculos viven en services/training/sessionSummary
  * (lógica pura, 100 % cubierta).
  */
-import { useCallback, useMemo, useState } from 'react';
-import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert, StyleSheet, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { SymbolView } from 'expo-symbols';
 
 import { DomainPills } from '@/components/home/HomeHeader';
 import { TodayCard } from '@/components/home/TodayCard';
@@ -26,6 +27,10 @@ import { TrainingCalendarCard } from '@/components/train/TrainingCalendarCard';
 import { useTheme } from '@/theme/useTheme';
 import { useRoutines } from '@/hooks/useRoutines';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
+import { mesocycleRepository, workoutSessionRepository } from '@/services/repositories';
+import { skipRoutineDay } from '@/services/training/skipRoutineDay';
+import { useAuth } from '@/hooks/useAuth';
+import type { DayListScroll } from '@/components/train/RoutineDayList';
 import {
   defaultExpandedRoutineId,
   defaultSessionId,
@@ -45,8 +50,17 @@ function findSession(routines: readonly RoutineView[], sessionId: string) {
 
 export default function TrainHomeScreen() {
   const { t, i18n } = useTranslation();
+  const { uid } = useAuth();
+  const owner = useRef(uid); owner.current = uid;
   const { colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
+  const scroll = useRef<ScrollView>(null), scrollOffset = useRef(0), scrollRange = useRef({ content: 0, viewport: 0 });
+  const dayScroll = useMemo<DayListScroll>(() => ({ currentOffset: () => scrollOffset.current,
+    scrollBy: (delta) => {
+      const next = Math.max(0, Math.min(Math.max(0, scrollRange.current.content - scrollRange.current.viewport), scrollOffset.current + delta));
+      scrollOffset.current = next; scroll.current?.scrollTo({ y: next, animated: false });
+    }, top: insets.top + 70, bottom: height - insets.bottom - 110 }), [height, insets.top, insets.bottom]);
   const router = useRouter();
   const { status, routines: allRoutines, reload, activate, rename, remove } = useRoutines();
   const activeWorkout = useActiveWorkout();
@@ -152,10 +166,29 @@ export default function TrainHomeScreen() {
       plannedSessionIndex: String(plannedSessionIndex),
     } });
   }, [router]);
+  const showDayActions = (routine: RoutineView, index: number) => {
+    const session = routine.microcycles[routine.currentMicrocycleIndex]?.sessions.find((day) => day.plannedSessionIndex === index);
+    if (!uid || !routine.isActive || !session || session.completedOn || session.skippedOn
+      || activeWorkout?.mesocycleId === routine.mesocycleId && activeWorkout.microcycleIndex === routine.currentMicrocycleIndex && activeWorkout.plannedSessionIndex === index) return;
+    Alert.alert(session.name, undefined, [
+      { text: t('generate.cancel'), style: 'cancel' },
+      { text: t('routine.skipSession'), onPress: () => { void (async () => {
+        const [fresh, history] = await Promise.all([mesocycleRepository.get(routine.mesocycleId), workoutSessionRepository.listByUser(uid)]);
+        if (!fresh || owner.current !== uid) throw Error('Missing plan');
+        await mesocycleRepository.updateLocally(fresh.id, {
+          ...skipRoutineDay(fresh, uid, routine.currentMicrocycleIndex, index, history, Date.now()), updatedAt: Date.now() });
+        reload();
+      })().catch(() => Alert.alert(t('routine.editError'))); } },
+    ]);
+  };
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
       <ScrollView
+        ref={scroll} scrollEventThrottle={16}
+        onScroll={(event) => { scrollOffset.current = event.nativeEvent.contentOffset.y; }}
+        onLayout={(event) => { scrollRange.current.viewport = event.nativeEvent.layout.height; }}
+        onContentSizeChange={(_width, content) => { scrollRange.current.content = content; }}
         contentContainerStyle={{
           paddingHorizontal: spacing.lg,
           paddingBottom: insets.bottom + 110,
@@ -171,12 +204,6 @@ export default function TrainHomeScreen() {
           />
         </View>
 
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md }}>
-          {(['exercises', 'rehab', 'history'] as const).map((route) => <Pressable key={route} onPress={() => router.push(`/${route}`)}
-            style={{ padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface }}>
-            <Text style={{ color: colors.textPrimary }}>{t(route === 'exercises' ? 'custom.library' : route === 'history' ? 'workout.history' : 'rehab.title')}</Text>
-          </Pressable>)}
-        </View>
         {activeWorkout && resumeGoal && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/session', params: {
           mesocycleId: activeWorkout.mesocycleId, goal: resumeGoal,
           microcycleIndex: String(activeWorkout.microcycleIndex), plannedSessionIndex: String(activeWorkout.plannedSessionIndex),
@@ -211,9 +238,6 @@ export default function TrainHomeScreen() {
           </View>
         )}
 
-        {orderedRoutines.filter((routine) => routine.isActive).map((routine) =>
-          <TrainingCalendarCard key={routine.id} mesocycleId={routine.mesocycleId}
-            microcycleIndex={routine.currentMicrocycleIndex} goal={routine.generationGoal} durationFeedback={routine.durationFeedback} onChanged={reload} />)}
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.xl }]}>
           {t('home.routines')}
         </Text>
@@ -253,6 +277,10 @@ export default function TrainHomeScreen() {
               </Text>
             ) : null}
             <RoutineCard
+              renderSessionList={(sessionRows) => <TrainingCalendarCard sessionRows={sessionRows} mesocycleId={routine.mesocycleId}
+                initialMesocycle={routine.mesocycleSnapshot} onSessionHold={(index) => showDayActions(routine, index)}
+                edgeScroll={dayScroll}
+                microcycleIndex={routine.currentMicrocycleIndex} goal={routine.generationGoal} onChanged={reload} />}
               routine={routine}
               expanded={routine.id === expandedId}
               selectedSessionId={selectedSession?.session.id ?? ''}
@@ -295,7 +323,7 @@ export default function TrainHomeScreen() {
             styles.emptyWorkout,
             { borderColor: colors.surfaceBorder, borderRadius: radius.md, marginTop: spacing.md },
           ]}>
-          <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 16 }}>
             + {t('home.newRoutine')}
           </Text>
         </Pressable>
@@ -307,10 +335,23 @@ export default function TrainHomeScreen() {
             styles.emptyWorkout,
             { borderColor: colors.surfaceBorder, borderRadius: radius.md, marginTop: spacing.md },
           ]}>
-          <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 16 }}>
             + {t('home.emptyWorkout')}
           </Text>
         </Pressable>
+        <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.xl, marginBottom: spacing.md }]}>{t('library.tools')}</Text>
+        <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, paddingHorizontal: spacing.lg }}>
+          {([
+            { route: 'exercises', icon: 'books.vertical', label: 'library.title' },
+            { route: 'history', icon: 'clock.arrow.circlepath', label: 'workout.history' },
+            { route: 'rehab', icon: 'bandage', label: 'rehab.title' },
+          ] as const).map(({ route, icon, label }, index) => <Pressable key={route} accessibilityRole="button" onPress={() => router.push(`/${route}`)}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 64, borderTopWidth: index ? 0.5 : 0, borderTopColor: colors.surfaceBorder }}>
+            <SymbolView name={icon} tintColor={colors.textSecondary} size={24} />
+            <Text style={{ flex: 1, color: colors.textPrimary, fontSize: 17, fontWeight: '600' }}>{t(label)}</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 22 }}>›</Text>
+          </Pressable>)}
+        </View>
       </ScrollView>
 
       <RenameRoutineSheet
@@ -341,8 +382,8 @@ export default function TrainHomeScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   title: { fontSize: 30, fontWeight: '800', letterSpacing: -0.6, paddingTop: 6 },
-  sectionLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.9 },
-  empty: { fontSize: 12 },
+  sectionLabel: { fontSize: 13, fontWeight: '700', letterSpacing: 0.9 },
+  empty: { fontSize: 16 },
   emptyWorkout: {
     borderWidth: 1,
     paddingVertical: 12,

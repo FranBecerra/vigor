@@ -3,6 +3,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
+import { useExerciseName } from '@/hooks/useExerciseName';
 import { useTheme } from '@/theme/useTheme';
 import type { Exercise } from '@/models';
 import { moveWorkoutExercise } from '@/services/training/workoutRuntime';
@@ -20,21 +21,21 @@ function DraggableExercise({ exercise, index, active, dragging, onDrag, onDrop, 
   { exercise: Exercise; index: number; active: boolean; dragging: boolean;
     onDrag: (index: number, delta: number, x: number) => void; onDrop: () => void; onCancel: () => void;
     onSelect: () => void; onMove: (direction: number) => void }) {
-  const { colors, radius, sectionAccent } = useTheme(); const { t } = useTranslation();
+  const { colors, radius, sectionAccent } = useTheme(); const { t } = useTranslation(); const name = useExerciseName();
   const pan = useMemo(() => Gesture.Pan().activateAfterLongPress(280).runOnJS(true)
     .onStart((event) => onDrag(index, 0, event.absoluteX))
     .onUpdate((event) => onDrag(index, event.translationX, event.absoluteX))
     .onEnd(onDrop).onFinalize((_event, success) => { if (!success) onCancel(); }), [index, onDrag, onDrop, onCancel]);
   return <GestureDetector gesture={pan}>
     <View>
-      <Pressable onPress={onSelect} accessibilityRole="button" accessibilityLabel={exercise.name}
+      <Pressable onPress={onSelect} accessibilityRole="button" accessibilityLabel={name(exercise)}
         accessibilityHint={t('workout.dragHint')} accessibilityState={{ selected: active }}
         accessibilityActions={[{ name: 'decrement', label: t('rehab.moveUp') }, { name: 'increment', label: t('workout.moveDown') }]}
         onAccessibilityAction={({ nativeEvent }) => onMove(nativeEvent.actionName === 'decrement' ? -1 : 1)}
         style={{ width: 84, height: 72, borderRadius: radius.md, justifyContent: 'center', padding: 7, borderWidth: 1.5,
           backgroundColor: colors.bgElevated, borderColor: active || dragging ? sectionAccent.train : colors.surfaceBorder,
           transform: [{ scale: dragging ? 1.06 : 1 }] }}>
-        <Text numberOfLines={3} style={{ color: active ? sectionAccent.train : colors.textSecondary, textAlign: 'center', fontSize: 10, lineHeight: 13, fontWeight: '600' }}>{exercise.name}</Text>
+        <Text numberOfLines={3} style={{ color: active ? colors.accentText : colors.textSecondary, textAlign: 'center', fontSize: 11, lineHeight: 14, fontWeight: '600' }}>{name(exercise)}</Text>
       </Pressable>
     </View>
   </GestureDetector>;
@@ -108,7 +109,7 @@ export function WorkoutExerciseStrip({ exercises, activeId, onSelect, onReorder,
       <Pressable onPress={onAdd} accessibilityRole="button" accessibilityLabel={t('train.addExercise')}
         style={{ position: 'absolute', left: spacing.lg + exercises.length * PITCH, top: 5, width: 70, height: 72,
           borderRadius: radius.md, backgroundColor: colors.bgElevated, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontSize: 24, color: sectionAccent.train }}>+</Text>
+        <Text style={{ fontSize: 24, color: colors.accentText }}>+</Text>
       </Pressable>
     </ScrollView>
   </View>;

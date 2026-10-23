@@ -24,6 +24,7 @@ import {
   Pressable,
   TextInput,
   ActivityIndicator,
+  Alert,
   StyleSheet,
   useWindowDimensions,
   type StyleProp,
@@ -43,7 +44,11 @@ import {
   Stepper,
 } from '@/components/train/generate/GenerateControls';
 import { PlanPreview } from '@/components/train/generate/PlanPreview';
+import { mergePrescriptionEdit } from '@/services/training/prescriptionEntry';
+import { countWorkingSets } from '@/services/training/sessionSummary';
+import { splitAdherence } from '@/services/training/splitAdherence';
 import { GenerationChoice, PriorityBudget } from '@/components/train/generate/GenerationChoice';
+import { ExperienceLevelGuide } from '@/components/train/generate/ExperienceLevelGuide';
 import { SplitDiagram, SplitLegend } from '@/components/train/generate/SplitDiagram';
 import { EquipmentIllustration } from '@/components/train/generate/EquipmentIllustration';
 import { sortEquipmentOptions } from '@/services/training/generationPresentation';
@@ -52,13 +57,14 @@ import { uiPerformance } from '@/services/performance/uiPerformance';
 import { ExerciseSwapSheet } from '@/components/train/generate/ExerciseSwapSheet';
 import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import {
-  EXERCISE_CATALOGUE,
   filterCatalogue,
 } from '@/services/training/exerciseCatalogue';
-import { planDoseFirstMesocycle, rerollMesocycle, type MesocyclePlan } from '@/services/training/mesocyclePlanner';
+import { planDoseFirstMesocycle, rerollMesocycleAsync, type MesocyclePlan } from '@/services/training/mesocyclePlanner';
+import { RerollFeedback, type RerollNotice } from '@/components/train/generate/RerollFeedback';
 import { reviewScheduleSuitability } from '@/services/training/alternativeSchedule';
 import { MIN_HYPERTROPHY_SESSION_SETS } from '@/services/training/sessionDistribution';
 import {
+  generateFromCapacityRecommendation,
   recommendCapacityAsync,
   CapacityRecommendationCancelled,
   type CapacityRecommendation,
@@ -200,10 +206,12 @@ function saveFailureCode(error: unknown): string {
  */function RerollButton({
   onPress,
   disabled = false,
+  busy = false,
   style,
 }: {
   onPress: () => void;
   disabled?: boolean;
+  busy?: boolean;
   style?: StyleProp<ViewStyle>;
 }) {
   const { t } = useTranslation();
@@ -213,6 +221,8 @@ function saveFailureCode(error: unknown): string {
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
+      accessibilityLabel={t('generate.reroll')}
+      accessibilityState={{ busy, disabled }}
       style={[
         styles.rerollButton,
         {
@@ -224,7 +234,7 @@ function saveFailureCode(error: unknown): string {
         style,
       ]}
     >
-      <Text style={[typography.body, { color: colors.textPrimary }]}>{t('generate.reroll')}</Text>
+      {busy ? <ActivityIndicator color={colors.textPrimary} /> : <Text style={[typography.body, { color: colors.textPrimary }]}>{t('generate.reroll')}</Text>}
     </Pressable>
   );
 }
@@ -240,6 +250,7 @@ export default function GenerateScreen() {
   const [name, setName] = useState('');
   const [goal, setGoal] = useState<TrainingGoal>(DEFAULT_GENERATOR_GOAL);
   const [level, setLevel] = useState<ExperienceLevel>(DEFAULT_GENERATOR_LEVEL);
+  const [levelGuideOpen, setLevelGuideOpen] = useState(false);
   const [sessions, setSessions] = useState(DEFAULT_GENERATOR_SESSIONS);
   const [minutes, setMinutes] = useState(DEFAULT_GENERATOR_MINUTES);
   const [split, setSplit] = useState<SplitStructure>(DEFAULT_GENERATOR_SPLIT);
@@ -252,7 +263,10 @@ export default function GenerateScreen() {
   const goToStep = (next: number) => { uiPerformance.begin('wizard.commit'); setStep(Math.max(0, Math.min(5, next))); configureScrollRef.current?.scrollTo({ y: 0, animated: false }); };
   useMeasuredCommit(step, 'wizard.commit');
   const [plan, setPlan] = useState<MesocyclePlan | null>(null);
-  const [rerollNotice, setRerollNotice] = useState<'unchanged' | 'edited' | null>(null);
+  const [rerollNotice, setRerollNotice] = useState<RerollNotice | null>(null);
+  const [rerolling, setRerolling] = useState(false);
+  const variationTask = useRef<{ cancelled: boolean } | null>(null);
+  const [reviewRequested, setReviewRequested] = useState(false);
   // Settings the plan on screen was built from, so going back to LOOK at a setting is
   // told apart from changing one.
   const [planSignature, setPlanSignature] = useState<string | null>(null);
@@ -274,6 +288,8 @@ export default function GenerateScreen() {
   const recommendationTask = useRef<{ cancelled: boolean } | null>(null);
   const [recommendationFailed, setRecommendationFailed] = useState(false);
   const [recommendation, setRecommendation] = useState<CapacityRecommendation | null>(null);
+  const recommendationSignature = useRef<string | null>(null);
+  const recommendationCatalogue = useRef<readonly Exercise[] | null>(null);
   const [e1rmByExerciseId, setE1rmByExerciseId] = useState<ReadonlyMap<string, number>>(new Map());
 
   // Load only completed, actual sets. A generated target is not evidence for a
@@ -296,6 +312,7 @@ export default function GenerateScreen() {
     return () => { cancelled = true; };
   }, [user]);
 
+  const { catalogue: sharedCatalogue, exercisesById, notRecommendedExerciseIds, preferencesReady } = useExerciseCatalogue();
   const settings = useMemo<GenerationSettings>(
     () => ({
       goal,
@@ -306,8 +323,9 @@ export default function GenerateScreen() {
       availableEquipment: equipment,
       priorityRegions: emphasis.priority,
       deprioritizedRegions: emphasis.deprioritized,
+      vetoedExerciseIds: [...notRecommendedExerciseIds],
     }),
-    [goal, level, split, sessions, minutes, equipment, emphasis],
+    [goal, level, split, sessions, minutes, equipment, emphasis, notRecommendedExerciseIds],
   );
   const stale = isPlanStale(planSignature, settings);
   const primary = primaryActionFor({ phase, hasPlan: plan !== null, stale });
@@ -350,10 +368,13 @@ export default function GenerateScreen() {
     [sessions, minutes],
   );
 
-  const { catalogue: sharedCatalogue, exercisesById } = useExerciseCatalogue();
   const availableCatalogue = useMemo(
     () => filterCatalogue(sharedCatalogue.filter((exercise) => exercise.archivedAt === undefined), { availableEquipment: equipment }),
     [equipment, sharedCatalogue],
+  );
+  const planningCatalogue = useMemo(
+    () => filterCatalogue(availableCatalogue, { vetoedExerciseIds: [...notRecommendedExerciseIds] }),
+    [availableCatalogue, notRecommendedExerciseIds],
   );
 
   const toggleEquipment = useCallback((item: Equipment) => {
@@ -375,7 +396,7 @@ export default function GenerateScreen() {
       const best = await recommendCapacityAsync({
         level,
         goal,
-        catalogue: availableCatalogue,
+        catalogue: planningCatalogue,
         split,
         priorityRegions: emphasis.priority,
         deprioritizedRegions: emphasis.deprioritized,
@@ -384,6 +405,8 @@ export default function GenerateScreen() {
       setSessions(best.sessionsPerMicrocycle);
       setMinutes(best.minutesPerSession);
       setRecommendation(best);
+      recommendationSignature.current = settingsSignature({ ...settings, sessionsPerMicrocycle: best.sessionsPerMicrocycle, minutesPerSession: best.minutesPerSession });
+      recommendationCatalogue.current = planningCatalogue;
     } catch (error: unknown) {
       if (!(error instanceof CapacityRecommendationCancelled) && !task.cancelled) {
         console.warn('[generate] capacity recommendation failed', error);
@@ -395,16 +418,13 @@ export default function GenerateScreen() {
         setRecommending(false);
       }
     }
-  }, [availableCatalogue, emphasis, goal, level, split]);
+  }, [planningCatalogue, emphasis, goal, level, split, settings]);
 
   const generate = useCallback(
     (withSeed: number) => {
       setRerollNotice(null);
-      const catalogue = filterCatalogue(EXERCISE_CATALOGUE, {
-        availableEquipment: equipment,
-      });
-      setPlan(
-        planDoseFirstMesocycle({
+      const catalogue = planningCatalogue;
+      const input = {
           level,
           goal,
           catalogue,
@@ -413,8 +433,10 @@ export default function GenerateScreen() {
           priorityRegions: emphasis.priority,
           deprioritizedRegions: emphasis.deprioritized,
           capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes },
-        }),
-      );
+      };
+      const prepared = recommendationSignature.current === settingsSignature(settings) && recommendationCatalogue.current === planningCatalogue
+        ? generateFromCapacityRecommendation(input, recommendation) : null;
+      setPlan(prepared ?? planDoseFirstMesocycle(input));
       setPlanSignature(settingsSignature(settings));
       setPreviewEdits({});
       setPreviewAdditions([]);
@@ -422,10 +444,13 @@ export default function GenerateScreen() {
       setAddTarget(null);
       setPhase('preview');
     },
-    [equipment, level, goal, split, emphasis, sessions, minutes, settings],
+    [planningCatalogue, level, goal, split, emphasis, sessions, minutes, settings, recommendation],
   );
 
-  const onReroll = useCallback(() => {
+  useEffect(() => () => { if (variationTask.current) variationTask.current.cancelled = true; variationTask.current = null; }, []);
+  useEffect(() => { if (variationTask.current) variationTask.current.cancelled = true; setReviewRequested(false); }, [settings, availableCatalogue]);
+  const onReroll = useCallback(async () => {
+    if (variationTask.current) return;
     const next = Math.floor(Math.random() * 1_000_000);
     const action = rerollActionFor({ hasPlan: plan !== null, stale,
       hasPreviewEdits: Object.keys(previewEdits).length > 0 || previewAdditions.length > 0 });
@@ -434,23 +459,29 @@ export default function GenerateScreen() {
         setRerollNotice('edited');
         return;
       }
-      const candidate = rerollMesocycle({ level, goal, catalogue: availableCatalogue, seed: next, split,
-        priorityRegions: emphasis.priority, deprioritizedRegions: emphasis.deprioritized,
-        capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes } }, plan);
-      setRerollNotice(candidate === plan ? 'unchanged' : null);
-      if (candidate !== plan) { setSeed(next); setPlan(candidate); }
-      setSwapTarget(null);
-      setAddTarget(null);
-      setPhase('preview');
+      const task = { cancelled: false }; variationTask.current = task; setRerolling(true); setReviewRequested(false);
+      try {
+        const candidate = await rerollMesocycleAsync({ level, goal, catalogue: planningCatalogue, seed: next, split,
+          priorityRegions: emphasis.priority, deprioritizedRegions: emphasis.deprioritized,
+          capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes } }, plan, { isCancelled: () => task.cancelled });
+        if (task.cancelled) return;
+        setRerollNotice(candidate === plan ? 'unchanged' : 'updated');
+        if (candidate !== plan) { setSeed(next); setPlan(candidate); }
+        setSwapTarget(null); setAddTarget(null); setPhase('preview');
+      } catch {
+        if (!task.cancelled) setRerollNotice('failed');
+      } finally {
+        if (variationTask.current === task) { variationTask.current = null; setRerolling(false); }
+      }
       return;
     }
     setSeed(next);
     generate(next);
-  }, [generate, plan, stale, previewEdits, previewAdditions, level, goal, availableCatalogue, split, emphasis, sessions, minutes]);
+  }, [generate, plan, stale, previewEdits, previewAdditions, level, goal, planningCatalogue, split, emphasis, sessions, minutes]);
 
   const plannedSessions = useMemo<PlannedSession[]>(() => {
     if (plan === null) return [];
-    const base = toPlannedSessions(plan, false, { e1rmByExerciseId });
+    const base = toPlannedSessions(plan, false, { e1rmByExerciseId, preserveFocus: split !== SplitStructure.AUTO });
     return applyPreviewEdits(
       appendPreviewExercises(base, previewAdditions, exercisesById, goal), previewEdits,
       exercisesById,
@@ -463,21 +494,21 @@ export default function GenerateScreen() {
           : total + exerciseMinutes(catalogueExercise, exercise.sets.length, exercise.restSeconds);
       }, 0),
     }));
-  }, [e1rmByExerciseId, exercisesById, goal, plan, previewAdditions, previewEdits]);
+  }, [e1rmByExerciseId, exercisesById, goal, plan, previewAdditions, previewEdits, split]);
   const plannedSetCount = useMemo(
     () => plannedSessions.reduce(
-      (total, session) => total + session.exercises.reduce((sum, exercise) => sum + exercise.sets.length, 0),
+      (total, session) => total + session.exercises.reduce((sum, exercise) => sum + countWorkingSets(exercise.sets), 0),
       0,
     ),
     [plannedSessions],
   );
   const hasPreviewEdits = Object.keys(previewEdits).length > 0 || previewAdditions.length > 0;
   const scheduleReview = useMemo(() => {
-    if (!plan || stale || hasPreviewEdits) return null;
-    return reviewScheduleSuitability({ level, goal, split, seed, catalogue: availableCatalogue,
+    if (!reviewRequested || !plan || stale || hasPreviewEdits) return null;
+    return reviewScheduleSuitability({ level, goal, split, seed, catalogue: planningCatalogue,
       priorityRegions: emphasis.priority, deprioritizedRegions: emphasis.deprioritized,
       capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes } }, plan);
-  }, [plan, stale, hasPreviewEdits, level, goal, split, seed, availableCatalogue, emphasis, sessions, minutes]);
+  }, [reviewRequested, plan, stale, hasPreviewEdits, level, goal, split, seed, planningCatalogue, emphasis, sessions, minutes]);
   const alternative = scheduleReview?.alternative ?? null;
   const overTimeSessionIndexes = useMemo(() => {
     if (!hasPreviewEdits) return [];
@@ -621,7 +652,7 @@ export default function GenerateScreen() {
             availableEquipment: equipment,
             priorityRegions: [...emphasis.priority],
             deprioritizedRegions: [...emphasis.deprioritized],
-            vetoedExerciseIds: [],
+            vetoedExerciseIds: [...notRecommendedExerciseIds],
             seed,
           },
           now,
@@ -695,10 +726,19 @@ export default function GenerateScreen() {
   }, [phase, router]);
 
   const slots = usedSlots(emphasis);
+  const adherence = plan && split !== SplitStructure.AUTO ? splitAdherence(plan.distribution) : null;
+  const cancelCreation = () => Alert.alert(t('generate.cancelCreation'), t('generate.cancelCreationHint'), [
+    { text: t('generate.keepCreating'), style: 'cancel' },
+    { text: t('generate.cancelCreation'), style: 'destructive', onPress: () => {
+      if (variationTask.current) variationTask.current.cancelled = true;
+      if (recommendationTask.current) recommendationTask.current.cancelled = true;
+      router.dismissTo('/(tabs)/(train)');
+    } },
+  ]);
   const twoEmphasisColumns = width >= 340 && fontScale < 1.4;
   const orderedEquipment = useMemo(() => sortEquipmentOptions(EQUIPMENT,
     (entry) => t(`generate.equipment${entry}`), i18n?.resolvedLanguage ?? i18n?.language ?? 'en'), [t, i18n?.resolvedLanguage, i18n?.language]);
-  const canGenerate = equipment.length > 0;
+  const canGenerate = equipment.length > 0 && preferencesReady !== false;
   // The recommendation is only worth showing while the controls still hold it: once a
   // stepper moves, the numbers on screen are the athlete's and not the engine's.
   const showsRecommendation =
@@ -712,6 +752,10 @@ export default function GenerateScreen() {
           unsaved plan with its edits, so while the preview is up the phase owns going
           back and the gesture is off. */}
       <Stack.Screen options={{ gestureEnabled: phase === 'configure' && step === 0 }} />
+      <View style={{ paddingTop: insets.top, paddingHorizontal: spacing.lg, alignItems: 'flex-end' }}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('generate.cancelCreation')} disabled={saving} onPress={cancelCreation}
+          style={{ minHeight: 44, justifyContent: 'center' }}><Text style={{ color: colors.textSecondary, fontSize: 16 }}>{t('generate.cancel')}</Text></Pressable>
+      </View>
       <Animated.View style={[styles.pages, { width: width * 2 }, pagesStyle]}>
         <View
           style={{ width }}
@@ -722,13 +766,13 @@ export default function GenerateScreen() {
           <ScrollView
             ref={configureScrollRef}
             contentContainerStyle={{
-              paddingTop: insets.top + spacing.lg,
+              paddingTop: spacing.lg,
               paddingHorizontal: spacing.lg,
               paddingBottom: spacing.xl,
             }}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={[typography.caption, { color: sectionAccent.train, marginBottom: 8 }]}>{t('workout.step', { current: step + 1, total: 6 })}</Text>
+            <Text style={[typography.caption, { color: colors.accentText, marginBottom: 8 }]}>{t('workout.step', { current: step + 1, total: 6 })}</Text>
             <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{t(['generate.goal', 'generate.level', 'generate.emphasis', 'generate.equipment', 'generate.capacity', 'generate.split'][step])}</Text>
             <View style={{ flexDirection: 'row', gap: 6, marginVertical: 20 }}>
               {Array.from({ length: 6 }, (_, index) => <View key={index} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: index <= step ? sectionAccent.train : colors.surface }} />)}
@@ -741,7 +785,7 @@ export default function GenerateScreen() {
                 <Text
                   style={[
                     typography.caption,
-                    { color: stale ? semantic.warning : sectionAccent.train },
+                    { color: stale ? semantic.warning : colors.accentText },
                   ]}
                 >
                   {stale
@@ -750,12 +794,10 @@ export default function GenerateScreen() {
                 </Text>
                 <RerollButton
                   onPress={onReroll}
-                  disabled={!canGenerate || recommending || saving}
+                  busy={rerolling} disabled={!canGenerate || recommending || saving || rerolling}
                   style={{ marginTop: spacing.md }}
                 />
-                {rerollNotice && <Text style={[typography.caption, { color: colors.textSecondary, marginTop: spacing.sm }]}>
-                  {t(rerollNotice === 'edited' ? 'generate.rerollEdited' : 'generate.rerollUnchanged')}
-                </Text>}
+                <RerollFeedback notice={rerollNotice} />
               </View>
             )}
             <View style={{ height: spacing.xl }} />
@@ -775,6 +817,11 @@ export default function GenerateScreen() {
             </Section>}
 
             {step === 1 && <Section>
+              <Text style={[typography.body, { color: colors.textSecondary, marginBottom: spacing.sm }]}>{t('generate.levelExplanation')}</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel={t('experienceGuide.open')} onPress={() => setLevelGuideOpen(true)}
+                style={{ minHeight: 48, justifyContent: 'center', marginBottom: spacing.md }}>
+                <Text style={[typography.title, { color: colors.accentText }]}>{t('experienceGuide.open')} ›</Text>
+              </Pressable>
               <View accessibilityRole="radiogroup">
                 {LEVELS.map((entry) => (
                   <GenerationChoice
@@ -838,7 +885,7 @@ export default function GenerateScreen() {
                   {recommending ? (
                     <ActivityIndicator color={sectionAccent.train} />
                   ) : (
-                    <Text style={[typography.body, { color: sectionAccent.train }]}>
+                    <Text style={[typography.body, { color: colors.accentText }]}>
                       {t('generate.capacityAuto')}
                     </Text>
                   )}
@@ -1005,7 +1052,7 @@ export default function GenerateScreen() {
             <ScrollView
               ref={previewScrollRef}
               contentContainerStyle={{
-                paddingTop: insets.top + spacing.lg,
+                paddingTop: spacing.lg,
                 paddingHorizontal: spacing.lg,
                 paddingBottom: spacing.xl,
               }}
@@ -1018,12 +1065,10 @@ export default function GenerateScreen() {
                   another draw is usually something just read in this list. */}
               <RerollButton
                 onPress={onReroll}
-                disabled={!canGenerate || recommending || saving}
+                busy={rerolling} disabled={!canGenerate || recommending || saving || rerolling}
                 style={{ marginTop: spacing.md, marginBottom: spacing.xl }}
               />
-              {rerollNotice && <Text style={[typography.caption, { color: colors.textSecondary, marginBottom: spacing.lg }]}>
-                {t(rerollNotice === 'edited' ? 'generate.rerollEdited' : 'generate.rerollUnchanged')}
-              </Text>}
+              <RerollFeedback notice={rerollNotice} />
               {/* Named here, not on the form: the name belongs to the plan being kept. */}
               <Section title={t('generate.name')}>
                 <TextInput
@@ -1066,6 +1111,13 @@ export default function GenerateScreen() {
                   {t('generate.strengthNoBarbell')}
                 </Text>
               )}
+              {!reviewRequested && !hasPreviewEdits && <Pressable accessibilityRole="button" disabled={rerolling}
+                onPress={() => setReviewRequested(true)} style={{ minHeight: 44, justifyContent: 'center', marginBottom: spacing.md }}>
+                <Text style={{ color: colors.accentText }}>{t('generate.reviewDistribution')}</Text>
+              </Pressable>}
+              {adherence && adherence.sessions.length > 0 && <Text style={[typography.caption, { color: adherence.light ? colors.textSecondary : semantic.warning, marginBottom: spacing.md }]}>
+                {t(adherence.light ? 'generate.lightOverlap' : 'generate.largeOverlap')}
+              </Text>}
               {alternative && <View style={{ gap: spacing.sm, marginBottom: spacing.lg }}>
                 <Text style={[typography.caption, { color: colors.textSecondary }]}>
                   {t('generate.alternativeHint', { sessions: alternative.input.capacity.sessionsPerMicrocycle,
@@ -1110,6 +1162,11 @@ export default function GenerateScreen() {
                   });
                 }}
                 onChangeSets={onChangePreviewSets}
+                onChangeSet={(sessionIndex, order, setIndex, patch) => {
+                  const key = previewEditKey(sessionIndex, order);
+                  const sets = plannedSessions.find((session) => session.index === sessionIndex)?.exercises.find((exercise) => exercise.order === order)?.sets ?? [];
+                  setPreviewEdits((current) => ({ ...current, [key]: mergePrescriptionEdit(current[key], sets, setIndex, patch) }));
+                }}
                 onChangeRepMin={onChangePreviewRepMin}
                 onChangeRepMax={onChangePreviewRepMax}
                 onChangeRest={(sessionIndex, order, value) => {
@@ -1187,7 +1244,7 @@ export default function GenerateScreen() {
         </Pressable>
         <Pressable
           onPress={() => { if (phase === 'configure' && step < 5) goToStep(step + 1); else onPrimary(); }}
-          disabled={!canGenerate || saving || recommending || (primary === 'save' && plannedSetCount === 0)}
+          disabled={!canGenerate || saving || recommending || rerolling || (primary === 'save' && plannedSetCount === 0)}
           accessibilityRole="button"
           style={{
             flex: 1,
@@ -1208,6 +1265,7 @@ export default function GenerateScreen() {
           )}
         </Pressable>
       </View>
+      {levelGuideOpen && <ExperienceLevelGuide onSelect={setLevel} onClose={() => setLevelGuideOpen(false)} />}
     </SafeAreaView>
   );
 }

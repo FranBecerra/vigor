@@ -54,3 +54,14 @@ it('hides native tabs during workouts and preserves the training stack when rese
   expect(tree.root.findByType('NativeTabs').props.hidden).toBe(false);
   await act(async () => tree.unmount());
 });
+it('allows a safe tab reset without scrolling retained content, but protects creation and rehabilitation drafts', async () => {
+  let tree: any;
+  for (const route of ['history', 'exercises', 'routine', 'mesocycle', 'generate', 'manual-routine', 'rehab']) {
+    mockSegments = ['(tabs)', '(train)', route];
+    await act(async () => { if (tree) tree.update(<TabsLayout />); else tree = create(<TabsLayout />); });
+    const trigger = tree.root.findAllByType('Trigger').find((node: any) => node.props.name === '(train)');
+    expect(trigger.props.disablePopToTop).toBe(['generate', 'manual-routine', 'rehab'].includes(route));
+    expect(trigger.props.disableScrollToTop).toBe(true); expect(trigger.props.disableAutomaticContentInsets).toBe(true);
+  }
+  await act(async () => tree.unmount());
+});

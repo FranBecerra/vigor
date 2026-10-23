@@ -5,8 +5,8 @@ import { BodyMapThumbnail } from './BodyMap';
 import { useTheme } from '@/theme/useTheme';
 
 export function MusclePicture({ muscle, size = 42 }: { muscle: MuscleGroup; size?: number }) {
-  const { sectionAccent } = useTheme();
+  const { sectionAccent, colors } = useTheme();
   const thumbnail = REGION_THUMBNAILS[REGION_OF_MUSCLE[muscle]];
   return thumbnail ? <BodyMapThumbnail thumbnail={thumbnail} size={size}
-    paint={(target) => target === muscle ? { color: sectionAccent.train, opacity: 1 } : null} /> : null;
+    paint={(target) => target === muscle ? { color: colors.accentText, opacity: 1 } : null} /> : null;
 }

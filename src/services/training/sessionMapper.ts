@@ -81,6 +81,9 @@ export function toWorkoutExercises(
 
 /** Datos de la sesión que no viven en el estado de series. */
 export interface SessionContext {
+  sessionNote?: string;
+  mesocycleNote?: string;
+  persistentExerciseNotes?: Record<string, string>;
   trainingGoal?: string;
   sessionName?: string;
   activeExerciseId?: string;
@@ -117,6 +120,8 @@ export function toWorkoutSession(
     performedAt: context.performedAt,
   };
   if (context.trainingGoal !== undefined) session.trainingGoal = context.trainingGoal;
+  if (context.sessionNote !== undefined) session.sessionNote = context.sessionNote;
+  if (context.mesocycleNote !== undefined) session.mesocycleNote = context.mesocycleNote;
   if (context.sessionName !== undefined) session.sessionName = context.sessionName;
   if (context.activeExerciseId !== undefined) session.activeExerciseId = context.activeExerciseId;
   if (context.restTimer !== undefined) session.restTimer = context.restTimer;
@@ -125,6 +130,8 @@ export function toWorkoutSession(
     if (snapshot) exercise.exerciseSnapshot = snapshot;
     const notes = context.exerciseNotes?.[exercise.exerciseId];
     if (notes !== undefined) exercise.notes = notes;
+    const persistentNote = context.persistentExerciseNotes?.[exercise.exerciseId];
+    if (persistentNote !== undefined) exercise.exerciseNote = persistentNote;
     const original = context.swappedFrom?.[exercise.exerciseId];
     if (original) { exercise.isSwap = true; exercise.swappedFromExerciseId = original; }
   }

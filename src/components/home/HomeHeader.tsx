@@ -110,7 +110,7 @@ export function MesoRail({
 
       <View style={styles.railFooter}>
         <Text style={[styles.railCaption, { color: colors.textSecondary }]}>{caption}</Text>
-        <Text style={[styles.railAction, { color: sectionAccent.train }]}>{actionLabel} ›</Text>
+        <Text style={[styles.railAction, { color: colors.accentText }]}>{actionLabel} ›</Text>
       </View>
     </Pressable>
   );

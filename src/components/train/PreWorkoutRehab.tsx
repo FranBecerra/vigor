@@ -27,11 +27,11 @@ export function PreWorkoutRehab({ workoutKey, hasStarted = false, routineId, ses
         {due.map((block) => <Pressable key={block.id} onPress={() => setRunning(block)}
           style={{ padding: 18, marginVertical: 12, backgroundColor: colors.surface, borderRadius: 16 }}>
           <Text style={{ color: colors.textPrimary, fontSize: 19 }}>{block.name}</Text>
-          <Text style={{ color: sectionAccent.train }}>{t('rehab.start')}</Text>
+          <Text style={{ color: colors.accentText }}>{t('rehab.start')}</Text>
         </Pressable>)}
         {error && <Text style={{ color: colors.textPrimary }}>{t('rehab.saveFailed')}</Text>}
         <Pressable onPress={() => setDismissed(true)} style={{ padding: 18, backgroundColor: sectionAccent.train, borderRadius: 16, marginTop: 20 }}>
-          <Text style={{ color: colors.bg, fontWeight: '700', textAlign: 'center' }}>{t('rehab.continueStrength')}</Text>
+          <Text style={{ color: colors.onAccent, fontWeight: '700', textAlign: 'center' }}>{t('rehab.continueStrength')}</Text>
         </Pressable>
       </ScrollView>}
     </Modal>
