@@ -1,0 +1,7594 @@
+{
+  "version": 1,
+  "runId": "1793043064-56824",
+  "environment": {
+    "platform": "ios",
+    "os": "27.0",
+    "mode": "release",
+    "viewport": "402x874",
+    "target": "simulator-DB12E945-C223-44BE-B5BE-0885FE77B895",
+    "workload": "illustrated-options-v1"
+  },
+  "samples": [
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 5.205541968345642,
+      "cold": true
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 9.332792043685913,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 14.54604196548462,
+      "cold": true
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660082936286926,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.654749989509583,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.294999957084656,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66604208946228,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.751415967941284,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.42120802402496,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59874999523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.683249950408936,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.261250019073486,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661500096321106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.711166977882385,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.363499999046326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.593166947364807,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.696457982063293,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.281999945640564,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67520809173584,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.682374954223633,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.34695899486542,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.637084007263184,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.666165947914124,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.287083983421326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71025002002716,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.643208980560303,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.36229109764099,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668708086013794,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.648791909217834,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.286750078201294,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.707208037376404,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.74275004863739,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.439666986465454,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.638582944869995,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.605499982833862,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.21783399581909,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.667917013168335,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.743667006492615,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.417165994644165,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.738582968711853,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684542059898376,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.42650008201599,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.511083006858826,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72795796394348,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.14633297920227,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.619624972343445,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.710458993911743,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.27941596508026,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661375045776367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671332955360413,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.28979206085205,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6548330783844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68820893764496,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.296375036239624,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668624997138977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.657291054725647,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.28749990463257,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.647709012031555,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69249999523163,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.29458296298981,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.645416021347046,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675416946411133,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.28366708755493,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60308301448822,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672917008399963,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.24466598033905,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68012499809265,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677374958992004,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.301249980926514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.626042008399963,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66700005531311,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.28416693210602,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68737494945526,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64912497997284,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.26954197883606,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.78725004196167,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.55537497997284,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.33504104614258,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64049994945526,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684458017349243,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.289708971977234,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.77370798587799,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.56262505054474,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.303833961486816,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670166969299316,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.694666981697083,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.33762502670288,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63700008392334,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658790946006775,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.27008390426636,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6443749666214,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72295904159546,
+      "cold": false
+    },
+    {
+      "metric": "button.commit",
+      "milliseconds": 33.31583297252655,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 62.14512503147125,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 21.109833002090454,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 83.18387508392334,
+      "cold": true
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.707249999046326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66220796108246,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.356958985328674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.092458963394165,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.241791009902954,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.32412493228912,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 57.56433403491974,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 25.762583017349243,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 83.3203330039978,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.721667051315308,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.24354088306427,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 32.95066595077515,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.057542085647583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673542022705078,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.731500029563904,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 57.3154159784317,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 25.37262499332428,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 82.66791594028473,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.08095896244049,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.86537504196167,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.931458950042725,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.20912492275238,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.903041005134583,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.106791973114014,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 55.731500029563904,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 27.784124970436096,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 83.49529206752777,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.717000007629395,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.125750064849854,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 32.828750014305115,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.429875016212463,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.453666925430298,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.877874970436096,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 69.17791700363159,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 13.20283305644989,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 82.369500041008,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.61666691303253,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661416053771973,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 34.26762497425079,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672124981880188,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66870903968811,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.32433295249939,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 55.43962502479553,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 27.903790950775146,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 83.33495795726776,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6452499628067,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.669209003448486,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.30375003814697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68120801448822,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66112506389618,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.33062505722046,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 56.49995791912079,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 26.883584022521973,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 83.3790830373764,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.618041038513184,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.7002090215683,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.2960000038147,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6177499294281,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68591606616974,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.28145897388458,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 63.302958965301514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 20.004124999046326,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 83.29520905017853,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668540954589844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.681459069252014,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.33158302307129,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.654749989509583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665500044822693,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.308666944503784,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 55.28450000286102,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 28.055665969848633,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 83.3330830335617,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66045892238617,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659375071525574,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.30633294582367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69458293914795,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.680583000183105,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.36874997615814,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 69.71679198741913,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 13.579750061035156,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 83.2832499742508,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660624980926514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691457986831665,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.34162497520447,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676249980926514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.632166981697083,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 33.29479193687439,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 54.916333079338074,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 28.433416962623596,
+      "cold": false
+    },
+    {
+      "metric": "wizard.commit",
+      "milliseconds": 83.34166598320007,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 47.42545807361603,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 19.23337495326996,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.678416967391968,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671499967575073,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65125000476837,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67283308506012,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66391694545746,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.651167035102844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.680624961853027,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65625,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 21.66304099559784,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 11.662083983421326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672500014305115,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659833073616028,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65845799446106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66687500476837,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.681249976158142,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.717541933059692,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.617958068847656,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66045892238617,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661250114440918,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67799997329712,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64954102039337,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.681584000587463,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 433.2872499227524,
+      "cold": true
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664415955543518,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675083994865417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653375029563904,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67366600036621,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.710749983787537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691208958625793,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.631500005722046,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659000039100647,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.77512502670288,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.613165974617004,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64845895767212,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.711416006088257,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.611292004585266,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684792041778564,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71887493133545,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.58229100704193,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661875009536743,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66604197025299,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.647792100906372,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.723124980926514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68091595172882,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66700005531311,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71191692352295,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.590667009353638,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61129105091095,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663749933242798,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69395899772644,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646082997322083,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 28.44095802307129,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 4.423042058944702,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.184332966804504,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.611667037010193,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660374999046326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.652125000953674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.679458022117615,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66395890712738,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.7798330783844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.56749999523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65974998474121,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6522079706192,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668792009353638,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67687499523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658874988555908,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673042058944702,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 266.63816606998444,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66362500190735,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.669874906539917,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668666005134583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659542083740234,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68133294582367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66870903968811,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665624976158142,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656415939331055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.674208998680115,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665333032608032,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68191707134247,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66054093837738,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70970904827118,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.657832980155945,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.692291975021362,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63066601753235,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673624992370605,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72012495994568,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.605499982833862,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65029203891754,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.743417024612427,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.644665956497192,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.724166989326477,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665374994277954,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668333053588867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.57995903491974,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.749915957450867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.921167016029358,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 36.48504197597504,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 29.871749997138977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67491602897644,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.583833932876587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66962504386902,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646957993507385,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.690625071525574,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653374910354614,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.682042002677917,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63754105567932,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684417009353638,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66366696357727,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.689375042915344,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.88679206371307,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659500002861023,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656415939331055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69533407688141,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.674832940101624,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665791988372803,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.713958024978638,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62024998664856,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.74891698360443,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656957983970642,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684208035469055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61091697216034,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.736124992370605,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71358299255371,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.552792072296143,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68037497997284,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.734375,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.57462501525879,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.835582971572876,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.527541995048523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673874974250793,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.609708070755005,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63141691684723,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69266700744629,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68970799446106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63824999332428,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.654208064079285,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.699416995048523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70420801639557,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 25.115334033966064,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 7.25220799446106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.53837490081787,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.688667058944702,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.645874977111816,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64645802974701,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.686332941055298,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664709091186523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66166591644287,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665250062942505,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66645896434784,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670915961265564,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6681250333786,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.649749994277954,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71762502193451,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.8741670846939,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.625625014305115,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65308403968811,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.695624947547913,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653332948684692,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67050004005432,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70204198360443,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.648082971572876,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.712042093276978,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658124923706055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.722874999046326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677790999412537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.589250087738037,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.761249899864197,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.601834058761597,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.712916016578674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.578208923339844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.703333020210266,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66937506198883,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.725957989692688,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.577875018119812,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.751208901405334,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63670802116394,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.721917033195496,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.650583028793335,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.695124983787537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.559417009353638,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72070801258087,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.93120801448822,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 36.41454195976257,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 29.91237497329712,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663874983787537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.657708048820496,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.662791967391968,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.662500023841858,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67050004005432,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677332997322083,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656208992004395,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.681582927703857,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.650583028793335,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66629195213318,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.727167010307312,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.95074999332428,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.624791026115417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68295907974243,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.704415917396545,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.627874970436096,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69366705417633,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677167057991028,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663415908813477,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.648750066757202,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.641166925430298,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.696542024612427,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659000039100647,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.75891602039337,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.574874997138977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.747833967208862,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.587540984153748,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.713417053222656,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.590791940689087,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.75920796394348,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.612292051315308,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70895802974701,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61158299446106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70679199695587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.627874970436096,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660083055496216,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.719583988189697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.713165998458862,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.592417001724243,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6788330078125,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 36.894999980926514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 29.76133394241333,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65566599369049,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65666699409485,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66124999523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68879210948944,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.610915899276733,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663292050361633,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664832949638367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658874988555908,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.666667103767395,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656457901000977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.717125058174133,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.92695903778076,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.625542044639587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66741693019867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.703832983970642,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675832986831665,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671833992004395,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67604100704193,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.667542099952698,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.727999925613403,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.610000014305115,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67545795440674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.711167097091675,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668624997138977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663291931152344,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.623499989509583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.709833025932312,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64550006389618,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.619207978248596,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.682209014892578,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69462490081787,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.633291006088257,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659500002861023,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676542043685913,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62958300113678,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.695291996002197,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676416993141174,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72462499141693,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59929096698761,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.706375002861023,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 36.775875091552734,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 29.80470895767212,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.650207996368408,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6875,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675583004951477,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.638084053993225,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691415905952454,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.667541980743408,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67579209804535,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64787495136261,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.687415957450867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.657124996185303,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69029200077057,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.90687501430511,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65262508392334,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.624666929244995,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.784041047096252,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6608749628067,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65545904636383,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.720165967941284,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.636916995048523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.74887502193451,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.573042035102844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.729790925979614,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.608667016029358,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.689957976341248,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65208399295807,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.702458024024963,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.641083002090454,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.722292065620422,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60545790195465,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67820906639099,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63450002670288,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.721166014671326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.652833938598633,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.687790989875793,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.607542037963867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.626791954040527,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73045802116394,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.674000024795532,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.598999977111816,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.719958066940308,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 35.9539589881897,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 13.911249995231628,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73866593837738,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.639750003814697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64079201221466,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6516250371933,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.689957976341248,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665583968162537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.631500005722046,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.698415994644165,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670583963394165,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.706791043281555,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.596624970436096,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.702792048454285,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.85029196739197,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.644166946411133,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676791071891785,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672624945640564,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.703125,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.683500051498413,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.655375003814697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72141695022583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.642125010490417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.686292052268982,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.584707975387573,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73537504673004,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67645788192749,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676167011260986,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.623208045959473,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.722916960716248,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6429580450058,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71050000190735,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59137499332428,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67583405971527,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.747999906539917,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65012502670288,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.58004105091095,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71404194831848,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668833017349243,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.689249992370605,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65570902824402,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.608624935150146,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.7306250333786,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 39.259832978248596,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 27.342249989509583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.679542064666748,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59595799446106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.703999996185303,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646291971206665,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68829095363617,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658042073249817,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67395794391632,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656875014305115,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.636250019073486,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66266703605652,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.717832922935486,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.8341670036316,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63145899772644,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671125054359436,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.690250039100647,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691707968711853,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.640416979789734,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.743083000183105,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670708060264587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.605374932289124,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653959035873413,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67425000667572,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.730957984924316,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660499930381775,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684875011444092,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60212504863739,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65708303451538,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.722625017166138,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.689541935920715,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.598582983016968,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68162500858307,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.727959036827087,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.617666006088257,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.725000023841858,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.618749976158142,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70212495326996,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.651749968528748,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663417100906372,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70395791530609,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.041375041007996,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 38.18283402919769,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 27.941833019256592,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.789666891098022,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.589333057403564,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62600004673004,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656874895095825,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67395806312561,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6767920255661,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66016697883606,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66587495803833,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670415997505188,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.651208996772766,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73549997806549,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.86208295822144,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.573458075523376,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.692041993141174,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71204102039337,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677500009536743,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676124930381775,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646875023841858,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.753167033195496,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.576624989509583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.748291969299316,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61775004863739,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.634791016578674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67595899105072,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.666458010673523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67299997806549,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677917003631592,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.699582934379578,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67312502861023,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.597458004951477,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.721333980560303,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62483298778534,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61675000190735,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.708667039871216,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.638415932655334,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.635542035102844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.715375065803528,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63908290863037,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69520902633667,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.639750003814697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 23.251875042915344,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 10.056666016578674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70120894908905,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.669875025749207,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.642791032791138,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664541959762573,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69604194164276,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671666026115417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66016697883606,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.666500091552734,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.652957916259766,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671459078788757,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668666005134583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663333892822266,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 233.3214590549469,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.678458094596863,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.651457905769348,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.687084078788757,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.683957934379578,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.639750003814697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66866707801819,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.7858749628067,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.595499992370605,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.791458010673523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.569249987602234,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72808301448822,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.594792008399963,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.723124980926514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.604249954223633,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6877920627594,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64187502861023,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67745792865753,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68154203891754,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.630082964897156,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.730833053588867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.634124994277954,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670333981513977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.787040948867798,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.578917026519775,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670207977294922,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.647709012031555,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.741582989692688,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.958333015441895,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 37.86133396625519,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 28.358208060264587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675583004951477,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.685500025749207,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.631541967391968,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.650042057037354,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.712374925613403,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658540964126587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63620901107788,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65850007534027,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.701665997505188,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.622458934783936,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.76379108428955,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.90699994564056,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.582541942596436,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.718958020210266,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.633334040641785,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.679999947547913,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65329098701477,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71545898914337,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.655583024024963,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660624980926514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73645806312561,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62999999523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62083399295807,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.755208015441895,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.606249928474426,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.652708053588867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.777041912078857,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.53833305835724,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.692334055900574,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.752457976341248,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.572582960128784,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.76454198360443,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.604833006858826,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.749125003814697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59150004386902,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.766708970069885,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65345799922943,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60199999809265,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65654194355011,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.75933301448822,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 37.320667028427124,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 29.233749985694885,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.643875002861023,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65816605091095,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656083941459656,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660500049591064,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63112497329712,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660207986831665,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6513329744339,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67133402824402,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665958046913147,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.667207956314087,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.754000067710876,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.81433296203613,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.58050000667572,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66616690158844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.707292079925537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68241596221924,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70899999141693,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.631958961486816,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66920804977417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.748291969299316,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65375006198883,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.615124940872192,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.730540990829468,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.551334023475647,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67545795440674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.695917010307312,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668583035469055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64050006866455,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.697499990463257,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668874979019165,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63349997997284,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73158299922943,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663874983787537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65862500667572,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61595904827118,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68091595172882,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6686669588089,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.644625067710876,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69116699695587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.642290949821472,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 33.53891706466675,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.410583019256592,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684834003448486,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69337499141693,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62624990940094,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6895409822464,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.637875080108643,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.686167001724243,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.641417026519775,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.685750007629395,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664999961853027,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.679415941238403,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.647459030151367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.692790985107422,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.9736669063568,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.624417066574097,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.700042009353638,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.719165921211243,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64287507534027,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71404194831848,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69462502002716,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656499981880188,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.703999996185303,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.595417022705078,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.739040970802307,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.593667030334473,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691707968711853,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66170907020569,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72487497329712,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.569208025932312,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.77537488937378,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.706250071525574,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72445797920227,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.575042009353638,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.650624990463257,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59862494468689,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.821500062942505,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.539250016212463,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68383300304413,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.605666995048523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.82616698741913,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.524708032608032,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.734583020210266,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 36.35370898246765,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 13.472124934196472,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.758625030517578,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.679625034332275,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.590749979019165,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664999961853027,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.645707964897156,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671542048454285,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664916038513184,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67945897579193,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.725332975387573,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.593000054359436,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.717041969299316,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.716832995414734,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.87012493610382,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.5749169588089,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.685166001319885,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.641458988189697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70183300971985,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70662498474121,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.649042010307312,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.747375011444092,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.651416063308716,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.654250025749207,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.591291904449463,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.745833039283752,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.666125059127808,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646166920661926,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.607375025749207,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.689000010490417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.736042022705078,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.700500011444092,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.57808291912079,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.787832975387573,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.568084001541138,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.78624999523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59916603565216,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69283401966095,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.639165997505188,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65179204940796,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.641624927520752,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.785083055496216,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.871917009353638,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 37.70770800113678,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 28.63004195690155,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663750052452087,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.5914169549942,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675541043281555,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663874983787537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.674916982650757,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65725004673004,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.655791997909546,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68287491798401,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65375006198883,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64287495613098,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71954095363617,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.85291600227356,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646042108535767,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.694166898727417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64887499809265,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673166036605835,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67925000190735,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691375017166138,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.610875010490417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.701709032058716,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.652999997138977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66554093360901,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664999961853027,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70075011253357,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63129198551178,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69695794582367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.642750024795532,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64191699028015,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66729199886322,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677041053771973,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660916924476624,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65845799446106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.674458980560303,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.678916096687317,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66283392906189,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65566599369049,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658542037010193,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.694707989692688,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6446670293808,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691041946411133,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 23.62666606903076,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 9.68762493133545,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.707375049591064,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.667750000953674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63087499141693,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.636291980743408,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673583030700684,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66966700553894,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66945791244507,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65666699409485,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68383300304413,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66995906829834,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.643208026885986,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684875011444092,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 233.2998330593109,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646416902542114,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72191607952118,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.669999957084656,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.686334013938904,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66824996471405,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.725250005722046,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65499997138977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62737500667572,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653083086013794,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.694832921028137,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.620500087738037,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.692291975021362,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64887499809265,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.699999928474426,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67062509059906,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.666624903678894,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659250020980835,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.711833000183105,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59320902824402,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663457989692688,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.652125000953674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.74916696548462,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.601083040237427,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.759541988372803,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.645791053771973,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.750874996185303,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.523708939552307,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.812291026115417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 37.53741705417633,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 28.969541907310486,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64895808696747,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.630124926567078,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66545808315277,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67483389377594,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676666021347046,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65612506866455,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653792023658752,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677332997322083,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.662292003631592,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66458296775818,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653499960899353,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.8961659669876,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69949996471405,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.651084065437317,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676416039466858,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663166999816895,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65833294391632,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664541959762573,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673624992370605,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65962505340576,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.679749965667725,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65750002861023,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.707541942596436,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60075008869171,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68612492084503,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66041600704193,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.686042070388794,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.694082975387573,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63616704940796,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675999999046326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684207916259766,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66241705417633,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.827207922935486,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.624083995819092,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.705916047096252,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.56058406829834,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.692457914352417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673042058944702,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.74387502670288,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 41.519874930381775,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 25.07291603088379,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63283395767212,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.58887505531311,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.718915939331055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.649042010307312,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.626749992370605,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.745458006858826,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.57733404636383,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66404092311859,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663166999816895,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69320809841156,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66391694545746,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.72345900535583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66570794582367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.751459002494812,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663875102996826,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.633749961853027,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676707983016968,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.628875017166138,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691916942596436,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.686500072479248,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646875023841858,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68508291244507,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63504207134247,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.708750009536743,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665082931518555,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.636124968528748,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663125038146973,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.680458068847656,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67720890045166,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.631208062171936,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.655333042144775,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67483389377594,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.710833072662354,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653416991233826,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.724082946777344,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6047500371933,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.727583050727844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.635666966438293,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70812499523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.758458018302917,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 35.621333956718445,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 14.137374997138977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67058300971985,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.78933298587799,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.611333966255188,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62725007534027,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64854097366333,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72895896434784,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6007080078125,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.678542017936707,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663125038146973,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.669916033744812,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6802499294281,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68404197692871,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.9603329896927,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.615958094596863,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.692083954811096,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.690207958221436,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66829204559326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.648625016212463,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.754791021347046,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.605791926383972,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73937499523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.626625061035156,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668582916259766,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.619792103767395,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73454189300537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60700011253357,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64299988746643,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.749791026115417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.693542003631592,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.608458042144775,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.640458941459656,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.644458055496216,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.682124972343445,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65733301639557,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.7589590549469,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.614415884017944,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.679209113121033,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.622666001319885,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.649874925613403,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.701624989509583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653584003448486,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 37.55483305454254,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 29.07949995994568,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64287495613098,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6875,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665667057037354,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671041011810303,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665292024612427,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64787495136261,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660542011260986,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.702250003814697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.667415976524353,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.654667019844055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71624994277954,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 250.0000420808792,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6446670293808,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.77370798587799,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.55654203891754,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691166043281555,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71987497806549,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659624934196472,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.747000098228455,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.587291955947876,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72712504863739,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60949993133545,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.773625016212463,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60379195213318,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65316605567932,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59408402442932,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.700249910354614,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.731124997138977,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67116606235504,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.5375839471817,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.747000098228455,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.632665991783142,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.611999988555908,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.793166995048523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.574041962623596,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.75808298587799,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.643583059310913,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.574416995048523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.872125029563904,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.97866690158844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 36.00024998188019,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 30.15554106235504,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62391698360443,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.626167058944702,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.678457975387573,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670832991600037,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.651208996772766,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69487500190735,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653625011444092,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6513329744339,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.680708050727844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.652208924293518,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673333048820496,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.66316604614258,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656957983970642,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.682209014892578,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.723708033561707,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.620666980743408,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64141595363617,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67454206943512,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.735124945640564,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.598541975021362,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6750830411911,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.690083026885986,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.662791967391968,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.640041947364807,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.708041071891785,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.707541942596436,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62304198741913,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658707976341248,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.758583068847656,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60212504863739,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.654666900634766,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665791988372803,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670875072479248,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.745332956314087,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653208017349243,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.674334049224854,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64283299446106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6247079372406,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665583968162537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.882416009902954,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 37.39620900154114,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 29.070666074752808,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67220902442932,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64045798778534,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64058291912079,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66504204273224,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67520797252655,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.74554204940796,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.603874921798706,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.643542051315308,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671957969665527,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.708750009536743,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67170798778534,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 250.00499999523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.650959014892578,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.666333079338074,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68137490749359,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659125089645386,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68358290195465,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71291708946228,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62999999523163,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65608298778534,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67549991607666,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.657459020614624,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67995798587799,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.731667041778564,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.585875034332275,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72554099559784,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66849994659424,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6360000371933,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653708934783936,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.754124999046326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.590458035469055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70550000667572,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.60004198551178,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68845808506012,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.783207893371582,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.624958992004395,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.636916041374207,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670667052268982,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677917003631592,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.642249941825867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 37.364416003227234,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 29.25250005722046,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67174994945526,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59975004196167,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658666968345642,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661707997322083,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.691750049591064,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656291961669922,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.686457991600037,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672417044639587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66908299922943,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64316689968109,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68637502193451,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.8627918958664,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63237500190735,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69337499141693,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.693167090415955,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66574990749359,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69125008583069,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.77254092693329,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.558624982833862,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73087501525879,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.58875000476837,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675417065620422,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664541959762573,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.778625011444092,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.565374970436096,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67241597175598,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.711584091186523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65012490749359,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.748833060264587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.683499932289124,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.598417043685913,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.700708031654358,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.615582942962646,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.666709065437317,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72891592979431,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.652042031288147,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.593541979789734,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.714375019073486,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62554097175598,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.765459060668945,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 38.33629095554352,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 28.17495906352997,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.669250011444092,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61983299255371,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.666458010673523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66449999809265,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.678708910942078,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69083309173584,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67354190349579,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.643416047096252,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670583963394165,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.667582988739014,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68041706085205,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.7557920217514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.621457934379578,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.680958032608032,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6649169921875,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66237497329712,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672333002090454,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676459074020386,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68387496471405,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.638833045959473,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653374910354614,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.654667019844055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.693000078201294,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.720582962036133,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.5986670255661,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663999915122986,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69000005722046,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64620804786682,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.694832921028137,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672625064849854,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665916919708252,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67408299446106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.759209036827087,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.630915999412537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.710291981697083,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.567000031471252,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.807167053222656,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.547582983970642,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.657041907310486,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.684375047683716,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 38.51666605472565,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 28.145583987236023,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.688832998275757,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.635375022888184,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.637207984924316,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71137499809265,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658958911895752,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.649708032608032,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.636500000953674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.674582958221436,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.640584111213684,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.680999994277954,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656291007995605,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.657999992370605,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 266.54608404636383,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.678791999816895,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.654332995414734,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.674624919891357,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.662625074386597,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.7007919549942,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 22.70537495613098,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 10.599250078201294,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661582946777344,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.737542033195496,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.601249933242798,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.714667081832886,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 19.263208031654358,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 14.037124991416931,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65054190158844,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672083020210266,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672917008399963,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68162500858307,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646124958992004,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659791111946106,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.690874934196472,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64566695690155,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.727375030517578,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61883306503296,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.687749981880188,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.648083925247192,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.746458053588867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67900002002716,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.86270797252655,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 34.08449995517731,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 15.607834100723267,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65012490749359,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71858298778534,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.639625072479248,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.654791951179504,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66191601753235,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668084025382996,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675999999046326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66641592979431,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65516710281372,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6669579744339,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66645896434784,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661416053771973,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70091700553894,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 266.59366595745087,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.685041904449463,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.621541023254395,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.698459029197693,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670915961265564,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.680042028427124,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.734833002090454,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.651417016983032,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.649207949638367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.688417077064514,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.577332973480225,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.749541997909546,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66337502002716,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.625749945640564,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.715041995048523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67675006389618,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.562915921211243,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69979202747345,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.72683298587799,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.620500087738037,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671124935150146,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.651334047317505,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664250016212463,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66099989414215,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65566599369049,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.74191701412201,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.59945809841156,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67708396911621,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656415939331055,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 31.58179199695587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 0.8361250162124634,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.545542001724243,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.677083015441895,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658833026885986,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65179193019867,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660625100135803,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.673582911491394,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676042079925537,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64554190635681,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66391611099243,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.670833945274353,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671957969665527,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70216703414917,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66949999332428,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.94162499904633,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62829101085663,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.687749981880188,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67483401298523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.711416006088257,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6377090215683,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73212492465973,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.71383309364319,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62608289718628,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.575291991233826,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69366705417633,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.663290977478027,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.731541991233826,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.613208055496216,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.671291947364807,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659332990646362,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65779209136963,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668957948684692,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.772416949272156,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.609333038330078,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64804196357727,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.641208052635193,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.669000029563904,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.737499952316284,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61345899105072,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.62837505340576,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.775290966033936,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.583500027656555,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.715791940689087,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 35.837417006492615,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 14.05858302116394,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69433295726776,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66170907020569,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.689332962036133,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661707997322083,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653959035873413,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65708303451538,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.685041904449463,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65104103088379,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65962505340576,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.672666907310486,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68612504005432,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6828750371933,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.9097089767456,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.624541997909546,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661415934562683,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.721958994865417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.650333046913147,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.707249999046326,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.630249977111816,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.760208010673523,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.639124989509583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6805419921875,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.605917096138,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.755249977111816,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.641083002090454,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.686332941055298,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68512499332428,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.682334065437317,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70670795440674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.52983295917511,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.665250062942505,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.73470902442932,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63362491130829,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656541109085083,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.76620888710022,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.717125058174133,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6672500371933,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.574000000953674,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64129090309143,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.655791997909546,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 17.107083082199097,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 35.537042021751404,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 13.905457973480225,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.746459007263184,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.658999919891357,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.594083070755005,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.674875020980835,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6805419921875,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656832933425903,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656208038330078,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.69508397579193,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.636916041374207,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.692916989326477,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.643208026885986,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.703083992004395,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 249.8295420408249,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.61016595363617,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.688333988189697,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.708333015441895,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.653792023658752,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676790952682495,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68429207801819,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67087495326996,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.664832949638367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.644625067710876,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.655833959579468,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.687125086784363,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67312490940094,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66054105758667,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659166932106018,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66354203224182,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.688250064849854,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.744707942008972,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6525000333786,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656624913215637,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.597292065620422,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.63754093647003,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668500065803528,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.631209015846252,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.70379102230072,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66858398914337,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.74412500858307,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.631165981292725,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68512499332428,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 38.42620897293091,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 28.16179096698761,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659458994865417,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66416609287262,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660833954811096,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.656582951545715,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675875067710876,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.65641701221466,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.660749912261963,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.675291061401367,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.662791967391968,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.662999987602234,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.667708039283752,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.682708978652954,
+      "cold": false
+    },
+    {
+      "metric": "picker.ready",
+      "milliseconds": 266.5248340368271,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.655500054359436,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668874979019165,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.668332934379578,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.68233299255371,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6525000333786,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67695903778076,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.67895793914795,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.659000039100647,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.7068749666214,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.620042085647583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.676374912261963,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.66195809841156,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.720707893371582,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.594917058944702,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.703832983970642,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.696416974067688,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64887499809265,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.64770805835724,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.646333932876587,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.77625000476837,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.686291098594666,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.601791977882385,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.685999989509583,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.6539169549942,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.661540985107422,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.715084075927734,
+      "cold": false
+    },
+    {
+      "metric": "js.frameGap",
+      "milliseconds": 16.608457922935486,
+      "cold": false
+    }
+  ]
+}
