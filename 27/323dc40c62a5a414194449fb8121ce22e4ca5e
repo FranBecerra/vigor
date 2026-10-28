@@ -1,0 +1,29 @@
+src/services/cardio/__tests__/easyCardio.test.ts
+  s_b6a0f22c32fc5f::t_a90397e56c876f 1-106
+src/models/cardio.ts
+  s_b6a0f22c32fc5f::t_cdbf375c0a6076 107-140
+PRD.md
+  s_b6a0f22c32fc5f::t_703d8daf7983fa 3
+  s_b6a0f22c32fc5f::t_e585bdbf6e1a96 5-14
+  s_b6a0f22c32fc5f::t_d87e1566ef225c 15
+  s_b6a0f22c32fc5f::t_d0968e6097a574 4
+src/services/cardio/easyCardio.ts
+  s_b6a0f22c32fc5f::t_cdbf375c0a6076 1-12,14-61,63-75
+  s_b6a0f22c32fc5f::t_a90397e56c876f 13,62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "27323dc40c62a5a414194449fb8121ce22e4ca5e",
+  "prompts": {},
+  "sessions": {
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
