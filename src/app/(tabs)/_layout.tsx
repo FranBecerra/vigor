@@ -7,7 +7,7 @@ import { canResetTrainingTab } from '@/services/training/tabNavigation';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
-  const { sectionAccent, colors } = useTheme();
+  const { colors } = useTheme();
   const segments = useSegments();
 
   return (
@@ -20,7 +20,7 @@ export default function TabsLayout() {
         <NativeTabs.Trigger.Label>{t('tabs.bio')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="waveform.path.ecg" md="monitor_heart" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="nutrition" contentStyle={{ backgroundColor: colors.bg }}>
+      <NativeTabs.Trigger name="nutrition" hidden contentStyle={{ backgroundColor: colors.bg }}>
         <NativeTabs.Trigger.Label>{t('tabs.nutrition')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'fork.knife', selected: 'fork.knife' }} md="restaurant" />
       </NativeTabs.Trigger>

@@ -22,7 +22,7 @@ import { authErrorPresentation } from '@/services/authError';
 
 export function SignInScreen() {
   const { t } = useTranslation();
-  const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
+  const { surfaces, colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { signInWithGoogle, continueWithoutAccount, isSigningIn, error } = useAuth();
   const failure = authErrorPresentation(error);
@@ -32,7 +32,7 @@ export function SignInScreen() {
       style={[
         styles.screen,
         {
-          backgroundColor: colors.bg,
+          ...surfaces.screen, backgroundColor: colors.bg,
           paddingTop: insets.top + spacing.xxl,
           paddingBottom: insets.bottom + spacing.xl,
         },
@@ -67,7 +67,7 @@ export function SignInScreen() {
           accessibilityState={{ disabled: isSigningIn }}
           style={[
             styles.primaryButton,
-            { backgroundColor: sectionAccent.train, borderRadius: radius.pill },
+            { backgroundColor: sectionAccent.train, borderRadius: radius.md },
             isSigningIn && styles.disabled,
           ]}>
           {isSigningIn ? (
@@ -111,5 +111,5 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.6 },
   secondaryButton: { paddingVertical: 11, alignItems: 'center' },
   secondaryLabel: { fontSize: 13, fontWeight: '600' },
-  disclaimer: { fontSize: 10.5, textAlign: 'center', lineHeight: 15 },
+  disclaimer: { fontSize: 11, textAlign: 'center', lineHeight: 15 },
 });

@@ -5,11 +5,11 @@ import { useTranslation } from 'react-i18next';
 
 export function GenerationChoice({ title, description, selected, onPress, artwork, footer, compact = false, multiple = false }:
   { title: string; description?: string; selected: boolean; onPress: () => void; artwork?: React.ReactNode; footer?: React.ReactNode; compact?: boolean; multiple?: boolean }) {
-  const { colors, typography, radius, sectionAccent } = useTheme();
+  const { surfaces, colors, typography, radius, sectionAccent } = useTheme();
   return <Pressable accessibilityRole={multiple ? 'checkbox' : 'radio'} accessibilityLabel={title} accessibilityHint={description} accessibilityState={multiple ? { checked: selected } : { selected }} onPress={onPress}
     style={{ width: '100%', minHeight: compact ? 76 : 126, justifyContent: 'center', padding: 16,
       borderRadius: radius.lg, borderWidth: selected ? 1.5 : 1, borderColor: selected ? sectionAccent.train : colors.surfaceBorder,
-      backgroundColor: colors.bgElevated, marginBottom: 12 }}>
+      ...surfaces.card, backgroundColor: colors.bgElevated, marginBottom: 12 }}>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
     {artwork}
     <View style={{ flex: 1, minWidth: 0 }}>
@@ -26,7 +26,7 @@ export function GenerationChoice({ title, description, selected, onPress, artwor
 }
 
 export function PriorityBudget({ used, total, hint }: { used: number; total: number; hint?: string }) {
-  const { t } = useTranslation(); const { colors, sectionAccent, typography } = useTheme();
+  const { t } = useTranslation(); const { surfaces, colors, sectionAccent, typography } = useTheme();
   const [expanded, setExpanded] = useState(false);
   return <View style={{ marginBottom: 20 }}>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>

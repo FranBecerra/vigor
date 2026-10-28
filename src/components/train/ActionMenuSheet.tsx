@@ -17,11 +17,11 @@ interface ActionMenuSheetProps {
 
 /** App-styled contextual actions; never delegates the choice UI to a system alert. */
 export function ActionMenuSheet({ title, subtitle, actions, onClose }: ActionMenuSheetProps) {
-  const { colors, typography, spacing, radius, semantic, sectionAccent } = useTheme();
+  const { surfaces, colors, typography, spacing, radius, semantic, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets();
   return <Modal visible={title !== null} transparent animationType="fade" onRequestClose={onClose}>
     <Pressable style={styles.backdrop} onPress={onClose} accessibilityRole="button" />
-    <View style={[styles.sheet, { backgroundColor: colors.bgElevated,
+    <View style={[styles.sheet, { ...surfaces.sheet, backgroundColor: colors.bgElevated,
       borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl,
       paddingBottom: insets.bottom + spacing.lg }]}>
       <View style={[styles.grabber, { backgroundColor: colors.surfaceBorder }]} />

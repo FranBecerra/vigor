@@ -9,10 +9,10 @@ import { timestampMillis } from '@/services/training/workoutRuntime';
 export function WorkoutHistoryCard({ session, catalogue, onPress }: {
   session: WorkoutSession; catalogue: ReadonlyMap<string, Exercise>; onPress: () => void;
 }) {
-  const { t, i18n } = useTranslation(); const { colors, typography, spacing, radius, sectionAccent } = useTheme();
+  const { t, i18n } = useTranslation(); const { surfaces, colors, typography, spacing, radius, sectionAccent } = useTheme();
   const details = workoutHistoryDetails(session, catalogue);
   return <Pressable accessibilityRole="button" accessibilityLabel={session.sessionName || t('historyDetails.workout')} onPress={onPress}
-    style={{ padding: spacing.lg, marginBottom: spacing.md, borderRadius: radius.lg, backgroundColor: colors.bgElevated }}>
+    style={{ padding: spacing.lg, marginBottom: spacing.md, borderRadius: radius.lg, ...surfaces.card, backgroundColor: colors.bgElevated }}>
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md }}>
       <View style={{ flex: 1 }}>
         <Text style={[typography.title, { color: colors.textPrimary }]}>{session.sessionName || t('historyDetails.workout')}</Text>
@@ -21,8 +21,8 @@ export function WorkoutHistoryCard({ session, catalogue, onPress }: {
     </View>
     <Text style={[typography.body, { color: colors.textSecondary, marginTop: spacing.sm }]}>{details.working} {t('workout.workingSets')}</Text>
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: spacing.md }}>
-      {details.volumes.map(({ muscle, sets }) => <View key={muscle} style={{ backgroundColor: colors.surface, borderRadius: radius.sm, paddingHorizontal: 9, minHeight: 26, justifyContent: 'center' }}>
-        <Text style={{ fontSize: 11, color: colors.textSecondary }}>{t(`muscle.${muscle}`)} <Text style={{ fontWeight: '800', fontVariant: ['tabular-nums'] }}>{formatSetVolume(sets)}</Text></Text>
+      {details.volumes.map(({ muscle, sets }) => <View key={muscle} style={{ backgroundColor: colors.accentTint, borderRadius: radius.sm, paddingHorizontal: 9, minHeight: 26, justifyContent: 'center' }}>
+        <Text style={{ fontSize: 11, color: colors.accentText }}>{t(`muscle.${muscle}`)} <Text style={{ fontWeight: '800', fontVariant: ['tabular-nums'] }}>{formatSetVolume(sets)}</Text></Text>
       </View>)}
     </View>
     {!session.completedAt && <Text style={[typography.caption, { color: colors.accentText, marginTop: 8 }]}>{t('workout.inProgress')}</Text>}

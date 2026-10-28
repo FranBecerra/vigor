@@ -33,7 +33,7 @@ const MAX_BAR_HEIGHT = 56;
 export default function MesocycleScreen() {
   const { t } = useTranslation();
   const name = useExerciseName();
-  const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
+  const { surfaces, colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { mesocycleId } = useLocalSearchParams<{ mesocycleId?: string }>();
@@ -80,7 +80,7 @@ export default function MesocycleScreen() {
 
   if (routine === null || selectedMicrocycle === null || selectedSession === null) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
+      <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
         <Pressable onPress={() => backToTraining(router)} accessibilityRole="button" style={styles.backRow}>
           <Text style={[styles.back, { color: colors.textSecondary }]}>‹ {t('tabs.train')}</Text>
         </Pressable>
@@ -92,7 +92,7 @@ export default function MesocycleScreen() {
   }
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
+    <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }]}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }}>
         <View style={{ paddingHorizontal: spacing.lg }}>
           <Pressable onPress={() => backToTraining(router)} accessibilityRole="button" style={styles.backRow}>
@@ -103,13 +103,13 @@ export default function MesocycleScreen() {
           <SharedNoteButton scope="MESOCYCLE" targetId={routine.mesocycleId} title={routine.name} />
 
           <View style={[styles.statRow, { marginTop: spacing.md }]}>
-            <View style={[styles.stat, { backgroundColor: colors.bgElevated, borderRadius: radius.md }]}>
+            <View style={[styles.stat, { ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: radius.md }]}>
               <Text style={[styles.statValue, { color: colors.accentText }]}>{completedSessions}</Text>
               <Text style={[styles.statLabel, { color: colors.textMuted }]}>
                 {t('meso.ofSessions', { total: totalSessions })}
               </Text>
             </View>
-            <View style={[styles.stat, { backgroundColor: colors.bgElevated, borderRadius: radius.md }]}>
+            <View style={[styles.stat, { ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: radius.md }]}>
               <Text style={[styles.statValue, { color: colors.textPrimary }]}>
                 {routine.currentMicrocycleIndex + 1}/{routine.microcycles.length}
               </Text>
@@ -150,7 +150,7 @@ export default function MesocycleScreen() {
 
         {/* Progresión: compacta y SELECCIONABLE */}
         <View style={{ paddingHorizontal: spacing.lg, marginTop: spacing.lg }}>
-          <View style={[styles.chart, { backgroundColor: colors.bgElevated, borderRadius: radius.lg }]}>
+          <View style={[styles.chart, { ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: radius.lg }]}>
             <View style={styles.chartHeader}>
               <Text style={[styles.chartTitle, { color: colors.textPrimary }]}>
                 {t('meso.progression')}
@@ -261,7 +261,7 @@ export default function MesocycleScreen() {
                 key={`${exercise.exerciseId}:${exerciseIndex}`}
                 style={[
                   styles.exerciseCard,
-                  { backgroundColor: colors.bgElevated, borderRadius: radius.md },
+                  { ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: radius.md },
                 ]}>
                 <View style={styles.exerciseTop}>
                   <View style={{ flex: 1 }}>
@@ -313,18 +313,18 @@ const styles = StyleSheet.create({
   statRow: { flexDirection: 'row', gap: 9 },
   stat: { flex: 1, padding: 10 },
   statValue: { fontSize: 19, fontWeight: '800', fontVariant: ['tabular-nums'] },
-  statLabel: { fontSize: 9.5, marginTop: 1 },
+  statLabel: { fontSize: 11, marginTop: 1 },
   sessionTab: { paddingBottom: 7, borderBottomWidth: 2, borderBottomColor: 'transparent' },
   sessionTabText: { fontSize: 13 },
   bold: { fontWeight: '800' },
   chart: { padding: 12 },
   chartHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   chartTitle: { fontSize: 13, fontWeight: '800' },
-  chartHint: { fontSize: 9 },
+  chartHint: { fontSize: 11 },
   columns: { gap: 8, paddingTop: 12, alignItems: 'flex-start' },
   column: { width: 58, alignItems: 'center', paddingVertical: 8, paddingHorizontal: 4 },
   /** Alturas FIJAS: si una etiqueta o cifra creciera, desalinearía toda la fila. */
-  columnLabel: { fontSize: 9.5, fontWeight: '800', height: 13, textAlign: 'center' },
+  columnLabel: { fontSize: 11, fontWeight: '800', height: 13, textAlign: 'center' },
   barArea: { height: MAX_BAR_HEIGHT, justifyContent: 'flex-end', marginTop: 6 },
   bar: { width: 22, borderRadius: 4 },
   volumeValue: {
@@ -336,9 +336,9 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   rirBadge: { minWidth: 34, paddingVertical: 2, alignItems: 'center', marginTop: 5 },
-  rirText: { color: '#16191C', fontSize: 10, fontWeight: '900', fontVariant: ['tabular-nums'] },
+  rirText: { color: '#16191C', fontSize: 11, fontWeight: '900', fontVariant: ['tabular-nums'] },
   listHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  sectionLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.9 },
+  sectionLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.9 },
   exerciseCard: { padding: 11, marginBottom: 6 },
   exerciseTop: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   exerciseName: { fontSize: 12.5, fontWeight: '600' },
@@ -347,5 +347,5 @@ const styles = StyleSheet.create({
   setRir: { width: 32, alignItems: 'center', gap: 4 },
   setIndex: { width: '100%', textAlign: 'center', fontSize: 11, lineHeight: 16, fontWeight: '700', fontVariant: ['tabular-nums'] },
   setRirBadge: { width: 32, height: 24, justifyContent: 'center', alignItems: 'center' },
-  setRirCaption: { fontSize: 8.5, marginLeft: 2 },
+  setRirCaption: { fontSize: 11, marginLeft: 2 },
 });

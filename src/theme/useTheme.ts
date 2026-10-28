@@ -6,6 +6,7 @@
  *   const { colors, motion } = useTheme();
  */
 import { useColorScheme } from 'react-native';
+import { surfaces } from './surfaces';
 import {
   palette,
   sectionAccent,
@@ -23,6 +24,7 @@ export function useTheme() {
   return {
     scheme,
     colors: palette[scheme],
+    surfaces: surfaces[scheme],
     sectionAccent,
     semantic: scheme === 'light' ? { ...semantic, danger: '#B82822', warning: '#805000', success: '#365E00' } : semantic,
     typography,

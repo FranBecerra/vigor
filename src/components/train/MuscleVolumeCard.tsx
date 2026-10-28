@@ -22,11 +22,11 @@ interface MuscleVolumeCardProps {
 
 export function MuscleVolumeCard({ title, hint, entries, heatMap = false }: MuscleVolumeCardProps) {
   const { t } = useTranslation();
-  const { colors, typography, spacing, radius, sectionAccent } = useTheme();
+  const { surfaces, colors, typography, spacing, radius, sectionAccent } = useTheme();
   const maxVolume = Math.max(1, ...entries.map((entry) => entry.sets));
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder,
+    <View style={[styles.card, { ...surfaces.card, borderColor: colors.surfaceBorder,
       borderRadius: radius.md }]}>
       <Text style={[typography.title, { color: colors.textPrimary, marginBottom: spacing.md }]}>
         {title}
@@ -75,11 +75,11 @@ export function MuscleVolumeCard({ title, hint, entries, heatMap = false }: Musc
 
 const styles = StyleSheet.create({
   card: { borderWidth: 1, padding: 16, marginTop: 4 },
-  blockLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.9, marginBottom: 8 },
+  blockLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.9, marginBottom: 8 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 7 },
   nameColumn: { width: 118 },
   name: { fontSize: 11 },
-  components: { fontSize: 9 },
+  components: { fontSize: 11 },
   track: { flex: 1, height: 7, borderRadius: 4, overflow: 'hidden' },
   fill: { height: 7, borderRadius: 4 },
   value: { width: 30, fontSize: 11, fontWeight: '700', textAlign: 'right', fontVariant: ['tabular-nums'] },

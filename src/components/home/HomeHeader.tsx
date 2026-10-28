@@ -125,6 +125,6 @@ const styles = StyleSheet.create({
   railSegments: { flexDirection: 'row', gap: 4, marginBottom: 9 },
   railSegment: { flex: 1, height: 6, borderRadius: 3 },
   railFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  railCaption: { fontSize: 10, letterSpacing: 0.4 },
-  railAction: { fontSize: 10, fontWeight: '700' },
+  railCaption: { fontSize: 11, letterSpacing: 0.4 },
+  railAction: { fontSize: 11, fontWeight: '700' },
 });

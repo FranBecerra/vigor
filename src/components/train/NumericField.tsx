@@ -45,7 +45,7 @@ export function NumericField({
   accessibilityLabel,
   compact = false,
 }: NumericFieldProps) {
-  const { colors, radius } = useTheme();
+  const { surfaces, colors, radius } = useTheme();
   const [text, setText] = useState(value === undefined ? '' : String(value));
   const focused = useRef(false);
   const [open, setOpen] = useState(false);
@@ -65,7 +65,7 @@ export function NumericField({
 
   if (compact) return <>
     <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} disabled={!editable} onPress={() => setOpen(true)}
-      style={[styles.input, { minHeight: 44, justifyContent: 'center', borderRadius: radius.sm, backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
+      style={[styles.input, { minHeight: 44, justifyContent: 'center', borderRadius: radius.sm, ...surfaces.field, backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
       <Text style={{ color: isPlanned ? colors.textMuted : colors.textPrimary, textAlign: 'center', fontSize: 16, fontWeight: '700', fontVariant: ['tabular-nums'] }}>{value ?? '—'}</Text>
     </Pressable>
     {open && <NumericKeypad label={accessibilityLabel} value={value} decimal={decimal} onSave={onChangeValue} onClose={() => setOpen(false)} />}

@@ -18,14 +18,14 @@ export default function ExerciseDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>(); const router = useRouter(); const { t } = useTranslation();
   const { exercisesById, ready, archive, error, notRecommendedExerciseIds = new Set<string>(), setExerciseNotRecommended } = useExerciseCatalogue(); const exercise = exercisesById.get(id);
   const [editing, setEditing] = useState(false); const [failed, setFailed] = useState(false);
-  const { colors, typography, spacing, radius, sectionAccent, semantic } = useTheme(); const insets = useSafeAreaInsets();
+  const { surfaces, colors, typography, spacing, radius, sectionAccent, semantic } = useTheme(); const insets = useSafeAreaInsets();
   const back = () => router.canGoBack() ? router.back() : router.replace('/exercises');
   const description = cleanImportedExerciseNotes(exercise?.notes);
   const section = (title: string, value: string) => <View style={{ marginTop: spacing.md }}>
     <Text style={[typography.caption, { color: colors.textMuted }]}>{title}</Text>
     <Text style={[typography.body, { color: colors.textPrimary, marginTop: 5 }]}>{value}</Text>
   </View>;
-  return <View style={{ flex: 1, paddingTop: insets.top, backgroundColor: colors.bg }}>
+  return <View style={{ flex: 1, paddingTop: insets.top, ...surfaces.screen, backgroundColor: colors.bg }}>
     <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + spacing.xl }}>
       <Pressable accessibilityRole="button" onPress={back} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={[typography.body, { color: colors.accentText }]}>{t('generate.back')}</Text></Pressable>
       {(error || failed) && <Text accessibilityRole="alert" style={[typography.body, { color: semantic.danger }]}>{t('custom.saveFailed')}</Text>}
@@ -34,7 +34,7 @@ export default function ExerciseDetailsScreen() {
         <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{name(exercise)}</Text>
         <BodyMap height={230} paint={(muscle) => primaryMusclesOf(exercise).includes(muscle) ? { color: colors.accentText, opacity: 1 }
           : exercise.secondaryMuscles.includes(muscle) ? { color: colors.accentText, opacity: 0.35 } : null} />
-        <View style={{ padding: spacing.lg, borderRadius: radius.lg, backgroundColor: colors.surface }}>
+        <View style={{ ...surfaces.card, padding: spacing.lg, borderRadius: radius.lg }}>
           {section(t('custom.muscle'), primaryMusclesOf(exercise).map((muscle) => t(`muscle.${muscle}`)).join(' · ') || t('custom.UNCLASSIFIED'))}
           {!!exercise.secondaryMuscles.length && section(t('custom.secondary'), exercise.secondaryMuscles.map((muscle) => t(`muscle.${muscle}`)).join(' · '))}
           {section(t('custom.equipment'), t(`generate.equipment${exercise.equipment}`))}
@@ -63,7 +63,7 @@ export default function ExerciseDetailsScreen() {
             <Text style={[typography.title, { color: colors.accentText }]}>{exercise.criteria ? `${exercise.criteria[key]} / 5` : '—'}</Text></View>
           <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6 }]}>{t(`library.criteriaHints.${key}`)}</Text>
         </View>)}
-        <Pressable accessibilityRole="button" disabled={!ready || error} onPress={() => setEditing(true)} style={{ minHeight: 52, justifyContent: 'center', alignItems: 'center', backgroundColor: sectionAccent.train, borderRadius: radius.md, marginTop: spacing.xl }}>
+        <Pressable accessibilityRole="button" disabled={!ready || error} onPress={() => setEditing(true)} style={{ minHeight: 52, justifyContent: 'center', alignItems: 'center', ...surfaces.primary, backgroundColor: sectionAccent.train, borderRadius: radius.md, marginTop: spacing.xl }}>
           <Text style={[typography.body, { color: colors.onAccent, fontWeight: '700' }]}>{t('library.edit')}</Text>
         </Pressable>
         {exercise.isCustom && <Pressable accessibilityRole="button" onPress={() => Alert.alert(t('custom.archive'), t('custom.archiveMessage'), [

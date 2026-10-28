@@ -45,14 +45,14 @@ export function GlassSurface({
   tintColor,
   ...rest
 }: GlassSurfaceProps) {
-  const { colors } = useTheme();
+  const { colors, surfaces } = useTheme();
 
   // Camino nativo: material real de Apple (iOS 26+).
   // GLASS_ENABLED permite desactivarlo para medir su coste (ver arriba).
   if (GLASS_ENABLED && isGlassEffectAPIAvailable()) {
     return (
       <GlassView
-        style={style}
+        style={[{ borderCurve: 'continuous' }, style]}
         glassEffectStyle={glassEffectStyle}
         tintColor={tintColor}
         {...rest}>
@@ -66,7 +66,8 @@ export function GlassSurface({
     <View
       style={[
         {
-          backgroundColor: colors.surface,
+          ...surfaces.card,
+          backgroundColor: colors.bgElevated,
           borderColor: colors.surfaceBorder,
           borderWidth: 1,
         },

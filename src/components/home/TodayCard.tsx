@@ -61,7 +61,7 @@ export function TodayCard({
   onPressPreview,
   onPressStart,
 }: TodayCardProps) {
-  const { colors, radius, spacing } = useTheme();
+  const { surfaces, colors, radius, spacing } = useTheme();
   const RoutineIcon = ROUTINE_ICONS[routineIcon];
 
   // TODOS los músculos, ordenados por series; los que no caben se resumen en "+N".
@@ -78,7 +78,7 @@ export function TodayCard({
   const hidden = muscles.length - visible;
 
   const chipText = (entry: (typeof muscles)[number]) => (
-    <Text style={[styles.chipLabel, { color: colors.textSecondary }]}>
+    <Text style={[styles.chipLabel, { color: colors.accentText }]}>
       {muscleLabel(entry.muscle)}{' '}
       <Text style={styles.chipCount}>{formatSetVolume(entry.sets)}</Text>
     </Text>
@@ -86,7 +86,7 @@ export function TodayCard({
 
   return (
     <View
-      style={[styles.card, { backgroundColor: colors.bgElevated, borderRadius: radius.lg }]}>
+      style={[styles.card, { ...surfaces.hero, backgroundColor: colors.bgElevated, borderRadius: radius.lg }]}>
       {/* Cuerpo pulsable → previsualización */}
       <Pressable
         onPress={onPressPreview}
@@ -108,6 +108,15 @@ export function TodayCard({
             {session.scheduledOn && <Text style={[styles.routineName, { color: colors.textMuted }]}>{session.scheduledOn}</Text>}
           </View>
         </View>
+      </Pressable>
+
+      <Pressable onPress={onPressPreview} accessibilityRole="button" accessibilityLabel={labels.preview}
+        style={styles.metrics}>
+        {[[session.exercises.length, labels.exercises], [workingSets, labels.sets], [`~${minutes}`, 'min']].map(([value, label]) =>
+          <View key={label} style={styles.metric}>
+            <Text style={[styles.metricValue, { color: colors.textPrimary }]}>{value}</Text>
+            <Text style={[styles.meta, { color: colors.textSecondary }]}>{label}</Text>
+          </View>)}
       </Pressable>
 
       {/* Área de músculos de ALTO FIJO: el contenido de debajo nunca salta. */}
@@ -132,7 +141,7 @@ export function TodayCard({
           {muscles.slice(0, visible).map((entry) => (
             <View
               key={entry.muscle}
-              style={[styles.chip, { backgroundColor: colors.surface, borderRadius: radius.sm }]}>
+              style={[styles.chip, { backgroundColor: colors.accentTint, borderRadius: radius.sm }]}>
               {chipText(entry)}
             </View>
           ))}
@@ -150,16 +159,6 @@ export function TodayCard({
         </View>
       </View>
 
-      <Pressable
-        onPress={onPressPreview}
-        accessibilityRole="button"
-        accessibilityLabel={labels.preview}>
-        <Text style={[styles.meta, { color: colors.textMuted, marginTop: spacing.xs }]}>
-          {session.exercises.length} {labels.exercises} · {workingSets} {labels.sets} · ~{minutes}
-          {' min'}
-        </Text>
-      </Pressable>
-
       {/* Acción primaria, separada del cuerpo */}
       <Pressable
         onPress={onPressStart}
@@ -167,28 +166,31 @@ export function TodayCard({
         accessibilityLabel={labels.start}
         style={[
           styles.startButton,
-          { backgroundColor: routineColor, borderRadius: radius.pill, marginTop: spacing.md },
+          { ...surfaces.primary, backgroundColor: routineColor, borderRadius: radius.md, marginTop: spacing.md },
         ]}>
-        <Text style={styles.startLabel}>{labels.start}</Text>
+        <Text style={[styles.startLabel, { color: colors.onAccent }]}>{labels.start}</Text>
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { padding: 14 },
+  card: { padding: 20 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   iconBadge: { width: 34, height: 34, alignItems: 'center', justifyContent: 'center' },
   headerText: { flex: 1 },
-  sessionName: { fontSize: 19, fontWeight: '800', letterSpacing: -0.3 },
-  routineName: { fontSize: 11, marginTop: 1 },
+  sessionName: { fontSize: 32, fontWeight: '800', letterSpacing: -1 },
+  routineName: { fontSize: 13, marginTop: 4 },
+  metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: 20, marginTop: 20, marginBottom: 8 },
+  metric: { gap: 4 },
+  metricValue: { fontSize: 20, fontWeight: '700', fontVariant: ['tabular-nums'] },
   muscleArea: { height: MUSCLE_AREA_HEIGHT, overflow: 'hidden' },
   muscleWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: MUSCLE_ROW_GAP },
   measureLayer: { position: 'absolute', left: 0, right: 0, top: 0, opacity: 0 },
   chip: { paddingHorizontal: 9, justifyContent: 'center', height: MUSCLE_ROW_HEIGHT },
   chipLabel: { fontSize: 11 },
   chipCount: { fontWeight: '800', fontVariant: ['tabular-nums'] },
-  meta: { fontSize: 11 },
-  startButton: { paddingVertical: 12, alignItems: 'center' },
-  startLabel: { fontSize: 14, fontWeight: '800', color: '#16191C' },
+  meta: { fontSize: 12 },
+  startButton: { minHeight: 48, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
+  startLabel: { fontSize: 16, fontWeight: '700' },
 });

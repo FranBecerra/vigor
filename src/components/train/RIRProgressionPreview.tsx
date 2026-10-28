@@ -11,9 +11,9 @@ import { setTypeLabel } from './setTypeLabel';
 export function RIRProgressionPreview({ steps, catalogue, busy, onApply, onClose }: {
   steps: readonly ProgressionStep[] | null; catalogue: ReadonlyMap<string, Exercise>; busy: boolean; onApply: () => void; onClose: () => void;
 }) {
-  const { t } = useTranslation(); const { colors, radius, sectionAccent } = useTheme(); const insets = useSafeAreaInsets(); const name = useExerciseName();
+  const { t } = useTranslation(); const { surfaces, colors, radius, sectionAccent } = useTheme(); const insets = useSafeAreaInsets(); const name = useExerciseName();
   return <Modal visible={steps !== null} animationType="slide" onRequestClose={() => { if (!busy) onClose(); }}>
-    <View style={{ flex: 1, paddingTop: insets.top + 12, paddingBottom: insets.bottom + 12, backgroundColor: colors.bg }}>
+    <View style={{ flex: 1, paddingTop: insets.top + 12, paddingBottom: insets.bottom + 12, ...surfaces.screen, backgroundColor: colors.bg }}>
       <Text style={{ color: colors.textPrimary, fontSize: 26, fontWeight: '700', paddingHorizontal: 20 }}>{t('progression.title')}</Text>
       <Text style={{ color: colors.textSecondary, fontSize: 15, padding: 20 }}>{t('progression.hint')}</Text>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}>
@@ -28,7 +28,7 @@ export function RIRProgressionPreview({ steps, catalogue, busy, onApply, onClose
       <View style={{ flexDirection: 'row', gap: 12, padding: 16 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={t('generate.cancel')} disabled={busy} onPress={onClose} style={{ minHeight: 48, padding: 14 }}><Text style={{ color: colors.textSecondary }}>{t('generate.cancel')}</Text></Pressable>
         <Pressable accessibilityRole="button" accessibilityLabel={t('progression.apply')} disabled={busy} onPress={onApply}
-          style={{ minHeight: 48, flex: 1, borderRadius: radius.md, backgroundColor: sectionAccent.train, justifyContent: 'center', alignItems: 'center', opacity: busy ? 0.5 : 1 }}><Text style={{ color: colors.onAccent, fontWeight: '700', fontSize: 17 }}>{t('progression.apply')}</Text></Pressable>
+          style={{ minHeight: 48, flex: 1, borderRadius: radius.md, ...surfaces.primary, backgroundColor: sectionAccent.train, justifyContent: 'center', alignItems: 'center', opacity: busy ? 0.5 : 1 }}><Text style={{ color: colors.onAccent, fontWeight: '700', fontSize: 17 }}>{t('progression.apply')}</Text></Pressable>
       </View>
     </View>
   </Modal>;

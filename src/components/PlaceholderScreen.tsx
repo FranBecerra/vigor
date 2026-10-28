@@ -16,11 +16,11 @@ interface PlaceholderScreenProps {
 }
 
 export function PlaceholderScreen({ title, subtitle, section = 'train' }: PlaceholderScreenProps) {
-  const { colors, sectionAccent, typography, spacing } = useTheme();
+  const { surfaces, colors, sectionAccent, typography, spacing } = useTheme();
   const accent = sectionAccent[section];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.bg, padding: spacing.xl }]}>
+    <View style={[styles.container, { ...surfaces.screen, backgroundColor: colors.bg, padding: spacing.xl }]}>
       <Text style={[typography.h1, { color: colors.accentText }]}>{title}</Text>
       {subtitle ? (
         <Text

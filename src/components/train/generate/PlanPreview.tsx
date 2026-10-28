@@ -93,7 +93,7 @@ export function PlanPreview({
 }: PlanPreviewProps) {
   const { t } = useTranslation();
   const name = useExerciseName();
-  const { colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
+  const { surfaces, colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
   const [selected, setSelected] = useState<number | null>(sessions[0]?.index ?? null);
   const active = selected === null ? null : sessions.some((session) => session.index === selected) ? selected : sessions[0]?.index ?? null;
   const showOverview = !sessionTabs || active === null;
@@ -181,7 +181,7 @@ export function PlanPreview({
             disabled={onPressSession === undefined}
             accessibilityRole={onPressSession ? 'button' : undefined}
             style={{
-              backgroundColor: colors.surface,
+              ...surfaces.card,
               borderRadius: radius.md,
               borderWidth: 1,
               borderColor: colors.surfaceBorder,

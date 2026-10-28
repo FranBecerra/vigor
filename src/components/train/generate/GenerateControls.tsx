@@ -323,5 +323,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cornerBadgeText: { fontSize: 10, lineHeight: 12, fontWeight: '700' },
+  cornerBadgeText: { fontSize: 11, lineHeight: 12, fontWeight: '700' },
 });

@@ -215,7 +215,7 @@ function saveFailureCode(error: unknown): string {
   style?: StyleProp<ViewStyle>;
 }) {
   const { t } = useTranslation();
-  const { colors, typography, radius } = useTheme();
+  const { surfaces, colors, typography, radius } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -244,7 +244,7 @@ export default function GenerateScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width, fontScale = 1 } = useWindowDimensions();
-  const { colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
+  const { surfaces, colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
   const { user } = useAuth();
 
   const [name, setName] = useState('');
@@ -747,7 +747,7 @@ export default function GenerateScreen() {
     recommendation.minutesPerSession === minutes;
 
   return (
-    <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, backgroundColor: colors.bg, overflow: 'hidden' }}>
+    <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, overflow: 'hidden' }}>
       {/* A swipe back from the preview would pop the whole screen and discard an
           unsaved plan with its edits, so while the preview is up the phase owns going
           back and the gesture is off. */}
@@ -800,7 +800,7 @@ export default function GenerateScreen() {
                 <RerollFeedback notice={rerollNotice} />
               </View>
             )}
-            <View style={{ height: spacing.xl }} />
+            <View style={{ height: step === 1 ? spacing.sm : spacing.xl }} />
 
             {step === 0 && <Section>
               <View accessibilityRole="radiogroup">
@@ -817,7 +817,6 @@ export default function GenerateScreen() {
             </Section>}
 
             {step === 1 && <Section>
-              <Text style={[typography.body, { color: colors.textSecondary, marginBottom: spacing.sm }]}>{t('generate.levelExplanation')}</Text>
               <Pressable accessibilityRole="button" accessibilityLabel={t('experienceGuide.open')} onPress={() => setLevelGuideOpen(true)}
                 style={{ minHeight: 48, justifyContent: 'center', marginBottom: spacing.md }}>
                 <Text style={[typography.title, { color: colors.accentText }]}>{t('experienceGuide.open')} ›</Text>
@@ -825,6 +824,7 @@ export default function GenerateScreen() {
               <View accessibilityRole="radiogroup">
                 {LEVELS.map((entry) => (
                   <GenerationChoice
+                    compact
                     key={entry}
                     title={t(`generate.level${entry}`)}
                     description={t(`generate.levelHint${entry}`)}
@@ -1228,7 +1228,7 @@ export default function GenerateScreen() {
           {
             paddingBottom: spacing.md,
             paddingHorizontal: spacing.lg,
-            backgroundColor: colors.bg,
+            ...surfaces.screen, backgroundColor: colors.bg,
             borderTopColor: colors.surfaceBorder,
           },
         ]}
@@ -1251,7 +1251,7 @@ export default function GenerateScreen() {
             height: 52,
             alignItems: 'center',
             justifyContent: 'center',
-            borderRadius: radius.pill,
+            borderRadius: radius.md,
             backgroundColor: sectionAccent.train,
             opacity: !canGenerate || saving || recommending ? 0.4 : 1,
           }}
@@ -1273,7 +1273,7 @@ export default function GenerateScreen() {
 const styles = StyleSheet.create({
   pages: { flex: 1, flexDirection: 'row' },
   emphasisChip: { width: '47%', minWidth: 0 },
-  emphasisBlockLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.9, marginBottom: 8 },
+  emphasisBlockLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.9, marginBottom: 8 },
   rerollButton: {
     height: 48,
     alignItems: 'center',

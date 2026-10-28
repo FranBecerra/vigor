@@ -7,9 +7,9 @@ import { healthWorkout } from '@/services/health/workoutExport';
 import type { WorkoutSession } from '@/models';
 
 export function HealthExportSettings() {
-  const health = useHealthExport(); const { t } = useTranslation(); const { colors, radius, typography, semantic } = useTheme();
+  const health = useHealthExport(); const { t } = useTranslation(); const { surfaces, colors, radius, typography, semantic } = useTheme();
   const [busy, setBusy] = useState(false);
-  return <View style={{ padding: 16, borderRadius: radius.lg, backgroundColor: colors.surface, marginTop: 20 }}>
+  return <View style={{ ...surfaces.card, padding: 20, borderRadius: radius.lg, marginTop: 20 }}>
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
       <Text style={[typography.title, { color: colors.textPrimary, flex: 1 }]}>{t('health.title')}</Text>
       <Switch accessibilityLabel={t('health.enable')} value={health.enabled} disabled={busy || !health.owner || !health.ready || !health.available}
@@ -27,14 +27,14 @@ export function HealthExportSettings() {
 }
 
 export function WorkoutHealthExport({ session }: { session: WorkoutSession }) {
-  const health = useHealthExport(); const { t } = useTranslation(); const { colors, radius, sectionAccent, typography } = useTheme();
+  const health = useHealthExport(); const { t } = useTranslation(); const { surfaces, colors, radius, sectionAccent, typography } = useTheme();
   const [busy, setBusy] = useState(false); const [failed, setFailed] = useState(false);
   if (!health.owner || !health.ready || !health.available) return null;
   const workout = healthWorkout(session, health.owner);
   if (!workout) return null;
   const entry = health.entries[workout.identity];
   const status = entry?.status ?? 'idle';
-  return <View style={{ padding: 16, borderRadius: radius.md, backgroundColor: colors.surface, marginTop: 14 }}>
+  return <View style={{ ...surfaces.card, padding: 20, borderRadius: radius.md, marginTop: 14 }}>
     <Text style={[typography.title, { color: colors.textPrimary }]}>{t('health.title')}</Text>
     <Text accessibilityRole={failed || status === 'failed' || status === 'denied' ? 'alert' : undefined}
       style={[typography.caption, { color: colors.textSecondary, marginTop: 6 }]}>

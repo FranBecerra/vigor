@@ -33,7 +33,7 @@ interface RenameRoutineSheetProps {
 }
 
 export function RenameRoutineSheet({ currentName, otherNames, labels, onSave, onClose }: RenameRoutineSheetProps) {
-  const { colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
+  const { surfaces, colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
   const insets = useSafeAreaInsets();
   const [value, setValue] = useState('');
 
@@ -56,7 +56,7 @@ export function RenameRoutineSheet({ currentName, otherNames, labels, onSave, on
           style={[
             styles.sheet,
             {
-              backgroundColor: colors.bg,
+              ...surfaces.screen, backgroundColor: colors.bg,
               borderTopLeftRadius: radius.xl,
               borderTopRightRadius: radius.xl,
               paddingBottom: insets.bottom + spacing.lg,

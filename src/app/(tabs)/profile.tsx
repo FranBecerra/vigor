@@ -23,7 +23,7 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
-  const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
+  const { surfaces, colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, isAnonymous, signOut } = useAuth();
   const router = useRouter(); const { displayName } = useAppSettings();
@@ -47,7 +47,7 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
+    <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }]}>
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: spacing.lg,
@@ -65,7 +65,7 @@ export default function ProfileScreen() {
         <View
           style={[
             styles.card,
-            { backgroundColor: colors.bgElevated, borderRadius: radius.lg, marginTop: spacing.lg },
+            { ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: radius.lg, marginTop: spacing.lg },
           ]}>
           <Text style={[styles.cardLabel, { color: colors.textMuted }]}>
             {t('profile.account').toUpperCase()}
@@ -92,7 +92,7 @@ export default function ProfileScreen() {
                 accessibilityLabel={t('auth.linkGoogle')}
                 style={[
                   styles.primaryButton,
-                  { backgroundColor: sectionAccent.train, borderRadius: radius.pill },
+                  { backgroundColor: sectionAccent.train, borderRadius: radius.md },
                   isLinking && styles.disabled,
                 ]}>
                 <Text style={styles.primaryLabel}>{t('auth.linkGoogle')}</Text>
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   screen: { flex: 1 },
   title: { fontSize: 30, fontWeight: '800', letterSpacing: -0.6, paddingTop: 6 },
   card: { padding: 14 },
-  cardLabel: { fontSize: 9.5, fontWeight: '700', letterSpacing: 0.9 },
+  cardLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.9 },
   identity: { fontSize: 15, fontWeight: '700', marginTop: 6 },
   warning: { fontSize: 11, lineHeight: 16, marginTop: 10 },
   error: { fontSize: 11, marginTop: 8 },
@@ -136,5 +136,5 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.6 },
   signOut: { borderWidth: 1, paddingVertical: 12, alignItems: 'center' },
   signOutLabel: { fontSize: 13, fontWeight: '700' },
-  signOutWarning: { fontSize: 10, textAlign: 'center', marginTop: 8, lineHeight: 14 },
+  signOutWarning: { fontSize: 11, textAlign: 'center', marginTop: 8, lineHeight: 14 },
 });

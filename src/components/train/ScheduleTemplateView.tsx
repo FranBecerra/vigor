@@ -8,11 +8,11 @@ import type { PlannedSession } from '@/models';
 export function ScheduleTemplateView({ template, sessions, onMoveRest }: {
   template: ScheduleTemplate; sessions: readonly PlannedSession[]; onMoveRest?: (from: number, to: number) => void;
 }) {
-  const { t } = useTranslation(); const { colors, spacing, typography } = useTheme();
+  const { t } = useTranslation(); const { surfaces, colors, spacing, typography } = useTheme();
   const names = sessionNames(sessions, (focus) => t(`generate.focus${focus}`));
   return <View style={{ gap: spacing.sm, marginVertical: spacing.sm }}>
     <Text style={[typography.title, { color: colors.textPrimary }]}>{t('calendar.cycleOrder')}</Text>
-    <View style={{ borderRadius: 16, backgroundColor: colors.bgElevated, paddingHorizontal: spacing.md }}>
+    <View style={{ borderRadius: 16, ...surfaces.card, backgroundColor: colors.bgElevated, paddingHorizontal: spacing.md }}>
       {template.slots.map((slot, index) => <View key={index} style={{ minHeight: 52, alignItems: 'center',
         borderBottomWidth: index === template.days - 1 ? 0 : 1, borderColor: colors.surfaceBorder, flexDirection: 'row', gap: spacing.md }}>
         <Text style={{ width: 28, color: colors.textMuted, fontVariant: ['tabular-nums'], fontSize: 14 }}>{index + 1}</Text>

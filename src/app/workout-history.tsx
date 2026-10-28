@@ -24,7 +24,7 @@ import { formatWorkoutTime } from '@/services/training/workoutRuntime';
 export default function HistoryScreen() {
   const { id, edit } = useLocalSearchParams<{ id: string; edit?: string }>();
   const { uid } = useAuth(); const { exercisesById } = useExerciseCatalogue(); const { t, i18n } = useTranslation();
-  const { colors, typography, sectionAccent, radius, spacing, semantic } = useTheme(); const insets = useSafeAreaInsets(); const router = useRouter();
+  const { surfaces, colors, typography, sectionAccent, radius, spacing, semantic } = useTheme(); const insets = useSafeAreaInsets(); const router = useRouter();
   const [history, setHistory] = useState<WorkoutSession[]>([]); const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false); const [deleting, setDeleting] = useState<WorkoutSession | null>(null);
   const [busy, setBusy] = useState(false);
@@ -55,7 +55,7 @@ export default function HistoryScreen() {
     if (session) { openedEditor.current = key; setEditing(session); }
   }, [loading, edit, uid, id, history]);
   const timestamp = (session: WorkoutSession) => typeof session.performedAt === 'number' ? session.performedAt : session.performedAt.seconds * 1000;
-  return <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
+  return <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }}>
     <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 110 }}>
       <Pressable accessibilityRole="button" onPress={back} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={[typography.body, { color: colors.accentText }]}>{t('generate.back')}</Text></Pressable>
       <Text style={[typography.emphasis, { color: colors.textPrimary, marginBottom: 20 }]}>{t('workout.history')}</Text>
@@ -66,7 +66,7 @@ export default function HistoryScreen() {
         const exercises = [...session.exercises].sort((a, b) => a.order - b.order).map((entry) => entry.exerciseSnapshot ?? exercisesById.get(entry.exerciseId)).filter((ex): ex is Exercise => !!ex);
         const summary = workoutReview(exercises, toSessionSetsByExercise(session), history.filter((other) => timestamp(other) < timestamp(session)), session.id);
         const details = workoutHistoryDetails(session, exercisesById);
-        return <View key={session.id} style={{ padding: 18, marginBottom: 14, borderRadius: radius.lg, backgroundColor: colors.surface }}>
+        return <View key={session.id} style={{ ...surfaces.card, padding: 18, marginBottom: 14, borderRadius: radius.lg }}>
           <View>
             <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{session.sessionName || t('historyDetails.workout')}</Text>
             <Text style={{ color: colors.textMuted, marginTop: 6 }}>{new Date(timestamp(session)).toLocaleDateString(i18n.language)} · M{session.microcycleIndex + 1}</Text>

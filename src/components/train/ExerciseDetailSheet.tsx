@@ -12,10 +12,10 @@ export function ExerciseDetailSheet({ exercise, mode, note, onNote, onClose, not
   exercise: Exercise | null; mode: 'info' | 'note'; note: string; onNote: (note: string) => void; onClose: () => void;
   notRecommended?: boolean; onToggleRecommendation?: (exercise: Exercise, notRecommended: boolean) => void;
 }) {
-  const { colors, typography, spacing, sectionAccent, radius } = useTheme(); const { t } = useTranslation(); const insets = useSafeAreaInsets();
+  const { surfaces, colors, typography, spacing, sectionAccent, radius } = useTheme(); const { t } = useTranslation(); const insets = useSafeAreaInsets();
   const name = useExerciseName();
   return <Modal visible={exercise !== null} animationType="slide" onRequestClose={onClose}>
-    <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg }}>
+    <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg }}>
       <Text style={[typography.h2, { color: colors.textPrimary }]}>{name(exercise)}</Text>
       <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         {mode === 'note' ? <TextInput multiline value={note} onChangeText={onNote} maxLength={2000} autoFocus
@@ -38,7 +38,7 @@ export function ExerciseDetailSheet({ exercise, mode, note, onNote, onClose, not
           {!!exercise.guidePage && <Text style={{ color: colors.textMuted, marginTop: 20 }}>{t('workout.guidePage', { page: exercise.guidePage })}</Text>}
         </>}
       </ScrollView>
-      <Pressable onPress={onClose} style={{ padding: 18, backgroundColor: sectionAccent.train, borderRadius: radius.pill, marginBottom: insets.bottom + 12 }}>
+      <Pressable onPress={onClose} style={{ padding: 18, ...surfaces.primary, backgroundColor: sectionAccent.train, borderRadius: radius.md, marginBottom: insets.bottom + 12 }}>
         <Text style={{ color: colors.onAccent, textAlign: 'center', fontWeight: '700' }}>{t('workout.done')}</Text>
       </Pressable>
     </View>

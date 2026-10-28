@@ -22,7 +22,7 @@ import { countWorkingSets } from '@/services/training/sessionSummary';
 
 export default function ManualRoutineScreen() {
   const { t } = useTranslation(); const router = useRouter(); const insets = useSafeAreaInsets(); const { uid } = useAuth();
-  const { catalogue, exercisesById } = useExerciseCatalogue(); const { colors, spacing, radius, sectionAccent } = useTheme();
+  const { catalogue, exercisesById } = useExerciseCatalogue(); const { surfaces, colors, spacing, radius, sectionAccent } = useTheme();
   const [name, setName] = useState(''); const goal = TrainingGoal.HYPERTROPHY;
   const [microcycles, setMicrocycles] = useState(6);
   const [sessions, setSessions] = useState(() => resizeManualSessions([], 3));
@@ -63,7 +63,7 @@ export default function ManualRoutineScreen() {
     finally { setBusy(false); }
   };
   const field = { color: colors.textPrimary, backgroundColor: colors.bgElevated, padding: spacing.md, borderRadius: radius.md, marginVertical: spacing.md };
-  return <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, backgroundColor: colors.bg }}>
+  return <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg }}>
     <ScrollView pointerEvents={busy ? 'none' : 'auto'} keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: spacing.lg, paddingTop: insets.top + spacing.lg }}>
       <Text style={{ color: colors.textPrimary, fontSize: 27, fontWeight: '700' }}>{t('routineCreation.manualTitle')}</Text>
       <Text style={{ color: colors.textMuted, marginVertical: spacing.md }}>{t('routineCreation.manualHint')}</Text>
@@ -106,7 +106,7 @@ export default function ManualRoutineScreen() {
     </ScrollView>
     <View style={{ flexDirection: 'row', gap: spacing.md, padding: spacing.lg }}>
       <Pressable disabled={busy} onPress={() => backToTraining(router)} style={{ padding: 16 }}><Text style={{ color: colors.textSecondary }}>{t('generate.cancel')}</Text></Pressable>
-      <Pressable disabled={busy} onPress={() => { void save(); }} style={{ flex: 1, padding: 16, borderRadius: radius.pill, backgroundColor: sectionAccent.train }}>
+      <Pressable disabled={busy} onPress={() => { void save(); }} style={{ flex: 1, padding: 16, borderRadius: radius.md, ...surfaces.primary, backgroundColor: sectionAccent.train }}>
         <Text style={{ textAlign: 'center', color: colors.onAccent, fontWeight: '700' }}>{t(busy ? 'generate.saving' : 'generate.save')}</Text>
       </Pressable>
     </View>

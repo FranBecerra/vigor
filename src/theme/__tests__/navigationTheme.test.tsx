@@ -33,11 +33,13 @@ it.each(['dark', 'light'] as const)('matches native stack, tab surfaces, safe-ar
   expect(theme.colors.background).toBe(palette[scheme].bg);
   expect(theme.colors.card).toBe(palette[scheme].bg);
   expect(theme.colors.text).toBe(palette[scheme].textPrimary);
+  expect(theme.colors.primary).toBe(palette[scheme].accentText);
   expect(theme.colors.notification).toBe('red');
   let stack: any, tabs: any;
   await act(async () => { stack = create(<TrainStackLayout />); tabs = create(<TabsLayout />); });
   expect(stack.root.findByType('Stack').props.screenOptions.contentStyle.backgroundColor).toBe(palette[scheme].bg);
   expect(tabs.root.findAllByType('Trigger')).toHaveLength(4);
+  expect(tabs.root.findAllByType('Trigger').filter((node: any) => !node.props.hidden).map((node: any) => node.props.name)).toEqual(['(train)', 'bio', 'profile']);
   tabs.root.findAllByType('Trigger').forEach((node: any) => expect(node.props.contentStyle.backgroundColor).toBe(palette[scheme].bg));
   await act(async () => { stack.unmount(); tabs.unmount(); });
 });

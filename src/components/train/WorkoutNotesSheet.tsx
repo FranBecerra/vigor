@@ -10,7 +10,7 @@ export function WorkoutNotesSheet({ open, exerciseName, values, initialScope = '
   allowedScopes?: readonly WorkoutNoteScope[]; executionNote?: string;
   onSave: (scope: WorkoutNoteScope, note: string, executionNote?: string) => Promise<void>; onClose: () => void;
 }) {
-  const { t } = useTranslation(); const { colors, typography, spacing, radius, sectionAccent, semantic } = useTheme(); const insets = useSafeAreaInsets();
+  const { t } = useTranslation(); const { surfaces, colors, typography, spacing, radius, sectionAccent, semantic } = useTheme(); const insets = useSafeAreaInsets();
   const [scope, setScope] = useState<WorkoutNoteScope>(initialScope); const [drafts, setDrafts] = useState(values);
   const [busy, setBusy] = useState(false); const [error, setError] = useState(false);
   useEffect(() => { if (open) { setScope(initialScope); setDrafts(values); setError(false); setBusy(false); } }, [open, exerciseName, initialScope]);
@@ -24,7 +24,7 @@ export function WorkoutNotesSheet({ open, exerciseName, values, initialScope = '
     } catch { setError(true); } finally { setBusy(false); }
   };
   return <Modal visible={open} animationType="slide" onRequestClose={() => { if (!busy) onClose(); }}>
-    <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom }}>
+    <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.lg, gap: spacing.md }}>
         <Text style={[typography.h2, { flex: 1, color: colors.textPrimary }]}>{t('train.note')}</Text>
         <Pressable accessibilityRole="button" disabled={busy} onPress={onClose} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={[typography.body, { color: colors.accentText }]}>{t('generate.cancel')}</Text></Pressable>
@@ -42,7 +42,7 @@ export function WorkoutNotesSheet({ open, exerciseName, values, initialScope = '
           style={[typography.body, { color: colors.textPrimary, textAlignVertical: 'top', minHeight: 180, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface }]} />
         <Text style={[typography.caption, { color: colors.textMuted, textAlign: 'right', marginTop: spacing.sm }]}>{drafts[scope].length}/2000</Text>
         {(error || (unavailable && scope !== 'SESSION')) && <Text accessibilityRole="alert" style={[typography.body, { color: semantic.danger, marginVertical: spacing.md }]}>{t('notes.saveFailed')}</Text>}
-        <Pressable accessibilityRole="button" disabled={busy || (scope !== 'SESSION' && unavailable)} onPress={() => { void save(); }} style={{ minHeight: 52, justifyContent: 'center', alignItems: 'center', backgroundColor: sectionAccent.train, borderRadius: radius.md, marginTop: spacing.lg }}>
+        <Pressable accessibilityRole="button" disabled={busy || (scope !== 'SESSION' && unavailable)} onPress={() => { void save(); }} style={{ minHeight: 52, justifyContent: 'center', alignItems: 'center', ...surfaces.primary, backgroundColor: sectionAccent.train, borderRadius: radius.md, marginTop: spacing.lg }}>
           <Text style={[typography.body, { color: colors.onAccent, fontWeight: '700' }]}>{t(busy ? 'custom.saving' : 'custom.save')}</Text>
         </Pressable>
       </ScrollView>

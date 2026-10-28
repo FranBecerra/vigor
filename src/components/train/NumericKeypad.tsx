@@ -11,12 +11,12 @@ export function NumericKeypad({ label, value, decimal = false, onSave, onClose }
   label: string; value?: number; decimal?: boolean;
   onSave: (value: number | undefined) => void; onClose: () => void;
 }) {
-  const { colors, radius, sectionAccent } = useTheme(); const { t } = useTranslation();
+  const { surfaces, colors, radius, sectionAccent } = useTheme(); const { t } = useTranslation();
   const insets = useSafeAreaInsets(); const [text, setText] = useState(value === undefined ? '' : String(value));
   const [replace, setReplace] = useState(true);
   return <Modal visible transparent animationType="fade" onRequestClose={onClose}>
     <Pressable onPress={onClose} accessibilityLabel={t('generate.cancel')} style={{ flex: 1, backgroundColor: '#0007' }} />
-    <View accessibilityViewIsModal style={{ backgroundColor: colors.bgElevated, padding: 16,
+    <View accessibilityViewIsModal style={{ ...surfaces.sheet, backgroundColor: colors.bgElevated, padding: 16,
       paddingBottom: Math.max(12, insets.bottom), borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl, gap: 8 }}>
       <Text style={{ color: colors.textSecondary, fontSize: 15 }}>{label}</Text>
       <Text style={{ color: colors.textPrimary, fontSize: 30, fontWeight: '700', textAlign: 'center', padding: 8 }}>{text || '—'}</Text>
@@ -30,7 +30,7 @@ export function NumericKeypad({ label, value, decimal = false, onSave, onClose }
         </Pressable>)}
       </View>)}
       <Pressable accessibilityRole="button" accessibilityLabel={t('workout.done')} onPress={() => { onSave(parseNumericText(text, decimal)); onClose(); }}
-        style={{ minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: radius.md, backgroundColor: sectionAccent.train }}>
+        style={{ minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: radius.md, ...surfaces.primary, backgroundColor: sectionAccent.train }}>
         <Text style={{ color: '#16191C', fontSize: 17, fontWeight: '700' }}>{t('workout.done')} ↵</Text>
       </Pressable>
     </View>

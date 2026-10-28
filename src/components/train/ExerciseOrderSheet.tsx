@@ -10,7 +10,7 @@ import { MusclePicture } from './MusclePicture';
 const HEIGHT = 76;
 function DragRow({ exercise, index, onMove, onDragging, last }: { exercise: Exercise; index: number; last: boolean;
   onMove: (from: number, to: number) => void; onDragging: (value: boolean) => void }) {
-  const { colors, sectionAccent, radius } = useTheme(); const { t } = useTranslation();
+  const { surfaces, colors, sectionAccent, radius } = useTheme(); const { t } = useTranslation();
   const [dy, setDy] = useState(0); const [dragging, setDragging] = useState(false);
   const current = useRef({ index, onMove, onDragging }); current.current = { index, onMove, onDragging };
   const responder = useRef(PanResponder.create({
@@ -39,17 +39,17 @@ function DragRow({ exercise, index, onMove, onDragging, last }: { exercise: Exer
 
 export function ExerciseOrderSheet({ open, exercises, onChange, onClose }: { open: boolean; exercises: Exercise[];
   onChange: (exercises: Exercise[]) => void; onClose: () => void }) {
-  const { colors, typography, spacing, sectionAccent } = useTheme(); const { t } = useTranslation();
+  const { surfaces, colors, typography, spacing, sectionAccent } = useTheme(); const { t } = useTranslation();
   const insets = useSafeAreaInsets(); const [dragging, setDragging] = useState(false);
   return <Modal visible={open} animationType="slide" onRequestClose={onClose}>
-    <View style={{ flex: 1, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg, backgroundColor: colors.bg }}>
+    <View style={{ flex: 1, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg, ...surfaces.screen, backgroundColor: colors.bg }}>
       <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{t('workout.order')}</Text>
       <Text style={{ color: colors.textMuted, marginVertical: 12 }}>{t('workout.dragHint')}</Text>
       <ScrollView scrollEnabled={!dragging} removeClippedSubviews={false}>
         {exercises.map((exercise, index) => <DragRow key={exercise.id} exercise={exercise} index={index} last={index === exercises.length - 1}
           onDragging={setDragging} onMove={(from, to) => onChange(moveItem(exercises, from, Math.max(0, Math.min(exercises.length - 1, to))))} />)}
       </ScrollView>
-      <Pressable onPress={onClose} style={{ padding: 18, marginBottom: insets.bottom + 12, borderRadius: 24, backgroundColor: sectionAccent.train }}>
+      <Pressable onPress={onClose} style={{ padding: 18, marginBottom: insets.bottom + 12, borderRadius: 24, ...surfaces.primary, backgroundColor: sectionAccent.train }}>
         <Text style={{ textAlign: 'center', color: colors.onAccent, fontWeight: '700' }}>{t('workout.done')}</Text>
       </Pressable>
     </View>

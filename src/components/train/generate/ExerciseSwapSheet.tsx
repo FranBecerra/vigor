@@ -53,7 +53,7 @@ function ExercisePickerContent({
   const notRecommendedExerciseIds = exercisePreferences?.notRecommendedExerciseIds ?? new Set<string>();
   const setExerciseNotRecommended = exercisePreferences?.setExerciseNotRecommended;
   const preferencesReady = exercisePreferences?.preferencesReady ?? true;
-  const { colors, typography, spacing, radius, sectionAccent } = useTheme();
+  const { surfaces, colors, typography, spacing, radius, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const deferredQuery = useDeferredValue(query);
@@ -160,7 +160,7 @@ function ExercisePickerContent({
           styles.sheet,
           sheetStyle,
           {
-            backgroundColor: colors.bg,
+            ...surfaces.screen, backgroundColor: colors.bg,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
             paddingBottom: insets.bottom + spacing.lg,
@@ -246,12 +246,12 @@ function ExercisePickerContent({
         </Pressable>
         </View>} />
         {multiple && <Pressable disabled={!selected.length} onPress={() => onSelectMany?.(selected)} accessibilityRole="button"
-          style={{ padding: 16, marginTop: 8, borderRadius: radius.pill, backgroundColor: selected.length ? sectionAccent.train : colors.surface }}>
+          style={{ padding: 16, marginTop: 8, borderRadius: radius.md, backgroundColor: selected.length ? sectionAccent.train : colors.surface }}>
           <Text style={{ textAlign: 'center', fontWeight: '700', color: selected.length ? colors.onAccent : colors.textMuted }}>{t('workout.addSelected', { count: selected.length })}</Text>
         </Pressable>}
       </Animated.View>
     </>;
-  if (embedded) return <View style={{ flex: 1, backgroundColor: colors.bg }}>{content}</View>;
+  if (embedded) return <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg }}>{content}</View>;
   return <Modal visible transparent animationType="none" onShow={present} onRequestClose={() => creating ? setCreating(false) : close()}>{content}</Modal>;
 }
 

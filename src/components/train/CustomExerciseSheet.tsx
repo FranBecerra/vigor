@@ -13,7 +13,7 @@ export function CustomExerciseSheet({ open, initialName = '', embedded = false, 
   open: boolean; initialName?: string; embedded?: boolean; exercise?: Exercise; onClose: () => void; onCreated: (exercise: Exercise) => void;
 }) {
   const { t } = useTranslation();
-  const { colors, typography, spacing, radius, sectionAccent } = useTheme();
+  const { surfaces, colors, typography, spacing, radius, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets(); const { create, edit } = useExerciseCatalogue();
   const scroll = useRef<ScrollView>(null);
   const [step, setStep] = useState(0);
@@ -76,7 +76,7 @@ export function CustomExerciseSheet({ open, initialName = '', embedded = false, 
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'saveFailed'); }
     finally { setBusy(false); }
   };
-  const content = <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom }}>
+  const content = <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom }}>
     <View style={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={[typography.h2, { color: colors.textPrimary }]}>{t(exercise ? 'library.edit' : 'custom.title')}</Text>
@@ -171,7 +171,7 @@ export function CustomExerciseSheet({ open, initialName = '', embedded = false, 
         <Text style={[typography.body, { color: colors.textSecondary }]}>{t('exerciseWizard.back')}</Text>
       </Pressable>}
       <Pressable disabled={busy} onPress={step === STEPS.length - 1 ? save : () => move(step + 1)} style={{ flex: 1, padding: spacing.md,
-        alignItems: 'center', borderRadius: radius.md, backgroundColor: sectionAccent.train }}>
+        alignItems: 'center', borderRadius: radius.md, ...surfaces.primary, backgroundColor: sectionAccent.train }}>
         <Text style={[typography.body, { color: colors.onAccent, fontWeight: '600' }]}>{t(step === STEPS.length - 1 ? busy ? 'custom.saving' : 'custom.save' : 'exerciseWizard.next')}</Text>
       </Pressable>
     </View>

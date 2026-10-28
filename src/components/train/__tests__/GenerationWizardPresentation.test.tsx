@@ -37,6 +37,7 @@ it('opens the optional experience guide, applies only accepted results and retai
   const levels = () => tree.root.findAllByType(GenerationChoice).filter((node: any) => node.props.title.startsWith('generate.level'));
   const open = async () => act(async () => tree.root.findAll((node: any) => node.props.accessibilityLabel === 'experienceGuide.open' && typeof node.props.onPress === 'function')[0].props.onPress());
   expect(levels().find((node: any) => node.props.selected).props.title).toBe('generate.levelINTERMEDIATE');
+  expect(JSON.stringify(tree.toJSON())).not.toContain('generate.levelExplanation');
   await open();
   await act(async () => tree.root.findByType(ExperienceLevelGuide).props.onClose());
   expect(levels().find((node: any) => node.props.selected).props.title).toBe('generate.levelINTERMEDIATE');

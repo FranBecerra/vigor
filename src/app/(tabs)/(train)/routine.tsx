@@ -43,7 +43,7 @@ export default function RoutineDetailScreen() {
   const { catalogue, exercisesById: CATALOGUE } = useExerciseCatalogue();
   const { t } = useTranslation();
   const name = useExerciseName();
-  const { colors, typography, spacing, sectionAccent } = useTheme();
+  const { surfaces, colors, typography, spacing, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { mesocycleId, plannedSessionIndex, microcycleIndex } = useLocalSearchParams<{
@@ -276,7 +276,7 @@ export default function RoutineDetailScreen() {
   };
 
   if (routine === undefined || mesocycle === null || completedWorkoutId) {
-    return <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
+    return <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }}>
       {loadFinished && routines.length > 0
         ? <Text style={[typography.body, { color: colors.textSecondary, padding: spacing.lg }]}>
           {t('train.sessionUnavailable')}
@@ -285,7 +285,7 @@ export default function RoutineDetailScreen() {
     </View>;
   }
 
-  return <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, backgroundColor: colors.bg }}>
+  return <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg }}>
     <ScrollView contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg,
       paddingBottom: insets.bottom + spacing.xl }}>
       <Pressable onPress={() => {
@@ -306,7 +306,7 @@ export default function RoutineDetailScreen() {
           onPress={() => setMenu('session')} onLongPress={() => setMenu('session')}
           accessibilityRole="button" accessibilityLabel={t('routine.sessionActions')}
           style={{ paddingHorizontal: spacing.md, paddingVertical: spacing.sm,
-            backgroundColor: colors.bgElevated, borderRadius: 20 }}>
+            ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: 20 }}>
           <Text style={[typography.title, { color: colors.textPrimary }]}>⋮</Text>
         </Pressable>}
       </View>
@@ -318,7 +318,7 @@ export default function RoutineDetailScreen() {
         {selectedSessionIndex === null && <Pressable
           onPress={() => router.push({ pathname: '/mesocycle', params: { mesocycleId } })}
           accessibilityRole="button" style={{ paddingVertical: spacing.sm,
-            paddingHorizontal: spacing.md, borderRadius: 12, backgroundColor: colors.bgElevated,
+            paddingHorizontal: spacing.md, borderRadius: 12, ...surfaces.card, backgroundColor: colors.bgElevated,
             borderWidth: 1, borderColor: colors.surfaceBorder }}>
           <Text style={[typography.body, { color: colors.textPrimary }]}>{t('home.viewMesocycle')} ↗</Text>
         </Pressable>}
@@ -326,7 +326,7 @@ export default function RoutineDetailScreen() {
           ? fromIndex < routine.microcycles.length : pendingSelection) &&
           <Pressable onPress={() => { resetDraft(); setEditing(true); }} accessibilityRole="button"
             style={{ paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: 12,
-              backgroundColor: colors.bgElevated, borderWidth: 1, borderColor: colors.surfaceBorder }}>
+              ...surfaces.card, backgroundColor: colors.bgElevated, borderWidth: 1, borderColor: colors.surfaceBorder }}>
             <Text style={[typography.body, { color: colors.textPrimary }]}>
               {selectedSessionIndex === null ? t('routine.edit') : t('routine.editSession')}
             </Text>
@@ -466,7 +466,7 @@ export default function RoutineDetailScreen() {
             } }));
           } : undefined} />}
     </ScrollView>
-    {selected !== null && !editing && canStartSelected && <View style={{ backgroundColor: colors.bg }}>
+    {selected !== null && !editing && canStartSelected && <View style={{ ...surfaces.screen, backgroundColor: colors.bg }}>
       <Pressable onPress={startSelected} accessibilityRole="button"
         style={{ height: 52, marginHorizontal: spacing.lg, marginVertical: spacing.sm,
           justifyContent: 'center', alignItems: 'center', borderRadius: 14,
@@ -483,7 +483,7 @@ export default function RoutineDetailScreen() {
       onRequestClose={() => setDraftExercise(null)}>
       <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.58)' }}
         onPress={() => setDraftExercise(null)} />
-      <View style={{ backgroundColor: colors.bgElevated, borderTopLeftRadius: 20,
+      <View style={{ ...surfaces.sheet, backgroundColor: colors.bgElevated, borderTopLeftRadius: 20,
         borderTopRightRadius: 20, padding: spacing.lg, paddingBottom: insets.bottom + spacing.lg }}>
         <Text style={[typography.h2, { color: colors.textPrimary, marginBottom: spacing.md }]}>
           {name(draftExercise?.exerciseSnapshot ?? CATALOGUE.get(draftExercise?.exerciseId ?? '')) || t('routine.editExercise')}

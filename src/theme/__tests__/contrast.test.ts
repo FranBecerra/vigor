@@ -10,5 +10,6 @@ it('keeps light-mode accent/muted text readable and lime buttons dark-labelled',
     expect(contrast(palette.light.textMuted, background)).toBeGreaterThanOrEqual(4.5);
   }
   expect(contrast(palette.light.onAccent, sectionAccent.train)).toBeGreaterThanOrEqual(4.5);
-  expect(palette.dark.accentText).toBe(sectionAccent.train);
+  expect(contrast(palette.dark.accentText, palette.dark.bgElevated)).toBeGreaterThanOrEqual(4.5);
+  expect(sectionAccent.train).toBe('#9BE317');
 });

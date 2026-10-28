@@ -13,7 +13,7 @@ export function ExperienceLevelGuide({ onSelect, onClose }: {
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const { colors, typography, spacing, radius, sectionAccent } = useTheme();
+  const { surfaces, colors, typography, spacing, radius, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<ExperienceAnswers>({});
@@ -24,7 +24,7 @@ export function ExperienceLevelGuide({ onSelect, onClose }: {
   useEffect(() => { scroll.current?.scrollTo({ y: 0, animated: false }); }, [step]);
 
   return <Modal visible animationType="slide" onRequestClose={onClose}>
-    <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
+    <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }}>
       <View style={{ paddingHorizontal: spacing.lg, alignItems: 'flex-end' }}>
         <Pressable accessibilityRole="button" accessibilityLabel={t('experienceGuide.close')} onPress={onClose}
           style={{ minHeight: 44, paddingHorizontal: spacing.sm, justifyContent: 'center' }}>
@@ -52,7 +52,7 @@ export function ExperienceLevelGuide({ onSelect, onClose }: {
         </> : result && <>
           <Text style={[typography.caption, { color: colors.accentText, marginBottom: spacing.sm }]}>{t('experienceGuide.result')}</Text>
           <Text accessibilityRole="header" style={[typography.emphasis, { color: colors.textPrimary }]}>{t(`generate.level${result.level}`)}</Text>
-          <View style={{ backgroundColor: colors.bgElevated, borderRadius: radius.lg, padding: spacing.lg, marginVertical: spacing.lg }}>
+          <View style={{ ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: radius.lg, padding: spacing.lg, marginVertical: spacing.lg }}>
             <Text style={[typography.body, { color: colors.textPrimary }]}>{t(`experienceGuide.reasons.${result.reason}`)}</Text>
           </View>
           <Text style={[typography.body, { color: colors.textSecondary }]}>{t('experienceGuide.resultHint')}</Text>
@@ -70,8 +70,8 @@ export function ExperienceLevelGuide({ onSelect, onClose }: {
             if (result) { onSelect(result.level); onClose(); }
             else setStep((value) => value + 1);
           }}
-          style={{ flex: 1, minHeight: 52, padding: spacing.sm, borderRadius: radius.pill,
-            alignItems: 'center', justifyContent: 'center', backgroundColor: sectionAccent.train, opacity: canContinue ? 1 : 0.4 }}>
+          style={{ flex: 1, minHeight: 52, padding: spacing.sm, borderRadius: radius.md,
+            alignItems: 'center', justifyContent: 'center', ...surfaces.primary, backgroundColor: sectionAccent.train, opacity: canContinue ? 1 : 0.4 }}>
           <Text style={[typography.title, { color: colors.onAccent }]}>{t(result ? 'experienceGuide.apply' : 'exerciseWizard.next')}</Text>
         </Pressable>
       </View>

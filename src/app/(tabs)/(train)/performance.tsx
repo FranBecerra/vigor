@@ -19,7 +19,7 @@ const ITERATIONS = 31; // First exposure is cold, followed by thirty warm sample
 const wait = (milliseconds: number) => new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 
 export default function PerformanceScreen() {
-  const { colors, sectionAccent, spacing, typography } = useTheme(); const insets = useSafeAreaInsets();
+  const { surfaces, colors, sectionAccent, spacing, typography } = useTheme(); const insets = useSafeAreaInsets();
   const router = useRouter(); const { width, height } = useWindowDimensions();
   const params = useLocalSearchParams<{ autorun?: string; target?: string }>();
   const [scene, setScene] = useState<'idle' | 'button.commit' | 'wizard.commit' | 'picker.ready'>('idle');
@@ -77,7 +77,7 @@ export default function PerformanceScreen() {
     }
   };
   useEffect(() => { if (params.autorun) void run(runId); }, [params.autorun]);
-  return <View style={{ flex: 1, backgroundColor: colors.bg, padding: spacing.lg, paddingTop: insets.top + spacing.lg }}>
+  return <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, padding: spacing.lg, paddingTop: insets.top + spacing.lg }}>
     <Text style={[typography.emphasis, { color: colors.textPrimary }]}>UI PERFORMANCE</Text>
     <Text style={{ color: colors.textSecondary, marginVertical: 16 }}>Fixture-only · Release · 30 warm samples per action</Text>
     {running && <Text style={{ color: colors.accentText, marginBottom: 12 }}>{scene} · {iteration}</Text>}

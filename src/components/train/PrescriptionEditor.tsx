@@ -19,13 +19,13 @@ interface Props {
 
 /** A single line per set, with one persistent keypad for the entire exercise. */
 export function PrescriptionEditor({ exercise, restSeconds, onChangeSet, onChangeCount, onChangeRest }: Props) {
-  const { t } = useTranslation(); const { colors, radius } = useTheme();
+  const { t } = useTranslation(); const { surfaces, colors, radius } = useTheme();
   const [selection, setSelection] = useState<Selection | null>(null);
   const workCount = exercise.sets.filter((set) => set.setType !== SetType.TOP_SINGLE).length;
   const timed = exercise.sets.some((set) => set.targetDurationSeconds !== undefined);
   const cell = (label: string, value: string, onPress: () => void, disabled = false, flex = 1) =>
     <Pressable accessibilityRole="button" accessibilityLabel={label} disabled={disabled} onPress={onPress}
-      style={{ flex, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm, backgroundColor: colors.bgElevated, opacity: disabled ? 0.5 : 1 }}>
+      style={{ flex, minHeight: 44, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm, ...surfaces.field, backgroundColor: colors.bgElevated, opacity: disabled ? 0.5 : 1 }}>
       <Text style={{ color: colors.textPrimary, fontSize: 16, fontWeight: '600', fontVariant: ['tabular-nums'] }}>{value}</Text>
     </Pressable>;
   return <View style={{ gap: 6, marginTop: 12 }}>
@@ -44,7 +44,7 @@ export function PrescriptionEditor({ exercise, restSeconds, onChangeSet, onChang
     </View>
     {exercise.sets.map((set, index) => <View key={index} testID={`prescription-row-${index}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
       <Pressable accessibilityRole="button" accessibilityLabel={`${t('prescription.setType')} ${index + 1}`} disabled={set.setType === SetType.TOP_SINGLE}
-        onPress={() => setSelection({ index, field: 'type' })} style={{ width: 32, minHeight: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bgElevated, borderRadius: radius.sm }}>
+        onPress={() => setSelection({ index, field: 'type' })} style={{ width: 32, minHeight: 44, alignItems: 'center', justifyContent: 'center', ...surfaces.field, backgroundColor: colors.bgElevated, borderRadius: radius.sm }}>
         <Text style={{ color: colors.accentText, fontSize: 14, fontWeight: '700' }}>{setTypeLabel(set.setType) || index + 1}</Text>
       </Pressable>
       {cell(`${t('train.reps')} ${index + 1}`, set.targetDurationSeconds !== undefined ? `${set.targetDurationSeconds}s`
@@ -57,7 +57,7 @@ export function PrescriptionEditor({ exercise, restSeconds, onChangeSet, onChang
 }
 
 function PrescriptionEntrySheet({ exercise, restSeconds, selection, onChangeSet, onChangeRest, onClose }: Props & { selection: Selection; onClose: () => void }) {
-  const { t } = useTranslation(); const { colors, radius, sectionAccent } = useTheme(); const insets = useSafeAreaInsets();
+  const { t } = useTranslation(); const { surfaces, colors, radius, sectionAccent } = useTheme(); const insets = useSafeAreaInsets();
   const [sets, setSets] = useState(() => exercise.sets.map((set) => ({ ...set })));
   const [rest, setRest] = useState(restSeconds);
   const [active, setActive] = useState(selection);
@@ -95,7 +95,7 @@ function PrescriptionEntrySheet({ exercise, restSeconds, selection, onChangeSet,
   const invalid = sets.some((set) => set.targetDurationSeconds === undefined && (set.targetRepsMin ?? set.targetReps) > set.targetReps);
   return <Modal visible transparent animationType="slide" onRequestClose={close}>
     <Pressable accessibilityLabel={t('workout.done')} onPress={close} style={{ flex: 1, backgroundColor: '#0005' }} />
-    <View accessibilityViewIsModal style={{ padding: 12, gap: 8, paddingBottom: Math.max(8, insets.bottom), backgroundColor: colors.bgElevated, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }}>
+    <View accessibilityViewIsModal style={{ padding: 12, gap: 8, paddingBottom: Math.max(8, insets.bottom), ...surfaces.sheet, backgroundColor: colors.bgElevated, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         {active.field !== 'rest' && <Pressable accessibilityLabel={t('prescription.previousSet')} disabled={position <= 0}
           onPress={() => select({ ...active, index: validIndexes[position - 1] })} style={{ padding: 12, opacity: position <= 0 ? 0.3 : 1 }}><Text style={{ color: colors.textPrimary, fontSize: 22 }}>‹</Text></Pressable>}
@@ -118,7 +118,7 @@ function PrescriptionEntrySheet({ exercise, restSeconds, selection, onChangeSet,
         onPress={() => {
           const patch = { setType: type, ...(type === SetType.FAILURE ? { targetRIR: 0 } : {}) };
           setSets((previous) => previous.map((set, index) => index === active.index ? { ...set, ...patch } : set)); onChangeSet(active.index, patch);
-        }} style={{ width: '48%', minHeight: 54, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm, backgroundColor: colors.surface }}>
+        }} style={{ width: '48%', minHeight: 54, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm, ...surfaces.field, backgroundColor: colors.surface }}>
         <Text style={{ color: colors.textPrimary, fontSize: 14 }}>{t(`setType.${type}`)}</Text></Pressable>)}</View>
         : ['123', '456', '789', ' 0⌫'].map((row) => <View key={row} style={{ flexDirection: 'row', gap: 6 }}>{[...row].map((key) => <Pressable key={key} accessibilityRole="button" accessibilityLabel={key === '⌫' ? t('workout.eraseDigit') : key}
           disabled={key === ' ' || active.field === 'rir' && (sets[active.index].setType === SetType.FAILURE || Number(key) > 5)}

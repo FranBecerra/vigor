@@ -14,7 +14,7 @@ import { backToTraining } from '@/services/training/backNavigation';
 export default function RehabScreen() {
   const { t } = useTranslation();
   const { blocks, logs, ready, error, saveBlock } = useRehabilitation();
-  const { colors, spacing, radius, sectionAccent } = useTheme();
+  const { surfaces, colors, spacing, radius, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const [editing, setEditing] = useState<RehabBlock | 'new' | null>(null);
@@ -22,7 +22,7 @@ export default function RehabScreen() {
   const [failed, setFailed] = useState(false);
   const today = localDateKey(new Date());
   return <>
-    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ flexGrow: 1, padding: spacing.lg, backgroundColor: colors.bg,
+    <ScrollView style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg }} contentContainerStyle={{ flexGrow: 1, padding: spacing.lg,
       paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + 120 }}>
       <Pressable onPress={() => backToTraining(router)}><Text style={{ color: colors.accentText }}>{t('rehab.back')}</Text></Pressable>
       <Text style={{ color: colors.textPrimary, fontSize: 27, fontWeight: '700', marginVertical: 18 }}>{t('rehab.title')}</Text>
@@ -32,7 +32,7 @@ export default function RehabScreen() {
         completed={rehabWeekCompletions(block, logs, today)} onEdit={() => setEditing(block)} onStart={() => setRunning(block)}
         onPause={() => { void saveBlock({ ...block, active: !block.active, updatedAt: Date.now() }).catch(() => setFailed(true)); }} />)}
       <Pressable onPress={() => setEditing('new')} style={{ padding: 18, marginVertical: 16,
-        backgroundColor: sectionAccent.train, borderRadius: radius.md }}>
+        ...surfaces.primary, backgroundColor: sectionAccent.train, borderRadius: radius.md }}>
         <Text style={{ color: colors.onAccent, textAlign: 'center', fontWeight: '700' }}>{t('rehab.newBlock')}</Text>
       </Pressable>
     </ScrollView>
@@ -44,8 +44,8 @@ function ReactBlock({ block, completed, onEdit, onStart, onPause }: {
   block: RehabBlock; completed: number; onEdit: () => void; onStart: () => void; onPause: () => void;
 }) {
   const { t } = useTranslation();
-  const { colors, spacing, radius, sectionAccent } = useTheme();
-  return <View style={{ backgroundColor: colors.surface, borderRadius: radius.md,
+  const { surfaces, colors, spacing, radius, sectionAccent } = useTheme();
+  return <View style={{ ...surfaces.card, borderRadius: radius.lg,
     padding: spacing.md, marginTop: spacing.lg }}>
     <Text style={{ color: colors.textPrimary, fontSize: 20, fontWeight: '600' }}>{block.name}</Text>
     <Text style={{ color: colors.textMuted, marginVertical: 6 }}>{t('rehab.weekProgress', { count: completed })}

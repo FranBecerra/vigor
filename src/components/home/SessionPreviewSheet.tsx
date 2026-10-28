@@ -45,7 +45,7 @@ export function SessionPreviewSheet({
   onClose,
   onStart,
 }: SessionPreviewSheetProps) {
-  const { colors, sectionAccent, radius, spacing } = useTheme();
+  const { surfaces, colors, sectionAccent, radius, spacing } = useTheme();
   const insets = useSafeAreaInsets();
 
   if (session === null) return null;
@@ -62,7 +62,7 @@ export function SessionPreviewSheet({
         style={[
           styles.sheet,
           {
-            backgroundColor: colors.bg,
+            ...surfaces.screen, backgroundColor: colors.bg,
             borderTopLeftRadius: radius.xl,
             borderTopRightRadius: radius.xl,
             paddingBottom: insets.bottom + 90,
@@ -154,7 +154,7 @@ export function SessionPreviewSheet({
           accessibilityLabel={labels.start}
           style={[
             styles.startButton,
-            { backgroundColor: sectionAccent.train, borderRadius: radius.pill },
+            { backgroundColor: sectionAccent.train, borderRadius: radius.md },
           ]}>
           <Text style={styles.startLabel}>{labels.start}</Text>
         </Pressable>
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   grabber: { width: 36, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 12 },
   title: { fontSize: 22, fontWeight: '800', letterSpacing: -0.4 },
   meta: { fontSize: 11, marginTop: 2 },
-  sectionLabel: { fontSize: 9.5, fontWeight: '700', letterSpacing: 0.9, marginBottom: 9 },
+  sectionLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.9, marginBottom: 9 },
   volumeRow: { flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 7 },
   volumeName: { width: 86, fontSize: 11 },
   volumeTrack: { flex: 1, height: 7, borderRadius: 4, overflow: 'hidden' },
@@ -184,10 +184,10 @@ const styles = StyleSheet.create({
   },
   exerciseText: { flex: 1 },
   exerciseName: { fontSize: 12.5, fontWeight: '600' },
-  exerciseMuscle: { fontSize: 9.5, marginTop: 1 },
+  exerciseMuscle: { fontSize: 11, marginTop: 1 },
   exercisePrescription: { fontSize: 11, fontWeight: '700', fontVariant: ['tabular-nums'] },
   rirBadge: { minWidth: 24, paddingVertical: 3, alignItems: 'center' },
-  rirText: { fontSize: 10.5, fontWeight: '800', color: '#16191C' },
+  rirText: { fontSize: 11, fontWeight: '800', color: '#16191C' },
   startButton: { paddingVertical: 13, alignItems: 'center', marginTop: 4 },
   startLabel: { fontSize: 14, fontWeight: '800', color: '#16191C' },
 });
