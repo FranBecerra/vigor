@@ -1,0 +1,150 @@
+docs/audits/2026-10-26-readiness-review.md
+  s_b6a0f22c32fc5f::t_ee8b35d9a08e2d 78
+  s_b6a0f22c32fc5f::t_3b5e9bb5bb8e4d 1-77,79-99
+  s_b6a0f22c32fc5f::t_308dee66580d72 100-103
+docs/design/cardio-planning-options.html
+  s_b6a0f22c32fc5f::t_dbd4a372d32c18 115,126,133-134
+  s_b6a0f22c32fc5f::t_7aa4b1ee112cb8 5,99,120,125,128,130
+  s_b6a0f22c32fc5f::t_02a30457d08e9f 116-119,124
+  s_b6a0f22c32fc5f::t_0b7015ca3a3cf8 127,138,151
+  s_b6a0f22c32fc5f::t_f128bc0c4e1417 1-4,6-38,40-98,100-114,121-123,129,131-132,135-137,139-150,152-156
+  s_b6a0f22c32fc5f::t_ca6edce3908e80 39
+docs/ui-performance.md
+  s_b6a0f22c32fc5f::t_b42c9734b9822b 22
+  s_b6a0f22c32fc5f::t_fedd915dac9626 11-12
+  s_b6a0f22c32fc5f::t_040c06ce697c24 29-34
+  s_b6a0f22c32fc5f::t_7d87e7f9817b9d 21
+  s_b6a0f22c32fc5f::t_a2e3b83fbfd8d1 23-28
+  s_b6a0f22c32fc5f::t_7d3a20fb87ed26 9-10,13-20
+docs/cardio-sport-acceptance.md
+  s_b6a0f22c32fc5f::t_20e0eb1666c831 1-37
+docs/research/cardio-input.md
+  s_b6a0f22c32fc5f::t_023edbd2180467 1-503
+docs/audits/2026-10-26-individual-volume-review.md
+  s_b6a0f22c32fc5f::t_500d16442df6cb 173-176
+  s_b6a0f22c32fc5f::t_e34413ba8ec337 1-172
+docs/ios-compatibility.md
+  s_b6a0f22c32fc5f::t_5306da58ba3b67 59
+  s_b6a0f22c32fc5f::t_fedd915dac9626 65-66
+  s_b6a0f22c32fc5f::t_b42c9734b9822b 63-64,68
+  s_b6a0f22c32fc5f::t_9fd3b967dc1849 1-58,60,62,69-74
+  s_b6a0f22c32fc5f::t_7d87e7f9817b9d 61
+  s_b6a0f22c32fc5f::t_6db1814a0dba3b 67
+PRD.md
+  s_b6a0f22c32fc5f::t_9261cd037f3485 247-256,259-264
+  s_b6a0f22c32fc5f::t_bce3866c2e82ba 468-481,518-519
+  s_b6a0f22c32fc5f::t_c2698615e2d4e6 573-576,580-582
+  s_b6a0f22c32fc5f::t_2c212bddf371a8 17-22
+  s_b6a0f22c32fc5f::t_3fe03391480e5a 207
+  s_b6a0f22c32fc5f::t_6bb5ca5c923dfc 91-108
+  s_b6a0f22c32fc5f::t_5c28921447fd5d 385
+  s_b6a0f22c32fc5f::t_9b4f9dae31e0c1 211-214
+  s_b6a0f22c32fc5f::t_266e200ab5c504 315-316
+  s_b6a0f22c32fc5f::t_948ee595834149 25-28
+  s_b6a0f22c32fc5f::t_91b20fec1dbb30 151-154
+  s_b6a0f22c32fc5f::t_27e0751398ff4c 355-360,362-384
+  s_b6a0f22c32fc5f::t_5306da58ba3b67 827
+  s_b6a0f22c32fc5f::t_fedd915dac9626 415-416
+  s_b6a0f22c32fc5f::t_7d87e7f9817b9d 411
+  s_b6a0f22c32fc5f::t_bba76467b2ec46 109-112
+  s_b6a0f22c32fc5f::t_f91fc721c4ee0d 393-394
+  s_b6a0f22c32fc5f::t_d02e612b0f6924 64
+  s_b6a0f22c32fc5f::t_566c953dd8842c 347,350
+  s_b6a0f22c32fc5f::t_673c3ca03db4bf 167-170,175-190
+  s_b6a0f22c32fc5f::t_a2e3b83fbfd8d1 23-24
+  s_b6a0f22c32fc5f::t_981d4a02629976 257-258
+  s_b6a0f22c32fc5f::t_d82234bd4f9b5e 361
+  s_b6a0f22c32fc5f::t_82302e3ecea97d 171-174
+  s_b6a0f22c32fc5f::t_3e9b78b7ec61ea 223-224
+  s_b6a0f22c32fc5f::t_7d3a20fb87ed26 585-586
+  s_b6a0f22c32fc5f::t_edee380f8f41b3 231-234,236
+  s_b6a0f22c32fc5f::t_c08765dbf0d85b 63
+  s_b6a0f22c32fc5f::t_3d08e9b2888554 81-82
+  s_b6a0f22c32fc5f::t_eaaf7f3dd6f889 51-53
+  s_b6a0f22c32fc5f::t_c30b03a0a63743 215-222,229-230
+  s_b6a0f22c32fc5f::t_4b48769d6d5125 387-391
+  s_b6a0f22c32fc5f::t_807a6463811ae2 77-80
+  s_b6a0f22c32fc5f::t_d732cbcc9352a7 197-206,208-210
+  s_b6a0f22c32fc5f::t_da15e113343e1c 541,545
+  s_b6a0f22c32fc5f::t_9f25addcc1f788 345,348-349
+  s_b6a0f22c32fc5f::t_426ce9bcfb8ac7 399-400
+  s_b6a0f22c32fc5f::t_eed4ddcd16adae 265-268
+  s_b6a0f22c32fc5f::t_05ccd8f7737d21 225-227
+  s_b6a0f22c32fc5f::t_88c54290b26357 577-579
+  s_b6a0f22c32fc5f::t_84dd0c107a7e8c 228
+  s_b6a0f22c32fc5f::t_17fb71eb09845b 237-246
+  s_b6a0f22c32fc5f::t_5c64ff508cc81f 610-611
+  s_b6a0f22c32fc5f::t_ddb0863e741525 83-86,89-90
+  s_b6a0f22c32fc5f::t_9292c61bb5c96e 235
+  s_b6a0f22c32fc5f::t_500d16442df6cb 295-296
+  s_b6a0f22c32fc5f::t_51d0902d037708 395-396
+  s_b6a0f22c32fc5f::t_703d8daf7983fa 55-61
+  s_b6a0f22c32fc5f::t_f684c11ba0d06d 596
+  s_b6a0f22c32fc5f::t_f528d14a7fb389 62,297-306,308-309
+  s_b6a0f22c32fc5f::t_5a48e2cb6a610b 317-318
+  s_b6a0f22c32fc5f::t_e7c11a8a9891cf 41-46
+  s_b6a0f22c32fc5f::t_3b5e9bb5bb8e4d 155-164
+  s_b6a0f22c32fc5f::t_5ffd8a7772b12d 409,412-413
+  s_b6a0f22c32fc5f::t_67f148f3ce74b2 65-76
+  s_b6a0f22c32fc5f::t_f7817fd1475cbe 583-584
+  s_b6a0f22c32fc5f::t_a5d96b90d94ae2 624-625
+  s_b6a0f22c32fc5f::t_d54448cab2bdf8 351-352
+  s_b6a0f22c32fc5f::t_d31740f62fcfdc 29-38
+  s_b6a0f22c32fc5f::t_6836f860c328ae 131-134
+  s_b6a0f22c32fc5f::t_33714ae075087f 407,410
+  s_b6a0f22c32fc5f::t_a7a2be8a6f2acd 87-88
+  s_b6a0f22c32fc5f::t_373081406663da 401-404,406,408,417-451,482-517,521-533,540,542-544,546-551,556-570,589-595,597-601,607-609
+  s_b6a0f22c32fc5f::t_e34413ba8ec337 285-294
+  s_b6a0f22c32fc5f::t_da22791b825b47 313-314
+  s_b6a0f22c32fc5f::t_9bd45b3c8edd16 39-40
+  s_b6a0f22c32fc5f::t_6903efcecf1b2b 191-196
+  s_b6a0f22c32fc5f::t_8d5fe9bb7ff3d0 310,319-343
+  s_b6a0f22c32fc5f::t_5dbe0daa95ff47 452-467,520,534-539,602-606
+  s_b6a0f22c32fc5f::t_8a3bbafce952b0 353-354
+  s_b6a0f22c32fc5f::t_3cbf1b6156d4e0 346
+  s_b6a0f22c32fc5f::t_372c07f1019218 135-150
+  s_b6a0f22c32fc5f::t_1b1a265e1e5003 392
+  s_b6a0f22c32fc5f::t_9c7b4764207ccf 405,414,552-555,571-572,825-826
+  s_b6a0f22c32fc5f::t_308dee66580d72 165-166
+  s_b6a0f22c32fc5f::t_df7f99433e5401 307
+  s_b6a0f22c32fc5f::t_e208f366d7c0e4 311-312
+  s_b6a0f22c32fc5f::t_752e74b7f721af 113-130
+  s_b6a0f22c32fc5f::t_2c02ee2ca01758 587-588
+  s_b6a0f22c32fc5f::t_7d0d88b60ff95b 269-284
+  s_b6a0f22c32fc5f::t_15aa8d77d59f43 386
+  s_b6a0f22c32fc5f::t_a48e5676f9c061 397-398
+  s_b6a0f22c32fc5f::t_fabb8fcf144380 47-50
+  s_b6a0f22c32fc5f::t_9544bdf80a8b93 54
+  s_b6a0f22c32fc5f::t_702e379c45fb78 344
+  s_b6a0f22c32fc5f::t_fb19452ba587cb 828
+output/performance/ios-1793021872-8014.json
+  s_b6a0f22c32fc5f::t_b27144478536aa 1-7694
+output/performance/ios-1793025171-40628.json
+  s_b6a0f22c32fc5f::t_34f725bb3f7600 1-7804
+output/performance/ios-1793043064-56824.json
+  s_58860a6dd107b9::t_c30909415f34a8 1-7594
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0071c3369d6f499b2c9bf370432eb0c743257ded",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
