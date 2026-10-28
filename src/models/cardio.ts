@@ -104,6 +104,40 @@ export interface CardioConstraintPlan {
   activeDays: number[];
 }
 
+/** A reviewable time/effort prescription, independent of sensor calibration. */
+export interface EasyCardioPrescription {
+  schemaVersion: 1;
+  policy: 'EASY_START_V1';
+  id: string;
+  modality: CardioPlanningModality;
+  stimulus: 'EASY';
+  durationSeconds: number;
+  allowWalking: boolean;
+  basis: 'CURRENT_PRACTICE' | 'FAMILIARIZATION';
+  adjustments: Array<'UNKNOWN_DURATION' | 'TOLERATED_DURATION_CAP' | 'AVAILABILITY_CAP'>;
+  segments: Array<{
+    phase: 'WARMUP' | 'EASY' | 'COOLDOWN';
+    durationSeconds: number;
+    effort: { scale: 'VIGOR_CARDIO_EFFORT_0_10_V1'; min: number; max: number };
+    talkTest: 'COMFORTABLE_CONVERSATION';
+  }>;
+}
+
+export interface EasyCardioRequest {
+  id: string;
+  modality: CardioPlanningModality;
+  /** Requested full session duration, before availability and tolerance caps. */
+  durationMinutes: number;
+  candidateDays: number[];
+  /** Explicit scheduling input; not inferred from a favorable readiness score. */
+  lowerBodyDemand: 'LOW' | 'HIGH';
+}
+
+export interface EasyCardioDraftPlan extends CardioConstraintPlan {
+  /** Only scheduled prescriptions are returned for review. No athlete write occurs. */
+  prescriptions: EasyCardioPrescription[];
+}
+
 /**
  * Sesión de cardio ejecutada o planificada.
  * Los campos target* son la pauta; los actual* el registro real (paralelo a
