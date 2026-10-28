@@ -1,0 +1,117 @@
+import React from 'react';
+import { Modal } from 'react-native';
+import { BioHealthCard } from '../BioHealthCard';
+import { BioIntervalBar, BioMetricTrend, metricTone, SoftMetricSurface } from '../BioMetricVisual';
+import { buildMetricMonitor } from '@/services/bio/metricMonitor';
+import { localCheckInDate } from '@/services/bio/dailyCheckIn';
+const { create, act } = require('react-test-renderer');
+const mockPush = jest.fn(), mockReload = jest.fn();
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string, args?: any) => args ? key+':'+JSON.stringify(args) : key, i18n: { language: 'en' } }) }));
+const now = new Date(2026, 9, 28, 10).getTime();
+const health = (patch: object = {}): any => ({ owner: 'owner', state: 'OFF', trends: [], reload: mockReload, ...patch });
+const text = (tree: any) => JSON.stringify(tree.toJSON());
+const button = (tree: any, label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
+const trend = (patch: any = {}): any => {
+  const days = Array.from({ length: 29 }, (_, index) => {
+    const at = new Date(now);at.setDate(at.getDate()-index);
+    return { date: localCheckInDate(at.getTime()), value: 50+index%3, at: at.getTime(), samples: 1 };
+  });
+  return { metric: 'RESTING_HR', sourceId: 'watch', sourceName: 'Watch', latest: days[0], days, fresh: true, status: 'AVAILABLE', ...patch };
+};
+const openMetric = async (tree: any, metric='RESTING_HR') => {
+  const tile=tree.root.findByProps({testID:'bio-metric-'+metric});
+  const press=tile.findAll((node: any)=>typeof node.props.onPress==='function')[0];
+  await act(async()=>press.props.onPress());
+};
+beforeEach(()=>{jest.clearAllMocks();jest.spyOn(Date,'now').mockReturnValue(now);});
+afterEach(()=>jest.restoreAllMocks());
+it('routes opt-in to settings and distinguishes loading, unsupported and failed reads', async () => {
+  let tree: any; await act(async () => { tree = create(<BioHealthCard health={health()} />); });
+  await act(async () => button(tree, 'bioHealth.openSettings').props.onPress()); expect(mockPush).toHaveBeenCalledWith('/settings');
+  await act(async () => tree.update(<BioHealthCard health={health({ state: 'UNAVAILABLE' })} />)); expect(text(tree)).toContain('health.unavailable');
+  await act(async () => tree.update(<BioHealthCard health={health({ state: 'ERROR' })} />)); expect(text(tree)).toContain('bioHealth.error');
+  await act(async () => button(tree, 'bioHealth.refresh').props.onPress()); expect(mockReload).toHaveBeenCalledTimes(1);
+  await act(async () => tree.update(<BioHealthCard health={health({ state: 'LOADING' })} />));
+  expect(button(tree, 'bioHealth.refresh')).toBeUndefined();await act(async () => tree.unmount());
+});
+it('renders three ordered compact cards, opens a real trend on tap and shares the Soft material', async()=>{
+  const input=health({state:'READY',trends:[trend(),trend({metric:'HRV_SDNN'})]});
+  let tree:any;await act(async()=>{tree=create(<BioHealthCard health={input}/>);});
+  expect(tree.root.findAllByType(BioIntervalBar).map((node:any)=>node.props.view.position)).toEqual(['WITHIN','WITHIN','MISSING']);
+  expect(text(tree)).not.toContain('Watch');expect(text(tree)).not.toContain('bioMetric.method');
+  expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  await openMetric(tree);
+  expect(tree.root.findAllByType(Modal)).toHaveLength(1);
+  expect(tree.root.findByType(Modal).props.presentationStyle).toBe('pageSheet');
+  expect(tree.root.findByType(Modal).props.allowSwipeDismissal).toBe(true);
+  expect(tree.root.findAllByType(BioMetricTrend)).toHaveLength(1);
+  expect(text(tree)).toContain('Watch');expect(text(tree)).toContain('bioMetric.method');
+  const surfaces=tree.root.findAllByType(SoftMetricSurface);
+  expect(surfaces.some((node:any)=>node.props.testID==='bio-metric-detail')).toBe(true);
+  await act(async()=>button(tree,'bioMetric.close').props.onPress());
+  expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  await openMetric(tree);
+  await act(async()=>tree.root.findByType(Modal).props.onRequestClose());
+  expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  await act(async()=>button(tree,'bioSummary.recordDetails').props.onPress());expect(text(tree)).toContain('bioMetric.method');
+  await act(async()=>button(tree,'bioSummary.recordDetails').props.onPress());expect(text(tree)).not.toContain('bioMetric.method');
+  await act(async()=>tree.unmount());
+});
+it('keeps missing data/reference/stale readings neutral and retains raw history without a band',async()=>{
+  let tree:any;const item=trend({days:[],fresh:true});
+  await act(async()=>{tree=create(<BioHealthCard health={health({state:'READY',trends:[item]})}/>);});
+  expect(text(tree)).toContain('bioMetric.position.BUILDING');expect(text(tree)).toContain('bioHealth.missing');
+  expect(tree.root.findAll((node:any)=>node.props.testID==='bio-interval')).toHaveLength(0);
+  await openMetric(tree);expect(tree.root.findAllByType(BioMetricTrend)).toHaveLength(1);
+  expect(text(tree)).toContain('bioHealth.buildingReference');expect(text(tree)).toContain('bioHealth.missing');
+  await act(async()=>tree.update(<BioHealthCard health={health({state:'READY',trends:[trend({fresh:false})]})}/>));
+  expect(text(tree)).toContain('bioMetric.position.STALE');
+  expect(tree.root.findAll((node:any)=>node.props.testID==='bio-interval')).toHaveLength(0);
+  await act(async()=>tree.update(<BioHealthCard health={health({state:'READY',trends:[trend({status:'TRUNCATED'})]})}/>));
+  expect(text(tree)).toContain('bioMetric.position.ERROR');
+  await openMetric(tree);expect(text(tree)).toContain('bioHealth.noData');
+  await act(async()=>tree.unmount());
+});
+it('clears private details on refresh, source change, disconnect and account change',async()=>{
+  let tree:any;let input=health({state:'READY',trends:[trend()]});
+  await act(async()=>{tree=create(<BioHealthCard health={input}/>);});await openMetric(tree);
+  await act(async()=>tree.update(<BioHealthCard health={{...input,owner:'other'}}/>));
+  expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  await openMetric(tree);
+  await act(async()=>tree.update(<BioHealthCard health={{...input,owner:'other',trends:[trend({sourceId:'new'})]}}/>));
+  expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  await act(async()=>tree.update(<BioHealthCard health={{...input,owner:'other'}}/>));
+  expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  input=health({state:'READY',trends:[trend()]});
+  await act(async()=>tree.update(<BioHealthCard health={input}/>));await openMetric(tree);
+  await act(async()=>tree.update(<BioHealthCard health={health({state:'LOADING'})}/>));expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  await act(async()=>tree.update(<BioHealthCard health={input}/>));expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  await openMetric(tree);await act(async()=>tree.update(<BioHealthCard health={health()}/>));expect(text(tree)).not.toContain('Watch');
+  await act(async()=>tree.unmount());
+});
+it('compares sleep to its chosen goal and opens settings only explicitly',async()=>{
+  let tree:any;const sleep=trend({metric:'SLEEP',latest:{...trend().latest,value:450}});
+  await act(async()=>{tree=create(<BioHealthCard health={health({state:'READY',trends:[sleep]})}/>);});
+  expect(text(tree)).toContain('bioMetric.position.GOAL_MISSING');await openMetric(tree,'SLEEP');
+  await act(async()=>button(tree,'bioReadiness.setGoal').props.onPress());expect(mockPush).toHaveBeenCalledWith('/settings');
+  await act(async()=>tree.update(<BioHealthCard health={health({state:'READY',trends:[sleep]})} sleepGoalMinutes={495}/>));await openMetric(tree,'SLEEP');
+  expect(text(tree)).toContain('bioMetric.position.TARGET_BELOW');expect(text(tree)).toContain('bioMetric.goal');
+  expect(text(tree)).toContain('bioMetric.sleepBoundary');await act(async()=>tree.unmount());
+});
+it('breaks trend paths at absent dates and renders finite constant and extreme geometry',async()=>{
+  const original=trend(), gaps=original.days.filter((_:unknown,index:number)=>index!==1&&index!==3);
+  const view=buildMetricMonitor({...original,days:gaps},undefined,now);
+  let tree:any;await act(async()=>{tree=create(<BioMetricTrend view={view} label="Trend"/>);});
+  const path=tree.root.findByProps({testID:'bio-trend-path'}).props.d;
+  expect((path.match(/M/g)||[]).length).toBe(3);expect(path).not.toMatch(/NaN|Infinity/);
+  const layout=tree.root.findAll((node:any)=>typeof node.props.onLayout==='function')[0];
+  await act(async()=>layout.props.onLayout({nativeEvent:{layout:{width:320}}}));
+  await act(async()=>layout.props.onLayout({nativeEvent:{layout:{width:NaN}}}));
+  expect(tree.root.findByProps({testID:'bio-trend-path'}).props.d).not.toMatch(/NaN|Infinity/);
+  await act(async()=>tree.update(<BioMetricTrend view={{days:[],position:'MISSING'}} label="Missing"/>));expect(tree.toJSON()).toBeNull();
+  await act(async()=>tree.unmount());
+  for(const position of ['WITHIN','TARGET_MET','BELOW','ABOVE','TARGET_BELOW','BUILDING','STALE','MISSING'] as const){
+    expect(metricTone({days:[],position})).toBe(['WITHIN','TARGET_MET'].includes(position)?'green':['BELOW','ABOVE','TARGET_BELOW'].includes(position)?'amber':'neutral');
+  }
+});

@@ -6,11 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { HealthExportSettings } from '@/components/train/WorkoutHealthExport';
+import { BioHealthSettings } from '@/components/bio/BioHealthSettings';
 import { normalizeDisplayName, type AppAppearance, type AppLanguage } from '@/services/settings/appSettings';
+import { NumericField } from '@/components/train/NumericField';
 
 export default function SettingsScreen() {
   const { t } = useTranslation(); const router = useRouter(); const insets = useSafeAreaInsets();
-  const { colors, radius, typography, spacing, sectionAccent, semantic } = useTheme(); const preferences = useAppSettings();
+  const { surfaces, colors, radius, typography, spacing, sectionAccent, semantic } = useTheme(); const preferences = useAppSettings();
   const [name, setName] = useState(preferences.displayName); const [invalidName, setInvalidName] = useState(false); const [savedName, setSavedName] = useState(false);
   useEffect(() => { setName(preferences.displayName); }, [preferences.displayName]);
   const row = (label: string, selected: boolean, onPress: () => void, group: string) => <Pressable key={label} accessibilityRole="radio"
@@ -21,8 +23,8 @@ export default function SettingsScreen() {
     <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: selected ? 6 : 1, borderColor: selected ? sectionAccent.train : colors.textMuted }} />
   </Pressable>;
   const heading = (key: string) => <Text style={[typography.title, { color: colors.textPrimary, marginBottom: 14 }]}>{t(key)}</Text>;
-  const card = { padding: 18, borderRadius: radius.lg, backgroundColor: colors.surface, marginTop: 20 };
-  return <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: insets.top }}>
+  const card = { ...surfaces.card, padding: 20, borderRadius: radius.lg, marginTop: 20 };
+  return <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }}>
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 32 }}>
       <Pressable accessibilityRole="button" accessibilityLabel={t('generate.back')} onPress={() => {
         if (router.canGoBack()) router.back(); else router.replace('/(tabs)/profile');
@@ -52,8 +54,17 @@ export default function SettingsScreen() {
         {heading('settings.language')}
         {(['system', 'es', 'en', 'fr', 'ja'] as AppLanguage[]).map((language) => row(t(`settings.language_${language}`), preferences.settings.language === language, () => { void preferences.change({ language }); }, t('settings.language')))}
       </View>
+      <View style={card}>
+        {heading('executionUpdates.units')}
+        {(['metric', 'imperial'] as const).map((measurementSystem) => row(t(`executionUpdates.${measurementSystem}`),
+          (preferences.settings.measurementSystem ?? 'metric') === measurementSystem, () => { void preferences.change({ measurementSystem }); }, t('executionUpdates.units')))}
+        <Text style={{ color: colors.textSecondary, marginTop: 16 }}>{t('executionUpdates.increment')}</Text>
+        <NumericField decimal value={preferences.settings.weightIncrement ?? 0.25} accessibilityLabel={t('executionUpdates.increment')}
+          onChangeValue={(value) => { if (value !== undefined && value >= 0.01 && value <= 100) void preferences.change({ weightIncrement: value }); }} />
+      </View>
       <Text style={[typography.title, { color: colors.textPrimary, marginTop: 28 }]}>{t('settings.connections')}</Text>
       <HealthExportSettings />
+      <BioHealthSettings />
       {preferences.error && <View style={{ marginTop: 18 }}>
         <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('settings.error')}</Text>
         <Pressable accessibilityRole="button" onPress={preferences.reload} style={{ paddingVertical: 14 }}><Text style={{ color: colors.accentText }}>{t('settings.retry')}</Text></Pressable>

@@ -1,0 +1,74 @@
+import React from 'react';
+import Screen from '@/app/(tabs)/(train)/bio-check';
+import { DailyCheckInSheet } from '../DailyCheckInSheet';
+import { MicrocycleReviewSheet } from '../MicrocycleReviewSheet';
+import { BioNightDetailsSheet } from '../BioNightDetailsSheet';
+const { create, act } = require('react-test-renderer');
+jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
+jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+it('previews intended-session context with an inline session choice using only fabricated data', async () => {
+  let tree: any; await act(async () => { tree = create(<Screen />); });
+  const button = (label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
+  await act(async () => button('Preview synthetic session context').props.onPress()); expect(JSON.stringify(tree.toJSON())).toContain('Synthetic Upper');
+  await act(async () => button('bioSession.choose').props.onPress());
+  await act(async () => button('Synthetic Lower').props.onPress()); expect(JSON.stringify(tree.toJSON())).toContain('Synthetic Lower');
+  await act(async () => tree.unmount());
+});
+it('renders the real experimental index from a complete fabricated reference, with no Health or account writes', async () => {
+  let tree: any; await act(async () => { tree = create(<Screen />); });
+  const open = tree.root.findAll((node: any) => node.props.accessibilityLabel === 'Preview synthetic overnight observations' && typeof node.props.onPress === 'function')[0];
+  await act(async () => open.props.onPress());
+  expect(tree.root.findAll((node: any) => node.props.testID === 'readiness-score')[0].props.children).toBe(100);
+  expect(JSON.stringify(tree.toJSON())).toContain('bioReadiness.experimental'); await act(async () => tree.unmount());
+});
+it('checks the overnight overlay without expanding or replacing the fixture overview', async () => {
+  let tree: any; await act(async () => { tree = create(<Screen />); });
+  const button = (label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
+  await act(async () => button('Preview synthetic overnight observations').props.onPress());
+  expect(tree.root.findAllByType(BioNightDetailsSheet)).toHaveLength(0);
+  await act(async () => button('bioSummary.nightDetails').props.onPress());
+  expect(tree.root.findAllByType(BioNightDetailsSheet)).toHaveLength(1);
+  await act(async () => tree.root.findByType(BioNightDetailsSheet).props.onClose());
+  expect(tree.root.findAllByType(BioNightDetailsSheet)).toHaveLength(0);
+  expect(tree.root.findAll((node: any) => node.props.testID === 'readiness-score')[0].props.children).toBe(100);
+  await act(async () => tree.unmount());
+});
+it('previews Health trends and dose reviews with synthetic observations and no native permission calls', async () => {
+  let tree: any; await act(async () => { tree = create(<Screen />); });
+  const open = tree.root.findAll((node: any) => node.props.accessibilityLabel === 'Preview synthetic Health and dose review' && typeof node.props.onPress === 'function')[0];
+  await act(async () => open.props.onPress());
+  const metric = tree.root.findAll((node: any) => node.props.accessibilityLabel === 'bioMetric.open' && typeof node.props.onPress === 'function')[0];
+  await act(async () => metric.props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('Synthetic Watch');
+  const close = tree.root.findAll((node: any) => node.props.accessibilityLabel === 'bioMetric.close' && typeof node.props.onPress === 'function')[0];
+  await act(async () => close.props.onPress());
+  expect(JSON.stringify(tree.toJSON())).toContain('bioDose.MAINTAIN');
+  await act(async () => tree.unmount());
+});
+it('checks the real survey component with synthetic in-memory answers and no athlete persistence', async () => {
+  let tree: any; await act(async () => { tree = create(<Screen />); });
+  const button = () => tree.root.findAll((node: any) => node.props.accessibilityLabel === 'bio.review' && typeof node.props.onPress === 'function')[0];
+  await act(async () => button().props.onPress());
+  await act(async () => tree.root.findByType(MicrocycleReviewSheet).props.onSave({ recovery: 'USUAL', context: ['STRESS'] }));
+  await act(async () => tree.root.findByType(MicrocycleReviewSheet).props.onClose());
+  expect(JSON.stringify(tree.toJSON())).toContain('Synthetic review saved in memory only');
+  await act(async () => button().props.onPress()); expect(tree.root.findByType(MicrocycleReviewSheet).props.initial.recovery).toBe('USUAL');
+  await act(async () => tree.root.findByType(MicrocycleReviewSheet).props.onSkip());
+  expect(JSON.stringify(tree.toJSON())).toContain('Synthetic review dismissed in memory only');
+  await act(async () => tree.unmount());
+});
+it('checks the daily editor with in-memory answers, separately from the microcycle review', async () => {
+  let tree: any; await act(async () => { tree = create(<Screen />); });
+  const open = () => tree.root.findAll((node: any) => node.props.accessibilityLabel === 'dailyCheckIn.start' && typeof node.props.onPress === 'function')[0];
+  await act(async () => open().props.onPress());
+  expect(tree.root.findByType(DailyCheckInSheet).props.initial).toEqual({});
+  await act(async () => tree.root.findByType(DailyCheckInSheet).props.onSave({ energy: 'LOWER', discomfort: 'PRESENT' }));
+  await act(async () => tree.root.findByType(DailyCheckInSheet).props.onClose());
+  expect(JSON.stringify(tree.toJSON())).toContain('Synthetic daily check-in saved in memory only');
+  expect(JSON.stringify(tree.toJSON())).toContain('LOWER');
+  await act(async () => open().props.onPress());
+  expect(tree.root.findByType(DailyCheckInSheet).props.initial).toEqual({ energy: 'LOWER', discomfort: 'PRESENT' });
+  expect(tree.root.findAllByType(MicrocycleReviewSheet)).toHaveLength(0);
+  await act(async () => tree.unmount());
+});

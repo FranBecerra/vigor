@@ -2,7 +2,7 @@ const plugin = require('../../../../plugins/withWorkoutHealth');
 const personalTeam = require('../../../../plugins/withFreePersonalTeam');
 const { withEntitlementsPlist } = require('@expo/config-plugins');
 
-it('enables only workout HealthKit capability and a write-purpose disclosure, preserving widget groups', async () => {
+it('retains workout writes and separately discloses optional local Bio reads, preserving widget groups', async () => {
   const config = plugin(personalTeam({ name: 'Vigor', slug: 'vigor' }));
   const entitlementConfig = withEntitlementsPlist(config, (mod: any) => {
     mod.modResults['aps-environment'] = 'development'; return mod;
@@ -13,5 +13,8 @@ it('enables only workout HealthKit capability and a write-purpose disclosure, pr
     'com.apple.security.application-groups': ['group.com.franciscobecerra.vigor'] });
   const info = await config.mods.ios.infoPlist({ ...config, modResults: { NSSupportsLiveActivities: true }, modRequest: {} });
   expect(info.modResults.NSHealthUpdateUsageDescription).toMatch(/start and end times/);
-  expect(info.modResults.NSHealthShareUsageDescription).toBeUndefined(); expect(info.modResults.NSSupportsLiveActivities).toBe(true);
+  expect(info.modResults.NSHealthShareUsageDescription).toMatch(/sleep, resting heart rate/);
+  expect(info.modResults.NSHealthShareUsageDescription).toMatch(/separate overnight opt-in/);
+  expect(info.modResults.NSHealthShareUsageDescription).toMatch(/SDNN\/RMSSD/);
+  expect(info.modResults.NSHealthShareUsageDescription).toMatch(/stay on this device/); expect(info.modResults.NSSupportsLiveActivities).toBe(true);
 });

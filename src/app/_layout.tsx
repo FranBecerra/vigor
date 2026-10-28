@@ -28,6 +28,7 @@ import { useWorkoutActivityOwner } from '@/hooks/useWorkoutActivity';
 import { HealthExportProvider } from '@/hooks/useHealthExport';
 import { AppSettingsProvider } from '@/hooks/useAppSettings';
 import { TrainingNotesProvider } from '@/hooks/useTrainingNotes';
+import { MicrocycleReviewsProvider } from '@/hooks/useMicrocycleReviews';
 
 /**
  * Decide qué mostrar según el estado de sesión.
@@ -68,12 +69,14 @@ export default function RootLayout() {
           <HealthExportProvider>
           <ExerciseCatalogueProvider>
           <TrainingNotesProvider>
+          <MicrocycleReviewsProvider>
           <RehabilitationProvider>
           <ThemeProvider value={navigationThemeFor(scheme)}>
             <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
             <AuthGate />
           </ThemeProvider>
           </RehabilitationProvider>
+          </MicrocycleReviewsProvider>
           </TrainingNotesProvider>
           </ExerciseCatalogueProvider>
           </HealthExportProvider>

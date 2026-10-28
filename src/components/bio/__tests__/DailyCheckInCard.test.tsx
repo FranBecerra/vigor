@@ -1,0 +1,76 @@
+import React from 'react';
+import { Modal } from 'react-native';
+import { DailyCheckInCard, DailyCheckInSheet } from '../DailyCheckInCard';
+const { create, act } = require('react-test-renderer');
+const mockSave = jest.fn(), mockReload = jest.fn();
+let mockCheckIn: any;
+jest.mock('@/hooks/useDailyCheckIn', () => ({ useDailyCheckIn: () => mockCheckIn }));
+jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ bottom: 0 }) }));
+const button = (tree: any, label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
+beforeEach(() => { jest.clearAllMocks(); mockSave.mockReset().mockResolvedValue(undefined);
+  mockCheckIn = { owner: 'owner', date: '2026-10-26', ready: true, error: false, pending: false, save: mockSave, reload: mockReload }; });
+
+it('is opt-in, has no defaults and permits a short partial check-in without fabricating a score', async () => {
+  let tree: any; await act(async () => { tree = create(<DailyCheckInCard />); });
+  expect(tree.root.findAllByType(DailyCheckInSheet)).toHaveLength(0); expect(mockSave).not.toHaveBeenCalled();
+  await act(async () => button(tree, 'dailyCheckIn.start').props.onPress());
+  expect(button(tree, 'dailyCheckIn.save').props.disabled).toBe(true);
+  expect(tree.root.findAll((node: any) => node.props.accessibilityState?.selected === true)).toHaveLength(0);
+  await act(async () => button(tree, 'dailyCheckIn.energy: dailyCheckIn.USUAL').props.onPress());
+  await act(async () => button(tree, 'dailyCheckIn.save').props.onPress());
+  expect(mockSave).toHaveBeenCalledWith({ energy: 'USUAL' }); expect(tree.root.findAllByType(DailyCheckInSheet)).toHaveLength(0);
+  await act(async () => tree.unmount());
+});
+it('edits existing answers, preserves separate discomfort and allows restoring an unanswered item', async () => {
+  mockCheckIn.entry = { answers: { recovery: 'BETTER', discomfort: 'PRESENT' } }; mockCheckIn.pending = true;
+  let tree: any; await act(async () => { tree = create(<DailyCheckInCard />); });
+  expect(JSON.stringify(tree.toJSON())).toContain('custom.pending');
+  await act(async () => button(tree, 'dailyCheckIn.edit').props.onPress());
+  await act(async () => button(tree, 'dailyCheckIn.recovery: dailyCheckIn.BETTER').props.onPress());
+  expect(button(tree, 'dailyCheckIn.save').props.disabled).toBe(false);
+  await act(async () => button(tree, 'dailyCheckIn.save').props.onPress()); expect(mockSave).toHaveBeenCalledWith({ discomfort: 'PRESENT' });
+  await act(async () => tree.unmount());
+});
+it('preserves a failed draft, blocks dismiss while saving and supports retry', async () => {
+  const close = jest.fn(); let resolve!: () => void;
+  mockSave.mockRejectedValueOnce(Error('offline')).mockImplementationOnce(() => new Promise<void>((done) => { resolve = done; }));
+  let tree: any; await act(async () => { tree = create(<DailyCheckInSheet initial={{ sleep: 'WORSE' }} onClose={close} onSave={mockSave} />); });
+  await act(async () => button(tree, 'dailyCheckIn.save').props.onPress());
+  expect(close).not.toHaveBeenCalled(); expect(JSON.stringify(tree.toJSON())).toContain('bio.saveError');
+  expect(button(tree, 'dailyCheckIn.sleep: dailyCheckIn.WORSE').props.accessibilityState.selected).toBe(true);
+  await act(async () => button(tree, 'dailyCheckIn.save').props.onPress());
+  expect(button(tree, 'bio.close').props.disabled).toBe(true);
+  await act(async () => tree.root.findByType(Modal).props.onRequestClose()); expect(close).not.toHaveBeenCalled();
+  await act(async () => resolve()); expect(close).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount());
+});
+it('reloads inside an open editor without losing its answers and serializes repeated save taps', async () => {
+  let tree: any; await act(async () => { tree = create(<DailyCheckInCard />); });
+  await act(async () => button(tree, 'dailyCheckIn.start').props.onPress());
+  await act(async () => button(tree, 'dailyCheckIn.energy: dailyCheckIn.LOWER').props.onPress());
+  mockCheckIn = { ...mockCheckIn, error: true }; await act(async () => tree.update(<DailyCheckInCard />));
+  expect(button(tree, 'dailyCheckIn.save').props.disabled).toBe(true);
+  await act(async () => tree.root.findByType(DailyCheckInSheet).props.onRetry()); expect(mockReload).toHaveBeenCalledTimes(1);
+  mockCheckIn = { ...mockCheckIn, error: false }; await act(async () => tree.update(<DailyCheckInCard />));
+  expect(button(tree, 'dailyCheckIn.energy: dailyCheckIn.LOWER').props.accessibilityState.selected).toBe(true);
+  const save = button(tree, 'dailyCheckIn.save').props.onPress;
+  await act(async () => { save(); save(); });
+  expect(mockSave).toHaveBeenCalledTimes(1); expect(mockSave).toHaveBeenCalledWith({ energy: 'LOWER' });
+  await act(async () => tree.unmount());
+});
+it('closes private editors on date or account changes, handles read failures and never writes on dismissal', async () => {
+  let tree: any; await act(async () => { tree = create(<DailyCheckInCard />); });
+  await act(async () => button(tree, 'dailyCheckIn.start').props.onPress());
+  mockCheckIn = { ...mockCheckIn, date: '2026-10-27' }; await act(async () => tree.update(<DailyCheckInCard />));
+  expect(tree.root.findAllByType(DailyCheckInSheet)).toHaveLength(0);
+  await act(async () => button(tree, 'dailyCheckIn.start').props.onPress());
+  mockCheckIn = { ...mockCheckIn, owner: 'other' }; await act(async () => tree.update(<DailyCheckInCard />));
+  expect(tree.root.findAllByType(DailyCheckInSheet)).toHaveLength(0);
+  mockCheckIn = { ...mockCheckIn, error: true }; await act(async () => tree.update(<DailyCheckInCard />));
+  await act(async () => button(tree, 'bio.retry').props.onPress()); expect(mockReload).toHaveBeenCalled();
+  await act(async () => tree.unmount());
+  const close = jest.fn(); await act(async () => { tree = create(<DailyCheckInSheet initial={{}} onClose={close} onSave={mockSave} />); });
+  await act(async () => tree.root.findByType(Modal).props.onRequestClose()); expect(close).toHaveBeenCalledTimes(1); expect(mockSave).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});

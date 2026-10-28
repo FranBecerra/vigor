@@ -11,6 +11,7 @@ export * from './sessionFeedback';
 export * from './cardio';
 export * from './analytics';
 export * from './readiness';
+export * from './microcycleReview';
 export * from './injury';
 export * from './rehabilitation';
 export * from './nutrition';

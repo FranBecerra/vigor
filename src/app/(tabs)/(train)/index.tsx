@@ -24,6 +24,7 @@ import { TodayCard } from '@/components/home/TodayCard';
 import { RoutineCard } from '@/components/home/RoutineCard';
 import { RenameRoutineSheet } from '@/components/home/RenameRoutineSheet';
 import { TrainingCalendarCard } from '@/components/train/TrainingCalendarCard';
+import { MicrocycleReviewPrompt } from '@/components/bio/MicrocycleReviewPrompt';
 import { useTheme } from '@/theme/useTheme';
 import { useRoutines } from '@/hooks/useRoutines';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
@@ -204,6 +205,7 @@ export default function TrainHomeScreen() {
           />
         </View>
 
+        {!activeWorkout && domain === 'STRENGTH' && <MicrocycleReviewPrompt routines={routines} />}
         {activeWorkout && resumeGoal && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/session', params: {
           mesocycleId: activeWorkout.mesocycleId, goal: resumeGoal,
           microcycleIndex: String(activeWorkout.microcycleIndex), plannedSessionIndex: String(activeWorkout.plannedSessionIndex),
