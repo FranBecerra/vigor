@@ -1,4 +1,4 @@
-const mockNative = { scheduleRestFeedback: jest.fn(), restFeedbackStatus: jest.fn() };
+const mockNative = { scheduleRestFeedback: jest.fn(), restFeedbackStatus: jest.fn(), recordRestDeliverySnapshot: jest.fn() };
 let mockModule: typeof mockNative | null | {} = mockNative;
 jest.mock('expo-modules-core', () => ({ ...jest.requireActual('expo-modules-core'), requireOptionalNativeModule: () => mockModule }));
 const load = () => { let bridge: any; jest.isolateModules(() => { bridge = require('../nativeRestFeedback.ios'); }); return bridge; };
@@ -11,11 +11,13 @@ it('forwards absolute deadlines and cancellation and reads only the local diagno
   expect(mockNative.scheduleRestFeedback).toHaveBeenLastCalledWith(123456);
   await bridge.scheduleNativeRestFeedback(null); expect(mockNative.scheduleRestFeedback).toHaveBeenLastCalledWith(null);
   expect(await bridge.nativeRestFeedbackStatus()).toEqual(status);
+  await bridge.recordRestDeliverySnapshot(2); expect(mockNative.recordRestDeliverySnapshot).toHaveBeenCalledWith(2);
 });
 it.each([null, {}])('degrades without native capability, without claiming feedback succeeded (%p)', async (module) => {
   mockModule = module; const bridge = load();
   expect(await bridge.scheduleNativeRestFeedback(123)).toBe(false);
   expect(await bridge.nativeRestFeedbackStatus()).toEqual({ phase: 'unavailable' });
+  await expect(bridge.recordRestDeliverySnapshot(1)).resolves.toBeUndefined();
 });
 it('propagates native errors for the caller fallback rather than reporting success', async () => {
   mockNative.scheduleRestFeedback.mockRejectedValue(Error('audio preparation failed'));

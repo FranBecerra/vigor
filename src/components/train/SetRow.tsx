@@ -17,7 +17,7 @@ import Animated, {
   withTiming,
   interpolateColor,
 } from 'react-native-reanimated';
-import { SetType, type SetExtension } from '@/models';
+import { SetType, type SetExtension, type ExerciseRecording } from '@/models';
 import { supportsExtensions } from '@/services/training/advancedSets';
 import { useTheme } from '@/theme/useTheme';
 import { setTypeLabel } from './setTypeLabel';
@@ -26,6 +26,8 @@ import type { SetEntryValues } from './SetEntrySheet';
 import { SwipeableSet } from './SwipeableSet';
 import { TrophyIcon } from '@/components/icons/ActionIcons';
 import { useTranslation } from 'react-i18next';
+import { useTrainingUnits } from '@/hooks/useTrainingUnits';
+import { WheelNumber } from './WheelNumber';
 import { SetExtensionsEditor } from './SetExtensionsEditor';
 import { intensityLabel, type IntensityScale, type IntensityValue } from '@/services/training/intensityScale';
 
@@ -59,6 +61,7 @@ export interface SetRowData {
 }
 
 interface SetRowProps {
+  recording?: ExerciseRecording;
   data: SetRowData;
   scale: IntensityScale;
   onPressSetType: () => void;
@@ -84,10 +87,20 @@ function SetRowComponent({
   onRemove,
   onChangePartialReps,
   onComplete,
+  recording,
 }: SetRowProps) {
   const { colors, sectionAccent, motion } = useTheme();
   const accent = sectionAccent.train;
   const { t } = useTranslation();
+  const units = useTrainingUnits();
+  const hasLoad = recording?.load !== 'NONE'; const timed = recording?.measure === 'SECONDS';
+  const display = recording?.load === 'LEVEL' ? (value: number | undefined) => value : units.display;
+  const store = recording?.load === 'LEVEL' ? (value: number | undefined) => value : units.store;
+  const loadLabel = recording?.load === 'LEVEL' ? t('custom.LEVEL') : units.unit.toUpperCase();
+  const repsLabel = timed ? t('rehab.seconds') : t('train.reps');
+  const previousLabel = data.previous
+    ? `${hasLoad ? `${display(data.previous.weight)?.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${recording?.load === 'LEVEL' ? t('custom.LEVEL') : units.unit} × ` : ''}${data.previous.reps}${timed ? ' s' : ''}${!timed && data.previous.intensity !== null ? ` @ ${scale} ${intensityLabel(data.previous.intensity, scale)}` : ''}`
+    : '—';
   const [editing, setEditing] = useState<'weight' | 'reps' | 'intensity' | null>(null);
 
   const done = useSharedValue(data.isCompleted ? 1 : 0);
@@ -135,41 +148,33 @@ function SetRowComponent({
 
         {/* PREVIOUS */}
         <View style={styles.previous}>
-          {data.previous ? (
-            <>
-              <Text style={[styles.previousMain, { color: colors.textSecondary }]}>
-                {data.previous.weight} kg × {data.previous.reps}
-              </Text>
-              <Text style={[styles.previousSub, { color: colors.textMuted }]}>
-                {intensityLabel(data.previous.intensity, scale)} {scale}
-              </Text>
-            </>
-          ) : (
-            <Text style={[styles.previousMain, { color: colors.textMuted }]}>—</Text>
-          )}
+          <Text accessibilityLabel={previousLabel} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85}
+            style={[styles.previousMain, { color: data.previous ? colors.textSecondary : colors.textMuted }]}>
+            {previousLabel}
+          </Text>
         </View>
 
         {/* KG — bloqueado al completar */}
         <View style={{ width: COLUMN_WIDTHS.weight, alignItems: 'center' }}>
-          <Pressable onPress={() => setEditing('weight')} accessibilityRole="button" accessibilityLabel={t('train.weight')}
+          {hasLoad && <WheelNumber value={display(data.weight)} step={recording?.load === 'LEVEL' ? 1 : units.increment} maximum={10000} label={loadLabel} onChange={(value) => onChangeWeight(store(value))} onPress={() => setEditing('weight')}
             style={{ paddingVertical: 10, width: '92%', borderRadius: 8, backgroundColor: colors.surface }}>
-            <Text style={{ textAlign: 'center', color: data.weightIsPlanned ? colors.textMuted : colors.textPrimary, fontWeight: '700' }}>{data.weight ?? '—'}</Text>
-          </Pressable>
+            <Text style={{ textAlign: 'center', color: data.weightIsPlanned ? colors.textMuted : colors.textPrimary, fontWeight: '700' }}>{display(data.weight)?.toLocaleString(undefined, { maximumFractionDigits: 2 }) ?? '—'}</Text>
+          </WheelNumber>}
         </View>
 
         {/* REPS — bloqueado al completar */}
         <View style={{ width: COLUMN_WIDTHS.reps, alignItems: 'center' }}>
-          <Pressable onPress={() => setEditing('reps')} accessibilityRole="button" accessibilityLabel={t('train.reps')}
+          <WheelNumber value={data.reps} step={1} maximum={timed ? 3600 : 999} label={repsLabel} onChange={onChangeReps} onPress={() => setEditing('reps')}
             style={{ paddingVertical: 10, width: '92%', borderRadius: 8, backgroundColor: colors.surface }}>
             <Text style={{ textAlign: 'center', color: data.repsIsPlanned ? colors.textMuted : colors.textPrimary, fontWeight: '700' }}>{data.reps ?? '—'}{data.partialReps ? ` +${data.partialReps}P` : ''}</Text>
-          </Pressable>
+          </WheelNumber>
         </View>
 
         {/* INTENSIDAD — sigue editable incluso en una serie completada */}
         <View style={{ width: COLUMN_WIDTHS.intensity, alignItems: 'center' }}>
-          <Pressable onPress={() => setEditing('intensity')} accessibilityRole="button" accessibilityLabel={scale} style={{ minHeight: 44, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
+          {!timed && <Pressable onPress={() => setEditing('intensity')} accessibilityRole="button" accessibilityLabel={scale} style={{ minHeight: 44, width: '100%', justifyContent: 'center', alignItems: 'center' }}>
             <Text style={{ color: colors.accentText, fontWeight: '700' }}>{intensityLabel(data.intensity ?? null, scale)}</Text>
-          </Pressable>
+          </Pressable>}
         </View>
 
         {/* ✓ */}
@@ -185,8 +190,10 @@ function SetRowComponent({
           </Animated.View>
         </Pressable>
       </Animated.View>
-      {editing && <SetEntrySheet initialField={editing} weight={data.weight} reps={data.reps} intensity={data.intensity} partialReps={data.partialReps} scale={scale}
-        onWeight={onChangeWeight} onReps={onChangeReps} onIntensity={onChangeIntensity} onPartialReps={onChangePartialReps} onComplete={onComplete} onClose={() => setEditing(null)} />}
+      {editing && <SetEntrySheet initialField={editing} weight={display(data.weight)} reps={data.reps} intensity={data.intensity} partialReps={data.partialReps} scale={scale}
+        weightLabel={loadLabel} repsLabel={repsLabel} showWeight={hasLoad} showIntensity={!timed}
+        onWeight={(value) => onChangeWeight(store(value))} onReps={onChangeReps} onIntensity={onChangeIntensity} onPartialReps={timed ? undefined : onChangePartialReps}
+        onComplete={onComplete ? (values) => onComplete({ ...values, weight: store(values.weight) }) : undefined} onClose={() => setEditing(null)} />}
 
       {/* Los parámetros aparecen justo al seleccionar un tipo avanzado. */}
       {hasExtraFields ? (
@@ -194,7 +201,7 @@ function SetRowComponent({
           setType={data.setType}
           extensions={data.extensions ?? [{}]}
           mainWeight={data.weight}
-          editable={!data.isCompleted}
+          editable
           onChange={onChangeExtensions}
         />
       ) : null}
@@ -220,9 +227,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   setBadgeText: { fontSize: 12, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  previous: { flex: 1, paddingLeft: 4 },
-  previousMain: { fontSize: 12, fontVariant: ['tabular-nums'] },
-  previousSub: { fontSize: 10, fontVariant: ['tabular-nums'] },
+  previous: { flex: 1, minWidth: 0, paddingLeft: 4, paddingRight: 4 },
+  previousMain: { fontSize: 13, fontVariant: ['tabular-nums'] },
   checkbox: {
     width: 22,
     height: 22,

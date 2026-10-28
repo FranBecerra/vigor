@@ -1,8 +1,9 @@
 import { SetType, type WorkoutSession } from '@/models';
 import { isSetCompleted } from './sessionMapper';
 import { normalizeWorkoutNote } from './trainingNotes';
+import { reviseSessionFeedback } from './sessionFeedback';
 
-export type HistoryEdit = Pick<WorkoutSession, 'sessionName' | 'sessionNote' | 'exercises'>;
+export type HistoryEdit = Pick<WorkoutSession, 'sessionName' | 'sessionNote' | 'exercises'> & { sessionEffort?: number | null };
 /** Only execution details are editable; identity, dates, progression and Health linkage stay intact. */
 export function editWorkoutHistory(original: WorkoutSession, owner: string, draft: HistoryEdit, now: number): WorkoutSession {
   if (!owner || original.userId !== owner || !original.completedAt || original.discardedAt !== undefined
@@ -29,7 +30,9 @@ export function editWorkoutHistory(original: WorkoutSession, owner: string, draf
       if (set.completionState !== undefined && !['DONE', 'PENDING'].includes(set.completionState)) throw Error('invalidHistoryCompletion');
       const result = { ...(baseline ?? { id: set.id, targetReps: 10, targetWeight: 0, targetRIR: 2, isAutoFilled: false }),
         setType: set.setType, completionState: set.completionState, actualReps: set.actualReps,
-        actualWeight: set.actualWeight, actualRIR: set.actualRIR, actualLoadLevel: set.actualLoadLevel,
+        actualWeight: set.actualWeight, actualRIR: set.setType === SetType.FAILURE ? 0 : set.actualRIR, actualLoadLevel: set.actualLoadLevel,
+        actualRIRSource: set.setType === SetType.FAILURE ? 'FAILURE' as const
+          : baseline?.actualRIR !== set.actualRIR ? 'ATHLETE' as const : baseline?.actualRIRSource,
         actualDurationSeconds: set.actualDurationSeconds, actualPartialReps: set.actualPartialReps,
         extensions: set.extensions?.map((extra) => ({ reps: extra.reps, weight: extra.weight })),
         ...(recording ? { recording } : {}) };
@@ -39,5 +42,7 @@ export function editWorkoutHistory(original: WorkoutSession, owner: string, draf
     });
     return { ...previous, order, sets, notes: normalizeWorkoutNote(entry.notes ?? '') };
   });
-  return { ...original, sessionName: name || original.sessionName || '', sessionNote: normalizeWorkoutNote(draft.sessionNote ?? ''), exercises, editedAt: now };
+  const feedback = draft.sessionEffort === undefined ? original.sessionFeedback : reviseSessionFeedback(original.sessionFeedback, draft.sessionEffort, now, 'HISTORY_EDIT');
+  return { ...original, sessionName: name || original.sessionName || '', sessionNote: normalizeWorkoutNote(draft.sessionNote ?? ''), exercises, editedAt: now,
+    ...(feedback ? { sessionFeedback: feedback } : {}) };
 }

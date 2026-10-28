@@ -12,6 +12,37 @@ it('normalizes visible names without reserving a handle and rejects invalid inpu
 it('validates implemented settings only', () => {
   for (const value of [null, {}, { appearance: 'blue', language: 'system' }, { appearance: 'system', language: 'de' }]) expect(() => validateAppSettings(value)).toThrow();
   expect(validateAppSettings({ appearance: 'dark', language: 'ja' })).toEqual({ appearance: 'dark', language: 'ja' });
+  expect(validateAppSettings({ ...DEFAULT_APP_SETTINGS, bioHealthEnabled: true }).bioHealthEnabled).toBe(true);
+  expect(() => validateAppSettings({ ...DEFAULT_APP_SETTINGS, bioHealthEnabled: 1 })).toThrow('Invalid Bio connection');
+  expect(validateAppSettings({ ...DEFAULT_APP_SETTINGS, bioNightEnabled: true }).bioNightEnabled).toBe(true);
+  expect(() => validateAppSettings({ ...DEFAULT_APP_SETTINGS, bioNightEnabled: 1 })).toThrow('Invalid overnight connection');
+});
+it('persists overnight opt-in separately without silently enabling it for legacy Bio users', async () => {
+  const { repo } = setup(); await repo.update('a', { bioHealthEnabled: true });
+  expect((await repo.get('a')).bioNightEnabled).toBeUndefined();
+  await repo.update('a', { bioNightEnabled: true });
+  expect(await repo.get('a')).toMatchObject({ bioHealthEnabled: true, bioNightEnabled: true });
+  expect((await repo.get('b')).bioNightEnabled).toBeUndefined();
+  await repo.update('a', { bioNightEnabled: false }); expect((await repo.get('a')).bioNightEnabled).toBe(false);
+});
+it('persists an explicit sleep target by owner without inventing one for existing users', async () => {
+  const { repo, storage } = setup();
+  expect((await repo.get('a')).bioSleepGoalMinutes).toBeUndefined();
+  for (const value of [null, '480', NaN, Infinity, 239, 721, 480.5]) {
+    await expect(repo.update('a', { bioSleepGoalMinutes: value as any })).rejects.toThrow('Invalid sleep goal');
+  }
+  expect(storage.write).not.toHaveBeenCalled();
+  await repo.update('a', { bioSleepGoalMinutes: 480 });
+  expect((await new AppSettingsRepository(storage).get('a')).bioSleepGoalMinutes).toBe(480);
+  expect((await repo.get('b')).bioSleepGoalMinutes).toBeUndefined();
+  await repo.update('a', { bioSleepGoalMinutes: undefined }); expect((await repo.get('a')).bioSleepGoalMinutes).toBeUndefined();
+});
+it('isolates unit and wheel-step preferences by owner, retaining legacy metric defaults', async () => {
+  const { repo, storage } = setup();
+  await repo.update('a', { measurementSystem: 'imperial', weightIncrement: 0.5 });
+  expect(await repo.get('a')).toMatchObject({ measurementSystem: 'imperial', weightIncrement: 0.5 });
+  expect(await repo.get('b')).toEqual(DEFAULT_APP_SETTINGS);
+  expect(await new AppSettingsRepository(storage).get('a')).toMatchObject({ measurementSystem: 'imperial', weightIncrement: 0.5 });
 });
 it('defaults to the system, persists per owner and merges rapid field edits without mutation', async () => {
   const { repo } = setup(); const initial = await repo.get('a'); expect(initial).toEqual(DEFAULT_APP_SETTINGS); initial.appearance = 'light';

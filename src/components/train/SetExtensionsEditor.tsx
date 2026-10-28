@@ -15,6 +15,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SetType, type SetExtension } from '@/models';
 import { useTheme } from '@/theme/useTheme';
+import { useTrainingUnits } from '@/hooks/useTrainingUnits';
 import { NumericField } from './NumericField';
 
 interface SetExtensionsEditorProps {
@@ -34,6 +35,7 @@ export function SetExtensionsEditor({
 }: SetExtensionsEditorProps) {
   const { t } = useTranslation();
   const { colors, sectionAccent, radius, spacing } = useTheme();
+  const units = useTrainingUnits();
   const requiresWeight = setType === SetType.DROP_SET;
 
   function update(index: number, patch: Partial<SetExtension>) {
@@ -50,7 +52,7 @@ export function SetExtensionsEditor({
         <Text style={[styles.label, { color: colors.textMuted }]}>{t('train.extraSets')}</Text>
         {!requiresWeight ? (
           <Text style={[styles.inheritedWeight, { color: colors.textMuted }]}>
-            {t('train.sameWeight', { weight: mainWeight ?? '—' })}
+            {t('train.sameWeight', { weight: units.display(mainWeight)?.toLocaleString(undefined, { maximumFractionDigits: 2 }) ?? '—' }).replace(/\bkg\b/gi, units.unit)}
           </Text>
         ) : null}
       </View>
@@ -73,11 +75,11 @@ export function SetExtensionsEditor({
 
           {requiresWeight ? (
             <View style={styles.fieldGroup}>
-              <Text style={[styles.fieldLabel, { color: colors.textMuted }]}>{t('train.weight')}</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textMuted }]}>{units.unit.toUpperCase()}</Text>
               <View style={styles.field}>
                 <NumericField
-                  value={extension.weight}
-                  onChangeValue={(weight) => update(index, { weight })}
+                  value={units.display(extension.weight)}
+                  onChangeValue={(weight) => update(index, { weight: units.store(weight) })}
                   decimal
                   editable={editable}
                   accessibilityLabel={`${t('train.extension')} ${index + 1} ${t('train.weight')}`}
@@ -114,15 +116,15 @@ export function SetExtensionsEditor({
 const styles = StyleSheet.create({
   container: { marginLeft: 52, marginRight: 16, marginBottom: 8, borderLeftWidth: 2, paddingLeft: 10 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 },
-  label: { fontSize: 9, fontWeight: '700', letterSpacing: 0.8 },
-  inheritedWeight: { fontSize: 9 },
+  label: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8 },
+  inheritedWeight: { fontSize: 11 },
   extensionRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 7, marginBottom: 6 },
-  index: { width: 13, fontSize: 10, fontWeight: '700', paddingBottom: 8 },
+  index: { width: 13, fontSize: 11, fontWeight: '700', paddingBottom: 8 },
   fieldGroup: { gap: 3 },
-  fieldLabel: { fontSize: 8, fontWeight: '700', letterSpacing: 0.5 },
+  fieldLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
   field: { width: 54, alignItems: 'center' },
   remove: { width: 28, height: 28, borderWidth: 1, alignItems: 'center', justifyContent: 'center', marginBottom: 1 },
   removeText: { fontSize: 18, lineHeight: 20, fontWeight: '400' },
   add: { alignSelf: 'flex-start', borderWidth: 1, borderStyle: 'dashed', paddingHorizontal: 9, paddingVertical: 5 },
-  addText: { fontSize: 10, fontWeight: '600' },
+  addText: { fontSize: 11, fontWeight: '600' },
 });

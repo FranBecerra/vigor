@@ -1,22 +1,16 @@
 /**
- * Tarjeta de rutina del acordeón (PRD §8.5).
- *
- * La rutina activa viene expandida y muestra las sesiones del microciclo en
- * curso. Cada sesión indica:
- *  - su FECHA REAL de realización si está completada (`16 SEP`),
- *  - nada (`—`) si está pendiente: el microciclo no está anclado al calendario,
- *    así que inventar un día de la semana sería falso (§3.1),
- *  - `HOY` si es la seleccionada.
- *
- * Cualquier sesión pendiente es pulsable para pasar a ser la sesión activa: el
- * usuario no está obligado a seguir el orden previsto.
+ * Subtle routine accordion (PRD §8.5): status on the left, session metadata in
+ * the middle and working sets on the right. Real dates live in the subtitle;
+ * pending sessions have no invented calendar date. Existing row actions and
+ * the fixed-height reorder slots are preserved.
  */
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { ROUTINE_ICONS } from '@/components/icons';
 import { MesoRail } from './HomeHeader';
 import { useTheme } from '@/theme/useTheme';
-import { rankedMuscleVolume } from '@/services/training/sessionSummary';
+import { rankedMuscleVolume, totalWorkingSets } from '@/services/training/sessionSummary';
+import { RoutineDayIndicator } from './RoutineDayIndicator';
 import type { MockRoutine } from '@/mocks/home';
 import type { ReactNode } from 'react';
 
@@ -37,6 +31,7 @@ interface RoutineCardProps {
   muscleLabel: (muscle: string) => string;
   labels: {
     sessions: string;
+    sets: string;
     today: string;
     viewMesocycle: string;
     microcycleOf: string;
@@ -76,7 +71,7 @@ export function RoutineCard({
   onRemove,
   renderSessionList,
 }: RoutineCardProps) {
-  const { colors, sectionAccent, semantic, radius, spacing } = useTheme();
+  const { surfaces, colors, sectionAccent, semantic, radius, spacing } = useTheme();
   const RoutineIcon = ROUTINE_ICONS[routine.icon];
   const current = routine.microcycles[routine.currentMicrocycleIndex];
   const accent = sectionAccent.train;
@@ -85,7 +80,7 @@ export function RoutineCard({
     <View
       style={[
         styles.card,
-        { backgroundColor: colors.bgElevated, borderRadius: radius.lg },
+        { ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: radius.lg },
         !expanded && styles.collapsed,
       ]}>
       <Pressable
@@ -126,11 +121,16 @@ export function RoutineCard({
           <View style={[styles.sessionList, { borderTopColor: colors.surfaceBorder }]}>
             {(() => { const rows = current.sessions.map((session) => {
               const isCompleted = session.completedOn !== undefined;
-              const isSkipped = session.skippedOn !== undefined;
+              const isSkipped = !isCompleted && session.skippedOn !== undefined;
               const isSelected = session.id === selectedSessionId;
-              const muscles = rankedMuscleVolume(session.exercises, 3)
+              const displayedExercises = isCompleted ? session.performedExercises ?? session.exercises : session.exercises;
+              const workingSets = totalWorkingSets(displayedExercises);
+              const muscles = rankedMuscleVolume(displayedExercises, 3)
                 .map((entry) => muscleLabel(entry.muscle))
                 .join(' · ');
+              const status = isCompleted ? formatSessionDate(session.completedOn!, locale)
+                : isSkipped ? labels.skipped : isSelected ? labels.today : '';
+              const subtitle = [status, isSkipped ? '' : muscles].filter(Boolean).join(' · ');
 
               return { index: session.plannedSessionIndex, content: (
                 <Pressable
@@ -139,51 +139,32 @@ export function RoutineCard({
                   onLongPress={onLongPressSession && !isCompleted && !isSkipped ? () => onLongPressSession(session.plannedSessionIndex) : undefined}
                   disabled={onSelectSession === undefined}
                   accessibilityRole="button"
+                  accessibilityLabel={[session.name, subtitle, `${workingSets} ${labels.sets}`].filter(Boolean).join(', ')}
                   accessibilityState={{ selected: isSelected, disabled: onSelectSession === undefined }}
                   style={[
                     styles.sessionRow,
-                    { borderBottomColor: colors.surfaceBorder },
-                    (isCompleted || isSkipped) && styles.sessionCompleted,
-                    isSelected && { backgroundColor: 'rgba(155,227,23,0.08)' },
+                    { borderBottomColor: colors.surfaceBorder, backgroundColor: colors.bgElevated },
+                    isSelected && { backgroundColor: colors.accentTint },
                   ]}>
-                  {/* Fecha real, o nada si está pendiente */}
-                  <Text
-                    style={[
-                      styles.sessionDate,
-                      { color: isSelected ? colors.accentText : colors.textMuted },
-                    ]}>
-                    {isSelected
-                      ? labels.today
-                      : isCompleted
-                        ? formatSessionDate(session.completedOn as string, locale)
-                        : isSkipped
-                          ? '—'
-                        : '—'}
-                  </Text>
-
+                  <RoutineDayIndicator completed={isCompleted || isSkipped} />
                   <View style={styles.sessionText}>
                     <Text
+                      numberOfLines={1}
                       style={[
                         styles.sessionName,
-                        { color: isSelected ? colors.accentText : colors.textPrimary },
+                        { color: isSelected ? colors.accentText : isCompleted || isSkipped ? colors.textSecondary : colors.textPrimary },
                         isSkipped && { textDecorationLine: 'line-through' },
                       ]}>
                       {session.name}
                     </Text>
-                    <Text style={[styles.sessionMuscles, { color: colors.textMuted }]}>
-                    {isSkipped ? labels.skipped : muscles}
+                    <Text numberOfLines={1} style={[styles.sessionMuscles, { color: colors.textMuted }]}>
+                    {subtitle}
                     </Text>
                   </View>
 
-                  <View
-                    style={[
-                      styles.checkbox,
-                      {
-                        borderColor: isCompleted || isSkipped || isSelected ? accent : colors.surfaceBorder,
-                        backgroundColor: isCompleted || isSkipped ? accent : 'transparent',
-                      },
-                    ]}>
-                    {isCompleted || isSkipped ? <Text style={styles.checkMark}>✓</Text> : null}
+                  <View style={styles.setCount}>
+                    <Text style={[styles.setCountValue, { color: isSelected ? colors.accentText : colors.textPrimary }]}>{workingSets}</Text>
+                    <Text style={[styles.setCountLabel, { color: colors.textSecondary }]}>{labels.sets}</Text>
                   </View>
                 </Pressable>
               ) };
@@ -230,7 +211,7 @@ const styles = StyleSheet.create({
   headerText: { flex: 1 },
   routineName: { fontSize: 19, fontWeight: '700' },
   routineMeta: { fontSize: 13, marginTop: 4 },
-  chevron: { fontSize: 10 },
+  chevron: { fontSize: 11 },
   sessionList: { borderTopWidth: 1, marginTop: 10 },
   sessionRow: {
     minHeight: 64,
@@ -241,20 +222,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     borderBottomWidth: 1,
   },
-  sessionCompleted: { opacity: 0.45 },
-  sessionDate: { width: 48, fontSize: 11, fontWeight: '800', letterSpacing: 0.3 },
-  sessionText: { flex: 1 },
+  sessionText: { flex: 1, minWidth: 0 },
   sessionName: { fontSize: 16, fontWeight: '600' },
   sessionMuscles: { fontSize: 12, marginTop: 4 },
-  checkbox: {
-    width: 18,
-    height: 18,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkMark: { fontSize: 11, fontWeight: '900', color: '#16191C' },
+  setCount: { minWidth: 40, alignItems: 'flex-end', gap: 2, flexShrink: 0 },
+  setCountValue: { fontSize: 16, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  setCountLabel: { fontSize: 11 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: 8 },
   actionButton: { borderWidth: 1, minHeight: 44, justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 12 },
   removeButton: { marginRight: 'auto' },

@@ -13,6 +13,7 @@ import { moveRoutineDay, orderedRoutineSessions, restDayKey, restDaysTemplate, r
 import type { durationCalibration } from '@/services/training/sessionDuration';
 import { SwipeableSet } from './SwipeableSet';
 import { RoutineDayList, type DayListScroll } from './RoutineDayList';
+import { RoutineDayIndicator } from '@/components/home/RoutineDayIndicator';
 
 /** One atomic workout/rest timeline. Incoming home metadata prevents deferred rest insertion. */
 export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, onChanged, sessionRows, initialMesocycle, onSessionHold, edgeScroll }: {
@@ -71,13 +72,9 @@ export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, onCha
       <Pressable testID={`rest-day-${day.id}`} accessibilityRole="checkbox" accessibilityLabel={t('calendar.rest')} accessibilityState={{ checked }} disabled={busy}
         onPress={() => void save(days, { ...meso.restDayChecks, [restDayKey(microcycleIndex, day.id)]: !checked })}
         style={{ minHeight: 64, paddingVertical: 9, paddingHorizontal: 4, borderBottomWidth: 1, borderColor: colors.surfaceBorder,
-          flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.bgElevated, opacity: checked ? 0.45 : 1 }}>
-        <Text style={{ width: 48, color: colors.textMuted, fontSize: 11, fontWeight: '800' }}>—</Text>
-        <Text style={{ flex: 1, color: colors.textPrimary, fontSize: 16, fontWeight: '600' }}>{t('calendar.rest')}</Text>
-        <View style={{ width: 18, height: 18, borderWidth: 1.5, borderColor: checked ? sectionAccent.train : colors.controlBorder,
-          borderRadius: 6, backgroundColor: checked ? sectionAccent.train : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
-          {checked && <Text style={{ color: colors.onAccent, fontWeight: '900', fontSize: 11 }}>✓</Text>}
-        </View>
+          flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.bgElevated }}>
+        <RoutineDayIndicator kind="rest" completed={checked} />
+        <Text style={{ flex: 1, color: checked ? colors.textSecondary : colors.textPrimary, fontSize: 16, fontWeight: '600' }}>{t('calendar.rest')}</Text>
       </Pressable>
     </SwipeableSet>;
   };

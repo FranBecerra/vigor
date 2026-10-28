@@ -75,7 +75,7 @@ export function useSessionPersistence({
   const hasRestored = sessionId !== null && restoredSessionId === sessionId;
   const writeAttempt = useRef(0);
   const writeGate = useRef(new WorkoutWriteGate());
-  const acceptedNoteIntent = useRef<Pick<SessionContext, 'sessionNote' | 'exerciseNotes'>>({});
+  const acceptedNoteIntent = useRef<Pick<SessionContext, 'sessionNote' | 'exerciseNotes' | 'sessionFeedback'>>({});
 
   // --- Recuperación: una sola vez por sesión ------------------------------
   useEffect(() => {
@@ -116,10 +116,10 @@ export function useSessionPersistence({
   }, [sessionId, restoreAttempt]);
 
   /** Escribe ya, sin esperar al temporizador. Para cerrar o salir. */
-  const flush = useCallback(async (completedAt?: number, notePatch?: Pick<SessionContext, 'sessionNote' | 'exerciseNotes'>): Promise<boolean> => {
+  const flush = useCallback(async (completedAt?: number, notePatch?: Pick<SessionContext, 'sessionNote' | 'exerciseNotes' | 'sessionFeedback'>): Promise<boolean> => {
     if (context === null || writeGate.current.stopped || !hasRestored || currentSessionId.current !== context.sessionId || (!context.persistDraft && isSessionEmpty(latestSets.current))) return false;
     const finalCompletedAt = completedAt ?? completedAtRef.current;
-    // Explicit note saves must survive an immediate background/unmount before
+    // Explicit note/feedback saves must survive an immediate background/unmount before
     // React commits the caller's updated context.
     if (notePatch) acceptedNoteIntent.current = { ...acceptedNoteIntent.current, ...notePatch };
 

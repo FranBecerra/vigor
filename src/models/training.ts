@@ -157,6 +157,8 @@ export interface SetExtension {
 }
 
 export interface WorkoutSet {
+  /** A temporarily invalid edit of an already completed set is not new work. */
+  completionWasRecorded?: boolean;
   recording?: import('./biomechanics').ExerciseRecording;
   targetDurationSeconds?: number;
   actualDurationSeconds?: number;
@@ -180,6 +182,8 @@ export interface WorkoutSet {
    * (p. ej. en calentamientos donde no se sabe cuántas reps quedan).
    */
   actualRIR?: number | null;
+  /** Absent in legacy history: numeric effort alone does not prove athlete reporting. */
+  actualRIRSource?: 'ATHLETE' | 'INHERITED_TARGET' | 'FAILURE';
   actualWeight?: number;
   /**
    * Tramos extra ejecutados, en orden, para series avanzadas (Rest Pause,
@@ -212,6 +216,10 @@ export interface WorkoutExercise {
 
 /** Sesión de entrenamiento completa dentro de un microciclo del mesociclo. */
 export interface WorkoutSession {
+  /** Optional whole-session effort; absent on legacy and skipped feedback. */
+  sessionFeedback?: import('./sessionFeedback').SessionFeedback;
+  /** User-authored round-robin groups; absent on older workouts. */
+  supersets?: Record<string, string>;
   /** Explicit execution correction; never changes the original completion timestamp. */
   editedAt?: number;
   /** Personal session note and mesocycle note captured at execution time. */

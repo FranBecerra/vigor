@@ -7,6 +7,7 @@ export * from './biomechanics';
 export * from './athlete';
 export * from './routine';
 export * from './training';
+export * from './sessionFeedback';
 export * from './cardio';
 export * from './analytics';
 export * from './readiness';

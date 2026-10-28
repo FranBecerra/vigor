@@ -12,6 +12,6 @@ Pod::Spec.new do |s|
   s.swift_version = '5.9'
   s.source_files = '**/*.swift'
   s.resources = 'Resources/rest-chime.wav'
-  s.frameworks = 'HealthKit', 'CryptoKit', 'AVFAudio', 'AudioToolbox', 'UIKit'
+  s.frameworks = 'HealthKit', 'CryptoKit', 'AVFAudio', 'AudioToolbox', 'UIKit', 'UserNotifications'
   s.dependency 'ExpoModulesCore'
 end

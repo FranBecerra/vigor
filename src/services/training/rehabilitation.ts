@@ -1,5 +1,6 @@
 import type { RehabBlock, RehabLog, RehabPrescription, RehabSetLog } from '@/models';
 import { isValidCustomExercise, recordingOf } from './customExercises';
+import { SetType } from '@/models';
 
 export function localDateKey(now: Date): string {
   if (!Number.isFinite(now.getTime())) throw new Error('invalidDate');
@@ -17,12 +18,13 @@ export function weekStartKey(key: string) {
   return localDateKey(date);
 }
 const positiveInteger = (value: number, max: number) => Number.isInteger(value) && value > 0 && value <= max;
-export function validateRehabBlock(block: RehabBlock): void {
+export function validateRehabBlock(block: RehabBlock, allowEmptyExecution = false): void {
   if (!block.userId || !block.id || block.version !== 1 || !block.name.trim() || block.name.trim().length > 120
     || !Number.isFinite(block.createdAt) || block.createdAt < 0 || !Number.isFinite(block.updatedAt)
     || block.updatedAt < 0 || typeof block.active !== 'boolean') throw new Error('invalidBlock');
-  if (!block.items.length || block.items.length > 30 || new Set(block.items.map((item) => item.id)).size !== block.items.length) throw new Error('invalidItems');
+  if ((!allowEmptyExecution && !block.items.length) || block.items.length > 30 || new Set(block.items.map((item) => item.id)).size !== block.items.length) throw new Error('invalidItems');
   for (const item of block.items) validateRehabItem(item, block.userId);
+  if (block.items[0]?.circuitWithPrevious) throw new Error('invalidCircuit');
   if (block.schedule.kind === 'WEEKLY') {
     if (!positiveInteger(block.schedule.target, 7)) throw new Error('invalidSchedule');
   } else if (block.schedule.kind === 'DAYS') {
@@ -44,7 +46,8 @@ export function validateRehabItem(item: RehabPrescription, ownerId: string): voi
     || !positiveInteger(item.max, mode.measure === 'SECONDS' ? 3600 : 999) || item.min > item.max
     || !Number.isFinite(item.restSeconds) || item.restSeconds < 0 || item.restSeconds > 3600
     || item.notes.length > 2000 || (item.load !== undefined && (!Number.isFinite(item.load) || item.load < 0 || item.load > 10000))
-    || (mode.load === 'NONE' && item.load !== undefined)) throw new Error('invalidPrescription');
+    || (mode.load === 'NONE' && item.load !== undefined)
+    || (item.circuitWithPrevious !== undefined && typeof item.circuitWithPrevious !== 'boolean')) throw new Error('invalidPrescription');
 }
 export function rehabWeekCompletions(block: RehabBlock, logs: readonly RehabLog[], today: string): number {
   dateFromKey(today);
@@ -70,7 +73,7 @@ export function newRehabLog(block: RehabBlock, today: string, now: number, worko
   validateRehabBlock(block); dateFromKey(today);
   if (!Number.isFinite(now) || now < 0) throw new Error('invalidDate');
   return { id: `${block.id}:${today}`, userId: block.userId, blockId: block.id, date: today,
-    status: 'IN_PROGRESS', blockSnapshot: JSON.parse(JSON.stringify(block)), updatedAt: now,
+    status: 'IN_PROGRESS', blockSnapshot: JSON.parse(JSON.stringify(block)), updatedAt: now, startedAt: now,
     ...(workoutKey ? { workoutKey } : {}), sets: block.items.flatMap((item) =>
       Array.from({ length: item.sets }, (_, index) => ({ itemId: item.id, index,
         recording: recordingOf(item.exerciseSnapshot), completed: false }))) };
@@ -81,26 +84,64 @@ export function rehabSetComplete(set: RehabSetLog): boolean {
     && (set.recording.load === 'NONE' || (typeof set.load === 'number' && Number.isFinite(set.load) && set.load >= 0 && set.load <= 10000));
 }
 export function validateRehabLog(log: RehabLog): void {
-  validateRehabBlock(log.blockSnapshot); dateFromKey(log.date);
+  // An execution may temporarily have zero rows after deletion; saved block
+  // templates still require a positive prescription.
+  validateRehabBlock({ ...log.blockSnapshot, items: log.blockSnapshot.items.map((item) => item.sets === 0 ? { ...item, sets: 1 } : item) }, true); dateFromKey(log.date);
   if (log.userId !== log.blockSnapshot.userId || log.blockId !== log.blockSnapshot.id
     || log.id !== `${log.blockId}:${log.date}` || !Number.isFinite(log.updatedAt)
     || !['IN_PROGRESS', 'COMPLETED', 'SKIPPED'].includes(log.status)
     || (log.workoutKey !== undefined && (typeof log.workoutKey !== 'string' || !log.workoutKey))) throw new Error('invalidLog');
-  const expected = newRehabLog(log.blockSnapshot, log.date, log.updatedAt).sets;
+  const expected = log.blockSnapshot.items.flatMap((item) => Array.from({ length: item.sets }, (_, index) => ({ itemId: item.id, index, recording: recordingOf(item.exerciseSnapshot) })));
+  if (log.activeItemId !== undefined && !log.blockSnapshot.items.some((item) => item.id === log.activeItemId)) throw new Error('invalidCursor');
+  if (log.restTimer !== undefined) {
+    const timer = log.restTimer;
+    if ((timer.startedAt !== null && (!Number.isFinite(timer.startedAt) || timer.startedAt < 0))
+      || !Number.isInteger(timer.durationSeconds) || timer.durationSeconds < 0 || timer.durationSeconds > 3600
+      || (timer.anchorSetId !== null && !expected.some((set) => `${set.itemId}:${set.index}` === timer.anchorSetId))) throw new Error('invalidRest');
+  }
   if (expected.length !== log.sets.length) throw new Error('invalidLog');
+  if (log.startedAt !== undefined && (!Number.isFinite(log.startedAt) || log.startedAt < 0)) throw Error('invalidStart');
   log.sets.forEach((set, index) => {
     const canonical = expected[index];
+    if ((set.completionWasRecorded !== undefined && typeof set.completionWasRecorded !== 'boolean')
+      || (set.setType !== undefined && !Object.values(SetType).includes(set.setType))
+      || (set.rir !== undefined && set.rir !== null && (!Number.isFinite(set.rir) || set.rir < 0 || set.rir > 5))
+      || (set.partialReps !== undefined && (!Number.isInteger(set.partialReps) || set.partialReps < 0 || set.partialReps > 999))
+      || (set.extensions !== undefined && (!Array.isArray(set.extensions) || set.extensions.length > 20 || set.extensions.some((extra) =>
+        (extra.reps !== undefined && (!Number.isInteger(extra.reps) || extra.reps < 0 || extra.reps > 999))
+        || (extra.weight !== undefined && (!Number.isFinite(extra.weight) || extra.weight < 0 || extra.weight > 10000)))))) throw Error('invalidSetDetails');
     if (canonical.itemId !== set.itemId || canonical.index !== set.index
       || canonical.recording.measure !== set.recording.measure || canonical.recording.load !== set.recording.load
       || typeof set.completed !== 'boolean' || (set.completed && !rehabSetComplete(set))
       || (set.actual !== undefined && (!Number.isFinite(set.actual) || set.actual < 0))
       || (set.load !== undefined && (!Number.isFinite(set.load) || set.load < 0 || set.recording.load === 'NONE'))) throw new Error('invalidLog');
   });
-  if (log.status === 'COMPLETED' && (!Number.isFinite(log.completedAt) || !log.sets.every((set) => set.completed && rehabSetComplete(set)))) throw new Error('invalidLog');
+  if (log.status === 'COMPLETED' && (!log.sets.length || !Number.isFinite(log.completedAt) || !log.sets.every((set) => set.completed && rehabSetComplete(set)))) throw new Error('invalidLog');
   if (log.status !== 'COMPLETED' && log.completedAt !== undefined) throw new Error('invalidLog');
 }
+
+/** Contiguous linked items run round-robin, including circuits with unequal set counts. */
+export function rehabExecutionOrder(block: RehabBlock): { itemId: string; index: number }[] {
+  const groups: RehabPrescription[][] = [];
+  for (const item of block.items) {
+    if (!item.circuitWithPrevious || !groups.length) groups.push([item]);
+    else groups[groups.length - 1].push(item);
+  }
+  return groups.flatMap((group) => Array.from({ length: Math.max(...group.map((item) => item.sets)) }, (_, index) =>
+    group.filter((item) => index < item.sets).map((item) => ({ itemId: item.id, index }))).flat());
+}
+
+export function nextRehabItem(log: RehabLog): string | undefined {
+  return rehabExecutionOrder(log.blockSnapshot).find((row) =>
+    !log.sets.find((set) => set.itemId === row.itemId && set.index === row.index)?.completed)?.itemId;
+}
+
+/** Reordering/removing breaks old links instead of silently joining unrelated prescriptions. */
+export function unlinkRehabItems(items: readonly RehabPrescription[]): RehabPrescription[] {
+  return items.map(({ circuitWithPrevious: _, ...item }) => item);
+}
 export function updateRehabSet(log: RehabLog, itemId: string, index: number,
-  patch: Partial<Pick<RehabSetLog, 'actual' | 'load' | 'completed'>>, now: number): RehabLog {
+  patch: Partial<Pick<RehabSetLog, 'actual' | 'load' | 'completed' | 'completionWasRecorded' | 'setType' | 'rir' | 'partialReps' | 'extensions'>>, now: number): RehabLog {
   if (!Number.isFinite(now) || !log.sets.some((set) => set.itemId === itemId && set.index === index)) throw new Error('invalidSet');
   const { completedAt: _, ...open } = log;
   return { ...open, updatedAt: now, status: 'IN_PROGRESS', sets: log.sets.map((set) => {

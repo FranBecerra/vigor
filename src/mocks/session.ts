@@ -72,7 +72,7 @@ export const mockExercises: Exercise[] = [
 
 /** Serie con el registro "anterior" para la columna PREVIOUS. */
 export interface MockSetRow extends WorkoutSet {
-  previous?: { weight: number; reps: number; rir: number };
+  previous?: { weight: number; reps: number; rir: number | null };
   isCompleted: boolean;
 }
 

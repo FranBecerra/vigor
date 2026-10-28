@@ -15,7 +15,7 @@ export function RestTimer({ state, onAdjust, onRestart, onSetDuration, onCancel,
   onSetDuration: (seconds: number) => void; onCancel: () => void;
   prescribedSeconds?: number; exerciseName?: string; onSetPrescription?: (seconds: number) => Promise<void>;
 }) {
-  const { colors, semantic, sectionAccent, radius } = useTheme(); const { t } = useTranslation();
+  const { surfaces, colors, semantic, sectionAccent, radius } = useTheme(); const { t } = useTranslation();
   const insets = useSafeAreaInsets(); const alertUnavailable = useRestAlert(state);
   const [now, setNow] = useState(Date.now); const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false); const [saveError, setSaveError] = useState(false);
@@ -26,21 +26,22 @@ export function RestTimer({ state, onAdjust, onRestart, onSetDuration, onCancel,
     return () => clearInterval(timer);
   }, [active, state.startedAt]);
   const remaining = remainingSeconds(state, now);
+  const displayed = active ? remaining : prescribedSeconds ?? 0;
   const tint = !active ? colors.textMuted : isRestFinished(state, now) ? semantic.warning : sectionAccent.train;
   return <>
-    <Pressable accessibilityRole="button" accessibilityLabel={t('restControls.open', { time: formatRest(remaining) })}
+    <Pressable accessibilityRole="button" accessibilityLabel={t('restControls.open', { time: formatRest(displayed) })}
       onPress={() => (active || onSetPrescription) && setOpen((value) => !value)} style={{ minWidth: 88, minHeight: 48 }}>
       <GlassSurface glassEffectStyle="regular" style={{ minWidth: 88, height: 48, justifyContent: 'center', alignItems: 'center', borderRadius: radius.lg }}>
         <Animated.Text key={active ? 'active' : 'idle'} entering={FadeIn.duration(220)} exiting={FadeOut.duration(100)}
-          style={{ color: tint, fontSize: 18, fontWeight: '700', fontVariant: ['tabular-nums'] }}>{active ? formatRest(remaining) : '—:—'}</Animated.Text>
+          style={{ color: tint, fontSize: 18, fontWeight: '700', fontVariant: ['tabular-nums'] }}>{active || prescribedSeconds !== undefined ? formatRest(displayed) : '—:—'}</Animated.Text>
       </GlassSurface>
     </Pressable>
     <Modal visible={open && (active || !!onSetPrescription)} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
       <Pressable accessibilityLabel={t('restControls.close')} onPress={() => setOpen(false)} style={{ flex: 1, backgroundColor: '#0007' }} />
-      <View accessibilityViewIsModal style={{ backgroundColor: colors.bgElevated, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl,
+      <View accessibilityViewIsModal style={{ ...surfaces.sheet, backgroundColor: colors.bgElevated, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl,
         padding: 20, paddingBottom: insets.bottom + 16, gap: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Text style={{ color: colors.textPrimary, fontSize: 24, fontWeight: '700' }}>{formatRest(remaining)}</Text>
+          <Text style={{ color: colors.textPrimary, fontSize: 24, fontWeight: '700' }}>{formatRest(displayed)}</Text>
           <Pressable onPress={() => setOpen(false)} accessibilityRole="button" accessibilityLabel={t('restControls.close')}
             style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.textPrimary, fontSize: 22 }}>×</Text></Pressable>
         </View>

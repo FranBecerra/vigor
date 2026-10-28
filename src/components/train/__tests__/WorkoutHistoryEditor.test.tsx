@@ -3,6 +3,8 @@ import { TextInput } from 'react-native';
 import { WorkoutHistoryEditor } from '../WorkoutHistoryEditor';
 import { NumericField } from '../NumericField';
 import { SetType, type WorkoutSession } from '@/models';
+import { ActionMenuSheet } from '../ActionMenuSheet';
+import { SessionEffortInput } from '../SessionEffortInput';
 const { create, act } = require('react-test-renderer');
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
@@ -10,6 +12,20 @@ const session: WorkoutSession = { id: 'history', userId: 'owner', performedAt: 1
   sessionName: 'Upper', exercises: [{ id: 'entry', exerciseId: 'ex', order: 0, isSwap: false,
     sets: [{ id: 'set', setType: SetType.NORMAL, targetWeight: 20, targetReps: 10, targetRIR: 2, actualWeight: 20, actualReps: 10, isAutoFilled: false }] }] };
 const button = (tree: any, label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
+it('restores, corrects and clears session effort without mutating the original or set intensity', async () => {
+  const feedback = { scale: 'VIGOR_SESSION_EFFORT_1_10_V1' as const, effort: 8, recordedAt: 5000, timing: 'AT_FINISH' as const };
+  const original = { ...session, sessionFeedback: feedback }; const save = jest.fn().mockResolvedValue(undefined); let tree: any;
+  await act(async () => { tree = create(<WorkoutHistoryEditor session={original} onSave={save} onClose={jest.fn()} />); });
+  expect(tree.root.findByType(SessionEffortInput).props.value).toBe(8);
+  await act(async () => tree.root.findByType(SessionEffortInput).props.onChange(6));
+  expect(save).not.toHaveBeenCalled(); expect(original.sessionFeedback.effort).toBe(8);
+  await act(async () => button(tree, 'custom.save').props.onPress());
+  expect(save.mock.calls[0][0].sessionEffort).toBe(6);
+  await act(async () => tree.root.findByType(SessionEffortInput).props.onChange(null));
+  await act(async () => button(tree, 'custom.save').props.onPress());
+  expect(save.mock.calls[1][0].sessionEffort).toBeNull();
+  await act(async () => tree.unmount());
+});
 it('keeps edits private until Save, retains a failed draft and closes only after a successful save', async () => {
   const save = jest.fn().mockRejectedValueOnce(Error('offline')).mockResolvedValue(undefined), close = jest.fn(); let tree: any;
   await act(async () => { tree = create(<WorkoutHistoryEditor session={session} onSave={save} onClose={close} />); });
@@ -27,5 +43,23 @@ it('can remove a set from the draft without writing the original', async () => {
   await act(async () => { tree = create(<WorkoutHistoryEditor session={session} onSave={save} onClose={jest.fn()} />); });
   await act(async () => button(tree, 'workout.removeSet').props.onPress());
   expect(tree.root.findAllByType(NumericField)).toHaveLength(0); expect(session.exercises[0].sets).toHaveLength(1); expect(save).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+it('edits failure and advanced segments explicitly and labels partials without cryptic abbreviations', async () => {
+  const save = jest.fn().mockResolvedValue(undefined); let tree: any;
+  await act(async () => { tree = create(<WorkoutHistoryEditor session={session} onSave={save} onClose={jest.fn()} />); });
+  expect(JSON.stringify(tree.toJSON())).toContain('trainingUpdates.partials');
+  expect(JSON.stringify(tree.toJSON())).not.toContain('+ P');
+  await act(async () => button(tree, 'prescription.setType').props.onPress());
+  await act(async () => tree.root.findByType(ActionMenuSheet).props.actions.find((item: any) => item.label === 'setType.FAILURE').onPress());
+  expect(tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === 'RIR').props).toMatchObject({ value: 0, editable: false });
+  await act(async () => button(tree, 'custom.save').props.onPress());
+  expect(save.mock.calls[0][0].exercises[0].sets[0]).toMatchObject({ setType: SetType.FAILURE, actualRIR: 0 });
+  await act(async () => button(tree, 'prescription.setType').props.onPress());
+  await act(async () => tree.root.findByType(ActionMenuSheet).props.actions.find((item: any) => item.label === 'setType.DROP_SET').onPress());
+  await act(async () => tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === 'train.extension 1').props.onChangeValue(4));
+  await act(async () => tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === 'KG 1').props.onChangeValue(15));
+  await act(async () => button(tree, 'custom.save').props.onPress());
+  expect(save.mock.calls[1][0].exercises[0].sets[0]).toMatchObject({ setType: SetType.DROP_SET, extensions: [{ weight: 15, reps: 4 }] });
   await act(async () => tree.unmount());
 });

@@ -14,7 +14,10 @@ it('shows actual values, missing effort and unfinished rows instead of the targe
     ] }] }, new Map());
   let tree: any; await act(async () => { tree = create(<WorkoutHistoryDetails details={details} />); });
   const output = JSON.stringify(tree.toJSON()); expect(output).toContain('35'); expect(output).toContain('8'); expect(output).toContain('Seat 4');
+  expect(output).not.toContain('sessionEffort.summary');
   expect(output).toContain('historyDetails.notCompleted'); expect(output).toContain('historyDetails.unknownExercise');
   expect(output).not.toContain('999'); expect(output).not.toContain('99'); expect(output).toContain('W'); expect(output).toContain('—');
+  await act(async () => tree.update(<WorkoutHistoryDetails details={{ ...details, sessionEffort: 6 }} />));
+  expect(JSON.stringify(tree.toJSON())).toContain('sessionEffort.summary');
   await act(async () => tree.unmount());
 });

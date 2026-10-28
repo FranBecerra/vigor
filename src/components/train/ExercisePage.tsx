@@ -17,8 +17,11 @@ import { CustomRecordingRows } from './CustomRecordingRows';
 import type { WorkoutNoteScope } from '@/services/training/trainingNotes';
 import { usesCustomRecording } from '@/services/training/customExercises';
 import { useExerciseName } from '@/hooks/useExerciseName';
+import { useTrainingUnits } from '@/hooks/useTrainingUnits';
+import { ExerciseActionsBar } from './ExerciseActionsBar';
 
 interface ExercisePageProps {
+  editable?: boolean;
   recordSetIds?: readonly string[];
   exercise: Exercise;
   sets: MockSetRow[];
@@ -34,6 +37,7 @@ interface ExercisePageProps {
   scopedNotes?: readonly { scope: WorkoutNoteScope; text: string }[];
   onPressNote?: (scope: WorkoutNoteScope) => void;
   active?: boolean;
+  onWarmup?: () => void;
 }
 
 function ExercisePageComponent({
@@ -52,10 +56,14 @@ function ExercisePageComponent({
   onPressNote,
   active = true,
   recordSetIds = [],
+  onWarmup,
+  editable = true,
 }: ExercisePageProps) {
   const { t } = useTranslation();
+  const units = useTrainingUnits();
   const name = useExerciseName();
   const { colors, spacing, radius } = useTheme();
+  const visibleNotes = scopedNotes ?? (note?.trim() ? [{ scope: 'SESSION' as const, text: note }] : []);
 
   const update = useCallback(
     (setId: string, patch: Partial<MockSetRow>) => onUpdateSet(exercise.id, setId, patch),
@@ -73,7 +81,7 @@ function ExercisePageComponent({
       weight: s.actualWeight ?? s.targetWeight,
       reps: s.actualReps ?? s.targetReps,
       partialReps: s.actualPartialReps,
-      intensity: s.actualRIR !== undefined ? s.actualRIR : s.targetRIR,
+      intensity: s.actualRIR !== undefined ? s.actualRIR : s.setType === SetType.WARMUP ? null : s.targetRIR,
       extensions: s.extensions,
       // Gris atenuado mientras el valor sea el previsto y no uno introducido.
       weightIsPlanned: s.actualWeight === undefined,
@@ -87,6 +95,7 @@ function ExercisePageComponent({
 
   return (
     <ScrollView
+      pointerEvents={editable ? 'auto' : 'none'}
       accessibilityElementsHidden={!active}
       importantForAccessibility={active ? 'auto' : 'no-hide-descendants'}
       style={{ width }}
@@ -94,15 +103,16 @@ function ExercisePageComponent({
       keyboardShouldPersistTaps="handled">
       <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm }}>
         <Text style={[styles.exerciseName, { color: colors.textPrimary }]}>{name(exercise)}</Text>
+        {onWarmup && <Pressable accessibilityRole="button" onPress={onWarmup} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={{ color: colors.accentText, fontWeight: '600' }}>+ {t('trainingUpdates.warmup')}</Text></Pressable>}
       </View>
 
-      {usesCustomRecording(exercise) ? <CustomRecordingRows exercise={exercise} sets={sets} update={update} onRemoveSet={onRemoveSet} /> : <>
+      {usesCustomRecording(exercise) ? <CustomRecordingRows exercise={exercise} sets={sets} update={update} onRemoveSet={onRemoveSet} onPressSetType={onPressSetType} recordSetIds={recordSetIds} /> : <>
       {/* Cabecera de columnas */}
       <View style={[styles.columnHeader, { paddingHorizontal: spacing.lg }]}>
         <Text style={[styles.columnLabel, { color: colors.textSecondary, width: COLUMN_WIDTHS.set }]}>SET</Text>
         <Text style={[styles.columnLabel, { color: colors.textSecondary, flex: 1, paddingLeft: 4 }]}>{t('train.previous')}</Text>
         <Text style={[styles.columnLabel, styles.centered, { color: colors.textSecondary, width: COLUMN_WIDTHS.weight }]}>
-          {t('train.weight')}
+          {units.unit.toUpperCase()}
         </Text>
         <Text style={[styles.columnLabel, styles.centered, { color: colors.textSecondary, width: COLUMN_WIDTHS.reps }]}>
           {t('train.reps')}
@@ -139,7 +149,7 @@ function ExercisePageComponent({
       ))}
       </>}
 
-      {(scopedNotes ?? (note?.trim() ? [{ scope: 'SESSION' as const, text: note }] : [])).map((entry, index) =>
+      {visibleNotes.map((entry, index) =>
         <Pressable key={`${entry.scope}:${index}`} accessibilityRole="button" accessibilityLabel={t('train.note')}
           onPress={() => onPressNote ? onPressNote(entry.scope) : onAction?.(exercise.id, 'note')}
           style={{ padding: spacing.md, margin: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface }}>
@@ -157,21 +167,9 @@ function ExercisePageComponent({
         </View>
       </Pressable>
 
-      {/* Acciones centradas */}
-      <View style={styles.actions}>
-        {(['swap', 'info', 'note'] as const).map((action) => (
-          <Pressable
-            key={action}
-            onPress={() => onAction?.(exercise.id, action)}
-            accessibilityRole="button"
-            accessibilityLabel={t(`train.${action}`)}
-            style={[
-              styles.actionChip,
-              { borderRadius: radius.pill, backgroundColor: colors.bgElevated },
-            ]}>
-            <Text style={[styles.actionText, { color: colors.textSecondary }]}>{t(`train.${action}`)}</Text>
-          </Pressable>
-        ))}
+      <View style={{ marginHorizontal: spacing.lg, marginTop: spacing.sm }}>
+        <ExerciseActionsBar hasNote={visibleNotes.some((entry) => entry.text.trim().length > 0)}
+          onAction={onAction ? (action) => onAction(exercise.id, action) : undefined} />
       </View>
     </ScrollView>
   );
@@ -188,7 +186,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 8,
   },
-  columnLabel: { fontSize: 10, fontWeight: '600', letterSpacing: 0.4 },
+  columnLabel: { fontSize: 11, fontWeight: '600', letterSpacing: 0.4 },
   centered: { textAlign: 'center' },
   addSetBadge: {
     width: 30,
@@ -197,7 +195,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  actions: { flexDirection: 'row', justifyContent: 'center', gap: 10, paddingTop: 4 },
-  actionChip: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 18, paddingVertical: 10 },
-  actionText: { fontSize: 15, fontWeight: '600' },
 });

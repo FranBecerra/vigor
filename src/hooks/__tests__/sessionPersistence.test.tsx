@@ -2,6 +2,7 @@ import React from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
 import { useSessionPersistence } from '../useSessionPersistence';
 import { SetType } from '@/models';
+import { reviseSessionFeedback } from '@/services/training/sessionFeedback';
 const { create, act } = require('react-test-renderer');
 const mockGet = jest.fn();
 const mockWrite = jest.fn();
@@ -23,6 +24,14 @@ beforeEach(() => {
   jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() });
 });
 afterEach(() => jest.restoreAllMocks());
+it('keeps explicitly accepted finish feedback through immediate background/unmount without waiting for a React context update', async () => {
+  let tree: any;
+  await act(async () => { tree = create(<Probe />); });
+  const feedback = reviseSessionFeedback(undefined, 8, 200, 'AT_FINISH')!;
+  await act(async () => { expect(await result.flush(200, { sessionFeedback: feedback })).toBe(true); });
+  await act(async () => { await result.flush(); tree.unmount(); });
+  for (const [record] of mockWrite.mock.calls) expect(record).toMatchObject({ completedAt: 200, sessionFeedback: feedback });
+});
 it('never overwrites an unread saved workout after a restore failure and allows a retry', async () => {
   mockGet.mockRejectedValueOnce(new Error('offline read failed'));
   let tree: any;

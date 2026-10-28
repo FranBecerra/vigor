@@ -10,6 +10,8 @@ export interface RehabPrescription {
   load?: number;
   restSeconds: number;
   notes: string;
+  /** Join the preceding exercise in a user-prescribed superset/circuit. */
+  circuitWithPrevious?: boolean;
 }
 export interface RehabBlock {
   id: string;
@@ -26,6 +28,11 @@ export interface RehabBlock {
   archivedAt?: number;
 }
 export interface RehabSetLog {
+  completionWasRecorded?: boolean;
+  setType?: import('./training').SetType;
+  rir?: number | null;
+  partialReps?: number;
+  extensions?: import('./training').SetExtension[];
   itemId: string;
   index: number;
   recording: ExerciseRecording;
@@ -34,6 +41,7 @@ export interface RehabSetLog {
   completed: boolean;
 }
 export interface RehabLog {
+  startedAt?: number;
   id: string;
   userId: string;
   blockId: string;
@@ -44,4 +52,6 @@ export interface RehabLog {
   workoutKey?: string;
   completedAt?: number;
   updatedAt: number;
+  activeItemId?: string;
+  restTimer?: { startedAt: number | null; durationSeconds: number; anchorSetId: string | null };
 }

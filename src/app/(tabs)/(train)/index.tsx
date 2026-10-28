@@ -52,7 +52,7 @@ export default function TrainHomeScreen() {
   const { t, i18n } = useTranslation();
   const { uid } = useAuth();
   const owner = useRef(uid); owner.current = uid;
-  const { colors, spacing, radius } = useTheme();
+  const { surfaces, colors, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
   const scroll = useRef<ScrollView>(null), scrollOffset = useRef(0), scrollRange = useRef({ content: 0, viewport: 0 });
@@ -183,7 +183,7 @@ export default function TrainHomeScreen() {
   };
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
+    <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }]}>
       <ScrollView
         ref={scroll} scrollEventThrottle={16}
         onScroll={(event) => { scrollOffset.current = event.nativeEvent.contentOffset.y; }}
@@ -207,7 +207,7 @@ export default function TrainHomeScreen() {
         {activeWorkout && resumeGoal && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/session', params: {
           mesocycleId: activeWorkout.mesocycleId, goal: resumeGoal,
           microcycleIndex: String(activeWorkout.microcycleIndex), plannedSessionIndex: String(activeWorkout.plannedSessionIndex),
-        } })} style={{ padding: 20, marginTop: spacing.lg, backgroundColor: colors.bgElevated, borderRadius: radius.lg }}>
+        } })} style={{ ...surfaces.hero, padding: 20, marginTop: spacing.lg, borderRadius: radius.lg }}>
           <Text style={{ color: colors.textSecondary }}>{t('workout.inProgress')}</Text>
           <Text style={{ color: colors.textPrimary, fontSize: 20, fontWeight: '700', marginVertical: 6 }}>{activeWorkout.sessionName ?? t('tabs.train')}</Text>
           <Text style={{ color: colors.textPrimary }}>{t('workout.resume')} →</Text>
@@ -232,6 +232,8 @@ export default function TrainHomeScreen() {
               onPressStart={startSession}
             />
           </View>
+        ) : status === 'loading' ? (
+          <View accessibilityLabel={t('home.routines')} style={{ height: 180, backgroundColor: colors.bgElevated, borderRadius: radius.lg, marginTop: spacing.lg }} />
         ) : (
           <View style={{ marginTop: spacing.lg }}>
             <Text style={[styles.empty, { color: colors.textMuted }]}>{t('home.noSession')}</Text>
@@ -243,7 +245,7 @@ export default function TrainHomeScreen() {
         </Text>
 
         {status === 'loading' ? (
-          <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.textMuted} />
+          <View style={{ height: 180, marginTop: spacing.md, borderRadius: radius.lg, backgroundColor: colors.bgElevated }} />
         ) : null}
 
         {status === 'error' ? (
@@ -288,6 +290,7 @@ export default function TrainHomeScreen() {
               muscleLabel={muscleLabel}
               labels={{
                 sessions: t('home.sessions'),
+                sets: t('home.sets'),
                 today: t('home.today'),
                 viewMesocycle: t('home.viewMesocycle'),
                 microcycleOf: t('home.microcycle'),
@@ -340,7 +343,7 @@ export default function TrainHomeScreen() {
           </Text>
         </Pressable>
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.xl, marginBottom: spacing.md }]}>{t('library.tools')}</Text>
-        <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, paddingHorizontal: spacing.lg }}>
+        <View style={{ ...surfaces.card, borderRadius: radius.lg, paddingHorizontal: spacing.lg }}>
           {([
             { route: 'exercises', icon: 'books.vertical', label: 'library.title' },
             { route: 'history', icon: 'clock.arrow.circlepath', label: 'workout.history' },

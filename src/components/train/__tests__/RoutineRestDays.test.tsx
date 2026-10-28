@@ -3,6 +3,7 @@ import { Text } from 'react-native';
 import { TrainingCalendarCard } from '../TrainingCalendarCard';
 import { RoutineDayList } from '../RoutineDayList';
 import { SwipeableSet } from '../SwipeableSet';
+import { RoutineDayIndicator } from '@/components/home/RoutineDayIndicator';
 import type { Mesocycle } from '@/models';
 const { create, act } = require('react-test-renderer');
 const mockGet = jest.fn(), mockUpdate = jest.fn(); let mockUid: string | null = 'owner';
@@ -22,11 +23,13 @@ const button = (tree: any, label: string) => tree.root.findAll((node: any) => no
 it('checks rest independently in the requested microcycle using an offline-safe merge', async () => {
   let tree: any; await act(async () => { tree = create(<TrainingCalendarCard mesocycleId="m" microcycleIndex={1} goal="HYPERTROPHY" />); });
   expect(button(tree, 'calendar.rest').props.accessibilityState.checked).toBe(false);
+  expect(tree.root.findByType(RoutineDayIndicator).props).toMatchObject({ kind: 'rest', completed: false });
   expect(tree.root.findByType(SwipeableSet).props.backgroundColor).toBe(button(tree, 'calendar.rest').props.style.backgroundColor);
   await act(async () => button(tree, 'calendar.rest').props.onPress());
   expect(mockUpdate).toHaveBeenCalledWith('m', expect.objectContaining({ restDayChecks: { '0:r': true, '1:r': true },
     scheduleTemplate: { days: 3, slots: [{ kind: 'workout', sessionIndex: 0 }, { kind: 'rest' }, { kind: 'workout', sessionIndex: 1 }] } }), expect.any(Function));
   expect(button(tree, 'calendar.rest').props.accessibilityState.checked).toBe(true);
+  expect(tree.root.findByType(RoutineDayIndicator).props.completed).toBe(true);
   expect(mockUpdate.mock.calls[0][1].currentMicrocycleIndex).toBeUndefined(); await act(async () => tree.unmount());
 });
 it('retains the current marker after a failed write and permits retry', async () => {

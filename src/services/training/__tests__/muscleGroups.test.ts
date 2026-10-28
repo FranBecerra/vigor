@@ -15,7 +15,7 @@ describe('bodyHalfOf', () => {
 });
 
 describe('groupByBodyHalf', () => {
-  it('separa torso y pierna conservando el orden de entrada', () => {
+  it('uses the stable anatomical order within each body half', () => {
     const entries = [
       { muscle: MuscleGroup.TRICEPS, sets: 18 },
       { muscle: MuscleGroup.GLUTES, sets: 8.5 },
@@ -23,8 +23,8 @@ describe('groupByBodyHalf', () => {
       { muscle: MuscleGroup.QUADS, sets: 8 },
     ];
     expect(groupByBodyHalf(entries)).toEqual([
-      { half: 'UPPER', entries: [entries[0], entries[2]] },
-      { half: 'LOWER', entries: [entries[1], entries[3]] },
+      { half: 'UPPER', entries: [entries[2], entries[0]] },
+      { half: 'LOWER', entries: [entries[3], entries[1]] },
     ]);
   });
 

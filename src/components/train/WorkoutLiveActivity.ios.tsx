@@ -5,10 +5,22 @@ import type { workoutActivityState } from '@/services/training/workoutActivitySt
 
 export type WorkoutActivityProps = ReturnType<typeof workoutActivityState> & { title: string; nextLabel: string; doneLabel: string; setLabel: string; restLabel: string };
 
-function WorkoutActivity(props: WorkoutActivityProps, environment: LiveActivityEnvironment) {
+export function WorkoutActivity(props: WorkoutActivityProps, environment: LiveActivityEnvironment) {
   'widget';
   const accent = environment.isLuminanceReduced ? '#FFFFFF' : '#9BE317';
   return {
+    bannerSmall: <VStack alignment="leading" spacing={4} modifiers={[padding({ all: 10 })]}>
+      <HStack spacing={6}>
+        <Text modifiers={[font({ weight: 'bold', size: 13 }), foregroundStyle(accent), lineLimit(1)]}>{props.title}</Text><Spacer />
+        <Text modifiers={[font({ size: 12 }), monospacedDigit()]}>{props.completed}/{props.total}</Text>
+      </HStack>
+      {props.restEnd > props.restStart && props.restStart > 0
+        ? <Text timerInterval={{ lower: new Date(props.restStart), upper: new Date(props.restEnd) }} countsDown modifiers={[font({ weight: 'bold', size: 24 }), monospacedDigit()]} />
+        : <Text modifiers={[font({ weight: 'bold', size: 20 })]}>{props.nextLabel}</Text>}
+      <Text modifiers={[font({ weight: 'semibold', size: 13 }), lineLimit(2)]}>{props.nextExercise || props.doneLabel}</Text>
+      {props.nextExercise ? <Text modifiers={[font({ size: 11 }), foregroundStyle(accent), lineLimit(1)]}>{props.setLabel}</Text> : null}
+      {props.nextExercise ? <Text modifiers={[font({ size: 12 }), monospacedDigit(), lineLimit(1)]}>{props.nextWeight} · {props.nextReps}</Text> : null}
+    </VStack>,
     banner: <VStack alignment="leading" spacing={10} modifiers={[padding({ all: 16 })]}>
       <HStack spacing={10}><Image systemName="dumbbell.fill" color={accent} size={18} />
         <Text modifiers={[font({ weight: 'bold', size: 16 }), foregroundStyle(accent), lineLimit(1)]}>{props.title}</Text><Spacer />

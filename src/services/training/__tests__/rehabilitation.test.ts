@@ -1,7 +1,7 @@
 import type { RehabBlock } from '@/models';
 import { createCustomExercise } from '../customExercises';
 import { finishRehabLog, localDateKey, newRehabLog, rehabIsDue, rehabSetComplete, rehabWeekCompletions,
-  skipRehabLog, updateRehabSet, validateRehabBlock, validateRehabLog, weekStartKey } from '../rehabilitation';
+  skipRehabLog, updateRehabSet, validateRehabBlock, validateRehabLog, weekStartKey, rehabExecutionOrder, nextRehabItem, unlinkRehabItems } from '../rehabilitation';
 
 const exercise = createCustomExercise({ name: 'My hold', recording: { measure: 'SECONDS', load: 'NONE' } }, 'u', 'custom:u:1', [], 1);
 const block = (): RehabBlock => ({ id: 'block', userId: 'u', version: 1, name: 'Pre workout', active: true,
@@ -12,9 +12,47 @@ const completed = (date: string) => {
   for (const row of log.sets) log = updateRehabSet(log, row.itemId, row.index, { actual: 25, completed: true }, 2);
   return finishRehabLog(log, 3);
 };
+it('executes circuits round-robin with unequal sets and resumes the next unfinished occurrence', () => {
+  const b = block(); b.items.push({ ...b.items[0], id: 'second', sets: 1, circuitWithPrevious: true }, { ...b.items[0], id: 'third', sets: 1 });
+  expect(rehabExecutionOrder(b)).toEqual([{ itemId: 'item', index: 0 }, { itemId: 'second', index: 0 }, { itemId: 'item', index: 1 }, { itemId: 'third', index: 0 }]);
+  let log = newRehabLog(b, '2026-10-23', 1);
+  expect(nextRehabItem(log)).toBe('item');
+  log = updateRehabSet(log, 'item', 0, { actual: 25, completed: true }, 2);
+  expect(nextRehabItem(log)).toBe('second');
+  for (const row of log.sets) log = updateRehabSet(log, row.itemId, row.index, { actual: 25, completed: true }, 3);
+  expect(nextRehabItem(log)).toBeUndefined();
+  expect(unlinkRehabItems(b.items).some((item) => item.circuitWithPrevious)).toBe(false);
+});
+it('validates persisted rehab cursor and rest while accepting older logs without them', () => {
+  const log = newRehabLog(block(), '2026-10-23', 1);
+  const timed = { ...log, activeItemId: 'item', restTimer: { startedAt: 1, durationSeconds: 30, anchorSetId: 'item:0' } };
+  expect(() => validateRehabLog(JSON.parse(JSON.stringify(timed)))).not.toThrow();
+  expect(() => validateRehabLog({ ...log, activeItemId: 'missing' })).toThrow();
+  for (const patch of [{ startedAt: NaN }, { startedAt: -1 }, { durationSeconds: 0.5 }, { durationSeconds: -1 }, { durationSeconds: 3601 }, { anchorSetId: 'unknown' }])
+    expect(() => validateRehabLog({ ...timed, restTimer: { ...timed.restTimer, ...patch } })).toThrow();
+  const b = block(); b.items[0].circuitWithPrevious = true;
+  expect(() => validateRehabBlock(b)).toThrow('invalidCircuit');
+});
 it('validates an independent user-authored block without a clinical injury or phase', () => {
   expect(() => validateRehabBlock(block())).not.toThrow();
   expect(block().injuryId).toBeUndefined();
+});
+it('rejects malformed custom prescriptions and timestamps and unchecks cleared completed actuals', () => {
+  const b = block(); b.items[0].exerciseSnapshot = { ...exercise, name: '' };
+  expect(() => validateRehabBlock(b)).toThrow('invalidExercise');
+  expect(() => newRehabLog(block(), '2026-10-23', NaN)).toThrow('invalidDate');
+  const log = completed('2026-10-23');
+  expect(updateRehabSet(log, 'item', 0, { actual: undefined }, 4).sets[0].completed).toBe(false);
+  expect(() => skipRehabLog(log, NaN)).toThrow('invalidDate');
+});
+it('validates routine-specific circuit scheduling and requires the selected routine/session context', () => {
+  const b: RehabBlock = { ...block(), schedule: { kind: 'ROUTINE', routineId: 'r', sessionIndexes: [0, 2] } };
+  expect(() => validateRehabBlock(b)).not.toThrow();
+  expect(rehabIsDue(b, [], '2026-10-23', undefined, { routineId: 'r', sessionIndex: 0 })).toBe(true);
+  for (const context of [undefined, { routineId: 'other', sessionIndex: 0 }, { routineId: 'r' }, { routineId: 'r', sessionIndex: 1 }]) expect(rehabIsDue(b, [], '2026-10-23', undefined, context)).toBe(false);
+  for (const schedule of [{ ...b.schedule, routineId: '' }, { ...b.schedule, sessionIndexes: [] }, { ...b.schedule, sessionIndexes: [0, 0] }, { ...b.schedule, sessionIndexes: [-1] }, { ...b.schedule, sessionIndexes: [7] }, { ...b.schedule, sessionIndexes: [0.5] }]) expect(() => validateRehabBlock({ ...b, schedule })).toThrow();
+  for (const recording of [{ measure: 'INVALID', load: 'NONE' }, { measure: 'SECONDS', load: 'INVALID' }]) expect(() => validateRehabBlock({ ...b, items: [{ ...b.items[0], exerciseSnapshot: { ...exercise, isCustom: false, recording: recording as never } }] })).toThrow('invalidRecording');
+  expect(() => validateRehabBlock({ ...b, items: [{ ...b.items[0], circuitWithPrevious: 'yes' as never }] })).toThrow();
 });
 it.each([
   { name: '' }, { name: 'a'.repeat(121) }, { version: 2 }, { userId: '' }, { updatedAt: NaN },

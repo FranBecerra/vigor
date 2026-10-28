@@ -5,6 +5,7 @@ import type { Exercise } from '@/models';
 import Activity from '@/components/train/WorkoutLiveActivity.ios';
 import type { SessionContext, SessionSetsByExercise } from '@/services/training/sessionMapper';
 import { workoutActivityState } from '@/services/training/workoutActivityState';
+import { useTrainingUnits } from './useTrainingUnits';
 
 let activityQueue: Promise<unknown> = Promise.resolve();
 
@@ -39,7 +40,8 @@ export function useWorkoutActivityOwner(owner: string | null, loading: boolean) 
 /** Reuse the OS activity across relaunch; screen unmount does not end a paused workout. */
 export function useWorkoutActivity(context: SessionContext | null, exercises: readonly Exercise[], sets: SessionSetsByExercise, finished: boolean) {
   const { t, i18n } = useTranslation(); const [unavailable, setUnavailable] = useState(false);
-  const activity = workoutActivityState(exercises, sets, context?.activeExerciseId, context?.restTimer ?? { startedAt: null, durationSeconds: 0, anchorSetId: null }, i18n?.language ?? 'es');
+  const units = useTrainingUnits();
+  const activity = workoutActivityState(exercises, sets, context?.activeExerciseId, context?.restTimer ?? { startedAt: null, durationSeconds: 0, anchorSetId: null }, i18n?.language ?? 'es', units.unit);
   const signature = JSON.stringify(context ? { id: context.sessionId, owner: context.userId, finished,
     props: { ...activity,
       setLabel: activity.nextSet === 'W' ? t('setType.WARMUP') : t('workout.setOf', { number: activity.nextSet, total: activity.nextSetTotal }),

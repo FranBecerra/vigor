@@ -1,13 +1,29 @@
 import { SetType } from '@/models';
 import { isLiveSetCompleted, type SessionSetState, type SessionSetsByExercise } from './sessionMapper';
+import { startRest, type RestTimerState } from './restTimer';
+
+/** Only the completion edge matters, never the execution position or prior PRs. */
+export function restAfterCompletion(previous: SessionSetState | undefined, next: SessionSetState | undefined,
+  timer: RestTimerState, duration: number, now: number): RestTimerState {
+  return isNewSetCompletion(previous, next) ? startRest(next!.id, duration, now) : timer;
+}
 
 /** Clearing a required actual cannot leave a checked-but-invalid completed row. */
 export function updateWorkoutSet(row: SessionSetState, patch: Partial<SessionSetState>): SessionSetState {
-  const next = { ...row, ...patch };
+  const next = { ...row, ...patch,
+    ...(Object.hasOwn(patch, 'actualRIR') ? { actualRIRSource: patch.actualRIRSource
+      ?? (patch.isCompleted === undefined ? 'ATHLETE' as const : row.actualRIRSource ?? 'INHERITED_TARGET' as const) } : {}),
+    ...(row.isCompleted && patch.isCompleted !== false ? { completionWasRecorded: true } : {}),
+    ...(patch.isCompleted === false ? { completionWasRecorded: false } : {}) };
   if (next.actualPartialReps !== undefined && (!Number.isInteger(next.actualPartialReps) || next.actualPartialReps < 0 || next.actualPartialReps > 999)) {
     next.actualPartialReps = row.actualPartialReps;
   }
   return next.isCompleted && !isLiveSetCompleted(next) ? { ...next, isCompleted: false } : next;
+}
+
+/** Data correction of a completed row is not a new physical set. */
+export function isNewSetCompletion(previous: SessionSetState | undefined, next: SessionSetState | undefined): boolean {
+  return !!previous && !previous.isCompleted && !previous.completionWasRecorded && !!next && isLiveSetCompleted(next);
 }
 
 /** Advance only on a newly completed exercise; stop at the end without wrapping. */
@@ -42,8 +58,8 @@ export function replacementWorkoutSets(source: readonly SessionSetState[], defau
     return { ...fallback, id: `${token}:${index}`, setType: set.setType,
       ...(sameMeasure ? { targetReps: set.targetReps, targetRIR: set.targetRIR,
         ...(set.targetDurationSeconds === undefined ? {} : { targetDurationSeconds: set.targetDurationSeconds }) } : {}),
-      actualWeight: undefined, actualReps: undefined, actualRIR: undefined, actualPartialReps: undefined,
+      actualWeight: undefined, actualReps: undefined, actualRIR: undefined, actualRIRSource: undefined, actualPartialReps: undefined,
       actualDurationSeconds: undefined, actualLoadLevel: undefined, extensions: undefined, previous: undefined,
-      isCompleted: false, completionState: 'PENDING' as const, isAutoFilled: false };
+      isCompleted: false, completionWasRecorded: false, completionState: 'PENDING' as const, isAutoFilled: false };
   });
 }

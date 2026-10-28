@@ -1,18 +1,29 @@
 import React from 'react';
-import { Pressable, Text, TextInput, Modal } from 'react-native';
+import { Pressable, Text, TextInput, Modal, Alert } from 'react-native';
+import { ActionMenuSheet } from '../ActionMenuSheet';
+import { ExerciseQuickMenu } from '../ExerciseQuickMenu';
 import { RehabBlockEditor } from '../RehabBlockEditor';
 import { PreWorkoutRehab } from '../PreWorkoutRehab';
 import { CustomExerciseSheet } from '../CustomExerciseSheet';
 import { ExerciseSwapSheet } from '../generate/ExerciseSwapSheet';
 import { NumericField } from '../NumericField';
 import { RehabRunner } from '../RehabRunner';
+import { RestTimer } from '../RestTimer';
+import { SetRow } from '../SetRow';
+import { ExercisePage } from '../ExercisePage';
+import { WorkoutExerciseStrip } from '../WorkoutExerciseStrip';
 import { createCustomExercise } from '@/services/training/customExercises';
 import { localDateKey } from '@/services/training/rehabilitation';
 import type { RehabBlock } from '@/models';
 const { create, act } = require('react-test-renderer');
+const Row = (SetRow as any).type ?? SetRow;
+const Page = (ExercisePage as any).type ?? ExercisePage;
 const mockCreate = jest.fn();
 const mockSaveBlock = jest.fn();
 const mockSaveLog = jest.fn();
+jest.mock('../RestTimer', () => ({ RestTimer: () => null }));
+jest.mock('../WorkoutClock', () => ({ WorkoutClock: () => null }));
+jest.mock('@/services/training/restAlerts', () => ({ clearWorkoutRestAlerts: jest.fn().mockResolvedValue(undefined) }));
 let mockRehab: any;
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
@@ -34,6 +45,45 @@ beforeEach(() => {
   mockCreate.mockResolvedValue(ex); mockSaveBlock.mockResolvedValue(undefined); mockSaveLog.mockResolvedValue(undefined);
   mockRehab = { blocks: [block], logs: [], ready: true, error: false, saveBlock: mockSaveBlock, saveLog: mockSaveLog };
 });
+it('shows one rehab exercise at a time, advances circuit rounds and preserves rest on actual corrections', async () => {
+  const circuit: RehabBlock = { ...block, items: [{ ...block.items[0], sets: 2 }, { ...block.items[0], id: 'second', exerciseSnapshot: { ...ex, name: 'Second hold' }, sets: 2, circuitWithPrevious: true }] };
+  let tree: any; await act(async () => { tree = create(<RehabRunner block={circuit} onClose={jest.fn()} />); });
+  const checks = () => tree.root.findAllByType(Row);
+  expect(checks()).toHaveLength(2);
+  await act(async () => checks()[0].props.onToggleDone());
+  const timer = tree.root.findByType(RestTimer).props.state;
+  expect(timer).toMatchObject({ durationSeconds: 15, anchorSetId: 'item:0' });
+  expect(tree.root.findByType(WorkoutExerciseStrip).props.activeId).toBe('second');
+  await act(async () => checks()[0].props.onToggleDone());
+  await act(async () => tree.root.findByType(Page).props.onUpdateSet('item', 'item:0', { actualDurationSeconds: 28 }));
+  expect(tree.root.findByType(RestTimer).props.state.anchorSetId).toBe('second:0');
+  await act(async () => tree.root.findByType(RestTimer).props.onSetPrescription(45));
+  expect(mockSaveBlock).toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+it('can remove the final rehab exercise and persist a resumable empty execution without changing its block', async () => {
+  let tree: any; await act(async () => { tree = create(<RehabRunner block={block} onClose={jest.fn()} />); });
+  await act(async () => tree.root.findByType(WorkoutExerciseStrip).props.onExerciseMenu('item'));
+  await act(async () => tree.root.findByType(ExerciseQuickMenu).props.onRemove());
+  expect(tree.root.findByType(WorkoutExerciseStrip).props.exercises).toEqual([]);
+  await act(async () => button(tree.root, 'rehab.saveProgress').props.onPress());
+  expect(mockSaveLog).toHaveBeenCalledWith(expect.objectContaining({ status: 'IN_PROGRESS', sets: [], blockSnapshot: expect.objectContaining({ items: [] }) }));
+  expect(mockSaveBlock).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+it('confirms replacement of a performed rehab exercise without appending or reattributing its actuals', async () => {
+  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {}); let tree: any;
+  await act(async () => { tree = create(<RehabRunner block={block} onClose={jest.fn()} />); });
+  await act(async () => tree.root.findByType(Row).props.onToggleDone());
+  await act(async () => tree.root.findByType(Page).props.onAction('item', 'swap'));
+  await act(async () => tree.root.findByType(ExerciseSwapSheet).props.onSelect({ ...ex, id: 'replacement', name: 'Replacement' }));
+  expect(tree.root.findByType(WorkoutExerciseStrip).props.exercises[0].id).toBe('item');
+  await act(async () => alert.mock.calls[0][2]!.find((action: any) => action.style === 'destructive')!.onPress!());
+  expect(tree.root.findByType(WorkoutExerciseStrip).props.exercises).toHaveLength(1);
+  expect(tree.root.findByType(Page).props.sets[0]).toMatchObject({ isCompleted: false, actualDurationSeconds: undefined });
+  expect(tree.root.findByType(Page).props.exercise.name).toBe('Replacement');
+  await act(async () => tree.unmount()); alert.mockRestore();
+});
 it('creates an exercise inside a block, preserves the draft, and saves explicit seconds and frequency', async () => {
   const close = jest.fn(); let tree: any;
   await act(async () => { tree = create(<RehabBlockEditor onClose={close} />); });
@@ -43,7 +93,7 @@ it('creates an exercise inside a block, preserves the draft, and saves explicit 
     button(tree.root, 'generate.addExercise').props.onPress();
   });
   expect(tree.root.findByType(ExerciseSwapSheet).props.open).toBe(true);
-  expect(tree.root.findAllByType(Modal)).toHaveLength(1);
+  expect(tree.root.findAllByType(Modal).filter((node: any) => node.props.visible)).toHaveLength(1);
   await act(async () => { button(tree.root, 'custom.createInline').props.onPress(); });
   expect(tree.root.findByType(CustomExerciseSheet).props.open).toBe(true);
   expect(tree.root.findAllByType(Modal)).toHaveLength(1);
@@ -82,7 +132,7 @@ it('opens pre-workout execution inside the same native modal and returns without
   let tree: any;
   await act(async () => { tree = create(<PreWorkoutRehab workoutKey="workout" />); });
   await act(async () => button(tree.root, 'rehab.start').props.onPress());
-  expect(tree.root.findAllByType(Modal)).toHaveLength(1);
+  expect(tree.root.findAllByType(Modal).filter((node: any) => node.props.visible)).toHaveLength(1);
   expect(tree.root.findByType(RehabRunner).props.embedded).toBe(true);
   await act(async () => { await button(tree.root, 'rehab.saveProgress').props.onPress(); });
   expect(tree.root.findAllByType(RehabRunner)).toHaveLength(0);
@@ -93,7 +143,7 @@ it('opens pre-workout execution inside the same native modal and returns without
 it('records a completed timed block separately and restores it read-only', async () => {
   let tree: any; const close = jest.fn();
   await act(async () => { tree = create(<RehabRunner block={block} workoutKey="workout" onClose={close} />); });
-  await act(async () => { tree.root.findByProps({ accessibilityRole: 'checkbox' }).props.onPress(); });
+  await act(async () => { tree.root.findByType(Row).props.onToggleDone(); });
   await act(async () => { await button(tree.root, 'rehab.finish').props.onPress(); });
   expect(mockSaveLog).toHaveBeenCalledWith(expect.objectContaining({ status: 'COMPLETED', date: localDateKey(new Date()),
     sets: [expect.objectContaining({ actual: 30, recording: { measure: 'SECONDS', load: 'NONE' }, completed: true })] }));
@@ -102,7 +152,7 @@ it('records a completed timed block separately and restores it read-only', async
   await act(async () => tree.unmount());
   mockRehab.logs = [completed];
   await act(async () => { tree = create(<RehabRunner block={block} onClose={close} />); });
-  expect(tree.root.findByProps({ accessibilityRole: 'checkbox' }).props.disabled).toBe(true);
+  expect(tree.root.findByType(Page).props.editable).toBe(false);
   expect(button(tree.root, 'rehab.finish')).toBeUndefined();
   await act(async () => tree.unmount());
 });

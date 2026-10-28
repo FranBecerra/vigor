@@ -1,6 +1,7 @@
 import { SetType, type Exercise, type MuscleGroup, type PlannedSession, type WorkoutSession } from '@/models';
 import { primaryMusclesOf } from './exerciseMuscles';
 import { isLiveSetCompleted, isSetCompleted, type SessionSetsByExercise } from './sessionMapper';
+import { cleanSupersets } from './workoutStructure';
 
 /** Stable move: payloads and completed work stay attached to their exercise identity. */
 export function moveItem<T>(items: readonly T[], from: number, to: number): T[] {
@@ -55,27 +56,62 @@ export function workoutReview(exercises: readonly Exercise[], sets: SessionSetsB
 }
 
 /** Explicit finish-time opt-in: persist roster/dose edits, never today's kg or achieved RIR as a future target. */
-export function prescriptionFromWorkout(base: PlannedSession, exercises: readonly Exercise[], sets: SessionSetsByExercise): PlannedSession {
-  return { ...base, exercises: exercises.map((exercise, order) => {
+export function prescriptionFromWorkout(base: PlannedSession, exercises: readonly Exercise[], sets: SessionSetsByExercise, supersets = base.supersets ?? {}): PlannedSession {
+  return { ...base, supersets: cleanSupersets(exercises.map((exercise) => exercise.id), supersets), exercises: exercises.map((exercise, order) => {
     const previous = base.exercises.find((entry) => entry.exerciseId === exercise.id);
+    let workingIndex = 0; let warmupIndex = 0;
     return { ...previous, exerciseId: exercise.id, exerciseSnapshot: exercise, order, isEdited: true,
-      sets: (sets[exercise.id] ?? []).map((row, index) => {
-        const planned = previous?.sets[index];
-        const repsChanged = row.actualReps !== undefined && row.actualReps !== row.targetReps;
-        return { setType: row.setType, targetRIR: planned?.targetRIR ?? row.targetRIR,
-          targetReps: repsChanged ? row.actualReps! : (planned?.targetReps ?? row.targetReps),
-          targetRepsMin: repsChanged ? row.actualReps! : (planned?.targetRepsMin ?? row.targetReps),
+      sets: (sets[exercise.id] ?? []).map((row) => {
+        const warmup = row.setType === SetType.WARMUP;
+        const planned = previous?.sets.filter((set) => (set.setType === SetType.WARMUP) === warmup)[warmup ? warmupIndex++ : workingIndex++];
+        return { ...planned, setType: row.setType, targetRIR: row.targetRIR,
+          targetReps: planned?.targetReps ?? row.targetReps,
+          targetRepsMin: planned?.targetRepsMin ?? row.targetReps,
           ...(row.targetDurationSeconds === undefined ? {} : { targetDurationSeconds: row.targetDurationSeconds }),
+          ...(warmup ? { targetWeightKg: row.targetWeight } : {}),
         };
       }) };
   }) };
 }
 
 export function hasWorkoutPlanChanges(base: PlannedSession, exercises: readonly Exercise[], sets: SessionSetsByExercise): boolean {
+  return workoutPlanChanges(base, exercises, sets).length > 0;
+}
+
+export interface WorkoutPlanChange {
+  kind: 'added' | 'removed' | 'order' | 'sets' | 'warmups' | 'type' | 'reps' | 'superset';
+  exercise?: Exercise;
+  exerciseId: string;
+  set?: number;
+  before?: string | number;
+  after?: string | number;
+}
+/** Describe only the prescription changes that the finish action actually applies. */
+export function workoutPlanChanges(base: PlannedSession, exercises: readonly Exercise[], sets: SessionSetsByExercise, supersets = base.supersets ?? {}): WorkoutPlanChange[] {
+  const changes: WorkoutPlanChange[] = [];
   const previous = [...base.exercises].sort((a, b) => a.order - b.order);
-  return previous.length !== exercises.length || exercises.some((exercise, index) => {
-    const entry = previous[index]; const rows = sets[exercise.id] ?? [];
-    return entry?.exerciseId !== exercise.id || entry.sets.length !== rows.length || rows.some((row, i) =>
-      row.setType !== entry.sets[i]?.setType || (row.actualReps !== undefined && row.actualReps !== row.targetReps));
+  previous.forEach((entry) => {
+    if (!exercises.some((exercise) => exercise.id === entry.exerciseId))
+      changes.push({ kind: 'removed', exercise: entry.exerciseSnapshot, exerciseId: entry.exerciseId });
   });
+  exercises.forEach((exercise, index) => {
+    const beforeIndex = previous.findIndex((entry) => entry.exerciseId === exercise.id);
+    const entry = previous[beforeIndex];
+    if ((base.supersets?.[exercise.id] ?? '') !== (supersets[exercise.id] ?? '')) changes.push({ kind: 'superset', exercise, exerciseId: exercise.id });
+    if (!entry) { changes.push({ kind: 'added', exercise, exerciseId: exercise.id }); return; }
+    if (beforeIndex !== index) changes.push({ kind: 'order', exercise, exerciseId: exercise.id, before: beforeIndex + 1, after: index + 1 });
+    const rows = sets[exercise.id] ?? [];
+    const beforeWarmups = entry.sets.filter((set) => set.setType === SetType.WARMUP).length;
+    const afterWarmups = rows.filter((set) => set.setType === SetType.WARMUP).length;
+    if (entry.sets.length - beforeWarmups !== rows.length - afterWarmups) changes.push({ kind: 'sets', exercise, exerciseId: exercise.id, before: entry.sets.length - beforeWarmups, after: rows.length - afterWarmups });
+    if (beforeWarmups !== afterWarmups) changes.push({ kind: 'warmups', exercise, exerciseId: exercise.id, before: beforeWarmups, after: afterWarmups });
+    let warmupIndex = 0; let workingIndex = 0;
+    rows.forEach((row, i) => {
+      const warmup = row.setType === SetType.WARMUP;
+      const original = entry.sets.filter((set) => (set.setType === SetType.WARMUP) === warmup)[warmup ? warmupIndex++ : workingIndex++];
+      if (!original) return;
+      if (row.setType !== original.setType) changes.push({ kind: 'type', exercise, exerciseId: exercise.id, set: i + 1, before: original.setType, after: row.setType });
+    });
+  });
+  return changes;
 }

@@ -7,6 +7,7 @@ import { useExerciseName } from '@/hooks/useExerciseName';
 import { useTheme } from '@/theme/useTheme';
 import type { Exercise } from '@/models';
 import { moveWorkoutExercise } from '@/services/training/workoutRuntime';
+import type { ExerciseMenuAnchor } from '@/services/training/exerciseMenuLayout';
 
 const PITCH = 92;
 
@@ -17,33 +18,40 @@ function ExercisePosition({ x, dragging, children }: { x: number; dragging: bool
   return <Animated.View style={[{ position: 'absolute', top: 5, left: 0, zIndex: dragging ? 10 : 0 }, animated]}>{children}</Animated.View>;
 }
 
-function DraggableExercise({ exercise, index, active, dragging, onDrag, onDrop, onCancel, onSelect, onMove }:
+function DraggableExercise({ exercise, index, active, dragging, onDrag, onDrop, onCancel, onSelect, onMove, onMenu, grouped }:
   { exercise: Exercise; index: number; active: boolean; dragging: boolean;
     onDrag: (index: number, delta: number, x: number) => void; onDrop: () => void; onCancel: () => void;
-    onSelect: () => void; onMove: (direction: number) => void }) {
+    onSelect: () => void; onMove: (direction: number) => void; onMenu?: (anchor?: ExerciseMenuAnchor) => void; grouped?: boolean }) {
   const { colors, radius, sectionAccent } = useTheme(); const { t } = useTranslation(); const name = useExerciseName();
+  const target = useRef<View>(null);
   const pan = useMemo(() => Gesture.Pan().activateAfterLongPress(280).runOnJS(true)
     .onStart((event) => onDrag(index, 0, event.absoluteX))
     .onUpdate((event) => onDrag(index, event.translationX, event.absoluteX))
     .onEnd(onDrop).onFinalize((_event, success) => { if (!success) onCancel(); }), [index, onDrag, onDrop, onCancel]);
-  return <GestureDetector gesture={pan}>
+  const hold = useMemo(() => Gesture.LongPress().minDuration(450).maxDistance(8).runOnJS(true).onEnd((_event, success) => {
+    if (!success) return;
+    if (target.current) target.current.measureInWindow((x, y, width, height) => onMenu?.({ x, y, width, height }));
+    else onMenu?.();
+  }), [onMenu]);
+  return <GestureDetector gesture={Gesture.Simultaneous(pan, hold)}>
     <View>
-      <Pressable onPress={onSelect} accessibilityRole="button" accessibilityLabel={name(exercise)}
+      <Pressable ref={target} onPress={onSelect} accessibilityRole="button" accessibilityLabel={name(exercise)}
         accessibilityHint={t('workout.dragHint')} accessibilityState={{ selected: active }}
-        accessibilityActions={[{ name: 'decrement', label: t('rehab.moveUp') }, { name: 'increment', label: t('workout.moveDown') }]}
-        onAccessibilityAction={({ nativeEvent }) => onMove(nativeEvent.actionName === 'decrement' ? -1 : 1)}
+        accessibilityActions={[{ name: 'decrement', label: t('rehab.moveUp') }, { name: 'increment', label: t('workout.moveDown') }, { name: 'showMenu', label: t('executionUpdates.actions') }]}
+        onAccessibilityAction={({ nativeEvent }) => nativeEvent.actionName === 'showMenu' ? onMenu?.() : onMove(nativeEvent.actionName === 'decrement' ? -1 : 1)}
         style={{ width: 84, height: 72, borderRadius: radius.md, justifyContent: 'center', padding: 7, borderWidth: 1.5,
           backgroundColor: colors.bgElevated, borderColor: active || dragging ? sectionAccent.train : colors.surfaceBorder,
           transform: [{ scale: dragging ? 1.06 : 1 }] }}>
-        <Text numberOfLines={3} style={{ color: active ? colors.accentText : colors.textSecondary, textAlign: 'center', fontSize: 11, lineHeight: 14, fontWeight: '600' }}>{name(exercise)}</Text>
+        {grouped && <Text style={{ color: colors.accentText, fontSize: 11, textAlign: 'center' }}>↔</Text>}<Text numberOfLines={3} style={{ color: active ? colors.accentText : colors.textSecondary, textAlign: 'center', fontSize: 11, lineHeight: 14, fontWeight: '600' }}>{name(exercise)}</Text>
       </Pressable>
     </View>
   </GestureDetector>;
 }
 
 /** Long-press and drag directly in the existing exercise rail, with edge scrolling. */
-export function WorkoutExerciseStrip({ exercises, activeId, onSelect, onReorder, onAdd }:
-  { exercises: Exercise[]; activeId?: string; onSelect: (index: number) => void; onReorder: (items: Exercise[]) => void; onAdd: () => void }) {
+export function WorkoutExerciseStrip({ exercises, activeId, onSelect, onReorder, onAdd, onExerciseMenu, supersets = {} }:
+  { exercises: Exercise[]; activeId?: string; onSelect: (index: number) => void; onReorder: (items: Exercise[]) => void; onAdd: () => void;
+    onExerciseMenu?: (id: string, anchor?: ExerciseMenuAnchor) => void; supersets?: Record<string, string> }) {
   const { colors, sectionAccent, spacing, radius } = useTheme(); const { t } = useTranslation();
   const rail = useRef<ScrollView>(null); const viewport = useRef<View>(null);
   const offset = useRef(0); const bounds = useRef({ x: 0, width: 0 });
@@ -102,6 +110,7 @@ export function WorkoutExerciseStrip({ exercises, activeId, onSelect, onReorder,
         return <ExercisePosition key={exercise.id} dragging={drag?.from === index}
           x={spacing.lg + index * PITCH + (drag?.from === index ? drag.delta : shift)}>
           <DraggableExercise exercise={exercise} index={index} active={exercise.id === activeId} dragging={drag?.from === index}
+            grouped={!!supersets[exercise.id]} onMenu={onExerciseMenu ? (anchor) => onExerciseMenu(exercise.id, anchor) : undefined}
             onDrag={handlers.update} onDrop={handlers.end} onCancel={handlers.cancel} onSelect={() => onSelect(index)}
             onMove={(direction) => onReorder(moveWorkoutExercise(exercises, index, index + direction))} />
         </ExercisePosition>;

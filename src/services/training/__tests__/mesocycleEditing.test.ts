@@ -28,6 +28,12 @@ const mesocycle: Mesocycle = {
 };
 
 describe('mesocycle editing', () => {
+  it('retains opt-in superset edits through future prescription progression', () => {
+    const grouped = { ...session, supersets: { curl: 'pair', second: 'pair' }, exercises: [...session.exercises, { ...session.exercises[0], exerciseId: 'second', order: 1 }] };
+    const patch = changesForSessionEdit(mesocycle, TrainingGoal.HYPERTROPHY, 1, grouped, 'remaining-mesocycle', true);
+    for (const index of [1, 2, 3]) expect(sessionsForMicrocycle({ ...mesocycle, ...patch }, TrainingGoal.HYPERTROPHY, index)[0].supersets).toEqual(grouped.supersets);
+    expect(sessionsForMicrocycle({ ...mesocycle, ...patch }, TrainingGoal.HYPERTROPHY, 0)[0].supersets).toBeUndefined();
+  });
   it('resolves a future revision without rewriting previous microcycles', () => {
     const previous = sessionsForMicrocycle(mesocycle, TrainingGoal.HYPERTROPHY, 1);
     const changed = { ...previous[0], exercises: [{ ...previous[0].exercises[0],

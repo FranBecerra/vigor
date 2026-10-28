@@ -26,7 +26,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { WorkoutPagerGestureContext } from '@/components/train/WorkoutPagerGesture';
 import { WorkoutPersistenceNotice } from '@/components/train/WorkoutPersistenceNotice';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { backToTraining } from '@/services/training/backNavigation';
+import { backToTraining, finishToTraining } from '@/services/training/backNavigation';
 import { useTranslation } from 'react-i18next';
 
 import { ExercisePage } from '@/components/train/ExercisePage';
@@ -39,12 +39,14 @@ import { useSessionPersistence } from '@/hooks/useSessionPersistence';
 import { changeExerciseRest } from '@/services/training/restPrescription';
 import { useExerciseName } from '@/hooks/useExerciseName';
 import { useWorkoutRecordHistory } from '@/hooks/useWorkoutRecordHistory';
+import { applyPreviousPerformance, previousPerformance } from '@/services/training/previousPerformance';
 import { endWorkoutActivity, useWorkoutActivity } from '@/hooks/useWorkoutActivity';
 import { clearWorkoutRestAlerts } from '@/hooks/useRestAlert';
 import { sessionProgress, toWorkoutSession, type SessionSetsByExercise } from '@/services/training/sessionMapper';
 import { useHealthExport } from '@/hooks/useHealthExport';
 import { WorkoutHealthExport } from '@/components/train/WorkoutHealthExport';
-import { nextExerciseAfterCompletion, replacementWorkoutSets, updateWorkoutSet } from '@/services/training/workoutExecution';
+import { isNewSetCompletion, restAfterCompletion, nextExerciseAfterCompletion, replacementWorkoutSets, updateWorkoutSet } from '@/services/training/workoutExecution';
+import { cleanSupersets, linkSuperset, unlinkSuperset, removeWorkoutExercise, supersetTransition } from '@/services/training/workoutStructure';
 import { SetType, type Exercise, type PlannedSession, type SetExtension, type WorkoutSession } from '@/models';
 import {
   type MockSetRow,
@@ -57,10 +59,15 @@ import { timestampMillis } from '@/services/training/workoutRuntime';
 import { uiPerformance } from '@/services/performance/uiPerformance';
 import { ExerciseDetailSheet } from '@/components/train/ExerciseDetailSheet';
 import { WorkoutFinishSheet } from '@/components/train/WorkoutFinishSheet';
+import { reviseSessionFeedback, sessionEffortValue } from '@/services/training/sessionFeedback';
+import { SmartWarmupSheet } from '@/components/train/SmartWarmupSheet';
+import { canSuggestWarmup, warmupReference } from '@/services/training/smartWarmup';
 import { ActionMenuSheet } from '@/components/train/ActionMenuSheet';
+import { ExerciseQuickMenu } from '@/components/train/ExerciseQuickMenu';
+import type { ExerciseMenuAnchor } from '@/services/training/exerciseMenuLayout';
 import { appendPreviewExercises } from '@/services/training/previewEditing';
 import { TrainingGoal } from '@/services/training/volumePlan';
-import { hasWorkoutPlanChanges, prescriptionFromWorkout, workoutReview } from '@/services/training/workoutReview';
+import { workoutPlanChanges, prescriptionFromWorkout, workoutReview } from '@/services/training/workoutReview';
 import { changesForSessionEdit } from '@/services/training/mesocycleEditing';
 import {
   addedSetTargetRIR,
@@ -86,7 +93,6 @@ import {
   restDurationFor,
   restartRest,
   setRestDuration,
-  shouldRestartRest,
   startRest,
 } from '@/services/training/restTimer';
 import type { IntensityScale } from '@/services/training/intensityScale';
@@ -95,7 +101,7 @@ export default function EntrenamientoScreen() {
   const { catalogue, exercisesById: exerciseById, ready: catalogueReady, notRecommendedExerciseIds = new Set<string>(), setExerciseNotRecommended = async () => {} } = useExerciseCatalogue();
   const { t } = useTranslation();
   const exerciseName = useExerciseName();
-  const { colors, sectionAccent, semantic, spacing, radius, typography } = useTheme();
+  const { surfaces, colors, sectionAccent, semantic, spacing, radius, typography } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const accent = sectionAccent.train;
@@ -122,18 +128,23 @@ export default function EntrenamientoScreen() {
   );
   const [restTimer, setRestTimer] = useState(IDLE_REST_TIMER);
   const [picker, setPicker] = useState<string | 'ADD' | null>(null);
+  const [warmupFor, setWarmupFor] = useState<string | null>(null);
   const [detail, setDetail] = useState<{ id: string; mode: 'info' | 'note'; scope?: WorkoutNoteScope } | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [sessionNote, setSessionNote] = useState('');
   const persistentNotes = useTrainingNotes();
   const noteSnapshots = useRef({ mesocycleNote: '', exerciseNotes: {} as Record<string, string> });
   const [swappedFrom, setSwappedFrom] = useState<Record<string, string>>({});
+  const [supersets, setSupersets] = useState<Record<string, string>>({});
+  const [exerciseMenu, setExerciseMenu] = useState<{ id: string; anchor?: ExerciseMenuAnchor } | null>(null);
   const [finishing, setFinishing] = useState(false);
   const [finished, setFinished] = useState(false);
   const [completedAt, setCompletedAt] = useState<number | undefined>();
   const [performedAt, setPerformedAt] = useState(Date.now);
   const [busy, setBusy] = useState(false);
   const [finishError, setFinishError] = useState(false);
+  const [sessionFeedback, setSessionFeedback] = useState<WorkoutSession['sessionFeedback']>();
+  const [sessionEffort, setSessionEffort] = useState<number | null>(null);
   const [discardConfirm, setDiscardConfirm] = useState(false);
   const [discardError, setDiscardError] = useState(false);
   const [restoreNotice, setRestoreNotice] = useState(false);
@@ -145,6 +156,7 @@ export default function EntrenamientoScreen() {
   // Declarado aquí arriba a propósito: lo usan tanto la persistencia como los
   // callbacks de edición de más abajo.
   const setsRef = useRef(setsByExercise);
+  const protectedLoads = useRef(new Set<string>());
   setsRef.current = setsByExercise;
 
   // --- Persistencia -------------------------------------------------------
@@ -195,9 +207,11 @@ export default function EntrenamientoScreen() {
       setRestOverrides(mesocycle?.exerciseRestOverrides ?? {});
       setRoutineId(mesocycle?.routineId);
       loadedIdentity.current = identity;
+      protectedLoads.current.clear();
       setPerformedAt(Date.now()); setCompletedAt(undefined); setFinished(false); setFinishing(false);
-      setRestTimer(IDLE_REST_TIMER); setNotes({}); setSwappedFrom({}); setPageIndex(0);
+      setRestTimer(IDLE_REST_TIMER); setNotes({}); setSwappedFrom({}); setSupersets(session.supersets ?? {}); setPageIndex(0);
       setSessionNote(''); noteSnapshots.current = { mesocycleNote: '', exerciseNotes: {} };
+      setSessionFeedback(undefined); setSessionEffort(null);
       setExercises(resolved);
       setSessionName(session.name || session.focus);
       const initial = initialSetsForPlannedSession(session);
@@ -238,12 +252,14 @@ export default function EntrenamientoScreen() {
             exerciseSnapshots: Object.fromEntries(exercises.map((exercise) => [exercise.id, exercise])),
             exerciseNotes: notes,
             sessionNote,
+            sessionFeedback,
             mesocycleNote: noteSnapshots.current.mesocycleNote,
             persistentExerciseNotes: noteSnapshots.current.exerciseNotes,
             swappedFrom,
+            supersets,
             persistDraft: true,
           },
-    [uid, mesocycleId, microcycleIndex, plannedSession, plannedSessionIndex, exercises, notes, sessionNote, liveNotes, swappedFrom, goal, performedAt, sessionName, pageIndex, restTimer, routeIdentity],
+    [uid, mesocycleId, microcycleIndex, plannedSession, plannedSessionIndex, exercises, notes, sessionNote, sessionFeedback, liveNotes, swappedFrom, supersets, goal, performedAt, sessionName, pageIndex, restTimer, routeIdentity],
   );
 
   const restoreSets = useCallback((restored: SessionSetsByExercise, saved: WorkoutSession) => {
@@ -252,11 +268,13 @@ export default function EntrenamientoScreen() {
     const restoredExercises = [...saved.exercises].sort((a, b) => a.order - b.order)
       .map((entry) => entry.exerciseSnapshot ?? exerciseById.get(entry.exerciseId)).filter((ex): ex is Exercise => !!ex);
     setExercises(restoredExercises);
+    setSupersets(cleanSupersets(restoredExercises.map((exercise) => exercise.id), saved.supersets ?? {}));
     const index = Math.max(0, restoredExercises.findIndex((entry) => entry.id === saved.activeExerciseId));
     setPageIndex(index);
     requestAnimationFrame(() => pagerRef.current?.scrollTo({ x: index * width, animated: false }));
     setNotes(Object.fromEntries(saved.exercises.filter((entry) => entry.notes !== undefined).map((entry) => [entry.exerciseId, cleanImportedExerciseNotes(entry.notes)])));
     setSessionNote(saved.sessionNote ?? '');
+    setSessionFeedback(saved.sessionFeedback); setSessionEffort(sessionEffortValue(saved.sessionFeedback));
     noteSnapshots.current = { mesocycleNote: saved.mesocycleNote ?? '', exerciseNotes: Object.fromEntries(saved.exercises.map((entry) => [entry.exerciseId, entry.exerciseNote ?? ''])) };
     setSwappedFrom(Object.fromEntries(saved.exercises.filter((entry) => entry.swappedFromExerciseId).map((entry) => [entry.exerciseId, entry.swappedFromExerciseId!])));
     setPerformedAt(timestampMillis(saved.performedAt));
@@ -270,6 +288,14 @@ export default function EntrenamientoScreen() {
     setsByExercise,
     onRestore: restoreSets,
   });
+  const baselines = useMemo(() => previousPerformance(exercises, history, { userId: uid ?? '',
+    sessionId: plannedSessionDocumentId(mesocycleId, microcycleIndex, plannedSessionIndex), mesocycleId, plannedSessionIndex, performedAt }),
+  [exercises, history, uid, mesocycleId, microcycleIndex, plannedSessionIndex, performedAt]);
+  useEffect(() => {
+    if (!historyReady || !hasRestored || finished) return;
+    const hydrated = applyPreviousPerformance(setsRef.current, baselines, protectedLoads.current);
+    if (hydrated !== setsRef.current) { setsRef.current = hydrated; setSetsByExercise(hydrated); }
+  }, [historyReady, hasRestored, finished, baselines, setsByExercise]);
   useEffect(() => {
     if (hasRestored) { setRestoreNotice(false); return; }
     const timer = setTimeout(() => setRestoreNotice(true), 650);
@@ -301,6 +327,7 @@ export default function EntrenamientoScreen() {
   // Callbacks ESTABLES: necesarios para que la memoización de ExercisePage sirva.
   const updateSet = useCallback(
     (exerciseId: string, setId: string, patch: Partial<MockSetRow>) => {
+      if (Object.hasOwn(patch, 'actualWeight') || Object.hasOwn(patch, 'actualLoadLevel')) protectedLoads.current.add(setId);
       const previous = setsRef.current;
       const next = {
         ...previous,
@@ -311,27 +338,26 @@ export default function EntrenamientoScreen() {
       setsRef.current = next;
       setSetsByExercise(next);
 
-      // REGLA DEL TEMPORIZADOR: solo reinicia si esta serie está en la FRONTERA
-      // del progreso, es decir si ninguna serie posterior está ya completada.
-      // Así, recompletar una serie anterior tras corregir un dato no destruye el
-      // descanso en curso, y desmarcar nunca lo toca.
-      if (patch.isCompleted === true) {
-        if (!previous[exerciseId]?.find((set) => set.id === setId)?.isCompleted) {
-          const following = nextExerciseAfterCompletion(exercises.map((exercise) => exercise.id), next, exerciseId);
-          if (following !== null) goToExercise(following);
-        }
+      // Start on every new physical completion, including out-of-order work.
+      // A correction to previously recorded work never restarts the clock.
+      if (isNewSetCompletion(previous[exerciseId]?.find((set) => set.id === setId), next[exerciseId]?.find((set) => set.id === setId))) {
+        const warmup = next[exerciseId]?.find((set) => set.id === setId)?.setType === SetType.WARMUP;
+        const transition = warmup ? { next: null, rest: true } : supersetTransition(exercises.map((exercise) => exercise.id), supersets, next, exerciseId);
+        const following = transition.next !== null ? exercises.findIndex((exercise) => exercise.id === transition.next)
+          : warmup ? null : nextExerciseAfterCompletion(exercises.map((exercise) => exercise.id), next, exerciseId);
+        if (following !== null) goToExercise(following);
         const order = flattenSessionSets(
           exercises.map((e) => e.id),
           next,
         );
-        if (shouldRestartRest(order, setId)) {
+        if (transition.rest && order.some((entry) => entry.id === setId)) {
           const exercise = exercises.find((e) => e.id === exerciseId);
           const duration = restOverrides[exerciseId] ?? plannedSession?.exercises.find((entry) => entry.exerciseId === exerciseId)?.restSeconds ?? (exercise ? restDurationFor(exercise.profile) : 180);
-          setRestTimer(startRest(setId, duration, Date.now()));
-        }
+          setRestTimer((timer) => restAfterCompletion(previous[exerciseId]?.find((set) => set.id === setId), next[exerciseId]?.find((set) => set.id === setId), timer, duration, Date.now()));
+        } else if (!transition.rest) setRestTimer(cancelRest());
       }
     },
-    [exercises, plannedSession, restOverrides, goToExercise],
+    [exercises, plannedSession, restOverrides, goToExercise, supersets],
   );
 
   const addSet = useCallback((exerciseId: string) => {
@@ -350,7 +376,7 @@ export default function EntrenamientoScreen() {
         {
           id: `${exerciseId}-${Date.now()}`,
           setType: SetType.NORMAL,
-          targetWeight: reference?.targetWeight ?? 20,
+          targetWeight: reference?.actualWeight ?? reference?.targetWeight ?? 0,
           targetReps: reference?.targetReps ?? 8,
           targetRIR: rir,
           ...(reference?.recording ? { recording: reference.recording } : {}),
@@ -358,7 +384,6 @@ export default function EntrenamientoScreen() {
           ...(reference?.targetLoadLevel === undefined ? {} : { targetLoadLevel: reference.targetLoadLevel }),
           isAutoFilled: false,
           isCompleted: false,
-          previous: reference?.previous,
         },
       ],
     };
@@ -394,7 +419,8 @@ export default function EntrenamientoScreen() {
   const completedSession = useMemo(() => completedAt !== undefined && sessionContext
     ? toWorkoutSession({ ...sessionContext, completedAt }, exerciseOrder, setsByExercise) : null,
   [completedAt, sessionContext, exerciseOrder, setsByExercise]);
-  const changed = plannedSession ? hasWorkoutPlanChanges(plannedSession, exercises, setsByExercise) : false;
+  const changes = plannedSession ? workoutPlanChanges(plannedSession, exercises, setsByExercise, supersets) : [];
+  const changed = changes.length > 0;
   const openFinish = () => {
     setFinishing(true); setFinishError(false);
   };
@@ -405,18 +431,22 @@ export default function EntrenamientoScreen() {
       if (savePlan) {
         const current = await mesocycleRepository.get(mesocycleId);
         if (!current || current.userId !== uid) throw new Error('Missing plan');
-        const prescription = prescriptionFromWorkout(plannedSession, exercises, setsByExercise);
+        const prescription = prescriptionFromWorkout(plannedSession, exercises, setsByExercise, supersets);
         await mesocycleRepository.update(mesocycleId, { ...changesForSessionEdit(current, goal, microcycleIndex, prescription, 'remaining-mesocycle', true), updatedAt: Date.now() });
       }
       const ended = Date.now();
-      if (!await flush(ended)) throw new Error('Save failed');
+      const feedback = reviseSessionFeedback(sessionFeedback, sessionEffort, ended, 'AT_FINISH');
+      if (!await flush(ended, feedback ? { sessionFeedback: feedback } : undefined)) throw new Error('Save failed');
+      setSessionFeedback(feedback);
       setCompletedAt(ended); setRestTimer(cancelRest()); setFinished(true);
+      void clearWorkoutRestAlerts().catch(() => undefined);
       // Health failures never roll back or block the athlete's primary save.
       void health.service.export(toWorkoutSession({ ...sessionContext, completedAt: ended }, exerciseOrder, setsRef.current));
     } catch { setFinishError(true); } finally { setBusy(false); }
   };
   const chooseExercises = (chosen: Exercise[]) => {
     if (!plannedSession || !chosen.length) return;
+    const apply = () => {
     const map = new Map(exerciseById); chosen.forEach((ex) => map.set(ex.id, ex));
     const template = appendPreviewExercises([{ ...plannedSession, exercises: [] }], chosen.map((ex) => ({ sessionIndex: plannedSession.index, exerciseId: ex.id })), map, goal as TrainingGoal)[0];
     template.exercises.forEach((entry) => { entry.exerciseSnapshot = map.get(entry.exerciseId); });
@@ -425,16 +455,36 @@ export default function EntrenamientoScreen() {
     const next = { ...setsRef.current };
     if (picker && picker !== 'ADD') {
       added[chosen[0].id] = replacementWorkoutSets(next[picker] ?? [], added[chosen[0].id] ?? [], `${chosen[0].id}:${Date.now()}`);
-      // Preserve completed work on the original exercise; replacement starts as its own entry.
-      const completed = (next[picker] ?? []).filter((row) => row.isCompleted);
-      if (completed.length) next[picker] = completed; else delete next[picker];
+      // A confirmed swap replaces the visible entry, without relabelling old actuals.
+      if ((next[picker] ?? []).some((row) => row.id === restTimer.anchorSetId)) setRestTimer(cancelRest());
+      delete next[picker];
       setSwappedFrom((old) => ({ ...old, [chosen[0].id]: old[picker] ?? picker }));
-      const updated = exercises.flatMap((ex) => ex.id !== picker ? [ex] : completed.length ? [ex, chosen[0]] : [chosen[0]]);
+      const updated = exercises.map((ex) => ex.id !== picker ? ex : chosen[0]);
+      const groups = { ...supersets }; if (groups[picker]) groups[chosen[0].id] = groups[picker]; delete groups[picker];
+      setSupersets(cleanSupersets(updated.map((exercise) => exercise.id), groups));
       setExercises(updated);
       const index = updated.findIndex((ex) => ex.id === chosen[0].id); setPageIndex(index);
       requestAnimationFrame(() => pagerRef.current?.scrollTo({ x: index * width, animated: true }));
     } else setExercises((old) => [...old, ...chosen.filter((ex) => !old.some((item) => item.id === ex.id))]);
     Object.assign(next, added); setsRef.current = next; setSetsByExercise(next); setPicker(null);
+    };
+    if (picker && picker !== 'ADD' && (setsRef.current[picker] ?? []).some((row) => row.isCompleted)) {
+      Alert.alert(t('train.swap'), t('executionUpdates.replaceRecorded'), [
+        { text: t('generate.cancel'), style: 'cancel' }, { text: t('train.swap'), style: 'destructive', onPress: apply },
+      ]);
+    } else apply();
+  };
+  const removeExercise = (id: string) => {
+    const apply = () => {
+      const next = removeWorkoutExercise(exercises, setsRef.current, id);
+      if ((setsRef.current[id] ?? []).some((set) => set.id === restTimer.anchorSetId)) setRestTimer(cancelRest());
+      setsRef.current = next.sets; setSetsByExercise(next.sets); setExercises(next.exercises);
+      setSupersets(cleanSupersets(next.exercises.map((exercise) => exercise.id), supersets));
+      goToExercise(Math.max(0, Math.min(pageIndex, next.exercises.length - 1)));
+    };
+    if ((setsRef.current[id] ?? []).some((set) => set.isCompleted)) Alert.alert(t('executionUpdates.removeExercise'), t('executionUpdates.removeRecorded'), [
+      { text: t('generate.cancel'), style: 'cancel' }, { text: t('executionUpdates.removeExercise'), style: 'destructive', onPress: apply },
+    ]); else apply();
   };
   // Auto-advancing the exercise rail must not change which exercise owns a running rest.
   const restExercise = exercises.find((exercise) => (setsByExercise[exercise.id] ?? []).some((set) => set.id === restTimer.anchorSetId)) ?? exercises[pageIndex];
@@ -458,7 +508,7 @@ export default function EntrenamientoScreen() {
 
   if (loadError) {
     return (
-      <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
+      <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
         <Text style={[styles.sessionName, { color: colors.textPrimary }]}>{t('train.sessionUnavailable')}</Text>
         <Pressable onPress={() => backToTraining(router)} style={{ marginTop: spacing.md }}>
           <Text style={{ color: colors.accentText }}>{t('generate.back')}</Text>
@@ -468,9 +518,9 @@ export default function EntrenamientoScreen() {
   }
 
   if (plannedSession === null) {
-    return <View style={[styles.screen, { backgroundColor: colors.bg }]} />;
+    return <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg }]} />;
   }
-  if (!hasRestored) return <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top + 32, paddingHorizontal: spacing.lg }]}>
+  if (!hasRestored) return <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top + 32, paddingHorizontal: spacing.lg }]}>
     {(restoreError || restoreNotice) && <Text style={[typography.title, { color: colors.textPrimary }]}>{t(restoreError ? 'workout.restoreError' : 'workout.restoring')}</Text>}
     {restoreError && <Pressable onPress={retryRestore} style={{ paddingVertical: 20 }}><Text style={{ color: colors.accentText }}>{t('home.retry')}</Text></Pressable>}
     {(restoreError || restoreNotice) && <Pressable onPress={() => backToTraining(router)} style={{ paddingVertical: 16 }}><Text style={{ color: colors.textSecondary }}>{t('generate.back')}</Text></Pressable>}
@@ -480,7 +530,7 @@ export default function EntrenamientoScreen() {
     <IntensityPickerProvider>
       {sessionContext && hasRestored && <PreWorkoutRehab key={sessionContext.sessionId} workoutKey={sessionContext.sessionId} routineId={routineId} sessionIndex={plannedSessionIndex}
         hasStarted={Object.values(setsByExercise).some((rows) => rows.some((row) => row.isCompleted))} />}
-      <View style={[styles.screen, { backgroundColor: colors.bg, paddingTop: insets.top }]}>
+      <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }]}>
       {/* Cabecera: nombre de la sesión + estado de guardado + cronómetro */}
       <View style={[styles.header, { paddingHorizontal: spacing.lg }]}>
         <View style={{ flex: 1 }}>
@@ -507,6 +557,7 @@ export default function EntrenamientoScreen() {
       </View>
 
       <WorkoutExerciseStrip exercises={exercises} activeId={exercises[pageIndex]?.id} onSelect={goToExercise} onAdd={() => { uiPerformance.begin('picker.ready'); setPicker('ADD'); }}
+        supersets={supersets} onExerciseMenu={(id, anchor) => setExerciseMenu({ id, anchor })}
         onReorder={(next) => { const active = exercises[pageIndex]?.id; setExercises(next);
           const index = Math.max(0, next.findIndex((ex) => ex.id === active)); setPageIndex(index);
           requestAnimationFrame(() => pagerRef.current?.scrollTo({ x: index * width, animated: false })); }} />
@@ -535,6 +586,7 @@ export default function EntrenamientoScreen() {
             key={exercise.id}
             active={exerciseIndex === pageIndex}
             exercise={exercise}
+            onWarmup={canSuggestWarmup(exercises, exerciseIndex, setsByExercise[exercise.id] ?? []) ? () => setWarmupFor(exercise.id) : undefined}
             scopedNotes={visibleWorkoutNotes(sessionNote, noteSnapshots.current.exerciseNotes[exercise.id] ?? '', noteSnapshots.current.mesocycleNote, notes[exercise.id] ?? '')}
             onPressNote={(scope) => setDetail({ id: exercise.id, mode: 'note', scope })}
             sets={setsByExercise[exercise.id] ?? []}
@@ -569,6 +621,22 @@ export default function EntrenamientoScreen() {
         </Pressable>
       </View>
 
+      {warmupFor && (() => {
+        const exercise = exercises.find((entry) => entry.id === warmupFor);
+        if (!exercise) return null;
+        const rows = setsByExercise[exercise.id] ?? [];
+        return <SmartWarmupSheet name={exerciseName(exercise)} reference={warmupReference(exercise, history, Date.now())}
+          workingLoad={rows.find((row) => row.setType !== SetType.WARMUP)?.targetWeight}
+          onClose={() => setWarmupFor(null)} onAdd={(warmups) => {
+            if (!canSuggestWarmup(exercises, exercises.indexOf(exercise), setsRef.current[exercise.id] ?? [])) { setWarmupFor(null); return; }
+            const next = { ...setsRef.current, [exercise.id]: [...warmups.map((row, index) => ({
+              id: `warmup:${exercise.id}:${Date.now()}:${index}`, setType: SetType.WARMUP,
+              targetWeight: row.weight, targetReps: row.reps, targetRIR: 4, isAutoFilled: false, isCompleted: false,
+              ...(exercise.recording ? { recording: exercise.recording } : {}),
+            })), ...(setsRef.current[exercise.id] ?? [])] };
+            setsRef.current = next; setSetsByExercise(next); setWarmupFor(null);
+          }} />;
+      })()}
       <ExerciseSwapSheet open={picker !== null} mode={picker === 'ADD' ? 'add' : 'swap'} current={exercises.find((ex) => ex.id === picker) ?? null}
         candidates={catalogue.filter((ex) => !ex.archivedAt && !exercises.some((item) => item.id === ex.id))}
         onSelect={(exercise) => chooseExercises([exercise])} onSelectMany={chooseExercises} onClose={() => setPicker(null)} />
@@ -588,9 +656,18 @@ export default function EntrenamientoScreen() {
           }
           else await persistentNotes.save(scope, scope === 'EXERCISE' ? detail.id : mesocycleId, text);
         }} onClose={() => setDetail(null)} />}
-      <WorkoutFinishSheet open={finishing} saved={finished} busy={busy} error={finishError} summary={summary} exercises={exercises} changed={changed} historyReady={historyReady} startedAt={performedAt} completedAt={completedAt}
+      <WorkoutFinishSheet open={finishing} saved={finished} busy={busy} error={finishError} summary={summary} exercises={exercises} changed={changed} changes={changes} historyReady={historyReady} startedAt={performedAt} completedAt={completedAt}
+        effortValue={sessionEffort} onChangeEffort={setSessionEffort}
         healthContent={completedSession ? <WorkoutHealthExport session={completedSession} /> : undefined}
-        onFinish={(savePlan) => { void finishWorkout(savePlan); }} onClose={() => { if (finished) backToTraining(router); else setFinishing(false); }} />
+        onFinish={(savePlan) => { void finishWorkout(savePlan); }} onClose={() => { if (finished) finishToTraining(router); else setFinishing(false); }} />
+      <ExerciseQuickMenu exercise={exerciseMenu && exercises.some((exercise) => exercise.id === exerciseMenu.id)
+        ? { id: exerciseMenu.id, name: exerciseName(exercises.find((exercise) => exercise.id === exerciseMenu.id)!) } : null}
+        anchor={exerciseMenu?.anchor} grouped={!!(exerciseMenu && supersets[exerciseMenu.id])}
+        partners={exercises.filter((exercise) => exercise.id !== exerciseMenu?.id).map((exercise) => ({ id: exercise.id, name: exerciseName(exercise) }))}
+        onClose={() => setExerciseMenu(null)} onRemove={() => { if (exerciseMenu) removeExercise(exerciseMenu.id); }}
+        onSwap={() => { if (exerciseMenu) { uiPerformance.begin('picker.ready'); setPicker(exerciseMenu.id); } }}
+        onLink={(id) => { if (exerciseMenu) setSupersets(linkSuperset(exerciseOrder, supersets, exerciseMenu.id, id)); }}
+        onUnlink={() => { if (exerciseMenu) setSupersets(unlinkSuperset(exerciseOrder, supersets, exerciseMenu.id)); }} />
       <ActionMenuSheet title={discardConfirm ? t('workout.discard') : null} subtitle={t('workout.discardHint')} onClose={() => setDiscardConfirm(false)}
         actions={[{ label: t('workout.discardConfirm'), tone: 'danger', onPress: async () => {
           if (busy || !sessionContext) return;
@@ -598,7 +675,7 @@ export default function EntrenamientoScreen() {
           if (!await discard()) { setDiscardError(true); setBusy(false); return; }
           setRestTimer(cancelRest()); setFinished(true);
           await Promise.allSettled([clearWorkoutRestAlerts(), endWorkoutActivity(sessionContext.userId, sessionContext.sessionId)]);
-          backToTraining(router);
+          finishToTraining(router);
         } }, { label: t('generate.cancel'), onPress: () => {} }]} />
 
       {/* Selector de tipo de serie */}
@@ -652,7 +729,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 6,
   },
-  thumbText: { fontSize: 10, fontWeight: '600', textAlign: 'center', lineHeight: 13 },
+  thumbText: { fontSize: 11, fontWeight: '600', textAlign: 'center', lineHeight: 13 },
   thumbUnderline: { height: 3, borderRadius: 2, marginTop: 5 },
   summary: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 8 },
   summaryLabel: { fontSize: 11 },

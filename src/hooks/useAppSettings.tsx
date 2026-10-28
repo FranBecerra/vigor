@@ -5,6 +5,7 @@ import i18n, { getSystemLanguage } from '@/i18n';
 import { DEFAULT_APP_SETTINGS, type AppSettings } from '@/services/settings/appSettings';
 import { appSettingsRepository } from '@/services/settings/settingsClient';
 import { updateDisplayName } from '@/services/settings/profileName';
+import { TrainingUnitsContext } from './TrainingUnitsContext';
 
 interface SettingsContext {
   settings: AppSettings; ready: boolean; busy: boolean; error: boolean; displayName: string;
@@ -59,7 +60,7 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
       const value = await updateDisplayName(owner, input);
       if (currentOwner.current === owner) { setName({ owner, value }); setState((old) => ({ ...old, error: false })); }
     }), reload: () => setAttempt((value) => value + 1),
-  }}>{children}</Context.Provider>;
+  }}><TrainingUnitsContext.Provider value={{ unit: visible.settings.measurementSystem === 'imperial' ? 'lb' : 'kg', increment: visible.settings.weightIncrement ?? 0.25 }}>{children}</TrainingUnitsContext.Provider></Context.Provider>;
 }
 export function useAppSettings() {
   const settings = useContext(Context); if (!settings) throw Error('AppSettingsProvider missing'); return settings;

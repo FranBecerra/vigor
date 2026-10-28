@@ -23,6 +23,7 @@ it('opens the exercise prescription even before the first rest and saves plan du
   const save = jest.fn().mockResolvedValue(undefined), adjust = jest.fn(), setDuration = jest.fn(); let tree: any;
   await act(async () => { tree = create(<RestTimer state={{ startedAt: null, durationSeconds: 0, anchorSetId: null }}
     prescribedSeconds={150} exerciseName="Squat" onSetPrescription={save} onAdjust={adjust} onSetDuration={setDuration} onRestart={jest.fn()} onCancel={jest.fn()} />); });
+  expect(JSON.stringify(tree.toJSON())).toContain('2:30');
   const button = (label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function').at(-1);
   await act(async () => button('restControls.open').props.onPress());
   const field = tree.root.findByType(NumericField); expect(field.props.value).toBe(150);

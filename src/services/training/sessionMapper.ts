@@ -17,7 +17,7 @@ import { SetType, type SetExtension, type WorkoutExercise, type WorkoutSession, 
 /** Serie tal como la maneja la pantalla: el modelo más su estado de ejecución. */
 export interface SessionSetState extends WorkoutSet {
   isCompleted: boolean;
-  previous?: { weight: number; reps: number; rir: number };
+  previous?: { weight: number; reps: number; rir: number | null };
 }
 
 /** Estado de la pantalla: series por ejercicio. */
@@ -81,6 +81,8 @@ export function toWorkoutExercises(
 
 /** Datos de la sesión que no viven en el estado de series. */
 export interface SessionContext {
+  sessionFeedback?: WorkoutSession['sessionFeedback'];
+  supersets?: Record<string, string>;
   sessionNote?: string;
   mesocycleNote?: string;
   persistentExerciseNotes?: Record<string, string>;
@@ -120,11 +122,13 @@ export function toWorkoutSession(
     performedAt: context.performedAt,
   };
   if (context.trainingGoal !== undefined) session.trainingGoal = context.trainingGoal;
+  if (context.sessionFeedback !== undefined) session.sessionFeedback = context.sessionFeedback;
   if (context.sessionNote !== undefined) session.sessionNote = context.sessionNote;
   if (context.mesocycleNote !== undefined) session.mesocycleNote = context.mesocycleNote;
   if (context.sessionName !== undefined) session.sessionName = context.sessionName;
   if (context.activeExerciseId !== undefined) session.activeExerciseId = context.activeExerciseId;
   if (context.restTimer !== undefined) session.restTimer = context.restTimer;
+  if (context.supersets !== undefined) session.supersets = context.supersets;
   for (const exercise of session.exercises) {
     const snapshot = context.exerciseSnapshots?.[exercise.exerciseId];
     if (snapshot) exercise.exerciseSnapshot = snapshot;

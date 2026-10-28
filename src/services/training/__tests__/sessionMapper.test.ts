@@ -36,6 +36,12 @@ const context: SessionContext = {
   performedAt: 1_700_000_000_000,
 };
 
+it('retains explicitly recorded session feedback and leaves legacy records free of undefined fields', () => {
+  const feedback = { scale: 'VIGOR_SESSION_EFFORT_1_10_V1' as const, effort: 6, recordedAt: 1700000001000, timing: 'AT_FINISH' as const };
+  expect(toWorkoutSession({ ...context, sessionFeedback: feedback }, [], {}).sessionFeedback).toEqual(feedback);
+  expect(toWorkoutSession(context, [], {})).not.toHaveProperty('sessionFeedback');
+});
+
 describe('isSetCompleted', () => {
   it('es true solo con peso y reps reales registrados', () => {
     expect(isSetCompleted(setState({ actualReps: 8, actualWeight: 80 }))).toBe(true);
@@ -93,10 +99,12 @@ describe('toWorkoutSession', () => {
   it('keeps runtime identity, exercise snapshots and swap provenance alongside new notes', () => {
     const restTimer = { startedAt: 1, durationSeconds: 120, anchorSetId: 's1' };
     const saved = toWorkoutSession({ ...context, trainingGoal: 'HYPERTROPHY', sessionName: 'Upper', activeExerciseId: 'bench', restTimer,
-      exerciseSnapshots: { bench: EXERCISE_CATALOGUE[0] }, swappedFrom: { bench: 'previous' }, plannedSessionIndex: undefined }, ['bench'], { bench: [setState()] });
+      exerciseSnapshots: { bench: EXERCISE_CATALOGUE[0] }, swappedFrom: { bench: 'previous' }, supersets: { bench: 'pair', ohp: 'pair' }, plannedSessionIndex: undefined }, ['bench'], { bench: [setState({ completionWasRecorded: true })] });
     expect(saved).toMatchObject({ trainingGoal: 'HYPERTROPHY', sessionName: 'Upper', activeExerciseId: 'bench', restTimer,
       exercises: [{ exerciseSnapshot: EXERCISE_CATALOGUE[0], isSwap: true, swappedFromExerciseId: 'previous' }] });
     expect(saved).not.toHaveProperty('plannedSessionIndex');
+    expect(saved.supersets).toEqual({ bench: 'pair', ohp: 'pair' });
+    expect(toSessionSetsByExercise(JSON.parse(JSON.stringify(saved))).bench[0].completionWasRecorded).toBe(true);
   });
   it('captures scoped notes and explicit empty clears without fabricating them on legacy records', () => {
     const saved = toWorkoutSession({ ...context, sessionNote: 'Today', mesocycleNote: 'Block', persistentExerciseNotes: { bench: 'Seat 4' }, exerciseNotes: { bench: '' } }, ['bench'], { bench: [setState()] });

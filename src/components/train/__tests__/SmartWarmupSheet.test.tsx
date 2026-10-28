@@ -1,0 +1,20 @@
+import React from 'react';
+import { Text } from 'react-native';
+import { SmartWarmupSheet } from '../SmartWarmupSheet';
+import { NumericField } from '../NumericField';
+const { create, act } = require('react-test-renderer');
+jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ bottom: 0 }) }));
+it('requires a valid reference, permits reviewing the ramp and adds only after explicit confirmation', async () => {
+  const add = jest.fn(), close = jest.fn(); let tree: any;
+  await act(async () => { tree = create(<SmartWarmupSheet name="Squat" workingLoad={80} onAdd={add} onClose={close} />); });
+  const apply = () => tree.root.findAll((node: any) => typeof node.props.onPress === 'function' && node.findAllByType(Text).some((text: any) => text.props.children === 'trainingUpdates.applyWarmup'))[0];
+  expect(apply().props.disabled).toBe(true);
+  await act(async () => tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === 'trainingUpdates.referenceRM').props.onChangeValue(100));
+  expect(apply().props.disabled).toBe(false); expect(add).not.toHaveBeenCalled();
+  await act(async () => tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === '% 1RM 1').props.onChangeValue(45));
+  await act(async () => apply().props.onPress());
+  expect(add).toHaveBeenCalledWith([{ weight: 45, reps: 8, percent: 45 }, { weight: 55, reps: 5, percent: 55 }, { weight: 70, reps: 3, percent: 70 }]);
+  expect(close).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});

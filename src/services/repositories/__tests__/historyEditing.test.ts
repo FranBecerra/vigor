@@ -6,6 +6,16 @@ jest.mock('@/services/firebase', () => ({ db: {} }));
 const session: WorkoutSession = { id: 'workout', userId: 'owner', sessionName: 'Upper', exercises: [], performedAt: 1000, completedAt: 5000,
   microcycleId: 'micro', microcycleIndex: 0, mesocycleId: 'meso' };
 afterEach(() => jest.restoreAllMocks());
+it('persists feedback corrections locally and detects concurrent feedback edits', async () => {
+  jest.spyOn(BaseRepository.prototype, 'get').mockResolvedValue(session);
+  const write = jest.spyOn(workoutSessionRepository, 'updateLocally').mockResolvedValue('pending');
+  const edited = await workoutSessionRepository.editCompletedLocally(session, 'owner', { ...session, sessionEffort: 6 });
+  expect(write).toHaveBeenCalledWith('workout', expect.objectContaining({ sessionFeedback: edited.sessionFeedback }), expect.any(Function));
+  jest.spyOn(BaseRepository.prototype, 'get').mockResolvedValue(edited);
+  write.mockClear();
+  await expect(workoutSessionRepository.editCompletedLocally(session, 'owner', session)).rejects.toThrow('staleHistory');
+  expect(write).not.toHaveBeenCalled();
+});
 it('merges only the execution correction, never rewrites identity, completion or progression', async () => {
   jest.spyOn(BaseRepository.prototype, 'get').mockResolvedValue(session);
   const write = jest.spyOn(workoutSessionRepository, 'updateLocally').mockResolvedValue('pending');

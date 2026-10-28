@@ -1,24 +1,7 @@
 /**
- * Temporizador de descanso entre series — LÓGICA PURA (PRD §3.4).
- *
- * REGLA ÚNICA:
- *   El temporizador se reinicia cuando una serie pasa a completada Y ninguna
- *   serie POSTERIOR está ya completada. Ninguna otra acción lo toca.
- *
- * Dicho de otro modo: el temporizador solo reacciona a la serie que está en la
- * FRONTERA del progreso del usuario. Consecuencias (todas deseadas):
- *  - Completar series en orden arranca el descanso cada vez, con la duración
- *    correspondiente al ejercicio.
- *  - Desmarcar y volver a marcar la ÚLTIMA serie lo reinicia: no hay ninguna
- *    serie posterior completada, así que sigue siendo la frontera.
- *  - Recompletar una serie ANTERIOR tras corregir un dato NO lo reinicia: hay
- *    series posteriores ya completadas, luego es una corrección y no trabajo
- *    nuevo. El descanso en curso se conserva.
- *  - Desmarcar cualquier serie NUNCA toca el temporizador.
- *
- * El estado guarda el INSTANTE de inicio, no los segundos restantes: así el
- * tiempo transcurrido se deriva del reloj y no se desvía aunque la interfaz se
- * repinte de forma irregular o la app quede en segundo plano.
+ * Pure rest-clock state. Store an absolute start, never a ticking counter.
+ * New completion edges are decided by workoutExecution.restAfterCompletion;
+ * supersets rest between rounds, not between members. Corrections are not work.
  */
 import { ExerciseProfile } from '@/models';
 
@@ -44,6 +27,16 @@ export const IDLE_REST_TIMER: RestTimerState = {
   durationSeconds: 0,
   anchorSetId: null,
 };
+
+/** Shortening a running rest across zero must ring once; an expired restore must not. */
+export function restFeedbackDeadline(previous: RestTimerState | null, next: RestTimerState, now: number): number | null {
+  if (next.startedAt === null) return null;
+  const deadline = next.startedAt + next.durationSeconds * 1000;
+  if (deadline > now) return deadline;
+  const shortenedActive = previous?.startedAt === next.startedAt && previous.anchorSetId === next.anchorSetId
+    && previous.durationSeconds > next.durationSeconds && previous.startedAt + previous.durationSeconds * 1000 > now;
+  return shortenedActive ? now + 100 : null;
+}
 
 /**
  * Recommended rest by exercise profile (PRD §3.4).
@@ -179,6 +172,7 @@ export function flattenSessionSets<T extends OrderedSet>(
  * `orderedSets` debe reflejar el estado YA con la serie marcada como completada.
  * Una serie que no aparezca en la lista devuelve `false` (defensivo).
  */
+/** @deprecated Legacy frontier heuristic. Execution uses completion edges instead. */
 export function shouldRestartRest(
   orderedSets: readonly OrderedSet[],
   completedSetId: string,

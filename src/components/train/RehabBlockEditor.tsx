@@ -11,6 +11,7 @@ import type { Exercise, RehabBlock, RehabPrescription } from '@/models';
 import { ExerciseSwapSheet } from './generate/ExerciseSwapSheet';
 import { NumericField } from './NumericField';
 import { useRoutines } from '@/hooks/useRoutines';
+import { unlinkRehabItems } from '@/services/training/rehabilitation';
 
 export function RehabBlockEditor({ initial, onClose }: { initial?: RehabBlock; onClose: () => void }) {
   const { t } = useTranslation();
@@ -19,7 +20,7 @@ export function RehabBlockEditor({ initial, onClose }: { initial?: RehabBlock; o
   const { saveBlock } = useRehabilitation();
   const { routines } = useRoutines();
   const activeRoutine = routines.find((routine) => routine.isActive);
-  const { colors, sectionAccent, spacing, radius } = useTheme();
+  const { surfaces, colors, sectionAccent, spacing, radius } = useTheme();
   const insets = useSafeAreaInsets();
   const [name, setName] = useState(initial?.name ?? '');
   const [items, setItems] = useState<RehabPrescription[]>(initial?.items ?? []);
@@ -41,7 +42,7 @@ export function RehabBlockEditor({ initial, onClose }: { initial?: RehabBlock; o
   return <Modal visible animationType="slide" onRequestClose={() => { if (!busy) { if (picker) setPicker(false); else onClose(); } }}>
     {picker ? <ExerciseSwapSheet embedded open mode="add" current={null}
       candidates={catalogue.filter((exercise) => exercise.archivedAt === undefined)} onSelect={add} onClose={() => setPicker(false)} /> :
-    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1, backgroundColor: colors.bg,
+    <ScrollView style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg }} keyboardShouldPersistTaps="handled" contentContainerStyle={{ flexGrow: 1,
       padding: spacing.lg, paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + 40 }}>
       <Text style={{ ...text, fontSize: 24, fontWeight: '700' }}>{t('rehab.editBlock')}</Text>
       <TextInput style={{ ...button, ...text }} value={name} onChangeText={setName} maxLength={120}
@@ -76,6 +77,10 @@ export function RehabBlockEditor({ initial, onClose }: { initial?: RehabBlock; o
         const mode = recordingOf(item.exerciseSnapshot);
         return <View key={item.id} style={{ ...button, padding: spacing.lg }}>
           <Text style={{ ...text, fontSize: 17, fontWeight: '600' }}>{item.exerciseSnapshot.name}</Text>
+          {position > 0 && <Pressable accessibilityRole="checkbox" accessibilityLabel={t('trainingUpdates.linkPrevious')} accessibilityState={{ checked: !!item.circuitWithPrevious }}
+            style={{ minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 12 }} onPress={() => patch(item.id, { circuitWithPrevious: !item.circuitWithPrevious })}>
+            <Text style={{ color: colors.accentText, fontSize: 22 }}>{item.circuitWithPrevious ? '☑' : '□'}</Text><Text style={text}>{t('trainingUpdates.linkPrevious')}</Text>
+          </Pressable>}
           {item.exerciseSnapshot.notes && <Text style={{ color: colors.textMuted }}>{item.exerciseSnapshot.notes}</Text>}
           {mode.measure === 'SECONDS' && <Text style={text}>{t('rehab.secondsPerSet')}</Text>}
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginVertical: 12 }}>
@@ -92,9 +97,9 @@ export function RehabBlockEditor({ initial, onClose }: { initial?: RehabBlock; o
             placeholder={t('custom.notes')} placeholderTextColor={colors.textMuted} style={{ ...text, minHeight: 40 }} />
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Pressable disabled={position === 0} onPress={() => setItems((old) => {
-              const next = [...old]; [next[position - 1], next[position]] = [next[position], next[position - 1]]; return next;
+              const next = [...old]; [next[position - 1], next[position]] = [next[position], next[position - 1]]; return unlinkRehabItems(next);
             })}><Text style={text}>{t('rehab.moveUp')}</Text></Pressable>
-            <Pressable onPress={() => setItems((old) => old.filter((entry) => entry.id !== item.id))}><Text style={text}>{t('generate.removeExercise')}</Text></Pressable>
+            <Pressable onPress={() => setItems((old) => unlinkRehabItems(old.filter((entry) => entry.id !== item.id)))}><Text style={text}>{t('generate.removeExercise')}</Text></Pressable>
           </View>
         </View>;
       })}

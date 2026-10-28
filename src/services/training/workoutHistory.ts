@@ -3,6 +3,7 @@ import { isSetCompleted } from './sessionMapper';
 import { timestampMillis } from './workoutRuntime';
 import { primaryMusclesOf } from './exerciseMuscles';
 import { MuscleGroup } from '@/models';
+import { sessionEffortValue } from './sessionFeedback';
 
 const finite = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
 /** Read actuals only. Missing catalogue entries must not erase recorded work. */
@@ -50,6 +51,6 @@ export function workoutHistoryDetails(session: WorkoutSession, catalogue: Readon
     return { id: entry.id, exerciseId: entry.exerciseId, name: exercise?.name ?? null, note: entry.notes ?? null, exerciseNote: entry.exerciseNote ?? null, completed, sets };
   });
   const start = timestampMillis(session.performedAt); const end = session.completedAt === undefined ? NaN : timestampMillis(session.completedAt);
-  return { exercises, working, warmups, tonnage, sessionNote: session.sessionNote ?? null, mesocycleNote: session.mesocycleNote ?? null, volumes: [...volumes].map(([muscle, sets]) => ({ muscle, sets })).sort((a, b) => b.sets - a.sets || a.muscle.localeCompare(b.muscle)), meanRIR: efforts.length ? efforts.reduce((sum, value) => sum + value, 0) / efforts.length : null,
+  return { exercises, working, warmups, tonnage, sessionEffort: sessionEffortValue(session.sessionFeedback), sessionNote: session.sessionNote ?? null, mesocycleNote: session.mesocycleNote ?? null, volumes: [...volumes].map(([muscle, sets]) => ({ muscle, sets })).sort((a, b) => b.sets - a.sets || a.muscle.localeCompare(b.muscle)), meanRIR: efforts.length ? efforts.reduce((sum, value) => sum + value, 0) / efforts.length : null,
     durationSeconds: finite(start) && finite(end) && end >= start ? Math.floor((end - start) / 1000) : null };
 }

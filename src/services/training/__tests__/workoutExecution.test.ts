@@ -1,6 +1,6 @@
 import { SetType } from '@/models';
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
-import { editNumericDraft, nextExerciseAfterCompletion, replacementWorkoutSets, updateWorkoutSet } from '../workoutExecution';
+import { editNumericDraft, isNewSetCompletion, nextExerciseAfterCompletion, replacementWorkoutSets, updateWorkoutSet } from '../workoutExecution';
 import { sessionProgress, toSessionSetsByExercise, toWorkoutSession, type SessionSetState } from '../sessionMapper';
 import { workoutReview } from '../workoutReview';
 
@@ -9,6 +9,26 @@ const row = (id: string, patch: Partial<SessionSetState> = {}): SessionSetState 
   isAutoFilled: false, isCompleted: false, ...patch,
 });
 const context = { sessionId: 'test-only', userId: 'fixture', mesocycleId: 'm', microcycleId: 'm0', microcycleIndex: 0, performedAt: 1 };
+
+it('preserves explicit effort provenance across completion and persistence without promoting inherited targets', () => {
+  const inherited = updateWorkoutSet(row('s'), { isCompleted: true, actualWeight: 20, actualReps: 10, actualRIR: 2 });
+  expect(inherited.actualRIRSource).toBe('INHERITED_TARGET');
+  const reported = updateWorkoutSet(row('s'), { actualRIR: 3 }); expect(reported.actualRIRSource).toBe('ATHLETE');
+  const completed = updateWorkoutSet(reported, { isCompleted: true, actualWeight: 20, actualReps: 10, actualRIR: 3 });
+  expect(completed.actualRIRSource).toBe('ATHLETE');
+  expect(toSessionSetsByExercise(toWorkoutSession(context, ['ex'], { ex: [completed] })).ex[0].actualRIRSource).toBe('ATHLETE');
+});
+
+it('starts rest for new completions, not corrections of a checked row or invalid completion attempts', () => {
+  const pending = row('s'); const done = { ...pending, actualWeight: 35, actualReps: 8, isCompleted: true };
+  expect(isNewSetCompletion(pending, done)).toBe(true);
+  expect(isNewSetCompletion(done, updateWorkoutSet(done, { actualWeight: 40, isCompleted: true }))).toBe(false);
+  expect(isNewSetCompletion(done, { ...done, isCompleted: false })).toBe(false);
+  expect(isNewSetCompletion(pending, { ...pending, isCompleted: true })).toBe(false);
+  expect(isNewSetCompletion(undefined, done)).toBe(false);
+  expect(isNewSetCompletion(pending, undefined)).toBe(false);
+  expect(isNewSetCompletion({ ...done, isCompleted: false }, done)).toBe(true);
+});
 
 it('keeps partial reps distinct through save/resume and never inflates full-rep tonnage', () => {
   const set = row('s', { actualWeight: 35, actualReps: 8, actualRIR: 2, actualPartialReps: 4, isCompleted: true });
@@ -60,6 +80,13 @@ it('ignores pending warmups, invalid actuals and untouched muscles in the review
   const exercise = EXERCISE_CATALOGUE[0];
   const sets = { [exercise.id]: [row('w', { setType: SetType.WARMUP }), row('invalid', { isCompleted: true })] };
   expect(workoutReview([exercise], sets, [], 's')).toMatchObject({ completed: 0, pending: 1, tonnage: 0, volumes: [] });
+});
+it('keeps advanced tonnage separate, rejects invalid loads and excludes incompatible recording modes', () => {
+  const exercise = EXERCISE_CATALOGUE[0];
+  const set = row('s', { isCompleted: true, actualWeight: 20, actualReps: 10, extensions: [{ weight: 10, reps: 5 }, { reps: 2 }, { weight: NaN, reps: 5 }, { weight: 10 }] });
+  expect(workoutReview([exercise], { [exercise.id]: [set] }, [], 's').tonnage).toBe(290);
+  for (const patch of [{ actualWeight: Infinity }, { actualWeight: NaN }, { actualWeight: -1 }, { actualReps: Infinity }, { actualReps: -1 }]) expect(workoutReview([exercise], { [exercise.id]: [{ ...set, ...patch }] }, [], 's').tonnage).toBe(0);
+  expect(workoutReview([{ ...exercise, recording: { measure: 'REPETITIONS', load: 'LEVEL' } }], { [exercise.id]: [set] }, [], 's').tonnage).toBe(0);
 });
 
 it('retains an empty exercise in an actively persisted draft after deleting its last set', () => {

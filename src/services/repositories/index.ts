@@ -191,11 +191,13 @@ class WorkoutSessionRepository extends BaseRepository<WorkoutSession> {
     const latest = await this.get(original.id);
     if (!isCurrent() || !latest || latest.userId !== owner || latest.editedAt !== original.editedAt
       || JSON.stringify(latest.exercises) !== JSON.stringify(original.exercises)
-      || latest.sessionNote !== original.sessionNote || latest.sessionName !== original.sessionName) throw Error('staleHistory');
+      || latest.sessionNote !== original.sessionNote || latest.sessionName !== original.sessionName
+      || JSON.stringify(latest.sessionFeedback) !== JSON.stringify(original.sessionFeedback)) throw Error('staleHistory');
     const edited = editWorkoutHistory(latest, owner, draft, Date.now());
     let rejected = false;
     await this.updateLocally(edited.id, { exercises: edited.exercises, sessionName: edited.sessionName,
-      sessionNote: edited.sessionNote, editedAt: edited.editedAt }, () => { rejected = true; });
+      sessionNote: edited.sessionNote, editedAt: edited.editedAt,
+      ...(edited.sessionFeedback ? { sessionFeedback: edited.sessionFeedback } : {}) }, () => { rejected = true; });
     if (rejected) throw Error('historyEditRejected');
     return edited;
   }

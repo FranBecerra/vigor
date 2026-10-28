@@ -16,7 +16,8 @@ import { loadRoutineViews, type RoutineView } from '@/services/training/routineV
 import { activationChanges, normalizeRoutineName } from '@/services/training/routineMapper';
 
 export type RoutinesStatus = 'loading' | 'ready' | 'error';
-
+/** Warm navigation snapshot only; Firestore remains the durable cache/source. */
+const viewCache = new Map<string, RoutineView[]>();
 
 const SOURCES = {
   listRoutines: (userId: string) => routineRepository.listByUser(userId),
@@ -32,11 +33,14 @@ export function useRoutines(): {
   rename: (routineId: string, name: string) => Promise<void>;
   remove: (routineId: string) => Promise<void>;
 } {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { uid } = useAuth();
   const { exercisesById: EXERCISE_BY_ID } = useExerciseCatalogue();
-  const [status, setStatus] = useState<RoutinesStatus>('loading');
-  const [routines, setRoutines] = useState<RoutineView[]>([]);
+  const cacheKey = JSON.stringify([uid, i18n?.resolvedLanguage ?? i18n?.language ?? 'en']);
+  const cached = uid ? viewCache.get(cacheKey) : undefined;
+  const [status, setStatus] = useState<RoutinesStatus>(cached ? 'ready' : 'loading');
+  const [routines, setRoutines] = useState<RoutineView[]>(cached ?? []);
+  const loadedKey = useRef(cacheKey);
   // A slow read must not overwrite a newer one that already landed.
   const requestId = useRef(0);
 
@@ -50,24 +54,30 @@ export function useRoutines(): {
   );
 
   const reload = useCallback(() => {
+    const id = ++requestId.current;
     if (uid === null) {
+      viewCache.clear(); loadedKey.current = cacheKey;
       setRoutines([]);
       setStatus('ready');
       return;
     }
-    const id = ++requestId.current;
     loadRoutineViews(uid, SOURCES, EXERCISE_BY_ID, labels)
       .then((views) => {
         if (id !== requestId.current) return;
+        viewCache.set(cacheKey, views);
+        if (viewCache.size > 8) viewCache.delete(viewCache.keys().next().value!);
+        loadedKey.current = cacheKey;
         setRoutines(views);
         setStatus('ready');
       })
       .catch((error: unknown) => {
         if (id !== requestId.current) return;
         console.error('[routines] load failed', error);
+        loadedKey.current = cacheKey;
+        setRoutines(viewCache.get(cacheKey) ?? []);
         setStatus('error');
       });
-  }, [uid, labels, EXERCISE_BY_ID]);
+  }, [uid, labels, EXERCISE_BY_ID, cacheKey]);
 
   useFocusEffect(reload);
 
@@ -106,5 +116,6 @@ export function useRoutines(): {
     [uid, reload],
   );
 
-  return { status, routines, reload, activate, rename, remove };
+  return { status: loadedKey.current === cacheKey ? status : cached ? 'ready' : 'loading',
+    routines: loadedKey.current === cacheKey ? routines : cached ?? [], reload, activate, rename, remove };
 }

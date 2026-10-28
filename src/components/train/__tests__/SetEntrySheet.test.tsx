@@ -46,3 +46,15 @@ it('opens effort directly with large targets and no unnecessary numeric keypad',
   expect(tree.root.findAll((node: any) => node.props.accessibilityLabel === 'RIR 0' && typeof node.props.onPress === 'function')[0].props.style.height).toBe(48);
   await act(async () => tree.unmount());
 });
+it('accepts a late historical load only while the weight draft is untouched', async () => {
+  const complete = jest.fn(); let tree: any;
+  const props = { initialField: 'weight' as const, reps: 10, scale: 'RIR' as const, onWeight: jest.fn(), onReps: jest.fn(), onIntensity: jest.fn(), onComplete: complete, onClose: jest.fn() };
+  await act(async () => { tree = create(<SetEntrySheet {...props} weight={0} />); });
+  await act(async () => tree.update(<SetEntrySheet {...props} weight={70} />));
+  const button = (label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
+  await act(async () => button('workout.completeSet').props.onPress()); expect(complete.mock.calls.at(-1)[0].weight).toBe(70);
+  await act(async () => button('3').props.onPress());
+  await act(async () => tree.update(<SetEntrySheet {...props} weight={80} />));
+  await act(async () => button('workout.completeSet').props.onPress()); expect(complete.mock.calls.at(-1)[0].weight).toBe(3);
+  await act(async () => tree.unmount());
+});

@@ -194,6 +194,7 @@ export type PlannedSessionFocus =
  * templates and calendar assignments are separate from workout progression (§3.1).
  */
 export interface PlannedSession {
+  supersets?: Record<string, string>;
   name?: string;
   index: number;
   focus: PlannedSessionFocus;

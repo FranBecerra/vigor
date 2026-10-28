@@ -17,12 +17,18 @@ export interface BodyHalfGroup<T> {
   entries: T[];
 }
 
-/** Keeps the incoming order inside each half and drops a half with nothing in it. */
+/** Anatomical order is stable across plan seeds, locale, volume and insertion order. */
+export const MUSCLE_DISPLAY_ORDER: readonly MuscleGroup[] = [MuscleGroup.CHEST, MuscleGroup.LATS, MuscleGroup.MID_BACK,
+  MuscleGroup.DELTS_FRONT, MuscleGroup.DELTS_LATERAL, MuscleGroup.DELTS_REAR, MuscleGroup.BICEPS, MuscleGroup.TRICEPS,
+  MuscleGroup.FOREARMS, MuscleGroup.NECK, MuscleGroup.ERECTORS, MuscleGroup.CORE, MuscleGroup.QUADS,
+  MuscleGroup.HAMSTRINGS, MuscleGroup.GLUTES, MuscleGroup.ADDUCTORS, MuscleGroup.CALVES, MuscleGroup.TIBIALIS, MuscleGroup.UNCLASSIFIED];
+/** Drops empty halves; never sorts muscles by their current dose. */
 export function groupByBodyHalf<T extends { muscle: MuscleGroup }>(
   entries: readonly T[],
 ): BodyHalfGroup<T>[] {
   return (['UPPER', 'LOWER'] as const)
-    .map((half) => ({ half, entries: entries.filter((entry) => bodyHalfOf(entry.muscle) === half) }))
+    .map((half) => ({ half, entries: entries.filter((entry) => bodyHalfOf(entry.muscle) === half)
+      .sort((a, b) => MUSCLE_DISPLAY_ORDER.indexOf(a.muscle) - MUSCLE_DISPLAY_ORDER.indexOf(b.muscle)) }))
     .filter((group) => group.entries.length > 0);
 }
 

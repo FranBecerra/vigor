@@ -1,4 +1,7 @@
 {
+  "sessionEffort": { "question": "今回のセッションはどのくらいきつかったですか？", "optional": "任意 · 最後のセットやRIRではなく、セッション全体の感覚です。", "value": "セッションのきつさ、10段階中{{value}}", "easy": "1 · とても楽", "hard": "10 · 極めてきつい", "skip": "未回答にする", "summary": "セッションのきつさ：{{value}}/10" },
+  "executionUpdates": { "units": "単位", "metric": "メートル法 · kg", "imperial": "ヤード・ポンド法 · lb", "increment": "ホイールの重量刻み", "actions": "種目の操作", "removeExercise": "種目を削除", "removeRecorded": "この種目と記録済みセットを今回のトレーニングから削除しますか？", "replaceRecorded": "種目を置き換えて記録済みセットを削除しますか？結果は別の種目に転送されません。", "link": "{{name}}とスーパーセット", "unlink": "スーパーセットから外す", "superset": "スーパーセット", "change_superset": "スーパーセットの構成" },
+  "trainingUpdates": { "changes": "変更内容", "change_added": "種目を追加", "change_removed": "種目を削除", "change_order": "種目の順序", "change_sets": "セット数", "change_type": "セット{{set}} · 種類", "change_reps": "セット{{set}} · 回数", "partials": "パーシャル", "circuit": "サーキット", "linkPrevious": "前の種目とサーキット", "warmup": "スマートウォームアップ", "warmupHint": "編集可能な開始例です。種目と同じ重量の入力方法を使用してください。", "referenceRM": "基準1RM (kg)", "increment": "重量の刻み (kg)", "applyWarmup": "ウォームアップを追加", "warmupUnavailable": "基準1RMを入力してください。", "estimatedRM": "完了したセットから推定", "referenceManual": "基準1RMを設定" },
   "calendar": {
     "templateSummary": "推奨サイクル：{{days}}日・休養{{rest}}日",
     "templateDescription": "日付なしで使える順序です。トレーニングの順序を保ったまま休養日を移動できます。設定済みの日付は変わりません。",
