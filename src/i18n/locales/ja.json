@@ -1,4 +1,6 @@
 {
+  "sportActivitiesRequiredName": "名前",
+  "sportActivities": {"title":"アクティビティ","intro":"有酸素運動やレッスン、好きなスポーツを日々の運動に。","plan":"予定を追加","record":"運動を記録","edit":"アクティビティを編集","viewAll":"すべてのアクティビティ","empty":"レッスン、試合、有酸素運動がここに表示されます。","planned":"予定","recorded":"完了","minutes":"{{value}} 分","context":"アクティビティの種類","name":"名前（任意）","starts":"開始日時","duration":"時間（分）","notes":"メモ","save":"保存","invalid":"名前と時間（1～1440分）を確認してください。記録する運動は終了している必要があります。","saveFailed":"保存できませんでした。再試行するか、変更済みの場合は開き直してください。","loadFailed":"アクティビティを読み込めませんでした。","manualMetrics":"手動記録・センサー測定なし","originalPlan":"当初の予定：{{value}} 分","discard":"アクティビティを破棄","cancelPlan":"予定をキャンセル","confirmDiscard":"一覧と履歴からこのアクティビティを削除しますか？","confirm":"確認","sports":{"PADEL":"パデル","FOOTBALL":"サッカー","TENNIS":"テニス","BASKETBALL":"バスケットボール","HIKING":"ハイキング","RUNNING":"ランニング","CYCLING":"サイクリング","MACHINE":"有酸素マシン","OTHER":"その他"},"contexts":{"CLASS":"レッスン","MATCH":"試合","FREE":"自由な運動"}},
   "sessionEffort": { "question": "今回のセッションはどのくらいきつかったですか？", "optional": "任意 · 最後のセットやRIRではなく、セッション全体の感覚です。", "value": "セッションのきつさ、10段階中{{value}}", "easy": "1 · とても楽", "hard": "10 · 極めてきつい", "skip": "未回答にする", "summary": "セッションのきつさ：{{value}}/10" },
   "dailyCheckIn": {
     "title": "今日の調子はどうですか？", "intro": "任意です。普段の状態と比べ、わからない項目は未回答のままにできます。",

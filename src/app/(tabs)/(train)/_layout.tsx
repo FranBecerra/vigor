@@ -31,6 +31,9 @@ export default function TrainStackLayout() {
       <Stack.Screen name="exercises" />
       <Stack.Screen name="rehab" />
       <Stack.Screen name="history" />
+      <Stack.Screen name="activities" />
+      <Stack.Screen name="activity" />
+      <Stack.Screen name="activity-editor" options={{ gestureEnabled: false }} />
       <Stack.Screen name="performance" />
     </Stack>
   );

@@ -9,6 +9,7 @@ export * from './routine';
 export * from './training';
 export * from './sessionFeedback';
 export * from './cardio';
+export * from './sportActivity';
 export * from './analytics';
 export * from './readiness';
 export * from './microcycleReview';

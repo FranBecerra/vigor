@@ -25,6 +25,7 @@ import { RoutineCard } from '@/components/home/RoutineCard';
 import { RenameRoutineSheet } from '@/components/home/RenameRoutineSheet';
 import { TrainingCalendarCard } from '@/components/train/TrainingCalendarCard';
 import { MicrocycleReviewPrompt } from '@/components/bio/MicrocycleReviewPrompt';
+import { SportActivitiesHome } from '@/components/cardio/SportActivitiesHome';
 import { useTheme } from '@/theme/useTheme';
 import { useRoutines } from '@/hooks/useRoutines';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
@@ -214,6 +215,8 @@ export default function TrainHomeScreen() {
           <Text style={{ color: colors.textPrimary, fontSize: 20, fontWeight: '700', marginVertical: 6 }}>{activeWorkout.sessionName ?? t('tabs.train')}</Text>
           <Text style={{ color: colors.textPrimary }}>{t('workout.resume')} →</Text>
         </Pressable>}
+        {domain === 'CARDIO' && <SportActivitiesHome />}
+        {domain === 'STRENGTH' && <>
         {selectedSession !== null ? (
           <View style={{ marginTop: spacing.lg }}>
             <TodayCard
@@ -344,11 +347,13 @@ export default function TrainHomeScreen() {
             + {t('home.emptyWorkout')}
           </Text>
         </Pressable>
+        </>}
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.xl, marginBottom: spacing.md }]}>{t('library.tools')}</Text>
         <View style={{ ...surfaces.card, borderRadius: radius.lg, paddingHorizontal: spacing.lg }}>
           {([
             { route: 'exercises', icon: 'books.vertical', label: 'library.title' },
             { route: 'history', icon: 'clock.arrow.circlepath', label: 'workout.history' },
+            { route: 'activities', icon: 'figure.run', label: 'sportActivities.title' },
             { route: 'rehab', icon: 'bandage', label: 'rehab.title' },
           ] as const).map(({ route, icon, label }, index) => <Pressable key={route} accessibilityRole="button" onPress={() => router.push(`/${route}`)}
             style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 64, borderTopWidth: index ? 0.5 : 0, borderTopColor: colors.surfaceBorder }}>

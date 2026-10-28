@@ -28,12 +28,90 @@ export enum HeartRateZone {
   Z5 = 'Z5', // VO2max / anaeróbico
 }
 
+/** Modality-specific self-report; never inferred from a strength experience label. */
+export type CardioPlanningModality = 'RUNNING' | 'CYCLING' | 'MACHINE';
+export type CardioExperienceStatus = 'NEW' | 'RETURNING' | 'REGULAR' | 'UNSURE';
+export type CardioQualityExposure = 'CURRENTLY_TOLERATED' | 'NOT_TOLERATED' | 'UNKNOWN';
+
+export interface CardioModalityProfile {
+  status: CardioExperienceStatus;
+  /** User-reported recent consistent weeks, if known. */
+  consistentWeeks?: number;
+  /** User-reported current sessions per week in this modality, if known. */
+  sessionsPerWeek?: number;
+  /** Typical tolerated session duration in minutes, if known. */
+  typicalSessionMinutes?: number;
+  /** Running only; maximum single-run distance in the recent 30-day period, if known. */
+  recentLongestRunKm?: number;
+  /** Whether this modality's harder work is currently part of the user's practice. */
+  qualityExposure: CardioQualityExposure;
+}
+
+/** Draft-only model. It is not persisted or derived from strength experience. */
+export interface CardioProfile {
+  schemaVersion: 1;
+  modalities: Partial<Record<CardioPlanningModality, CardioModalityProfile>>;
+}
+
+export type CardioPlanningGoal = 'GENERAL_FITNESS' | 'AEROBIC_BASE' | 'VO2_FITNESS';
+
+export interface CardioPlanCandidate {
+  id: string;
+  modality: CardioPlanningModality;
+  stimulus: 'EASY' | 'QUALITY';
+  /** Complete elapsed session duration, including warm-up, recoveries and cool-down. */
+  durationMinutes: number;
+  /** Allowed relative day slots within the microcycle. */
+  candidateDays: number[];
+  /** Transparent scheduling heuristic for local lower-body overlap. */
+  lowerBodyDemand: 'LOW' | 'HIGH';
+}
+
+export interface CardioStrengthAnchor {
+  id: string;
+  dayIndex: number;
+  lowerBodyDemand: 'LOW' | 'HIGH';
+}
+
+export interface CardioPlanningConstraints {
+  cycleDays: number;
+  availableDays: number[];
+  maxSessions: number;
+  maxActiveDays: number;
+  totalMinutes: number;
+  maxSessionMinutes: number;
+  allowDoubles: boolean;
+  goal: CardioPlanningGoal;
+  profile: CardioProfile;
+  candidates: CardioPlanCandidate[];
+  fixedStrength: CardioStrengthAnchor[];
+}
+
+export interface ScheduledCardioCandidate extends CardioPlanCandidate {
+  dayIndex: number;
+  overlap: 'NONE' | 'SAME_DAY' | 'ADJACENT_DAY';
+}
+
+export interface CardioPlanOmission {
+  candidateId: string;
+  reason: 'QUALITY_EXPOSURE_UNKNOWN' | 'QUALITY_NOT_TOLERATED' | 'SESSION_CAP' | 'TIME_CAP' | 'NO_AVAILABLE_DAY';
+}
+
+export interface CardioConstraintPlan {
+  scheduled: ScheduledCardioCandidate[];
+  omitted: CardioPlanOmission[];
+  usedMinutes: number;
+  activeDays: number[];
+}
+
 /**
  * Sesión de cardio ejecutada o planificada.
  * Los campos target* son la pauta; los actual* el registro real (paralelo a
  * WorkoutSet en fuerza).
  */
 export interface CardioSession {
+  /** Shared perception contract; does not convert legacy heart-rate zones or set RIR. */
+  sessionFeedback?: import('./sessionFeedback').SessionFeedback;
   id: string;
   userId: string;
   mesocycleId: string;

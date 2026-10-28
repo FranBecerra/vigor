@@ -3,6 +3,8 @@ import HistoryScreen from '@/app/(tabs)/(train)/history';
 import { SetType, MuscleGroup } from '@/models';
 const { create, act } = require('react-test-renderer');
 const mockList = jest.fn(); const mockPush = jest.fn(); let mockUid: string | null = 'owner'; const mockCatalogue = new Map();
+const mockSports = { entries: [] as any[], ready: true, error: false };
+jest.mock('@/hooks/useSportActivities', () => ({ useSportActivities: () => mockSports }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }), useFocusEffect: (effect: any) => require('react').useEffect(effect, [effect]) }));
@@ -16,7 +18,7 @@ const session: any = { id: 's', userId: 'owner', sessionName: 'Upper', performed
   ] }] };
 const text = (tree: any) => tree.root.findAll((node: any) => typeof node.props.children === 'string' || Array.isArray(node.props.children))
   .flatMap((node: any) => Array.isArray(node.props.children) ? node.props.children.filter((child: any) => typeof child === 'string') : [node.props.children]).join(' ');
-beforeEach(() => { jest.useFakeTimers(); jest.clearAllMocks(); mockUid = 'owner'; mockList.mockResolvedValue([session]); });
+beforeEach(() => { jest.useFakeTimers(); jest.clearAllMocks(); mockUid = 'owner'; mockSports.entries = []; mockSports.ready = true; mockSports.error = false; mockList.mockResolvedValue([session]); });
 afterEach(() => { act(() => jest.runOnlyPendingTimers()); jest.useRealTimers(); });
 it('shows only compact actual totals and muscle capsules, and opens a separate detailed route', async () => {
   let tree: any; await act(async () => { tree = create(<HistoryScreen />); });
@@ -37,5 +39,20 @@ it('hides another owner immediately and does not expose results from a stale req
 it('shows load failure without presenting another workout or a destructive action', async () => {
   mockList.mockRejectedValueOnce(Error('offline')); let tree: any; await act(async () => { tree = create(<HistoryScreen />); });
   expect(text(tree)).toContain('workout.historyError'); expect(text(tree)).not.toContain('Upper');
+  await act(async () => tree.unmount());
+});
+
+it('interleaves actual sport with strength, excludes appointments/foreign owners and opens the sport detail', async () => {
+  const { saveSportDraft } = require('@/services/cardio/sportActivities');
+  const now = Date.UTC(2026, 9, 28, 12);
+  const actual = saveSportDraft('padel', 'owner', { sport: 'PADEL', context: 'MATCH', name: 'Padel match', notes: '', mode: 'RECORD',
+    startAt: now - 7200000, durationMinutes: 60, timeZone: 'Europe/Madrid', effort: 7 }, now);
+  mockSports.entries = [actual, { ...actual, id: 'plan', name: 'Future appointment', record: null, planned: { startAt: now, durationMinutes: 60, timeZone: 'UTC' } },
+    { ...actual, id: 'foreign', userId: 'other', name: 'Private match' }];
+  let tree: any; await act(async () => { tree = create(<HistoryScreen />); });
+  expect(text(tree)).toContain('Padel match'); expect(text(tree)).not.toContain('Future appointment'); expect(text(tree)).not.toContain('Private match');
+  const cards = tree.root.findAll((node: any) => ['Upper', 'Padel match'].includes(node.props.accessibilityLabel) && typeof node.props.onPress === 'function');
+  expect(cards[0].props.accessibilityLabel).toBe('Padel match');
+  await act(async () => cards[0].props.onPress()); expect(mockPush).toHaveBeenCalledWith({ pathname: '/activity', params: { id: 'padel' } });
   await act(async () => tree.unmount());
 });
