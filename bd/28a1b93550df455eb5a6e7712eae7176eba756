@@ -1,0 +1,149 @@
+src/components/home/TodayCard.tsx
+  s_b6a0f22c32fc5f::t_69d61cf4d302fc 81,113-121,144,169,171,178,182-186,193-195
+  s_58860a6dd107b9::t_4510a20445e5e4 64,89
+src/theme/surfaces.ts
+  s_b6a0f22c32fc5f::t_f58fd505e93667 1-4,7-10,12-16,18-22,24-28,30-34,36-56
+  s_b6a0f22c32fc5f::t_6c18b91eadc27c 5-6,11,17,23,29,35,57
+src/components/train/NumericField.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 48,68
+src/components/train/generate/ExperienceLevelGuide.tsx
+  s_58860a6dd107b9::t_4510a20445e5e4 55
+  s_58860a6dd107b9::t_931f17fc2c9fcc 16,27
+  s_b6a0f22c32fc5f::t_ee8571122ab670 73-74
+src/app/(tabs)/(train)/create-routine.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 10-11
+  s_58860a6dd107b9::t_4510a20445e5e4 17
+src/components/train/NumericKeypad.tsx
+  s_58860a6dd107b9::t_4510a20445e5e4 14,19
+  s_b6a0f22c32fc5f::t_ee8571122ab670 33
+src/app/(tabs)/(train)/generate.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 1254,1276
+  s_58860a6dd107b9::t_931f17fc2c9fcc 218,247,750,1231
+  s_b6a0f22c32fc5f::t_da162f23a144b4 803,827
+src/components/train/PrescriptionEditor.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 28,47,121
+  s_58860a6dd107b9::t_4510a20445e5e4 22,60,98
+src/theme/__tests__/subtleTheme.test.tsx
+  s_b6a0f22c32fc5f::t_83caac8856c450 1,3,5-53,58-84
+  s_b6a0f22c32fc5f::t_6c18b91eadc27c 2,4,54-57
+src/components/train/generate/ExerciseSwapSheet.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 56,163,254
+  s_b6a0f22c32fc5f::t_ee8571122ab670 249
+src/components/train/CustomExerciseSheet.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 16,79
+  s_b6a0f22c32fc5f::t_ee8571122ab670 174
+src/components/home/RenameRoutineSheet.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 36,59
+src/components/train/PreWorkoutRehab.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 33
+  s_58860a6dd107b9::t_931f17fc2c9fcc 14
+  s_b6a0f22c32fc5f::t_c23fb53c39e43e 23
+src/components/train/ScheduleTemplateView.tsx
+  s_58860a6dd107b9::t_4510a20445e5e4 11,15
+src/theme/__tests__/contrast.test.ts
+  s_b6a0f22c32fc5f::t_4d1cc31ddde46f 13-14
+src/app/(tabs)/(train)/manual-routine.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 25,66
+  s_b6a0f22c32fc5f::t_ee8571122ab670 109
+src/app/(tabs)/(train)/performance.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 22,80
+src/components/train/generate/GenerateControls.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 326
+src/app/(tabs)/(train)/routine.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 46,279,288,469
+  s_58860a6dd107b9::t_4510a20445e5e4 309,321,329,486
+src/theme/__tests__/navigationTheme.test.tsx
+  s_b6a0f22c32fc5f::t_c30b03a0a63743 36
+  s_b6a0f22c32fc5f::t_8f974d1e7a1996 42
+src/theme/useTheme.ts
+  s_b6a0f22c32fc5f::t_f58fd505e93667 9,27
+src/components/train/WorkoutNotesSheet.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 45
+  s_58860a6dd107b9::t_931f17fc2c9fcc 13,27
+src/app/(tabs)/profile.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 26,50
+  s_b6a0f22c32fc5f::t_ee8571122ab670 95,130,139
+  s_58860a6dd107b9::t_4510a20445e5e4 68
+src/app/exercise-details.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 21,28
+  s_b6a0f22c32fc5f::t_d72e36b85d02db 37
+  s_b6a0f22c32fc5f::t_ee8571122ab670 66
+src/components/train/generate/GenerationChoice.tsx
+  s_58860a6dd107b9::t_4510a20445e5e4 8,12,29
+src/components/auth/SignInScreen.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 70,114
+  s_58860a6dd107b9::t_931f17fc2c9fcc 25,35
+src/components/train/ExerciseOrderSheet.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 52
+  s_58860a6dd107b9::t_931f17fc2c9fcc 13,42,45
+src/components/PlaceholderScreen.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 19,23
+src/components/train/RIRProgressionPreview.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 14,16
+  s_b6a0f22c32fc5f::t_ee8571122ab670 31
+src/components/GlassSurface.tsx
+  s_b6a0f22c32fc5f::t_6b2bb5f38c5563 48,55,69-70
+src/app/(tabs)/(train)/rehab.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 17,47
+  s_b6a0f22c32fc5f::t_c23fb53c39e43e 25
+  s_b6a0f22c32fc5f::t_d72e36b85d02db 48
+  s_b6a0f22c32fc5f::t_ee8571122ab670 35
+src/components/home/HomeHeader.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 128-129
+src/components/train/MuscleVolumeCard.tsx
+  s_b6a0f22c32fc5f::t_69d61cf4d302fc 25,29,78,82
+src/theme/tokens.ts
+  s_b6a0f22c32fc5f::t_f58fd505e93667 2-4,46,48-64,66,69-87,93-95
+src/app/workout-history.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 27,58
+  s_b6a0f22c32fc5f::t_d72e36b85d02db 69
+src/theme/navigationTheme.ts
+  s_b6a0f22c32fc5f::t_c30b03a0a63743 2,9
+src/components/train/WorkoutHealthExport.tsx
+  s_b6a0f22c32fc5f::t_d72e36b85d02db 10,12,30,37
+src/app/(tabs)/_layout.tsx
+  s_b6a0f22c32fc5f::t_5cea242ef539c5 10,23
+src/components/train/ExerciseDetailSheet.tsx
+  s_b6a0f22c32fc5f::t_ee8571122ab670 41
+  s_58860a6dd107b9::t_931f17fc2c9fcc 15,18
+src/components/home/SessionPreviewSheet.tsx
+  s_58860a6dd107b9::t_931f17fc2c9fcc 48,65
+  s_b6a0f22c32fc5f::t_ee8571122ab670 157,172,187,190
+src/components/train/ActionMenuSheet.tsx
+  s_58860a6dd107b9::t_4510a20445e5e4 20,24
+src/app/(tabs)/(train)/mesocycle.tsx
+  s_58860a6dd107b9::t_4510a20445e5e4 106,112,153,264
+  s_b6a0f22c32fc5f::t_ee8571122ab670 316,323,327,339,341,350
+  s_58860a6dd107b9::t_931f17fc2c9fcc 36,83,95
+src/components/train/WorkoutHistoryCard.tsx
+  s_58860a6dd107b9::t_4510a20445e5e4 12,15
+  s_b6a0f22c32fc5f::t_d72e36b85d02db 24-25
+src/components/train/generate/PlanPreview.tsx
+  s_b6a0f22c32fc5f::t_d72e36b85d02db 96,184
+src/components/train/__tests__/GenerationWizardPresentation.test.tsx
+  s_b6a0f22c32fc5f::t_c6131db433d308 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "bd28a1b93550df455eb5a6e7712eae7176eba756",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
