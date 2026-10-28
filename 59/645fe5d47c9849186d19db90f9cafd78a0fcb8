@@ -1,0 +1,110 @@
+src/i18n/locales/fr.json
+  s_b6a0f22c32fc5f::t_519e9c86ca7585 2
+  s_b6a0f22c32fc5f::t_439f540fe5c08b 3
+src/components/cardio/__tests__/SportActivityRoutes.test.tsx
+  s_b6a0f22c32fc5f::t_342a71addbea5a 1-112
+src/services/cardio/__tests__/sportActivityRepository.test.ts
+  s_b6a0f22c32fc5f::t_8600dac7bb77ab 1-60
+src/i18n/locales/es.json
+  s_b6a0f22c32fc5f::t_519e9c86ca7585 2
+  s_b6a0f22c32fc5f::t_3c3f0c5c79510d 3
+src/models/cardio.ts
+  s_b6a0f22c32fc5f::t_efd0dc05670b9a 31-96,98-106
+  s_b6a0f22c32fc5f::t_9c7b4764207ccf 113-114
+  s_b6a0f22c32fc5f::t_568836325cdcac 97
+src/components/cardio/SportActivitiesHome.tsx
+  s_b6a0f22c32fc5f::t_d716b9833d44d4 1-27
+src/components/cardio/__tests__/SportActivityForm.test.tsx
+  s_b6a0f22c32fc5f::t_00d39c9108b0fd 1-94
+src/models/sportActivity.ts
+  s_b6a0f22c32fc5f::t_2ddbc0f1456e0c 1-57
+src/i18n/__tests__/sportActivities.test.ts
+  s_b6a0f22c32fc5f::t_342a71addbea5a 1-17
+src/services/cardio/__tests__/sportActivities.test.ts
+  s_b6a0f22c32fc5f::t_3a7d22d59785f4 1-21,23-24,26-39,43-54,56-83
+  s_b6a0f22c32fc5f::t_50ee85a12bb24e 22,25,40-42
+  s_b6a0f22c32fc5f::t_8600dac7bb77ab 55
+src/app/(tabs)/(train)/activity-editor.tsx
+  s_b6a0f22c32fc5f::t_d716b9833d44d4 3-12,20-23,25-28,31,33-36
+  s_b6a0f22c32fc5f::t_e3f962f3cd6753 1,14-15,18-19
+  s_b6a0f22c32fc5f::t_f1a092bd0b7450 2,13,16-17,24,29-30,32
+src/app/(tabs)/(train)/index.tsx
+  s_b6a0f22c32fc5f::t_96514a25bbddfe 28,218-219,350,356
+src/services/cardio/sportActivities.ts
+  s_b6a0f22c32fc5f::t_3a7d22d59785f4 28
+  s_b6a0f22c32fc5f::t_50ee85a12bb24e 37,49,60-61
+  s_b6a0f22c32fc5f::t_2ddbc0f1456e0c 1-27,29-36,38-48,50-59,62-73
+src/components/cardio/SportActivityForm.tsx
+  s_b6a0f22c32fc5f::t_342a71addbea5a 33
+  s_b6a0f22c32fc5f::t_d716b9833d44d4 1-16,18-20,22-32,35-37,40-62,64-67
+  s_b6a0f22c32fc5f::t_b7a704f661d458 17,63
+  s_b6a0f22c32fc5f::t_519e9c86ca7585 38-39
+  s_b6a0f22c32fc5f::t_e3f962f3cd6753 21,34
+src/app/(tabs)/(train)/history.tsx
+  s_b6a0f22c32fc5f::t_f1a092bd0b7450 14-19,23,35-38,45,47,49-52
+  s_58860a6dd107b9::t_931f17fc2c9fcc 24,39
+src/i18n/locales/ja.json
+  s_b6a0f22c32fc5f::t_519e9c86ca7585 2
+  s_b6a0f22c32fc5f::t_6aa0f84d68e896 3
+src/services/cardio/cardioPlanner.ts
+  s_b6a0f22c32fc5f::t_17797286879dbe 1-180
+src/services/cardio/__tests__/cardioPlanner.test.ts
+  s_b6a0f22c32fc5f::t_4a915fd5bae9f7 89-93,117
+  s_b6a0f22c32fc5f::t_e17d85684adadc 109-116,119,121-123
+  s_b6a0f22c32fc5f::t_323ace56c4166a 118,120
+  s_b6a0f22c32fc5f::t_7f44c6975c80ad 80,125
+  s_b6a0f22c32fc5f::t_d93a96bf10c78c 1-79,81-88,95-108,124,126-152
+  s_b6a0f22c32fc5f::t_80e82da9c7f76f 94
+src/app/(tabs)/(train)/activities.tsx
+  s_b6a0f22c32fc5f::t_d716b9833d44d4 1-29
+src/hooks/__tests__/sportActivities.test.tsx
+  s_b6a0f22c32fc5f::t_eca10ed4bf05d8 69-79
+  s_b6a0f22c32fc5f::t_8600dac7bb77ab 1-68
+src/services/cardio/sportActivityRepository.ts
+  s_b6a0f22c32fc5f::t_3a7d22d59785f4 17-18,20
+  s_b6a0f22c32fc5f::t_50b829ee19d2f9 26-27
+  s_b6a0f22c32fc5f::t_2ddbc0f1456e0c 1-16,19,21-25,28-46
+src/app/(tabs)/(train)/activity.tsx
+  s_b6a0f22c32fc5f::t_d716b9833d44d4 2-14,16-19,22-35,40-43,45-46
+  s_b6a0f22c32fc5f::t_e3f962f3cd6753 1,15,20-21,36-39,44
+src/components/cardio/SportActivityCard.tsx
+  s_b6a0f22c32fc5f::t_d716b9833d44d4 1-26
+src/components/train/__tests__/HistoryIndex.test.tsx
+  s_b6a0f22c32fc5f::t_00d39c9108b0fd 21,44-56
+  s_b6a0f22c32fc5f::t_f1a092bd0b7450 6-7
+  s_b6a0f22c32fc5f::t_551c4d9d5c36c2 57-58
+src/hooks/useSportActivities.ts
+  s_b6a0f22c32fc5f::t_2ddbc0f1456e0c 1-15,17-21,23-24,26-32,34-36,38-39,43,46-48,50-52,55-56
+  s_b6a0f22c32fc5f::t_50b829ee19d2f9 16,22,25,33,37,40-42,44-45,49,53-54
+src/app/(tabs)/(train)/_layout.tsx
+  s_b6a0f22c32fc5f::t_96514a25bbddfe 34-36
+src/models/index.ts
+  s_b6a0f22c32fc5f::t_f1a092bd0b7450 12
+src/i18n/locales/en.json
+  s_b6a0f22c32fc5f::t_6811cf7878d9b4 3
+  s_b6a0f22c32fc5f::t_371ac50e87fc04 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "59645fe5d47c9849186d19db90f9cafd78a0fcb8",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
