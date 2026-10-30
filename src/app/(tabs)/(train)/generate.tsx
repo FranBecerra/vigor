@@ -36,8 +36,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
+import { RoutineIdentityPicker, type RoutineIdentity } from '@/components/train/RoutineIdentityPicker';
 import { Equipment, ExperienceLevel, SplitStructure, type Exercise, type PlannedSession } from '@/models';
 import { useAuth } from '@/hooks/useAuth';
+import { useAthleteIntakeDefaults, useAthleteIntakeReady } from '@/hooks/AthleteIntakeContext';
+import { strengthIntakeDefaults } from '@/services/settings/athleteIntake';
+import { AthleteDefaultsLoading } from '@/components/profile/AthleteDefaultsLoading';
 import {
   Chip,
   Section,
@@ -240,19 +244,27 @@ function saveFailureCode(error: unknown): string {
 }
 
 export default function GenerateScreen() {
+  const ready = useAthleteIntakeReady(), router = useRouter(), { user } = useAuth();
+  return ready ? <OwnedGenerateScreen key={user?.uid ?? 'signed-out'} />
+    : <AthleteDefaultsLoading onCancel={() => backToTraining(router)} />;
+}
+
+function OwnedGenerateScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width, fontScale = 1 } = useWindowDimensions();
   const { surfaces, colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
   const { user } = useAuth();
+  const defaults = strengthIntakeDefaults(useAthleteIntakeDefaults());
 
   const [name, setName] = useState('');
-  const [goal, setGoal] = useState<TrainingGoal>(DEFAULT_GENERATOR_GOAL);
-  const [level, setLevel] = useState<ExperienceLevel>(DEFAULT_GENERATOR_LEVEL);
+  const [routineIdentity, setRoutineIdentity] = useState<RoutineIdentity>(() => ({ icon: 'planet', color: sectionAccent.train }));
+  const [goal, setGoal] = useState<TrainingGoal>(defaults.goal as TrainingGoal | undefined ?? DEFAULT_GENERATOR_GOAL);
+  const [level, setLevel] = useState<ExperienceLevel>(defaults.level ?? DEFAULT_GENERATOR_LEVEL);
   const [levelGuideOpen, setLevelGuideOpen] = useState(false);
-  const [sessions, setSessions] = useState(DEFAULT_GENERATOR_SESSIONS);
-  const [minutes, setMinutes] = useState(DEFAULT_GENERATOR_MINUTES);
+  const [sessions, setSessions] = useState(defaults.sessions ?? DEFAULT_GENERATOR_SESSIONS);
+  const [minutes, setMinutes] = useState(defaults.minutes ?? DEFAULT_GENERATOR_MINUTES);
   const [split, setSplit] = useState<SplitStructure>(DEFAULT_GENERATOR_SPLIT);
   const [equipment, setEquipment] = useState<Equipment[]>([...DEFAULT_GENERATOR_EQUIPMENT]);
   const [emphasis, setEmphasis] = useState<EmphasisSelection>(EMPTY_EMPHASIS);
@@ -640,7 +652,7 @@ export default function GenerateScreen() {
         ...toRoutineDraft({
           userId: user.uid,
           name: chosenName,
-          icon: 'barbell',
+          icon: routineIdentity.icon,
           accentColor: sectionAccent.train,
           isActive: shouldActivateNewRoutine(existing),
           generation: {
@@ -697,6 +709,7 @@ export default function GenerateScreen() {
     plannedSessions,
     router,
     reportNameProblem,
+    routineIdentity,
   ]);
 
   const onCycleRegion = useCallback((region: VolumeRegion) => {
@@ -1078,6 +1091,7 @@ export default function GenerateScreen() {
                     setNameProblem(null);
                   }}
                   maxLength={MAX_ROUTINE_NAME_LENGTH}
+                  accessibilityLabel={t('generate.name')}
                   placeholder={t('generate.namePlaceholder')}
                   placeholderTextColor={colors.textMuted}
                   returnKeyType="done"
@@ -1101,6 +1115,7 @@ export default function GenerateScreen() {
                   </Text>
                 )}
               </Section>
+              <RoutineIdentityPicker value={routineIdentity} onChange={setRoutineIdentity} disabled={saving || rerolling} />
               {plan.strength?.missingBarbell === true && (
                 <Text
                   style={[

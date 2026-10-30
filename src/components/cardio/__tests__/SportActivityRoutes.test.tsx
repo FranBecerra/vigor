@@ -12,6 +12,8 @@ let mockParams: Record<string, string> = { id: 'a', mode: 'PLAN' }, mockUid = 'o
 const mockSports = { entries: [] as any[], ready: true, error: false, reload: jest.fn(), save: jest.fn(), discard: jest.fn(), newId: jest.fn(() => 'new') };
 jest.mock('expo-router', () => ({ useRouter: () => mockRouter, useLocalSearchParams: () => mockParams }));
 jest.mock('@/hooks/useSportActivities', () => ({ useSportActivities: () => mockSports }));
+jest.mock('@/hooks/useCardioPlans', () => ({ useCardioPlans: () => ({ entries: [], ready: true, error: false, pending: false }) }));
+jest.mock('@/hooks/useCardioTraining', () => ({ useCardioBlocks: () => ({ entries: [], ready: true }), useCardioWorkouts: () => ({ entries: [], ready: true }) }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: mockUid }) }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
@@ -108,5 +110,12 @@ it.each([ActivitiesScreen, SportActivitiesHome])('opens punctual planning and re
   await act(async () => press(tree, 'sportActivities.record'));
   expect(mockRouter.push).toHaveBeenLastCalledWith({ pathname: '/activity-editor', params: { mode: 'RECORD' } });
   expect(mockSports.save).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+
+it('opens the staged cardio planner from cardio home', async () => {
+  let tree: any; await act(async () => { tree = create(<SportActivitiesHome />); });
+  await act(async () => press(tree, 'cardioPlan.create'));
+  expect(mockRouter.push).toHaveBeenCalledWith('/cardio-plan'); expect(mockSports.save).not.toHaveBeenCalled();
   await act(async () => tree.unmount());
 });

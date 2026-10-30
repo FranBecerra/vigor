@@ -1,5 +1,6 @@
 import { Platform, type ViewStyle } from 'react-native';
 import { BRAND_LIME, palette, type ColorScheme } from './tokens';
+import type { ThemeColors } from './accent';
 
 /** Static native gradients: no additional views, timers, images or blur per row. */
 function gradient(image: string, platform: string): ViewStyle {
@@ -8,8 +9,8 @@ function gradient(image: string, platform: string): ViewStyle {
     : { experimental_backgroundImage: image };
 }
 
-export function createSurfaceStyles(scheme: ColorScheme, platform = Platform.OS) {
-  const c = palette[scheme];
+export function createSurfaceStyles(scheme: ColorScheme, platform = Platform.OS, colors: ThemeColors = palette[scheme], fill: string = BRAND_LIME) {
+  const c = colors;
   const outline = `inset 0 0 0 1px ${c.surfaceBorder}`;
   return {
     screen: {
@@ -46,7 +47,7 @@ export function createSurfaceStyles(scheme: ColorScheme, platform = Platform.OS)
     },
     selected: { backgroundColor: c.accentTint },
     primary: {
-      backgroundColor: BRAND_LIME,
+      backgroundColor: fill,
       borderCurve: 'continuous',
       boxShadow: `0 4px 12px ${c.shadow}, inset 0 1px 0 ${c.highlight}`,
     },

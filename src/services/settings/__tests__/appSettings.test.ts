@@ -1,8 +1,19 @@
 import { AppSettingsRepository, DEFAULT_APP_SETTINGS, normalizeDisplayName, validateAppSettings } from '../appSettings';
+import { ACCENT_KEYS } from '@/theme/accent';
 function setup(initial: string | null = null) {
   let text = initial; const storage = { read: jest.fn(async () => text), write: jest.fn(async (value: string) => { text = value; }) };
   return { storage, repo: new AppSettingsRepository(storage) };
 }
+it('persists a known accent per account with a backward-compatible lime fallback', async () => {
+  const { repo, storage } = setup();
+  expect((await repo.get('old')).accent).toBeUndefined();
+  for (const accent of ACCENT_KEYS) {
+    await repo.update('a', { accent }); expect((await new AppSettingsRepository(storage).get('a')).accent).toBe(accent);
+  }
+  expect((await repo.get('b')).accent).toBeUndefined();
+  for (const accent of [null, '', 'constructor', '__proto__', '#123456', 4]) await expect(repo.update('a', { accent: accent as any })).rejects.toThrow('Invalid accent');
+  expect((await repo.get('a')).accent).toBe('taupe');
+});
 it('normalizes visible names without reserving a handle and rejects invalid input', () => {
   expect(normalizeDisplayName('  Franci  Becerra  ')).toBe('Franci Becerra');
   expect(normalizeDisplayName('e\u0301')).toBe('é'); expect(normalizeDisplayName('🏋️')).toBe('🏋️');

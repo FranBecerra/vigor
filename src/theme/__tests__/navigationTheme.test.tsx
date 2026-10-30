@@ -38,6 +38,9 @@ it.each(['dark', 'light'] as const)('matches native stack, tab surfaces, safe-ar
   let stack: any, tabs: any;
   await act(async () => { stack = create(<TrainStackLayout />); tabs = create(<TabsLayout />); });
   expect(stack.root.findByType('Stack').props.screenOptions.contentStyle.backgroundColor).toBe(palette[scheme].bg);
+  for (const name of ['cardio-plan', 'cardio-cycle', 'activity-editor']) {
+    expect(stack.root.findAllByType('Screen').find((screen: any) => screen.props.name === name).props.options.gestureEnabled).toBe(false);
+  }
   expect(tabs.root.findAllByType('Trigger')).toHaveLength(4);
   expect(tabs.root.findAllByType('Trigger').filter((node: any) => !node.props.hidden).map((node: any) => node.props.name)).toEqual(['(train)', 'bio', 'profile']);
   tabs.root.findAllByType('Trigger').forEach((node: any) => expect(node.props.contentStyle.backgroundColor).toBe(palette[scheme].bg));

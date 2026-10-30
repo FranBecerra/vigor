@@ -6,6 +6,7 @@ import { buildNightObservations, nightWindowStart } from '@/services/bio/nightOb
 import { bioNightBridge } from '@/services/health/bioHealthClient';
 import { useAuth } from './useAuth';
 import { useAppSettings } from './useAppSettings';
+import { loadAudit, type LoadTrigger } from '@/services/performance/loadAudit';
 
 interface Snapshot { owner: string | null; state: 'OFF' | 'LOADING' | 'UNAVAILABLE' | 'READY' | 'ERROR'; analysis?: BioNightAnalysis; fetchedAt?: number }
 /** No raw/derived Health observation is persisted. Owners and read generations stay isolated. */
@@ -17,23 +18,26 @@ export function useBioNight() {
   useFocusEffect(useCallback(() => {
     let alive = true, sequence = 0;
     const epoch = ++generation.current;
-    const load = async () => {
+    const load = async (trigger: LoadTrigger = 'focus') => {
       const token = ++sequence;
       const current = () => alive && epoch === generation.current && sequence === token;
       setSnapshot({ owner: uid, state: enabled ? 'LOADING' : 'OFF' });
       if (!enabled) return;
+      const end = loadAudit.begin('bio.night', trigger);
       try {
         if (!await bioNightBridge.available()) { if (current()) setSnapshot({ owner: uid, state: 'UNAVAILABLE' }); return; }
         // Availability can complete after disconnect/account changes; do not initiate an obsolete read.
         if (!current()) return;
         const now = Date.now(), data = await bioNightBridge.read(nightWindowStart(now), now);
         if (current()) setSnapshot({ owner: uid, state: 'READY', analysis: buildNightObservations(data, now), fetchedAt: now });
-      } catch { if (current()) setSnapshot({ owner: uid, state: 'ERROR' }); }
+      } catch { end('error'); if (current()) setSnapshot({ owner: uid, state: 'ERROR' }); }
+      finally { end(current() ? 'success' : 'cancelled'); }
     };
     void load();
-    const listener = AppState.addEventListener('change', (state) => { if (state === 'active') void load(); });
+    const listener = AppState.addEventListener('change', (state) => { if (state === 'active') void load('foreground'); });
     return () => { alive = false; generation.current++; listener.remove(); };
   }, [uid, enabled, revision]));
-  const visible: Snapshot = snapshot.owner === uid && enabled ? snapshot : { owner: uid, state: enabled ? 'LOADING' : 'OFF' };
+  const visible: Snapshot = uid && !preferences.ready ? { owner: uid, state: 'LOADING' }
+    : snapshot.owner === uid && enabled ? snapshot : { owner: uid, state: enabled ? 'LOADING' : 'OFF' };
   return { ...visible, reload: () => setRevision((value) => value + 1) };
 }

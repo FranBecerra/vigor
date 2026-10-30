@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput } from 'react-native';
+import { Modal, TextInput } from 'react-native';
 import { WorkoutHistoryEditor } from '../WorkoutHistoryEditor';
 import { NumericField } from '../NumericField';
 import { SetType, type WorkoutSession } from '@/models';
@@ -12,6 +12,20 @@ const session: WorkoutSession = { id: 'history', userId: 'owner', performedAt: 1
   sessionName: 'Upper', exercises: [{ id: 'entry', exerciseId: 'ex', order: 0, isSwap: false,
     sets: [{ id: 'set', setType: SetType.NORMAL, targetWeight: 20, targetReps: 10, targetRIR: 2, actualWeight: 20, actualReps: 10, isAutoFilled: false }] }] };
 const button = (tree: any, label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
+it('offers inline Save/Cancel at the top, reports unsaved actuals and closes after saving without a navigation modal', async () => {
+  const dirty = jest.fn(), close = jest.fn(), savedClose = jest.fn(), save = jest.fn().mockResolvedValue(undefined); let tree: any;
+  await act(async () => { tree = create(<WorkoutHistoryEditor inline session={session} onSave={save} onClose={close} onSavedClose={savedClose} onDirtyChange={dirty} />); });
+  expect(tree.root.findAllByType(Modal).filter((node: any) => node.props.visible)).toHaveLength(0);
+  expect(tree.root.findAllByType(SessionEffortInput)).toHaveLength(0);
+  await act(async () => button(tree, 'editorFlow.sessionDetails').props.onPress());
+  expect(tree.root.findAllByType(SessionEffortInput)).toHaveLength(1);
+  await act(async () => button(tree, 'editorFlow.sessionDetails').props.onPress());
+  expect(dirty).toHaveBeenLastCalledWith(false);
+  await act(async () => tree.root.findAllByType(NumericField)[0].props.onChangeValue(22.5));
+  expect(dirty).toHaveBeenLastCalledWith(true); expect(session.exercises[0].sets[0].actualWeight).toBe(20);
+  await act(async () => button(tree, 'custom.save').props.onPress());
+  expect(savedClose).toHaveBeenCalledTimes(1); expect(close).not.toHaveBeenCalled(); await act(async () => tree.unmount());
+});
 it('restores, corrects and clears session effort without mutating the original or set intensity', async () => {
   const feedback = { scale: 'VIGOR_SESSION_EFFORT_1_10_V1' as const, effort: 8, recordedAt: 5000, timing: 'AT_FINISH' as const };
   const original = { ...session, sessionFeedback: feedback }; const save = jest.fn().mockResolvedValue(undefined); let tree: any;
@@ -43,6 +57,15 @@ it('can remove a set from the draft without writing the original', async () => {
   await act(async () => { tree = create(<WorkoutHistoryEditor session={session} onSave={save} onClose={jest.fn()} />); });
   await act(async () => button(tree, 'workout.removeSet').props.onPress());
   expect(tree.root.findAllByType(NumericField)).toHaveLength(0); expect(session.exercises[0].sets).toHaveLength(1); expect(save).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+it('offers an explicit save-and-review action only when the completed workout links to a prescribed session', async () => {
+  const save = jest.fn().mockResolvedValue(undefined); let tree: any;
+  await act(async () => { tree = create(<WorkoutHistoryEditor session={{ ...session, plannedSessionIndex: 0 }} onSave={save} onClose={jest.fn()} />); });
+  await act(async () => button(tree, 'historyProgression.saveReview').props.onPress());
+  expect(save).toHaveBeenCalledWith(expect.objectContaining({ id: session.id }), true);
+  await act(async () => tree.update(<WorkoutHistoryEditor session={session} onSave={save} onClose={jest.fn()} />));
+  expect(button(tree, 'historyProgression.saveReview')).toBeUndefined();
   await act(async () => tree.unmount());
 });
 it('edits failure and advanced segments explicitly and labels partials without cryptic abbreviations', async () => {

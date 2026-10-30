@@ -3,6 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import type { Mesocycle, Routine, WorkoutSession } from '@/models';
 import { mesocycleRepository, routineRepository, workoutSessionRepository } from '@/services/repositories';
 import { useAuth } from './useAuth';
+import { loadAudit } from '@/services/performance/loadAudit';
 
 interface Snapshot { owner: string | null; plans: Mesocycle[]; routines: Routine[]; history: WorkoutSession[]; ready: boolean; error: boolean }
 const empty = (owner: string | null): Snapshot => ({ owner, plans: [], routines: [], history: [], ready: false, error: false });
@@ -16,7 +17,7 @@ export function useBioHistory() {
   useFocusEffect(useCallback(() => {
     const id = ++request.current;
     if (!uid) { setState({ ...empty(uid), ready: true }); return; }
-    Promise.all([mesocycleRepository.listWhere('userId', uid), routineRepository.listByUser(uid), workoutSessionRepository.listByUser(uid)])
+    loadAudit.measure('bio.history', () => Promise.all([mesocycleRepository.listWhere('userId', uid), routineRepository.listByUser(uid), workoutSessionRepository.listByUser(uid)]))
       .then(([plans, routines, history]) => {
         if (request.current === id) setState({ owner: uid,
           plans: plans.filter((item) => item.userId === uid), routines: routines.filter((item) => item.userId === uid),

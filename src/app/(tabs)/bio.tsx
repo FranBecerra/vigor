@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, BackHandler, FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import { BackHandler, FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -100,7 +100,6 @@ export default function BioScreen() {
           <Text style={[typography.title, { color: colors.bioText }]}>‹ {t('tabs.bio')}</Text>
         </Pressable>}
         <Text style={[typography.emphasis, { color: colors.textPrimary, marginBottom: 20 }]}>{t(tab === 'TODAY' ? 'tabs.bio' : 'bio.response')}</Text>
-        {!data.ready && <ActivityIndicator color={colors.accentText} />}
         {(data.error || reviews.error || actionError) && <View style={card}><Text accessibilityRole="alert" style={[typography.body, { color: colors.textPrimary }]}>{t('bio.loadError')}</Text>
           {data.error && button(t('bio.retry'), data.reload)}
         </View>}

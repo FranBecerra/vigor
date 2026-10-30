@@ -300,7 +300,8 @@ export default function TrainHomeScreen() {
                 viewMesocycle: t('home.viewMesocycle'),
                 microcycleOf: t('home.microcycle'),
                 activate: t('home.activateRoutine'),
-                rename: t('home.renameRoutine'),
+                rename: t('routineEdit'),
+                identity: t('routineIdentity.title'),
                 remove: t('home.removeRoutine'),
                 active: t('home.activeRoutine'),
                 skipped: t('routine.skipped'),
@@ -317,7 +318,11 @@ export default function TrainHomeScreen() {
               }}
               onPressMesocycle={() => router.push({ pathname: '/mesocycle', params: { mesocycleId: routine.mesocycleId } })}
               onActivate={routine.isActive ? undefined : () => confirmActivate(routine)}
-              onRename={() => setRenaming(routine)}
+              onRename={() => router.push({ pathname: '/routine', params: {
+                mesocycleId: routine.mesocycleId, microcycleIndex: String(routine.currentMicrocycleIndex),
+                plannedSessionIndex: String(routine.microcycles[routine.currentMicrocycleIndex]?.sessions[0]?.plannedSessionIndex ?? 0), edit: '1',
+              } })}
+              onIdentity={() => setRenaming(routine)}
               onRemove={() => confirmRemove(routine)}
             />
           </View>
@@ -366,19 +371,20 @@ export default function TrainHomeScreen() {
 
       <RenameRoutineSheet
         currentName={renaming?.name ?? null}
+        currentIdentity={renaming ? { icon: renaming.icon, color: renaming.color } : undefined}
         otherNames={allRoutines.filter((routine) => routine.id !== renaming?.id).map((routine) => routine.name)}
         labels={{
-          title: t('home.renameRoutine'),
+          title: t('editorFlow.identity'),
           save: t('home.renameSave'),
           cancel: t('generate.cancel'),
           duplicate: t('generate.nameDuplicate'),
         }}
         onClose={() => setRenaming(null)}
-        onSave={(name) => {
+        onSave={(name, identity) => {
           const target = renaming;
           setRenaming(null);
           if (target === null) return;
-          rename(target.id, name).catch((error: unknown) => {
+          rename(target.id, name, identity).catch((error: unknown) => {
             console.error('[routines] rename failed', error);
             Alert.alert(t('home.renameFailed'));
           });

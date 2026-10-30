@@ -7,6 +7,7 @@ import { db } from '@/services/firebase';
 import { localCheckInDate, validDailyCheckIn } from '@/services/bio/dailyCheckIn';
 import { healthWindowStart } from '@/services/bio/healthTrends';
 import { useAuth } from './useAuth';
+import { loadAudit, type LoadTrigger } from '@/services/performance/loadAudit';
 
 interface State { owner: string | null; ready: boolean; error: boolean; entries: DailyCheckIn[] }
 /** A bounded, focus-scoped daily history; late owner/date results never become visible. */
@@ -17,10 +18,11 @@ export function useBioDailyHistory() {
   useFocusEffect(useCallback(() => {
     let active = true, sequence = 0;
     const epoch = ++generation.current;
-    const load = async () => {
+    const load = async (trigger: LoadTrigger = 'focus') => {
       const token = ++sequence, now = Date.now(), date = localCheckInDate(now);
       const current = () => active && generation.current === epoch && sequence === token && localCheckInDate(Date.now()) === date;
       if (!uid) { setState({ owner: null, ready: true, error: false, entries: [] }); return; }
+      const end = loadAudit.begin('bio.dailyHistory', trigger);
       try {
         const snapshot = await getDocs(query(collection(db, `users/${uid}/dailyCheckIns`),
           where(documentId(), '>=', localCheckInDate(healthWindowStart(now))), where(documentId(), '<=', date),
@@ -28,10 +30,11 @@ export function useBioDailyHistory() {
         const entries = snapshot.docs.map((entry) => ({ ...entry.data(), id: entry.id }))
           .filter((entry): entry is DailyCheckIn => validDailyCheckIn(entry, uid, entry.id) && entry.updatedAt <= now);
         if (current()) setState({ owner: uid, ready: true, error: false, entries });
-      } catch { if (current()) setState({ owner: uid, ready: true, error: true, entries: [] }); }
+      } catch { end('error'); if (current()) setState({ owner: uid, ready: true, error: true, entries: [] }); }
+      finally { end(current() ? 'success' : 'cancelled'); }
     };
     void load();
-    const listener = AppState.addEventListener('change', (state) => { if (state === 'active') void load(); });
+    const listener = AppState.addEventListener('change', (state) => { if (state === 'active') void load('foreground'); });
     return () => { active = false; generation.current++; listener.remove(); };
   }, [uid, revision]));
   return { ...(state.owner === uid ? state : { owner: uid, ready: false, error: false, entries: [] }), reload: () => setRevision((value) => value + 1) };

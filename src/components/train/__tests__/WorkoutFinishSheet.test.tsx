@@ -44,3 +44,11 @@ it('closes a saved summary only through the completion callback', async () => {
   await act(async () => press(tree, 'workout.done')); expect(close).toHaveBeenCalledTimes(1);
   await act(async () => tree.unmount());
 });
+it('distinguishes a failed optional plan update from a successfully saved workout', async () => {
+  const retry = jest.fn(); let tree: any;
+  await act(async () => { tree = create(<WorkoutFinishSheet open saved busy={false} error={false} summary={summary} exercises={[]} changed historyReady
+    planUpdateError onRetryPlan={retry} onFinish={jest.fn()} onClose={jest.fn()} />); });
+  const output = JSON.stringify(tree.toJSON()); expect(output).toContain('finishPlanUpdate.failed'); expect(output).not.toContain('workout.finishError');
+  await act(async () => press(tree, 'finishPlanUpdate.retry')); expect(retry).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount());
+});

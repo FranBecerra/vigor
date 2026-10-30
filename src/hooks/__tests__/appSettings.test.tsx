@@ -1,6 +1,8 @@
 import React from 'react';
 import { AppState, Appearance } from 'react-native';
 import { AppSettingsProvider, useAppSettings } from '../useAppSettings';
+import { AccentContext } from '@/theme/AccentContext';
+import { useAthleteIntakeDefaults } from '../AthleteIntakeContext';
 const { create, act } = require('react-test-renderer');
 let mockUid: string | null = 'owner'; let mockLoading = false;
 const mockGet = jest.fn(); const mockUpdate = jest.fn(); const mockName = jest.fn(); const mockLanguage = jest.fn(async (_language: string) => undefined);
@@ -9,13 +11,44 @@ jest.mock('@/i18n', () => ({ __esModule: true, default: { changeLanguage: (langu
 jest.mock('@/services/settings/settingsClient', () => ({ appSettingsRepository: { get: (...args: any[]) => mockGet(...args), update: (...args: any[]) => mockUpdate(...args) } }));
 jest.mock('@/services/settings/profileName', () => ({ updateDisplayName: (...args: any[]) => mockName(...args) }));
 let result: ReturnType<typeof useAppSettings>;
-function Probe() { result = useAppSettings(); return null; }
+let observedAccent: string;
+let observedIntake: ReturnType<typeof useAthleteIntakeDefaults>;
+function Probe() { result = useAppSettings(); observedAccent = React.useContext(AccentContext); observedIntake = useAthleteIntakeDefaults(); return null; }
 beforeEach(() => {
   jest.clearAllMocks(); mockUid = 'owner'; mockLoading = false;
   mockGet.mockResolvedValue({ appearance: 'system', language: 'system' }); mockUpdate.mockResolvedValue({ appearance: 'dark', language: 'en' }); mockName.mockResolvedValue('Fran');
   jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() }); jest.spyOn(Appearance, 'setColorScheme').mockImplementation(() => undefined);
 });
 afterEach(() => jest.restoreAllMocks());
+it('never publishes an obsolete intake write after an account round trip or provider unmount', async () => {
+  const intake = { version: 1 as const, status: 'COMPLETED' as const, updatedAt: 1000, goal: 'CARDIO' as const };
+  mockGet.mockResolvedValueOnce({ appearance: 'system', language: 'system', athleteIntake: intake });
+  let tree: any; await act(async () => { tree = create(<AppSettingsProvider><Probe /></AppSettingsProvider>); });
+  expect(observedIntake).toEqual(intake);
+  let finish!: (value: unknown) => void; mockUpdate.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  let pending!: Promise<boolean>; await act(async () => { pending = result.change({ athleteIntake: { ...intake, goal: 'HYBRID' } }); });
+  mockUid = 'other'; await act(async () => tree.update(<AppSettingsProvider><Probe /></AppSettingsProvider>)); expect(observedIntake).toBeUndefined();
+  mockUid = 'owner'; await act(async () => tree.update(<AppSettingsProvider><Probe /></AppSettingsProvider>));
+  await act(async () => finish({ appearance: 'dark', language: 'en', athleteIntake: { ...intake, goal: 'HYBRID' } }));
+  expect(await pending).toBe(false); expect(observedIntake).toBeUndefined(); expect(result.settings.appearance).toBe('system');
+  mockUpdate.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  await act(async () => { pending = result.change({ athleteIntake: intake }); });
+  await act(async () => tree.unmount()); await act(async () => finish({ appearance: 'system', language: 'system', athleteIntake: intake }));
+  expect(await pending).toBe(false);
+});
+it('applies the loaded accent, preserves it on write failure and hides it during another account load', async () => {
+  mockGet.mockResolvedValueOnce({ appearance: 'system', language: 'system', accent: 'sky' });
+  let tree: any; await act(async () => { tree = create(<AppSettingsProvider><Probe /></AppSettingsProvider>); });
+  expect(observedAccent).toBe('sky');
+  mockUpdate.mockRejectedValueOnce(Error('disk')); await act(async () => { expect(await result.change({ accent: 'violet' })).toBe(false); });
+  expect(observedAccent).toBe('sky');
+  let finish!: (value: unknown) => void; mockGet.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  mockUid = 'second'; await act(async () => tree.update(<AppSettingsProvider><Probe /></AppSettingsProvider>));
+  expect(observedAccent).toBe('lime');
+  await act(async () => finish({ appearance: 'system', language: 'system', accent: 'mint' })); expect(observedAccent).toBe('mint');
+  mockUid = null; await act(async () => tree.update(<AppSettingsProvider><Probe /></AppSettingsProvider>)); expect(observedAccent).toBe('lime');
+  await act(async () => tree.unmount());
+});
 it('restores and applies actual appearance/language and updates the visible username only after success', async () => {
   let tree: any; await act(async () => { tree = create(<AppSettingsProvider><Probe /></AppSettingsProvider>); });
   expect(result.ready).toBe(true); expect(Appearance.setColorScheme).toHaveBeenLastCalledWith('unspecified'); expect(mockLanguage).toHaveBeenCalledWith('es');

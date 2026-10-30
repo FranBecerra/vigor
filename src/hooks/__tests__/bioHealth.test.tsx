@@ -1,6 +1,7 @@
 import React from 'react';
 import { AppState } from 'react-native';
 import { useBioHealth } from '../useBioHealth';
+import { loadAudit, summarizeLoads } from '@/services/performance/loadAudit';
 const { create, act } = require('react-test-renderer');
 let mockUid: string | null = 'owner', mockEnabled = false, mockReady = true;
 const mockAvailable = jest.fn(), mockRead = jest.fn(), mockAuthorize = jest.fn();
@@ -18,6 +19,24 @@ beforeEach(() => {
   jest.spyOn(AppState, 'addEventListener').mockImplementation((_event, callback) => { appState = callback; return { remove: jest.fn() }; });
 });
 afterEach(() => jest.restoreAllMocks());
+it('retains visible readings while auditing a controlled 600ms foreground refresh', async () => {
+  jest.useFakeTimers(); mockEnabled = true; loadAudit.clear();
+  let tree: any;
+  try {
+    await act(async () => { tree = create(<Probe />); }); expect(result.state).toBe('READY'); expect(result.trends).toHaveLength(3);
+    mockRead.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve({}), 600)));
+    for (let n = 0; n < 20; n++) {
+      await act(async () => appState('active'));
+      expect(result.state).toBe('LOADING'); expect(result.trends).toHaveLength(3);
+      await act(async () => jest.advanceTimersByTime(599)); expect(result.state).toBe('LOADING');
+      await act(async () => jest.advanceTimersByTime(1)); expect(result.state).toBe('READY');
+    }
+    expect(mockRead).toHaveBeenCalledTimes(21);
+    expect(summarizeLoads(loadAudit.snapshot()).find(row => row.stage === 'bio.health' && row.trigger === 'foreground'))
+      .toMatchObject({ count: 20, p50: 600, p95: 600, max: 600, sufficient: true });
+    await act(async () => tree.unmount());
+  } finally { jest.useRealTimers(); loadAudit.clear(); }
+});
 it('performs no reads or prompts before opt-in and supports partial/empty authorized results', async () => {
   let tree: any; await act(async () => { tree = create(<Probe />); });
   expect(result.state).toBe('OFF'); expect(mockRead).not.toHaveBeenCalled(); expect(mockAuthorize).not.toHaveBeenCalled();
@@ -35,7 +54,19 @@ it('handles old binaries/read errors and retries without retaining inaccessible 
   mockAvailable.mockResolvedValue(true); mockRead.mockRejectedValueOnce(Error('locked'));
   await act(async () => result.reload()); expect(result.state).toBe('ERROR'); expect(result.trends).toEqual([]);
   await act(async () => result.reload()); expect(result.state).toBe('READY');
-  mockReady = false; await act(async () => tree.update(<Probe />)); expect(result.state).toBe('OFF');
+  mockReady = false; await act(async () => tree.update(<Probe />)); expect(result.state).toBe('LOADING'); expect(result.trends).toEqual([]);
+  await act(async () => tree.unmount());
+});
+it('retains readings only until a refresh fails or access is disabled and never starts obsolete reads', async () => {
+  mockEnabled = true; let tree: any;
+  await act(async () => { tree = create(<Probe />); });
+  mockRead.mockRejectedValueOnce(Error('locked'));
+  await act(async () => appState('active')); expect(result.trends).toEqual([]); expect(result.state).toBe('ERROR');
+  let release!: (value: boolean) => void;
+  mockAvailable.mockImplementationOnce(() => new Promise(resolve => { release = resolve; }));
+  await act(async () => result.reload()); const calls = mockRead.mock.calls.length;
+  mockEnabled = false; await act(async () => tree.update(<Probe />));
+  await act(async () => release(true)); expect(mockRead).toHaveBeenCalledTimes(calls); expect(result.trends).toEqual([]);
   await act(async () => tree.unmount());
 });
 it('ignores account round trips, overlapped foreground reads and completions after unmount', async () => {

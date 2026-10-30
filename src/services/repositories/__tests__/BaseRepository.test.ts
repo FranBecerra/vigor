@@ -18,6 +18,7 @@ jest.mock('../localWrite', () => ({ writeLocally: jest.fn() }));
 // --- Simulación del módulo de Firestore ------------------------------------
 const mockGetDoc = jest.fn();
 const mockGetDocs = jest.fn();
+const mockGetDocFromCache = jest.fn(), mockGetDocsFromCache = jest.fn();
 const mockSetDoc = jest.fn();
 const mockUpdateDoc = jest.fn();
 const mockDeleteDoc = jest.fn();
@@ -27,6 +28,8 @@ jest.mock('@react-native-firebase/firestore', () => ({
   doc: jest.fn((col: { path: string }, id: string) => ({ path: `${col.path}/${id}`, id })),
   getDoc: (...args: unknown[]) => mockGetDoc(...args),
   getDocs: (...args: unknown[]) => mockGetDocs(...args),
+  getDocFromCache: (...args: unknown[]) => mockGetDocFromCache(...args),
+  getDocsFromCache: (...args: unknown[]) => mockGetDocsFromCache(...args),
   setDoc: (...args: unknown[]) => mockSetDoc(...args),
   updateDoc: (...args: unknown[]) => mockUpdateDoc(...args),
   deleteDoc: (...args: unknown[]) => mockDeleteDoc(...args),
@@ -55,6 +58,21 @@ describe('BaseRepository', () => {
     repo = new BaseRepository<Widget>('widgets');
   });
 
+  it('reads the native cache explicitly without issuing a server-favoring read', async () => {
+    mockGetDocFromCache.mockResolvedValue(docSnap('real', { id: 'wrong', userId: 'owner' }));
+    await expect(repo.getCached('real')).resolves.toEqual({ id: 'real', userId: 'owner' });
+    mockGetDocFromCache.mockResolvedValue(docSnap('missing', null));
+    await expect(repo.getCached('missing')).resolves.toBeNull();
+    mockGetDocFromCache.mockRejectedValueOnce(Error('not cached'));
+    await expect(repo.getCached('missing')).rejects.toThrow('not cached');
+    mockGetDocsFromCache.mockResolvedValue({ docs: [docSnap('a', { userId: 'owner' })] });
+    await expect(repo.listWhereCached('userId', 'owner')).resolves.toEqual([{ id: 'a', userId: 'owner' }]);
+    expect(mockGetDocsFromCache).toHaveBeenCalledWith(expect.objectContaining({ clauses: [{ field: 'userId', op: '==', value: 'owner' }] }));
+    mockGetDocsFromCache.mockResolvedValue({ docs: [] });
+    await expect(repo.listWhereCached('userId', 'owner')).resolves.toEqual([]);
+    expect(mockGetDoc).not.toHaveBeenCalled(); expect(mockGetDocs).not.toHaveBeenCalled();
+  });
+
   it('prepares private local writes without document IDs or undefined nested fields and retains callbacks', async () => {
     const synced = jest.fn(), rejected = jest.fn();
     (writeLocally as jest.Mock).mockResolvedValue('pending');
@@ -63,6 +81,11 @@ describe('BaseRepository', () => {
       nested: { unset: undefined, value: 30 } } as Widget, synced, rejected)).resolves.toBe('pending');
     expect(writeLocally).toHaveBeenCalledWith(expect.objectContaining({ path: 'users/owner/customExercises/private' }),
       { userId: 'owner', label: 'hold', nested: { value: 30 } }, expect.any(String), synced, rejected);
+  });
+
+  it('sanitizes optional prescription fields on plan updates before calling the SDK', async () => {
+    await repo.update('w1', { sessionOverrides: { '0:0': { sets: [{ targetReps: 10, targetRIR: undefined }] } } } as any);
+    expect(mockUpdateDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'w1' }), { sessionOverrides: { '0:0': { sets: [{ targetReps: 10 }] } } });
   });
 
   describe('get', () => {

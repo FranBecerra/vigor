@@ -1,6 +1,7 @@
 import React from 'react';
 import { Switch } from 'react-native';
 import { BioNightSettings } from '../BioNightSettings';
+import { HealthAccessReview } from '../HealthAccessReview';
 const { create, act } = require('react-test-renderer');
 let mockUid: string | null = 'owner', mockEnabled = false, mockBase = true, mockReady = true, mockBusy = false;
 const mockAuthorize = jest.fn(), mockChange = jest.fn(), mockAvailable = jest.fn();
@@ -18,7 +19,9 @@ it('prompts only on explicit opt-in and serializes repeated actions; disabling m
   expect(mockAuthorize).toHaveBeenCalledTimes(1); expect(mockChange).toHaveBeenCalledWith({ bioNightEnabled: true });
   mockEnabled = true; await act(async () => tree.update(<BioNightSettings />));
   const review = tree.root.findAll((node: any) => node.props.accessibilityLabel === 'bioNight.permissions' && typeof node.props.onPress === 'function')[0];
-  await act(async () => review.props.onPress()); expect(mockAuthorize).toHaveBeenCalledTimes(2);
+  await act(async () => review.props.onPress()); expect(mockAuthorize).toHaveBeenCalledTimes(1);
+  expect(tree.root.findAllByType(HealthAccessReview)).toHaveLength(1);
+  await act(async () => tree.root.findByType(HealthAccessReview).props.onRequest()); expect(mockAuthorize).toHaveBeenCalledTimes(2);
   await act(async () => tree.root.findByType(Switch).props.onValueChange(false));
   expect(mockAuthorize).toHaveBeenCalledTimes(2); expect(mockChange).toHaveBeenLastCalledWith({ bioNightEnabled: false });
   await act(async () => tree.unmount());

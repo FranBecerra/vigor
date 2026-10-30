@@ -1,5 +1,5 @@
 /**
- * Bottom sheet to rename a routine from the home (PRD §8.5).
+ * Edit a saved routine's presentation without changing its training plan.
  *
  * A sheet rather than `Alert.prompt`, which exists only on iOS.
  */
@@ -9,6 +9,7 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,6 +17,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/useTheme';
+import { RoutineIdentityPicker, type RoutineIdentity } from '@/components/train/RoutineIdentityPicker';
 import {
   MAX_ROUTINE_NAME_LENGTH,
   normalizeRoutineName,
@@ -25,33 +27,37 @@ import {
 interface RenameRoutineSheetProps {
   /** Current name; null keeps the sheet closed. */
   currentName: string | null;
+  currentIdentity?: RoutineIdentity;
   /** Names of the athlete's OTHER routines, which this one may not repeat. */
   otherNames: readonly string[];
   labels: { title: string; save: string; cancel: string; duplicate: string };
-  onSave: (name: string) => void;
+  onSave: (name: string, identity?: RoutineIdentity) => void;
   onClose: () => void;
 }
 
-export function RenameRoutineSheet({ currentName, otherNames, labels, onSave, onClose }: RenameRoutineSheetProps) {
+export function RenameRoutineSheet({ currentName, currentIdentity, otherNames, labels, onSave, onClose }: RenameRoutineSheetProps) {
   const { surfaces, colors, typography, spacing, radius, sectionAccent, semantic } = useTheme();
   const insets = useSafeAreaInsets();
   const [value, setValue] = useState('');
+  const [identity, setIdentity] = useState(currentIdentity);
 
   useEffect(() => {
     if (currentName !== null) setValue(currentName);
-  }, [currentName]);
+    setIdentity(currentIdentity);
+  }, [currentName, currentIdentity?.icon, currentIdentity?.color]);
 
   const name = normalizeRoutineName(value);
   const problem = routineNameProblem(value, otherNames);
-  const canSave = problem === null && name !== currentName;
+  const canSave = currentName !== null && problem === null && (name !== currentName || identity?.icon !== currentIdentity?.icon);
   const submit = () => {
-    if (name !== null && canSave) onSave(name);
+    if (name !== null && canSave) onSave(name, identity);
   };
 
   return (
     <Modal visible={currentName !== null} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.backdrop} onPress={onClose} />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={{ maxHeight: '85%' }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <ScrollView keyboardShouldPersistTaps="handled">
         <View
           style={[
             styles.sheet,
@@ -68,7 +74,7 @@ export function RenameRoutineSheet({ currentName, otherNames, labels, onSave, on
             value={value}
             onChangeText={setValue}
             maxLength={MAX_ROUTINE_NAME_LENGTH}
-            autoFocus
+            accessibilityLabel={labels.title}
             returnKeyType="done"
             onSubmitEditing={submit}
             style={[
@@ -82,6 +88,7 @@ export function RenameRoutineSheet({ currentName, otherNames, labels, onSave, on
               },
             ]}
           />
+          {identity && <RoutineIdentityPicker value={identity} onChange={setIdentity} />}
           {problem === 'duplicate' ? (
             <Text style={[typography.caption, { color: semantic.danger, marginBottom: spacing.sm }]}>
               {labels.duplicate}
@@ -104,6 +111,7 @@ export function RenameRoutineSheet({ currentName, otherNames, labels, onSave, on
             </Pressable>
           </View>
         </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
   );

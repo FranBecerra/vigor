@@ -7,11 +7,15 @@ import { EquipmentIllustration } from '../generate/EquipmentIllustration';
 import { SplitDiagram } from '../generate/SplitDiagram';
 import { SplitStructure } from '@/models';
 import { ExperienceLevelGuide } from '../generate/ExperienceLevelGuide';
+import { RoutineIdentityPicker } from '../RoutineIdentityPicker';
+import { AthleteIntakeContext } from '@/hooks/AthleteIntakeContext';
 const { create, act } = require('react-test-renderer');
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 const mockDismissTo = jest.fn();
 let mockCanGoBack = false;
+let mockUser: any = null, mockCatalogue: any[] = [];
+const mockCreateRoutine = jest.fn(), mockCreateMeso = jest.fn(), mockListRoutines = jest.fn();
 let mockDimensions = { width: 390, height: 844, scale: 3, fontScale: 1 };
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({ __esModule: true, default: () => mockDimensions }));
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush, canGoBack: () => mockCanGoBack, replace: mockReplace, dismissTo: mockDismissTo }), Stack: { Screen: () => null } }));
@@ -24,12 +28,41 @@ jest.mock('../generate/ExerciseSwapSheet', () => ({ ExerciseSwapSheet: () => nul
 jest.mock('react-native-screens/experimental', () => ({ SafeAreaView: require('react-native').View }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }) }));
-jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: null }) }));
-jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: [], exercisesById: new Map(), notRecommendedExerciseIds: new Set(), preferencesReady: true }) }));
-jest.mock('@/services/repositories', () => ({ mesocycleRepository: {}, routineRepository: {}, workoutSessionRepository: {} }));
+jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: mockUser }) }));
+jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: mockCatalogue, exercisesById: new Map(mockCatalogue.map(ex => [ex.id, ex])), notRecommendedExerciseIds: new Set(), preferencesReady: true }), useOptionalExerciseCatalogue: () => null }));
+jest.mock('@/services/repositories', () => ({ mesocycleRepository: { create: (...args: any[]) => mockCreateMeso(...args) }, routineRepository: { create: (...args: any[]) => mockCreateRoutine(...args), listByUser: (...args: any[]) => mockListRoutines(...args), update: async () => undefined }, workoutSessionRepository: { listByUser: async () => [] } }));
 const press = (tree: any, key: string) => tree.root.findAll((node: any) => typeof node.props.onPress === 'function' &&
   node.findAllByType(RN.Text).some((text: any) => text.props.children === key))[0].props.onPress();
-beforeEach(() => { mockDimensions = { width: 390, height: 844, scale: 3, fontScale: 1 }; mockCanGoBack = false; jest.clearAllMocks(); });
+beforeEach(() => { mockDimensions = { width: 390, height: 844, scale: 3, fontScale: 1 }; mockCanGoBack = false; mockUser = null; mockCatalogue = []; jest.clearAllMocks(); mockListRoutines.mockResolvedValue([]); mockCreateRoutine.mockResolvedValue(undefined); mockCreateMeso.mockResolvedValue(undefined); });
+
+it('waits for intake then seeds strength values once without replacing later manual changes', async () => {
+  const intake = { version: 1 as const, status: 'COMPLETED' as const, updatedAt: 1000, goal: 'STRENGTH' as const,
+    strengthSessionsPerWeek: 3, strengthMinutesPerSession: 60 };
+  const render = (ready: boolean, current = intake) => <AthleteIntakeContext.Provider value={{ ready, intake: current }}><GenerateScreen /></AthleteIntakeContext.Provider>;
+  let tree: any; await act(async () => { tree = create(render(false)); });
+  expect(tree.root.findAllByType(GenerationChoice)).toHaveLength(0);
+  await act(async () => tree.update(render(true)));
+  expect(tree.root.findAllByType(GenerationChoice).find((n: any) => n.props.title === 'generate.goalStrength').props.selected).toBe(true);
+  for (let index = 0; index < 4; index++) await act(async () => press(tree, 'exerciseWizard.next'));
+  const sessions = () => tree.root.findAllByType(Stepper).find((n: any) => n.props.label === 'generate.sessions');
+  expect(sessions().props.value).toBe(3); await act(async () => sessions().props.onChange(5));
+  await act(async () => tree.update(render(true, { ...intake, strengthSessionsPerWeek: 2 })));
+  expect(sessions().props.value).toBe(5); await act(async () => tree.unmount());
+});
+
+it('persists the last selected icon and current app accent, ignoring obsolete independent colour input', async () => {
+  mockUser = { uid: 'owner' }; mockCatalogue = require('@/services/training/exerciseCatalogue').EXERCISE_CATALOGUE;
+  let tree: any; await act(async () => { tree = create(<GenerateScreen />); });
+  for (let step = 0; step < 5; step++) await act(async () => press(tree, 'exerciseWizard.next'));
+  await act(async () => press(tree, 'generate.generate'));
+  await act(async () => tree.root.findAllByType(RN.TextInput).find((node: any) => node.props.accessibilityLabel === 'generate.name').props.onChangeText('Distinct plan'));
+  await act(async () => tree.root.findByType(RoutineIdentityPicker).props.onChange({ icon: 'bike', color: '#83B0AC' }));
+  await act(async () => press(tree, 'generate.save'));
+  expect(mockCreateRoutine).toHaveBeenCalledWith(expect.objectContaining({ name: 'Distinct plan', icon: 'bike', accentColor: '#9BE317' }));
+  expect(mockCreateMeso).toHaveBeenCalled();
+  expect(mockDismissTo).toHaveBeenCalledWith('/(tabs)/(train)');
+  await act(async () => tree.unmount());
+}, 20000);
 
 it('opens the optional experience guide, applies only accepted results and retains manual choice across steps', async () => {
   let tree: any; await act(async () => { tree = create(<GenerateScreen />); });

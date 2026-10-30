@@ -18,6 +18,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  getDocFromCache,
+  getDocsFromCache,
   setDoc,
   updateDoc,
   deleteDoc,
@@ -29,6 +31,7 @@ import {
 } from '@react-native-firebase/firestore';
 import { db } from '../firebase';
 import { writeLocally } from './localWrite';
+import { firestoreData } from './firestoreData';
 
 /** Todo documento almacenado tiene, como mínimo, un id. */
 export interface WithId {
@@ -57,6 +60,18 @@ export class BaseRepository<T extends WithId> {
     const snap = await getDoc(this.ref(id));
     if (!snap.exists()) return null;
     return { ...(snap.data() as object), id: snap.id } as T;
+  }
+
+  /** Native durable cache only: never waits for a network attempt. Missing documents reject. */
+  async getCached(id: string): Promise<T | null> {
+    const snap = await getDocFromCache(this.ref(id));
+    return snap.exists() ? { ...(snap.data() as object), id: snap.id } as T : null;
+  }
+
+  /** An empty query cache is not evidence of an empty server collection. */
+  async listWhereCached(field: string, value: unknown): Promise<T[]> {
+    const snap = await getDocsFromCache(query(this.col(), where(field, '==', value)));
+    return snap.docs.map(d => ({ ...(d.data() as object), id: d.id }) as T);
   }
 
   /** Lista todos los documentos de la colección. */
@@ -91,7 +106,7 @@ export class BaseRepository<T extends WithId> {
 
   /** Actualiza parcialmente un documento existente. */
   async update(id: string, patch: Partial<Omit<T, 'id'>>): Promise<void> {
-    await updateDoc(this.ref(id), patch as DocumentData);
+    await updateDoc(this.ref(id), firestoreData(patch) as DocumentData);
   }
 
   /** Merge a bounded patch offline without replacing unrelated document fields. */

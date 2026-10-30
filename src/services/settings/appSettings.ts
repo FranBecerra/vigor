@@ -1,25 +1,30 @@
 import { validSleepGoal } from '@/services/bio/sleepGoal';
+import { validAccent, type Accent } from '@/theme/accent';
+import { validateAthleteIntake, type AthleteIntake } from './athleteIntake';
 
 export type AppAppearance = 'system' | 'light' | 'dark';
 export type AppLanguage = 'system' | 'en' | 'es' | 'fr' | 'ja';
-export interface AppSettings { appearance: AppAppearance; language: AppLanguage; measurementSystem?: 'metric' | 'imperial'; weightIncrement?: number; bioHealthEnabled?: boolean; bioNightEnabled?: boolean; bioSleepGoalMinutes?: number }
+export interface AppSettings { appearance: AppAppearance; language: AppLanguage; accent?: Accent; measurementSystem?: 'metric' | 'imperial'; weightIncrement?: number; bioHealthEnabled?: boolean; bioNightEnabled?: boolean; bioSleepGoalMinutes?: number; athleteIntake?: AthleteIntake }
 export const DEFAULT_APP_SETTINGS: Readonly<AppSettings> = { appearance: 'system', language: 'system' };
 export interface SettingsStorage { read(): Promise<string | null>; write(text: string): Promise<void> }
 
 export function validateAppSettings(value: unknown): AppSettings {
   const data = value as AppSettings;
   if (!data || !['system', 'light', 'dark'].includes(data.appearance) || !['system', 'en', 'es', 'fr', 'ja'].includes(data.language)) throw Error('Invalid app settings');
+  if (data.accent !== undefined && !validAccent(data.accent)) throw Error('Invalid accent');
   if (data.measurementSystem !== undefined && !['metric', 'imperial'].includes(data.measurementSystem)) throw Error('Invalid measurement system');
   if (data.weightIncrement !== undefined && (!Number.isFinite(data.weightIncrement) || data.weightIncrement < 0.01 || data.weightIncrement > 100)) throw Error('Invalid weight increment');
   if (data.bioHealthEnabled !== undefined && typeof data.bioHealthEnabled !== 'boolean') throw Error('Invalid Bio connection');
   if (data.bioNightEnabled !== undefined && typeof data.bioNightEnabled !== 'boolean') throw Error('Invalid overnight connection');
   if (data.bioSleepGoalMinutes !== undefined && !validSleepGoal(data.bioSleepGoalMinutes)) throw Error('Invalid sleep goal');
   return { appearance: data.appearance, language: data.language,
+    ...(data.accent === undefined ? {} : { accent: data.accent }),
     ...(data.measurementSystem === undefined ? {} : { measurementSystem: data.measurementSystem }),
     ...(data.weightIncrement === undefined ? {} : { weightIncrement: data.weightIncrement }),
     ...(data.bioHealthEnabled === undefined ? {} : { bioHealthEnabled: data.bioHealthEnabled }),
     ...(data.bioNightEnabled === undefined ? {} : { bioNightEnabled: data.bioNightEnabled }),
-    ...(data.bioSleepGoalMinutes === undefined ? {} : { bioSleepGoalMinutes: data.bioSleepGoalMinutes }) };
+    ...(data.bioSleepGoalMinutes === undefined ? {} : { bioSleepGoalMinutes: data.bioSleepGoalMinutes }),
+    ...(data.athleteIntake === undefined ? {} : { athleteIntake: validateAthleteIntake(data.athleteIntake) }) };
 }
 export function normalizeDisplayName(input: string): string {
   if (typeof input !== 'string' || /[\u0000-\u001f\u007f-\u009f]/u.test(input)) throw Error('Invalid display name');

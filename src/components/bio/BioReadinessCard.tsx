@@ -35,7 +35,17 @@ export function BioReadinessCard({ view }: { view: BioReadinessView }) {
         <View accessible={false}><InfoIcon size={24} color={colors.bioText} /></View>
       </Pressable>
     </View>
-    {view.state === 'LOADING' ? <ActivityIndicator color={colors.bioText} /> : <>
+    {view.state === 'LOADING' ? <View testID="readiness-placeholder" style={{ gap: 12 }}>
+      <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+        <Text style={[typography.emphasis, { color: colors.textSecondary }]}>—</Text>
+        <ActivityIndicator color={colors.bioText} />
+      </View>
+      <Text style={[typography.caption, { color: colors.textSecondary }]}>{t('bioMetricsRefreshing')}</Text>
+      {[t('bioReadiness.sleep'), t('bioNight.HEART_RATE'), t('bioSummary.hrv')].map(title => <View key={title}
+        style={{ minHeight: 72, borderTopWidth: .5, borderTopColor: colors.surfaceBorder, justifyContent: 'center' }}>
+        <Text style={[typography.body, { color: colors.textSecondary }]}>{title}</Text>
+      </View>)}
+    </View> : <>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
         <Text testID="readiness-score" style={[typography.emphasis, { color: readinessInk[scheme][readinessBand(index?.score)] }]}>{index?.score ?? '—'}</Text>
         {index?.score !== undefined && <Text style={[typography.title, { color: colors.textSecondary }]}>/ 100</Text>}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -9,9 +9,15 @@ import { HealthExportSettings } from '@/components/train/WorkoutHealthExport';
 import { BioHealthSettings } from '@/components/bio/BioHealthSettings';
 import { normalizeDisplayName, type AppAppearance, type AppLanguage } from '@/services/settings/appSettings';
 import { NumericField } from '@/components/train/NumericField';
+import { ACCENTS, ACCENT_KEYS } from '@/theme/accent';
+import { CheckIcon } from '@/components/icons/ActionIcons';
 
 export default function SettingsScreen() {
   const { t } = useTranslation(); const router = useRouter(); const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const swatchSize = width >= 380 ? 52 : 44, swatchGap = width >= 380 ? 12 : 6;
+  const swatchColumns = width >= 316 ? 5 : 3;
+  const swatchGridWidth = swatchColumns * swatchSize + (swatchColumns - 1) * swatchGap;
   const { surfaces, colors, radius, typography, spacing, sectionAccent, semantic } = useTheme(); const preferences = useAppSettings();
   const [name, setName] = useState(preferences.displayName); const [invalidName, setInvalidName] = useState(false); const [savedName, setSavedName] = useState(false);
   useEffect(() => { setName(preferences.displayName); }, [preferences.displayName]);
@@ -30,6 +36,12 @@ export default function SettingsScreen() {
         if (router.canGoBack()) router.back(); else router.replace('/(tabs)/profile');
       }} style={{ paddingVertical: 12 }}><Text style={{ color: colors.accentText }}>‹ {t('tabs.profile')}</Text></Pressable>
       <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{t('settings.title')}</Text>
+      <View style={card}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('athleteIntake.profile')} disabled={!preferences.ready || preferences.busy}
+          onPress={() => router.push('/athlete-profile')} style={{ minHeight: 52, justifyContent: 'center' }}>
+          <Text style={[typography.title, { color: colors.accentText }]}>{t('athleteIntake.profile')} ›</Text>
+        </Pressable>
+      </View>
       {!preferences.ready && !preferences.error && <ActivityIndicator color={sectionAccent.train} style={{ marginTop: 24 }} />}
       <View style={card}>
         {heading('settings.account')}
@@ -51,6 +63,19 @@ export default function SettingsScreen() {
         {(['system', 'dark', 'light'] as AppAppearance[]).map((appearance) => row(t(`settings.${appearance}`), preferences.settings.appearance === appearance, () => { void preferences.change({ appearance }); }, t('settings.appearance')))}
       </View>
       <View style={card}>
+        {heading('settings.accent')}
+        <View accessibilityRole="radiogroup" style={{ width: swatchGridWidth, alignSelf: 'center', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: swatchGap }}>
+          {ACCENT_KEYS.map(accent => <Pressable key={accent} accessibilityRole="radio" accessibilityLabel={t(`settings.accent_${accent}`)}
+            accessibilityState={{ selected: (preferences.settings.accent ?? 'lime') === accent, disabled: preferences.busy || !preferences.ready }}
+            disabled={preferences.busy || !preferences.ready} onPress={() => { void preferences.change({ accent }); }}
+            style={{ width: swatchSize, height: swatchSize, minHeight: swatchSize, alignItems: 'center', justifyContent: 'center', borderRadius: radius.md,
+              backgroundColor: ACCENTS[accent].fill, borderWidth: 2,
+              borderColor: (preferences.settings.accent ?? 'lime') === accent ? colors.textPrimary : 'transparent' }}>
+            {(preferences.settings.accent ?? 'lime') === accent && <View accessible={false}><CheckIcon size={24} color={colors.onAccent} /></View>}
+          </Pressable>)}
+        </View>
+      </View>
+      <View style={card}>
         {heading('settings.language')}
         {(['system', 'es', 'en', 'fr', 'ja'] as AppLanguage[]).map((language) => row(t(`settings.language_${language}`), preferences.settings.language === language, () => { void preferences.change({ language }); }, t('settings.language')))}
       </View>
@@ -65,6 +90,18 @@ export default function SettingsScreen() {
       <Text style={[typography.title, { color: colors.textPrimary, marginTop: 28 }]}>{t('settings.connections')}</Text>
       <HealthExportSettings />
       <BioHealthSettings />
+      <View style={card}>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('cardioHealth.title')} disabled={!preferences.ready || preferences.busy}
+          onPress={() => router.push('/cardio-health')} style={{ minHeight: 52, justifyContent: 'center' }}>
+          <Text style={[typography.title, { color: colors.accentText }]}>{t('cardioHealth.title')} ›</Text>
+        </Pressable>
+        <Text style={[typography.caption, { color: colors.textSecondary }]}>{t('cardioHealth.entryHint')}</Text>
+      </View>
+      <View style={card}>
+        <Pressable accessibilityRole="button" onPress={() => router.push('/load-audit')} style={{ minHeight: 48, justifyContent: 'center' }}>
+          <Text style={[typography.title, { color: colors.accentText }]}>{t('loadAudit.title')}</Text>
+        </Pressable>
+      </View>
       {preferences.error && <View style={{ marginTop: 18 }}>
         <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('settings.error')}</Text>
         <Pressable accessibilityRole="button" onPress={preferences.reload} style={{ paddingVertical: 14 }}><Text style={{ color: colors.accentText }}>{t('settings.retry')}</Text></Pressable>

@@ -16,7 +16,8 @@ jest.mock('react-native-gesture-handler', () => {
       'activateAfterLongPress', 'minDuration', 'maxDistance', 'runOnJS', 'onStart', 'onUpdate', 'onEnd', 'onFinalize']) gesture[name] = () => gesture;
     return gesture;
   };
-  return { GestureDetector: ({ children }) => children, Gesture: { Pan: chain, LongPress: chain, Simultaneous: (...items) => items } };
+  return { GestureHandlerRootView: require('react-native').View, GestureDetector: ({ children }) => children,
+    Gesture: { Pan: chain, LongPress: chain, Simultaneous: (...items) => items } };
 });
 jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
   const React = require('react');

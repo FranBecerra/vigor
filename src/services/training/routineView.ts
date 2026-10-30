@@ -69,6 +69,8 @@ export interface SessionView {
   exercises: SessionExerciseView[];
   /** ISO date it was performed. `undefined` = pending, and pending sessions show no day. */
   completedOn?: string;
+  /** Actual completion instant for timezone-aware cross-domain coordination. */
+  completedAtMs?: number;
   /** Execution stays separate from the prescription: history edits never replan. */
   completedWorkoutId?: string;
   performedExercises?: SessionExerciseView[];
@@ -288,6 +290,7 @@ export function toRoutineView(
         name: names[planned.findIndex((candidate) => candidate.index === session.index)] ?? names[position],
         completedOn: timestampToISODate(completed.get(`${index}:${session.index}`)?.completedAt),
         ...(completed.has(`${index}:${session.index}`) ? {
+          completedAtMs: timestampMillis(completed.get(`${index}:${session.index}`)!.completedAt!),
           completedWorkoutId: completed.get(`${index}:${session.index}`)!.id,
           performedExercises: performedExerciseViews(completed.get(`${index}:${session.index}`)!, exerciseById),
         } : {}),
@@ -387,17 +390,15 @@ export async function loadRoutineViews(
   exerciseById: ReadonlyMap<string, Exercise>,
   labels: RoutineViewLabels,
 ): Promise<RoutineView[]> {
-  const [routines, completedSessions] = await Promise.all([
-    sources.listRoutines(userId),
+  // Start dependent plan reads as soon as templates arrive, not after history.
+  // Attach both branches immediately so a history rejection cannot go unhandled.
+  const [{ routines, mesocycles }, completedSessions] = await Promise.all([
+    sources.listRoutines(userId).then(async routines => ({ routines,
+      mesocycles: await Promise.all(routines.map(routine => routine.activeMesocycleId === undefined
+        ? Promise.resolve(null) : sources.getMesocycle(routine.activeMesocycleId))),
+    })),
     sources.listWorkoutSessions?.(userId) ?? Promise.resolve([]),
   ]);
-  const mesocycles = await Promise.all(
-    routines.map((routine) =>
-      routine.activeMesocycleId === undefined
-        ? Promise.resolve(null)
-        : sources.getMesocycle(routine.activeMesocycleId),
-    ),
-  );
   const createdAt = new Map(
     routines.map((routine) => [
       routine.id,

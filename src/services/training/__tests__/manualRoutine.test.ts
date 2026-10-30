@@ -7,12 +7,24 @@ import { createCustomExercise } from '../customExercises';
 import { TrainingGoal } from '../volumePlan';
 import { equipmentCategory, filterExercisePicker, EXERCISE_EQUIPMENT_FILTERS } from '../exerciseFilters';
 import { toRoutineView } from '../routineView';
+import { ROUTINE_ICON_KEYS } from '@/models/routine';
 
 const exercise = EXERCISE_CATALOGUE[0];
 const catalogue = new Map([[exercise.id, exercise]]);
 const sessions = () => appendPreviewExercises(resizeManualSessions([], 2), [0, 1].map((sessionIndex) => ({ sessionIndex, exerciseId: exercise.id })), catalogue, TrainingGoal.HYPERTROPHY);
 const input = () => ({ userId: 'u', routineId: 'r', name: ' Manual plan ', goal: TrainingGoal.HYPERTROPHY,
   microcycles: 6, sessions: sessions(), catalogue, now: 1, active: true, accentColor: '#aaa' });
+it('retains a selected identity independently from the app and keeps the legacy icon default', () => {
+  expect(manualRoutineDocuments({ ...input(), icon: 'mountain', accentColor: '#99A6B2' }).routine).toMatchObject({ icon: 'mountain', accentColor: '#99A6B2' });
+  expect(manualRoutineDocuments(input()).routine.icon).toBe('barbell');
+  expect(() => manualRoutineDocuments({ ...input(), icon: 'unknown' as any })).toThrow('invalidIdentity');
+});
+it.each(ROUTINE_ICON_KEYS)('round-trips the %s identity without altering the prescription', icon => {
+  const { routine, mesocycle } = manualRoutineDocuments({ ...input(), icon });
+  expect(routine.icon).toBe(icon);
+  expect(toRoutineView(routine, mesocycle, catalogue, { focus: value => value, goal: value => value })?.icon).toBe(icon);
+  expect(mesocycle.plannedSessions).toEqual(manualRoutineDocuments(input()).mesocycle.plannedSessions);
+});
 it('starts empty and preserves existing session objects when expanding', () => {
   const first = resizeManualSessions([], 1); expect(first[0].exercises).toEqual([]);
   const next = resizeManualSessions(first, 3); expect(next[0]).toBe(first[0]); expect(next.map((session) => session.index)).toEqual([0, 1, 2]);

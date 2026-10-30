@@ -179,6 +179,7 @@ export function PlanPreview({
             key={session.index}
             onPress={onPressSession === undefined ? undefined : () => onPressSession(session.index)}
             disabled={onPressSession === undefined}
+            accessible={onPressSession !== undefined}
             accessibilityRole={onPressSession ? 'button' : undefined}
             style={{
               ...surfaces.card,

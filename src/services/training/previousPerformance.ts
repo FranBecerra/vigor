@@ -57,7 +57,8 @@ export function applyPreviousPerformance(sets: SessionSetsByExercise, baselines:
       const fallback = previous ?? values.findLast((value) => value !== undefined);
       const loadField = row.recording?.load === 'LEVEL' ? 'targetLoadLevel' : 'targetWeight';
       const seed = !row.isCompleted && !row.completionWasRecorded && !row.isAutoFilled && !protectedLoads.has(row.id) && row.recording?.load !== 'NONE'
-        && row.actualWeight === undefined && row.actualLoadLevel === undefined && (row[loadField] === undefined || row[loadField] === 0);
+        && row.actualWeight === undefined && row.actualLoadLevel === undefined
+        && (row.setType !== SetType.WARMUP || row[loadField] === undefined || row[loadField] === 0);
       const weight = seed && fallback ? fallback.weight : row[loadField];
       if (row.previous?.weight === previous?.weight && row.previous?.reps === previous?.reps && row.previous?.rir === previous?.rir && weight === row[loadField]) return row;
       return { ...row, previous, ...(weight === undefined ? {} : { [loadField]: weight }) };

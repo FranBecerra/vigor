@@ -4,6 +4,8 @@ import { SetType, MuscleGroup } from '@/models';
 const { create, act } = require('react-test-renderer');
 const mockList = jest.fn(); const mockPush = jest.fn(); let mockUid: string | null = 'owner'; const mockCatalogue = new Map();
 const mockSports = { entries: [] as any[], ready: true, error: false };
+const mockCardio = { entries: [] as any[], ready: true, error: false };
+jest.mock('@/hooks/useCardioTraining', () => ({ useCardioWorkouts: () => mockCardio }));
 jest.mock('@/hooks/useSportActivities', () => ({ useSportActivities: () => mockSports }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
@@ -18,8 +20,19 @@ const session: any = { id: 's', userId: 'owner', sessionName: 'Upper', performed
   ] }] };
 const text = (tree: any) => tree.root.findAll((node: any) => typeof node.props.children === 'string' || Array.isArray(node.props.children))
   .flatMap((node: any) => Array.isArray(node.props.children) ? node.props.children.filter((child: any) => typeof child === 'string') : [node.props.children]).join(' ');
-beforeEach(() => { jest.useFakeTimers(); jest.clearAllMocks(); mockUid = 'owner'; mockSports.entries = []; mockSports.ready = true; mockSports.error = false; mockList.mockResolvedValue([session]); });
+beforeEach(() => { jest.useFakeTimers(); jest.clearAllMocks(); mockUid = 'owner'; mockSports.entries = []; mockSports.ready = true; mockSports.error = false; mockCardio.entries = []; mockCardio.ready = true; mockCardio.error = false; mockList.mockResolvedValue([session]); });
 afterEach(() => { act(() => jest.runOnlyPendingTimers()); jest.useRealTimers(); });
+it('includes completed cardio once, excludes running/discarded/foreign records and opens its actual result', async () => {
+  const { cardioFixture, CARDIO_FIXTURE_NOW: now } = require('@/test-support/cardioFixture');
+  const { startCardioWorkout, transitionCardioWorkout } = require('@/services/cardio/cardioWorkout');
+  const { CardioHistoryCard } = require('@/components/cardio/CardioTrainingHome');
+  const b = cardioFixture(), run = startCardioWorkout(b, b.slots[0].id, now, 'run'), done = transitionCardioWorkout(run, 'FINISH', now + 60000, 60, 6);
+  mockCardio.entries = [done, { ...run, id: 'running' }, { ...done, id: 'foreign', userId: 'other' }, { ...done, id: 'discarded', status: 'DISCARDED' }];
+  let tree: any; await act(async () => { tree = create(<HistoryScreen />); });
+  expect(tree.root.findAllByType(CardioHistoryCard)).toHaveLength(1);
+  await act(async () => tree.root.findByType(CardioHistoryCard).props.onPress());
+  expect(mockPush).toHaveBeenCalledWith({ pathname: '/cardio-workout', params: { id: 'run' } }); await act(async () => tree.unmount());
+});
 it('shows only compact actual totals and muscle capsules, and opens a separate detailed route', async () => {
   let tree: any; await act(async () => { tree = create(<HistoryScreen />); });
   const output = text(tree);

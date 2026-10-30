@@ -15,10 +15,11 @@ import { useTrainingUnits } from '@/hooks/useTrainingUnits';
 import type { WorkoutPlanChange } from '@/services/training/workoutReview';
 import { SessionEffortInput } from './SessionEffortInput';
 
-export function WorkoutFinishSheet({ open, saved, busy, error, summary, exercises, changed, changes = [], historyReady, startedAt, completedAt, healthContent, effortValue = null, onChangeEffort, onFinish, onClose }:
+export function WorkoutFinishSheet({ open, saved, busy, error, summary, exercises, changed, changes = [], historyReady, startedAt, completedAt, healthContent, effortValue = null, onChangeEffort, onFinish, onClose, planUpdateError = false, onRetryPlan }:
   { open: boolean; saved: boolean; busy: boolean; error: boolean; summary: ReturnType<typeof workoutReview>; exercises: Exercise[];
     changed: boolean; changes?: WorkoutPlanChange[]; historyReady: boolean; startedAt?: number; completedAt?: number; healthContent?: ReactNode;
-    effortValue?: number | null; onChangeEffort?: (value: number | null) => void; onFinish: (savePlan: boolean) => void; onClose: () => void }) {
+    effortValue?: number | null; onChangeEffort?: (value: number | null) => void; onFinish: (savePlan: boolean) => void; onClose: () => void;
+    planUpdateError?: boolean; onRetryPlan?: () => void }) {
   const { t } = useTranslation(); const { surfaces, colors, typography, spacing, sectionAccent, radius, semantic } = useTheme(); const insets = useSafeAreaInsets();
   const exerciseName = useExerciseName(); const units = useTrainingUnits();
   const [showChanges, setShowChanges] = useState(false);
@@ -53,8 +54,10 @@ export function WorkoutFinishSheet({ open, saved, busy, error, summary, exercise
         <Text style={{ color: colors.textPrimary }}>{units.display(record.weight)?.toLocaleString(undefined, { maximumFractionDigits: 2 })} {units.unit} × {record.reps}</Text>
       </View>)}
       {error && <Text accessibilityRole="alert" style={{ color: semantic.danger, marginTop: 12 }}>{t('workout.finishError')}</Text>}
+      {saved && planUpdateError && <><Text accessibilityRole="alert" style={{ color: semantic.warning, marginTop: 12 }}>{t('finishPlanUpdate.failed')}</Text>
+        {onRetryPlan && action(t('finishPlanUpdate.retry'), onRetryPlan)}</>}
       {saved && healthContent}
-      {saved ? action(t('workout.done'), onClose, true) : <>
+      {saved ? action(t(busy ? 'train.saving' : 'workout.done'), onClose, true) : <>
         {changed && summary.completed > 0 && <><Text style={{ color: colors.textSecondary, marginTop: 20 }}>{t('workout.planChanges')}</Text>
           {action(t('trainingUpdates.changes'), () => setShowChanges(true))}
           {action(t('workout.finishAndUpdate'), () => onFinish(true))}</>}

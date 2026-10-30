@@ -9,6 +9,14 @@ jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string, ar
   i18n: { language: 'en', resolvedLanguage: 'en' } }) }));
 const button = (tree: any, label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
 const text = (tree: any) => JSON.stringify(tree.toJSON());
+it('keeps a structured loading card without displaying a stale score', async () => {
+  let tree: any;
+  await act(async () => { tree = create(<BioReadinessCard view={{ state: 'LOADING', index: buildReadinessIndex(readinessFixture(), 480, now) }} />); });
+  expect(tree.root.findByProps({ testID: 'readiness-placeholder' })).toBeDefined();
+  for (const title of ['bioReadiness.sleep', 'bioNight.HEART_RATE', 'bioSummary.hrv']) expect(text(tree)).toContain(title);
+  expect(text(tree)).toContain('bioMetricsRefreshing'); expect(text(tree)).not.toContain('/ 100');
+  await act(async () => tree.unmount());
+});
 it('shows an explicitly experimental total with expandable components, method and coverage, never a prescription', async () => {
   const index = buildReadinessIndex(readinessFixture(), 480, now); let tree: any;
   await act(async () => { tree = create(<BioReadinessCard view={{ state: 'READY', index }} />); });

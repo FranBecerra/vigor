@@ -8,6 +8,7 @@ import { sportDraft } from '@/services/cardio/sportActivities';
 import { NumericField } from '@/components/train/NumericField';
 import { SessionEffortInput } from '@/components/train/SessionEffortInput';
 import { useTheme } from '@/theme/useTheme';
+import { SportActivityIcon } from '@/components/icons/SportActivityIcon';
 
 /** Staged draft. The only persistence action is the explicit Save button. */
 export function SportActivityForm({ activity, mode, onSave, onCancel }: {
@@ -32,7 +33,19 @@ export function SportActivityForm({ activity, mode, onSave, onCancel }: {
     contentContainerStyle={{ padding: spacing.lg, paddingTop: insets.top + 12, paddingBottom: insets.bottom + 110, gap: 16 }}>
     <Pressable accessibilityRole="button" accessibilityLabel={t('generate.cancel')} disabled={busy} onPress={onCancel} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={{ color: colors.accentText, fontSize: 17 }}>{t('generate.cancel')}</Text></Pressable>
     <Text style={{ color: colors.textPrimary, fontSize: 29, fontWeight: '700' }}>{t(`sportActivities.${title}`)}</Text>
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{SPORT_KINDS.map((sport) => choice(t(`sportActivities.sports.${sport}`), draft.sport === sport, () => patch({ sport })))}</View>
+    <View accessibilityRole="radiogroup" style={{ ...surfaces.card, borderRadius: radius.lg, paddingHorizontal: 16 }}>
+      {[...SPORT_KINDS].sort((a, b) => t(`sportActivities.sports.${a}`).localeCompare(t(`sportActivities.sports.${b}`), i18n.resolvedLanguage ?? i18n.language)).map((sport, index) => <Pressable key={sport}
+        accessibilityRole="radio" accessibilityLabel={t(`sportActivities.sports.${sport}`)} accessibilityState={{ selected: draft.sport === sport, disabled: busy }}
+        disabled={busy} onPress={() => patch({ sport })} style={{ minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 14,
+          borderTopWidth: index ? .5 : 0, borderColor: colors.surfaceBorder }}>
+        <View accessible={false}><SportActivityIcon sport={sport} color={draft.sport === sport ? colors.accentText : colors.textSecondary} /></View>
+        <Text style={{ flex: 1, color: colors.textPrimary, fontSize: 17 }}>{t(`sportActivities.sports.${sport}`)}</Text>
+        <View accessible={false} style={{ width: 20, height: 20, borderRadius: 10, borderWidth: 2,
+          borderColor: draft.sport === sport ? colors.accentText : colors.surfaceBorder, justifyContent: 'center', alignItems: 'center' }}>
+          {draft.sport === sport && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.accentText }} />}
+        </View>
+      </Pressable>)}
+    </View>
     <Text style={{ color: colors.textSecondary }}>{t('sportActivities.context')}</Text>
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>{(['CLASS', 'MATCH', 'FREE'] as const).map((context) => choice(t(`sportActivities.contexts.${context}`), draft.context === context, () => patch({ context })))}</View>
     <Text style={{ color: colors.textSecondary }}>{t(draft.sport === 'OTHER' ? 'sportActivitiesRequiredName' : 'sportActivities.name')}</Text>

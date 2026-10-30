@@ -15,7 +15,13 @@ export function metricTone(view: MetricMonitor): 'green' | 'amber' | 'neutral' {
   return view.position === 'WITHIN' || view.position === 'TARGET_MET' ? 'green'
     : ['BELOW', 'ABOVE', 'TARGET_BELOW'].includes(view.position) ? 'amber' : 'neutral';
 }
-export function useMetricMaterial() { const { scheme } = useTheme(); return material[scheme]; }
+export function useMetricMaterial() {
+  const { scheme, colors } = useTheme();
+  // State markers retain their meaning; the shared material and reference bands follow the chosen accent.
+  return { ...material[scheme], surface: colors.surface, end: colors.accentTint,
+    track: colors.surfaceBorder, trackEnd: colors.surface,
+    range: colors.accentText, rangeEnd: colors.accentTint, neutral: colors.textSecondary };
+}
 export function SoftMetricSurface({ children, style, testID }: PropsWithChildren<{ style?: ViewStyle; testID?: string }>) {
   const m = useMetricMaterial(), { colors, radius } = useTheme();
   const image = `linear-gradient(145deg, ${m.surface}, ${m.end})`;
@@ -55,7 +61,7 @@ export function BioMetricTrend({ view, label }: { view: MetricMonitor; label: st
   // Never draw through a missing calendar day. Isolated observations remain visible as points.
   let path = '', connected = false;
   slots.forEach((slot, index) => { if (slot.day) { path += `${connected ? ' L' : ' M'}${x(index)},${y(slot.day.value)}`; connected = true; } else connected = false; });
-  const tone = m[metricTone(view)];
+  const tone = metricTone(view) === 'amber' ? m.amber : m.range;
   return <View testID="bio-metric-trend" accessible accessibilityRole="image" accessibilityLabel={label}
     onLayout={(event) => { const next = Math.max(48, event.nativeEvent.layout.width); if (Number.isFinite(next)) setWidth(next); }}>
     <Svg width="100%" height={164} viewBox={`0 0 ${width} 164`} accessible={false}>

@@ -18,5 +18,10 @@ export default function CreateRoutineScreen() {
       <Text style={{ color: colors.accentText, fontSize: 21, fontWeight: '600' }}>{t(`routineCreation.${mode}`)}</Text>
       <Text style={{ color: colors.textSecondary, marginTop: 10 }}>{t(`routineCreation.${mode}Hint`)}</Text>
     </Pressable>)}
+    <Pressable accessibilityRole="button" accessibilityLabel={t('cardioPlan.create')} onPress={() => router.push('/cardio-plan')}
+      style={{ padding: 22, borderRadius: radius.lg, ...surfaces.card, backgroundColor: colors.bgElevated, marginBottom: 16 }}>
+      <Text style={{ color: colors.accentText, fontSize: 21, fontWeight: '600' }}>{t('cardioPlan.create')}</Text>
+      <Text style={{ color: colors.textSecondary, marginTop: 10 }}>{t('cardioPlan.foundation')}</Text>
+    </Pressable>
   </ScrollView>;
 }

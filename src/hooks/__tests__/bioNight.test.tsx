@@ -35,7 +35,7 @@ it('handles availability/read errors and retries without retaining stale private
   mockAvailable.mockResolvedValue(true); mockRead.mockRejectedValueOnce(Error('locked'));
   await act(async () => result.reload()); expect(result.state).toBe('ERROR'); expect(result.analysis).toBeUndefined();
   await act(async () => result.reload()); expect(result.state).toBe('READY');
-  mockReady = false; await act(async () => tree.update(<Probe />)); expect(result.state).toBe('OFF');
+  mockReady = false; await act(async () => tree.update(<Probe />)); expect(result.state).toBe('LOADING'); expect(result.analysis).toBeUndefined();
   await act(async () => tree.unmount());
 });
 it('ignores account round trips, overlapped reads and results after unmount', async () => {

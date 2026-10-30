@@ -1,0 +1,33 @@
+import React from 'react';
+import { TextInput } from 'react-native';
+import { RenameRoutineSheet } from '../RenameRoutineSheet';
+import { RoutineIdentityPicker } from '@/components/train/RoutineIdentityPicker';
+const { act, create } = require('react-test-renderer');
+jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) }));
+const labels = { title: 'Edit routine', save: 'Save', cancel: 'Cancel', duplicate: 'Duplicate' };
+it('edits identity without renaming, keeps duplicate validation and resets unsaved edits between routines', async () => {
+  const onSave = jest.fn(), onClose = jest.fn(); let tree: any;
+  const render = (currentName: string | null = 'Upper', icon: any = 'barbell', color = '#ABC') => <RenameRoutineSheet
+    currentName={currentName} currentIdentity={{ icon, color }} otherNames={['Lower']} labels={labels} onSave={onSave} onClose={onClose} />;
+  const save = () => tree.root.findAll((n: any) => n.props.accessibilityRole === 'button' && n.props.disabled !== undefined)[0];
+  await act(async () => { tree = create(render()); });
+  expect(save().props.disabled).toBe(true);
+  await act(async () => tree.root.findByType(RoutineIdentityPicker).props.onChange({ icon: 'barbell', color: '#000000' }));
+  expect(save().props.disabled).toBe(true);
+  await act(async () => tree.root.findByType(RoutineIdentityPicker).props.onChange({ icon: 'mountain', color: '#99A6B2' }));
+  expect(save().props.disabled).toBe(false);
+  await act(async () => save().props.onPress());
+  expect(onSave).toHaveBeenCalledWith('Upper', { icon: 'mountain', color: '#99A6B2' });
+  await act(async () => tree.root.findByType(TextInput).props.onChangeText(' lower '));
+  expect(save().props.disabled).toBe(true);
+  await act(async () => tree.root.findByType(TextInput).props.onChangeText('  Revised  '));
+  await act(async () => save().props.onPress());
+  expect(onSave).toHaveBeenLastCalledWith('Revised', { icon: 'mountain', color: '#99A6B2' });
+  await act(async () => tree.update(render(null)));
+  await act(async () => tree.update(render('Second', 'bike', '#84BFFF')));
+  expect(tree.root.findByType(TextInput).props.value).toBe('Second');
+  expect(tree.root.findByType(RoutineIdentityPicker).props.value).toEqual({ icon: 'bike', color: '#84BFFF' });
+  expect(save().props.disabled).toBe(true);
+  await act(async () => tree.unmount());
+});

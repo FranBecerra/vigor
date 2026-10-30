@@ -4,6 +4,7 @@ import { useAuth } from './useAuth';
 import { workoutSessionRepository } from '@/services/repositories';
 import { latestUnfinishedWorkout } from '@/services/training/workoutRuntime';
 import type { WorkoutSession } from '@/models';
+import { loadAudit } from '@/services/performance/loadAudit';
 
 export function useActiveWorkout() {
   const { uid } = useAuth();
@@ -12,7 +13,7 @@ export function useActiveWorkout() {
   useFocusEffect(useCallback(() => {
     const id = ++request.current;
     setActive(null);
-    if (uid) void workoutSessionRepository.listByUser(uid).then((sessions) => {
+    if (uid) void loadAudit.measure('training.activeDraft', () => workoutSessionRepository.listByUser(uid)).then((sessions) => {
       if (id === request.current) setActive(latestUnfinishedWorkout(sessions));
     }).catch(() => {});
     return () => { ++request.current; };

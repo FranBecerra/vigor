@@ -5,8 +5,13 @@ import { SportActivityForm } from '../SportActivityForm';
 import { NumericField } from '@/components/train/NumericField';
 import { SessionEffortInput } from '@/components/train/SessionEffortInput';
 import { saveSportDraft } from '@/services/cardio/sportActivities';
+import { SportActivityIcon } from '@/components/icons/SportActivityIcon';
+import { SPORT_KINDS } from '@/models/sportActivity';
+import es from '@/i18n/locales/es.json';
 const { create, act } = require('react-test-renderer');
-jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
+let mockLocalized = false;
+jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => mockLocalized && key.startsWith('sportActivities.sports.')
+  ? require('@/i18n/locales/es.json').sportActivities.sports[key.split('.').pop()!] : key, i18n: { language: mockLocalized ? 'es' : 'en' } }) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
 jest.mock('@expo/ui/community/datetime-picker', () => ({ __esModule: true, default: () => null }));
 jest.mock('@/components/train/NumericField', () => ({ NumericField: () => null }));
@@ -16,7 +21,7 @@ const original = saveSportDraft('padel', 'owner', { sport: 'PADEL', context: 'CL
 function press(tree: any, label: string) {
   return tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0].props.onPress();
 }
-beforeEach(() => { jest.useFakeTimers(); jest.setSystemTime(now); });
+beforeEach(() => { mockLocalized = false; jest.useFakeTimers(); jest.setSystemTime(now); });
 afterEach(() => jest.useRealTimers());
 
 it('stages a reservation, date/time and duration without writing or collecting actual effort', async () => {
@@ -90,5 +95,18 @@ it('shows a required name for Other without losing the typed name when switching
   await act(async () => tree.root.findAllByType(TextInput)[0].props.onChangeText('Climbing'));
   await act(async () => press(tree, 'sportActivities.sports.PADEL'));
   expect(tree.root.findAllByType(TextInput)[0].props.value).toBe('Climbing');
+  await act(async () => tree.unmount());
+});
+
+it('lists all sports alphabetically in the current language, with icons and accessible full-width selection rows', async () => {
+  mockLocalized = true; let tree: any;
+  await act(async () => { tree = create(<SportActivityForm activity={null} mode="PLAN" onSave={jest.fn()} onCancel={jest.fn()} />); });
+  const icons = tree.root.findAllByType(SportActivityIcon);
+  expect(icons.map((icon: any) => icon.props.sport)).toEqual([...SPORT_KINDS].sort((a, b) => es.sportActivities.sports[a].localeCompare(es.sportActivities.sports[b], 'es')));
+  for (const kind of SPORT_KINDS) {
+    const row = tree.root.findAll((n: any) => n.props.accessibilityLabel === es.sportActivities.sports[kind] && typeof n.props.onPress === 'function')[0];
+    expect(row.props.accessibilityRole).toBe('radio'); expect(row.props.style.minHeight).toBeGreaterThanOrEqual(48);
+    await act(async () => row.props.onPress());
+  }
   await act(async () => tree.unmount());
 });

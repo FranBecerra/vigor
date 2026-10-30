@@ -6,7 +6,7 @@
  */
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { ROUTINE_ICONS } from '@/components/icons';
+import { RoutineBadgeIcon } from '@/components/icons/RoutineBadgeIcon';
 import { MesoRail } from './HomeHeader';
 import { useTheme } from '@/theme/useTheme';
 import { rankedMuscleVolume, totalWorkingSets } from '@/services/training/sessionSummary';
@@ -40,6 +40,7 @@ interface RoutineCardProps {
     remove: string;
     active: string;
     skipped: string;
+    identity?: string;
   };
   onToggle: () => void;
   onPressDetail: () => void;
@@ -50,6 +51,7 @@ interface RoutineCardProps {
   /** Absent on the active routine. */
   onActivate?: () => void;
   onRename: () => void;
+  onIdentity?: () => void;
   onRemove: () => void;
   renderSessionList?: (rows: readonly { index: number; content: ReactNode }[]) => ReactNode;
 }
@@ -68,11 +70,11 @@ export function RoutineCard({
   onPressMesocycle,
   onActivate,
   onRename,
+  onIdentity,
   onRemove,
   renderSessionList,
 }: RoutineCardProps) {
   const { surfaces, colors, sectionAccent, semantic, radius, spacing } = useTheme();
-  const RoutineIcon = ROUTINE_ICONS[routine.icon];
   const current = routine.microcycles[routine.currentMicrocycleIndex];
   const accent = sectionAccent.train;
 
@@ -83,28 +85,25 @@ export function RoutineCard({
         { ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: radius.lg },
         !expanded && styles.collapsed,
       ]}>
-      <Pressable
-        onPress={onPressDetail}
-        accessibilityRole="button"
-        accessibilityState={{ expanded }}
-        accessibilityLabel={routine.name}
-        style={styles.header}>
-        <View
-          style={[styles.iconBadge, { backgroundColor: routine.color, borderRadius: radius.sm }]}>
-          <RoutineIcon size={17} color="#16191C" />
-        </View>
-        <View style={styles.headerText}>
+      <View style={styles.header}>
+        <Pressable accessibilityRole="button" accessibilityLabel={labels.identity ?? labels.rename} disabled={!onIdentity}
+          onPress={event => { event?.stopPropagation(); onIdentity?.(); }}
+          testID="routine-card-identity" style={[styles.iconBadge, { backgroundColor: colors.accentTint, borderRadius: radius.sm }]}>
+          <RoutineBadgeIcon icon={routine.icon} size={26} />
+        </Pressable>
+        <Pressable onPress={onPressDetail} accessibilityRole="button" accessibilityState={{ expanded }}
+          accessibilityLabel={routine.name} style={styles.headerText}>
           <Text style={[styles.routineName, { color: colors.textPrimary }]}>{routine.name}</Text>
           <Text style={[styles.routineMeta, { color: colors.textMuted }]}>
             {routine.isActive ? `${labels.active} · ` : ''}
             {routine.objective} · {current.sessions.length} {labels.sessions}
           </Text>
-        </View>
+        </Pressable>
         <Pressable onPress={(event) => { event.stopPropagation(); onToggle(); }}
           accessibilityRole="button" accessibilityLabel={labels.sessions}>
           <Text style={[styles.chevron, { color: colors.textMuted, padding: 12 }]}>{expanded ? '▲' : '▼'}</Text>
         </Pressable>
-      </Pressable>
+      </View>
 
       {expanded ? (
         <Animated.View entering={FadeIn.duration(140)} exiting={FadeOut.duration(100)}>
@@ -207,7 +206,7 @@ const styles = StyleSheet.create({
   card: { padding: 16 },
   collapsed: { opacity: 0.72 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  iconBadge: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  iconBadge: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   headerText: { flex: 1 },
   routineName: { fontSize: 19, fontWeight: '700' },
   routineMeta: { fontSize: 13, marginTop: 4 },

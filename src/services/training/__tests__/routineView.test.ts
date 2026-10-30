@@ -25,6 +25,22 @@ const LABELS = {
   goal: (goal: string) => `goal:${goal}`,
 };
 
+it('audits the home read critical path without confusing parallel queries with serial stages', async () => {
+  jest.useFakeTimers();
+  const sleep = <T,>(ms: number, result: T) => new Promise<T>(resolve => setTimeout(() => resolve(result), ms));
+  const getMesocycle = jest.fn(() => sleep(300, mesocycle()));
+  let complete = false;
+  try {
+    const pending = loadRoutineViews('u1', { listRoutines: () => sleep(100, [routine()]),
+      listWorkoutSessions: () => sleep(400, []), getMesocycle }, BY_ID, LABELS).then(value => { complete = true; return value; });
+    await jest.advanceTimersByTimeAsync(99); expect(getMesocycle).not.toHaveBeenCalled(); expect(complete).toBe(false);
+    await jest.advanceTimersByTimeAsync(1); expect(getMesocycle).toHaveBeenCalledTimes(1);
+    await jest.advanceTimersByTimeAsync(299); expect(complete).toBe(false);
+    await jest.advanceTimersByTimeAsync(1); await pending; expect(complete).toBe(true);
+    // Plan reads overlap history: max(100+300,400) = 400ms, previously 700ms.
+  } finally { jest.useRealTimers(); }
+});
+
 describe('recorded mesocycle sessions', () => {
   const exercise = EXERCISE_CATALOGUE[0];
   const planned: PlannedSession = { index: 4, focus: 'UPPER', estimatedWorkMinutes: 10,
@@ -381,6 +397,7 @@ describe('toRoutineView', () => {
     };
     const result = toRoutineView(routine(), meso, BY_ID, LABELS, [completed]) as RoutineView;
     expect(result.microcycles[0].sessions[0].completedOn).toBe('2027-01-15');
+    expect(result.microcycles[0].sessions[0].completedAtMs).toBe(NOW);
     expect(result.currentMicrocycleIndex).toBe(0);
   });
 

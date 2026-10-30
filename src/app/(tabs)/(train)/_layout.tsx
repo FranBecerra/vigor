@@ -25,6 +25,10 @@ export default function TrainStackLayout() {
       <Stack.Screen name="session" />
       <Stack.Screen name="mesocycle" />
       <Stack.Screen name="generate" />
+      <Stack.Screen name="cardio-plan" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="cardio-cycle" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="cardio-block" />
+      <Stack.Screen name="cardio-workout" />
       <Stack.Screen name="create-routine" />
       <Stack.Screen name="manual-routine" />
       <Stack.Screen name="routine" />

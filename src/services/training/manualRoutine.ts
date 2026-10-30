@@ -5,6 +5,7 @@ import { normalizeRoutineName } from './routineMapper';
 import { exerciseMinutes, SESSION_OVERHEAD_MINUTES } from './trainingCapacity';
 import { buildScheduleTemplate } from './scheduleTemplate';
 import { TrainingGoal } from './volumePlan';
+import { ROUTINE_ICON_KEYS, type RoutineIconKey } from '@/models/routine';
 
 export function resizeManualSessions(sessions: readonly PlannedSession[], count: number): PlannedSession[] {
   if (!Number.isInteger(count) || count < 1 || count > 7) throw new Error('invalidSessions');
@@ -19,10 +20,11 @@ export function timeManualSessions(sessions: readonly PlannedSession[], catalogu
 }
 export function manualRoutineDocuments(input: { userId: string; routineId: string; name: string; goal: TrainingGoal;
   microcycles: number; sessions: readonly PlannedSession[]; catalogue: ReadonlyMap<string, Exercise>; now: number;
-  active: boolean; accentColor: string; automaticProgression?: boolean }): { routine: Routine; mesocycle: Mesocycle } {
+  active: boolean; accentColor: string; icon?: RoutineIconKey; automaticProgression?: boolean }): { routine: Routine; mesocycle: Mesocycle } {
   const name = normalizeRoutineName(input.name);
   if (!name) throw new Error('invalidName');
   if (!input.userId || !input.routineId || !Number.isFinite(input.now) || input.now < 0) throw new Error('invalidIdentity');
+  if (input.icon !== undefined && !ROUTINE_ICON_KEYS.includes(input.icon)) throw new Error('invalidIdentity');
   if (!Object.values(TrainingGoal).includes(input.goal) || !Number.isInteger(input.microcycles)
     || input.microcycles < 1 || input.microcycles > 12) throw new Error('invalidMicrocycles');
   if (input.sessions.length < 1 || input.sessions.length > 7) throw new Error('invalidSessions');
@@ -53,7 +55,7 @@ export function manualRoutineDocuments(input: { userId: string; routineId: strin
     plannedSessions: sessions, targetVolumePerGroup: Object.fromEntries(previewVolumeBreakdownByMuscle(sessions, input.catalogue).map((row) => [row.muscle, row.sets])),
     currentMicrocycleIndex: 0, projectedMicrocycles: input.microcycles, sessionsPerMicrocycle: sessions.length,
     scheduleTemplate: buildScheduleTemplate(sessions, input.catalogue), startedAt: input.now, updatedAt: input.now };
-  const routine: Routine = { id: input.routineId, userId: input.userId, name, icon: 'barbell', accentColor: input.accentColor,
+  const routine: Routine = { id: input.routineId, userId: input.userId, name, icon: input.icon ?? 'barbell', accentColor: input.accentColor,
     activeMesocycleId: id, isActive: input.active, createdAt: input.now, updatedAt: input.now,
     generation: { creationMode: 'MANUAL', goal: input.goal, experienceLevel: 'UNSPECIFIED', split: 'MANUAL',
       sessionsPerMicrocycle: sessions.length, minutesPerSession: Math.ceil(Math.max(...sessions.map((session) => session.estimatedWorkMinutes)) + SESSION_OVERHEAD_MINUTES),

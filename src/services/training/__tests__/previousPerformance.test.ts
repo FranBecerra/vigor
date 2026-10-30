@@ -42,16 +42,30 @@ it('keeps set ordinals and warmups/top singles separate without inventing previo
   expect(next[3].previous).toBeUndefined();
   expect(hydrate([session('partial', 100, [done(30, { completionState: 'PENDING' })]), session('earlier', 10)])[0].targetWeight).toBe(20);
 });
-it('does not replace actuals, corrections, protected drafts, fatigue suggestions or explicit loads', () => {
+it('copies only historical working load over a prescribed load, preserving reps, RIR and planned warmup percentages', () => {
+  const historical = session('last', 10, [done(35, { setType: SetType.WARMUP }), done(65, { actualReps: 14, actualRIR: 2 }), done(70, { actualReps: 12, actualRIR: 2 })]);
+  const result = hydrate([historical], [row('warm', { setType: SetType.WARMUP, targetWeight: 30 }),
+    row('a', { targetWeight: 70, targetReps: 11, targetRIR: 2 }), row('b', { targetWeight: 75, targetReps: 15, targetRIR: 1 })]);
+  expect(result.map(s => s.targetWeight)).toEqual([30, 65, 70]);
+  expect(result.map(s => [s.targetReps, s.targetRIR])).toEqual([[10, 2], [11, 2], [15, 1]]);
+});
+it('replaces planned working loads but not actuals, corrections, protected drafts or fatigue suggestions', () => {
   const rows = [row('actual', { actualWeight: 35 }), row('done', { isCompleted: true, actualWeight: 40, actualReps: 10 }), row('protected'),
     row('explicit', { targetWeight: 60 }), row('correction', { completionWasRecorded: true }), row('fatigue', { isAutoFilled: true })];
   const next = hydrate([session('last', 10)], rows, exercise, new Set(['protected']));
-  expect(next.map((set) => set.targetWeight)).toEqual([0, 0, 0, 60, 0, 0]);
+  expect(next.map((set) => set.targetWeight)).toEqual([0, 0, 0, 20, 0, 0]);
   expect(next[0].actualWeight).toBe(35); expect(next[1].isCompleted).toBe(true);
   const baselines = previousPerformance([exercise], [session('last', 10)], context);
   const first = applyPreviousPerformance({ [exercise.id]: [row()] }, baselines);
   expect(applyPreviousPerformance(first, baselines)).toBe(first);
   const unknown = { other: [row()] }; expect(applyPreviousPerformance(unknown, baselines)).toBe(unknown);
+  const missing = hydrate([], [row('no-load', { targetWeight: undefined, previous: { weight: 20, reps: 8, rir: 1 } })]);
+  expect(missing[0].targetWeight).toBeUndefined(); expect(missing[0].previous).toBeUndefined();
+  const secondId = 'second-exercise';
+  const multiple = applyPreviousPerformance({ [exercise.id]: [row('first')], [secondId]: [row('second')] },
+    new Map([[exercise.id, baselines.get(exercise.id)!], [secondId, baselines.get(exercise.id)!]]));
+  expect(multiple[exercise.id][0].targetWeight).toBe(20);
+  expect(multiple[secondId][0].targetWeight).toBe(20);
 });
 it.each(['NONE', 'LEVEL', 'PER_HAND_KG', 'ASSISTANCE_KG'] as const)('uses compatible %s recording without changing its units', (load) => {
   const recording = { measure: 'SECONDS' as const, load }; const custom = { ...exercise, recording };

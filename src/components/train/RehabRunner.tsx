@@ -7,6 +7,8 @@ import { useRehabilitation } from '@/hooks/useRehabilitation';
 import { useTheme } from '@/theme/useTheme';
 import { finishRehabLog, localDateKey, newRehabLog, skipRehabLog, updateRehabSet, nextRehabItem } from '@/services/training/rehabilitation';
 import { ExercisePage } from './ExercisePage';
+import { WheelOverlayProvider } from './WheelOverlay';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { WorkoutExerciseStrip } from './WorkoutExerciseStrip';
 import { WorkoutClock } from './WorkoutClock';
 import { ActionMenuSheet } from './ActionMenuSheet';
@@ -179,5 +181,8 @@ export function RehabRunner({ block, workoutKey, embedded = false, onClose }: { 
         ]); else apply();
       }} />
   </View>;
-  return embedded ? content : <Modal visible animationType="slide" onRequestClose={() => { if (!busy) void close(); }}>{content}</Modal>;
+  const scoped = <WheelOverlayProvider>{content}</WheelOverlayProvider>;
+  return embedded ? scoped : <Modal visible animationType="slide" onRequestClose={() => { if (!busy) void close(); }}>
+    <GestureHandlerRootView style={{ flex: 1 }}>{scoped}</GestureHandlerRootView>
+  </Modal>;
 }

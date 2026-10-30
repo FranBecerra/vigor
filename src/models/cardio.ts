@@ -47,7 +47,7 @@ export interface CardioModalityProfile {
   qualityExposure: CardioQualityExposure;
 }
 
-/** Draft-only model. It is not persisted or derived from strength experience. */
+/** Modality-specific intake. Saved only inside an explicit proposal snapshot, never inferred from strength. */
 export interface CardioProfile {
   schemaVersion: 1;
   modalities: Partial<Record<CardioPlanningModality, CardioModalityProfile>>;
@@ -71,9 +71,12 @@ export interface CardioStrengthAnchor {
   id: string;
   dayIndex: number;
   lowerBodyDemand: 'LOW' | 'HIGH';
+  estimatedMinutes?: number;
 }
 
 export interface CardioPlanningConstraints {
+  /** Opt-in version: legacy saved proposals retain their original placement. */
+  placementPolicy?: 'BALANCED_V2';
   cycleDays: number;
   availableDays: number[];
   maxSessions: number;
@@ -107,13 +110,13 @@ export interface CardioConstraintPlan {
 /** A reviewable time/effort prescription, independent of sensor calibration. */
 export interface EasyCardioPrescription {
   schemaVersion: 1;
-  policy: 'EASY_START_V1';
+  policy: 'EASY_START_V1' | 'REVIEWED_EASY_DURATION_V1';
   id: string;
   modality: CardioPlanningModality;
   stimulus: 'EASY';
   durationSeconds: number;
   allowWalking: boolean;
-  basis: 'CURRENT_PRACTICE' | 'FAMILIARIZATION';
+  basis: 'CURRENT_PRACTICE' | 'FAMILIARIZATION' | 'REVIEWED_HISTORY';
   adjustments: Array<'UNKNOWN_DURATION' | 'TOLERATED_DURATION_CAP' | 'AVAILABILITY_CAP'>;
   segments: Array<{
     phase: 'WARMUP' | 'EASY' | 'COOLDOWN';

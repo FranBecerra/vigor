@@ -34,9 +34,8 @@ export type ScheduleSlot = { kind: 'workout'; sessionIndex: number } | { kind: '
 export interface ScheduleTemplate { days: number; slots: ScheduleSlot[] }
 
 /**
- * Icon catalogue for a routine. A closed set of own SVGs: no icon library and no
- * emoji (PRD §8). The KEY is what gets persisted, never the drawing, so it lives
- * in the model and the component renders from it.
+ * Stable routine identity keys. Routine badges render system emoji; older keys
+ * remain readable without rewriting saved plans. Navigation/action SVGs are separate.
  */
 export type RoutineIconKey =
   | 'dumbbell'
@@ -46,19 +45,48 @@ export type RoutineIconKey =
   | 'run'
   | 'bike'
   | 'stopwatch'
-  | 'mountain';
+  | 'planet'
+  | 'comet'
+  | 'moon'
+  | 'sun'
+  | 'star'
+  | 'compass'
+  | 'lighthouse'
+  | 'anchor'
+  | 'sailboat'
+  | 'wave'
+  | 'pine'
+  | 'leaf'
+  | 'lightning'
+  | 'diamond'
+  | 'shield'
+  | 'telescope'
+  | 'constellation'
+  | 'mountain'
+  | 'rocket'
+  | 'satellite'
+  | 'ufo'
+  | 'fire'
+  | 'target'
+  | 'tower';
 
 /** Presentation order in the icon picker when creating or editing a routine. */
 export const ROUTINE_ICON_ORDER: readonly RoutineIconKey[] = [
-  'dumbbell',
-  'barbell',
-  'kettlebell',
-  'bodyweight',
-  'run',
-  'bike',
+  'planet', 'comet', 'moon', 'sun', 'star',
+  'telescope', 'constellation',
+  'compass', 'tower', 'mountain', 'anchor', 'sailboat',
+  'wave', 'pine', 'leaf', 'lightning', 'diamond', 'shield',
+  'rocket',
+  'satellite',
+  'ufo',
+  'fire',
+  'target',
   'stopwatch',
-  'mountain',
 ];
+
+/** Retired picker choices remain valid persisted identities; never rewrite old routines. */
+export const ROUTINE_ICON_KEYS: readonly RoutineIconKey[] = [...ROUTINE_ICON_ORDER,
+  'dumbbell', 'barbell', 'kettlebell', 'run', 'bike', 'lighthouse', 'bodyweight'];
 
 /**
  * Everything the generator needs to produce a mesocycle, stored so the next block
@@ -104,7 +132,7 @@ export interface Routine {
   name: string;
   /** Icon catalogue key. */
   icon: RoutineIconKey;
-  /** Accent colour as a palette hex. Validated where it is picked, not here. */
+  /** Legacy palette hex, retained for compatibility. Badges use the live app accent. */
   accentColor: string;
   generation: RoutineGenerationInput;
   /** Id of the mesocycle currently running from this routine, when there is one. */

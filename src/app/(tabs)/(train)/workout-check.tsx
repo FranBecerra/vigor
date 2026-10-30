@@ -29,6 +29,7 @@ import { nativeRestFeedbackStatus } from '@/services/training/nativeRestFeedback
 import { WorkoutHistoryEditor } from '@/components/train/WorkoutHistoryEditor';
 import { editWorkoutHistory } from '@/services/training/historyEditing';
 import { RoutineDayFixture } from '@/components/train/RoutineDayFixture';
+import { RoutineEditorFixture } from '@/components/train/RoutineEditorFixture';
 import { ExerciseSwapSheet } from '@/components/train/generate/ExerciseSwapSheet';
 import { SmartWarmupSheet } from '@/components/train/SmartWarmupSheet';
 import { ActionMenuSheet } from '@/components/train/ActionMenuSheet';
@@ -69,6 +70,7 @@ export default function WorkoutCheckScreen() {
   const [feedbackStatus, setFeedbackStatus] = useState('Not sampled');
   const [feedbackDetails, setFeedbackDetails] = useState(false);
   const [finishPreview, setFinishPreview] = useState(false);
+  const [sharedEditorOpen, setSharedEditorOpen] = useState(false);
   const [fixtureEffort, setFixtureEffort] = useState<number | null>(null);
   useEffect(() => {
     let alive = true;
@@ -140,6 +142,7 @@ export default function WorkoutCheckScreen() {
       ...exercises.filter((exercise) => exercise.id !== exerciseMenu).map((exercise) => ({ label: `Superset with ${exercise.name}`, onPress: () => setSupersets(linkSuperset(exercises.map((item) => item.id), supersets, exerciseMenu, exercise.id)) })),
     ] : []} />
     {button('Preview history (fixture)', () => { setHistoryDetail(false); setHistoryOpen(true); })}
+    {button('Preview shared editor (fixture)', () => setSharedEditorOpen(true))}
     {button('Preview session effort (fixture)', () => setFinishPreview(true))}
     <WorkoutFinishSheet open={finishPreview} saved={false} busy={false} error={false}
       summary={workoutReview(INITIAL, toSessionSetsByExercise(baseline), [], 'fixture-baseline')} exercises={INITIAL}
@@ -178,6 +181,9 @@ export default function WorkoutCheckScreen() {
         <ExerciseSwapSheet open={pickerOpen} current={INITIAL[0]} candidates={EXERCISE_CATALOGUE}
           onSelect={() => setPickerOpen(false)} onClose={() => setPickerOpen(false)} />
       </View>
+    </Modal>
+    <Modal visible={sharedEditorOpen} onRequestClose={() => setSharedEditorOpen(false)}>
+      <RoutineEditorFixture onClose={() => setSharedEditorOpen(false)} />
     </Modal>
     <Modal visible={historyOpen} onRequestClose={() => setHistoryOpen(false)}>
       <ScrollView style={{ ...surfaces.screen, backgroundColor: colors.bg }} contentContainerStyle={{ padding: 20, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }}>

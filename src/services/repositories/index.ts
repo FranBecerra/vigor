@@ -68,6 +68,10 @@ class RoutineRepository extends BaseRepository<Routine> {
     return this.listWhere('userId', userId);
   }
 
+  listCachedByUser(userId: string): Promise<Routine[]> {
+    return this.listWhereCached('userId', userId);
+  }
+
   /**
    * Applies activation flags in ONE batch. Separate writes could fail halfway and
    * leave two active routines, or none; the "only one active" rule needs atomicity.
@@ -167,6 +171,10 @@ export const microcycleRepository = new MicrocycleRepository();
 class WorkoutSessionRepository extends BaseRepository<WorkoutSession> {
   constructor() {
     super('workoutSessions');
+  }
+
+  async listCachedByUser(userId: string): Promise<WorkoutSession[]> {
+    return (await this.listWhereCached('userId', userId)).filter(session => session.discardedAt === undefined);
   }
 
   override async listWhere(field: string, value: unknown): Promise<WorkoutSession[]> {

@@ -8,8 +8,10 @@ afterEach(() => jest.restoreAllMocks());
 it('excludes discarded records from all workout read paths while retaining legacy history', async () => {
   const discarded = { ...session, discardedAt: 100 };
   jest.spyOn(BaseRepository.prototype, 'listWhere').mockResolvedValue([session, discarded]);
+  jest.spyOn(BaseRepository.prototype, 'listWhereCached').mockResolvedValue([session, discarded]);
   jest.spyOn(BaseRepository.prototype, 'list').mockResolvedValue([session, discarded]);
   expect(await workoutSessionRepository.listByUser('owner')).toEqual([session]);
+  expect(await workoutSessionRepository.listCachedByUser('owner')).toEqual([session]);
   expect(await workoutSessionRepository.listByMesocycle('meso')).toEqual([session]);
   expect(await workoutSessionRepository.listByMicrocycle('micro')).toEqual([session]);
   expect(await workoutSessionRepository.list()).toEqual([session]);

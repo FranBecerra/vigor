@@ -11,7 +11,8 @@
  */
 import { useState } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
-import { ROUTINE_ICONS, type RoutineIconKey } from '@/components/icons';
+import { type RoutineIconKey } from '@/components/icons';
+import { RoutineBadgeIcon } from '@/components/icons/RoutineBadgeIcon';
 import { useTheme } from '@/theme/useTheme';
 import {
   estimateSessionMinutes,
@@ -55,14 +56,12 @@ export function TodayCard({
   session,
   routineName,
   routineIcon,
-  routineColor,
   muscleLabel,
   labels,
   onPressPreview,
   onPressStart,
 }: TodayCardProps) {
   const { surfaces, colors, radius, spacing } = useTheme();
-  const RoutineIcon = ROUTINE_ICONS[routineIcon];
 
   // TODOS los músculos, ordenados por series; los que no caben se resumen en "+N".
   const muscles = rankedMuscleVolume(session.exercises);
@@ -94,11 +93,12 @@ export function TodayCard({
         accessibilityLabel={labels.preview}>
         <View style={styles.header}>
           <View
+            testID="today-card-identity"
             style={[
               styles.iconBadge,
-              { backgroundColor: routineColor, borderRadius: radius.sm },
+              { backgroundColor: colors.accentTint, borderRadius: radius.sm },
             ]}>
-            <RoutineIcon size={18} color="#16191C" />
+            <RoutineBadgeIcon icon={routineIcon} size={26} />
           </View>
           <View style={styles.headerText}>
             <Text style={[styles.sessionName, { color: colors.textPrimary }]}>
@@ -166,7 +166,7 @@ export function TodayCard({
         accessibilityLabel={labels.start}
         style={[
           styles.startButton,
-          { ...surfaces.primary, backgroundColor: routineColor, borderRadius: radius.md, marginTop: spacing.md },
+          { ...surfaces.primary, borderRadius: radius.md, marginTop: spacing.md },
         ]}>
         <Text style={[styles.startLabel, { color: colors.onAccent }]}>{labels.start}</Text>
       </Pressable>

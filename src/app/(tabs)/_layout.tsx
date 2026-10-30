@@ -4,15 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { useSegments } from 'expo-router';
 import { canResetTrainingTab } from '@/services/training/tabNavigation';
+import { useTrainingDraftGuard } from '@/hooks/useTrainingDraftGuard';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const segments = useSegments();
+  const protectedDraft = useTrainingDraftGuard();
 
   return (
-    <NativeTabs tintColor={colors.accentText} hidden={segments.some((segment) => ['session', 'workout-check'].includes(segment))}>
-      <NativeTabs.Trigger name="(train)" disablePopToTop={!canResetTrainingTab(segments)} disableScrollToTop disableAutomaticContentInsets contentStyle={{ backgroundColor: colors.bg }}>
+    <NativeTabs tintColor={colors.accentText} hidden={segments.some((segment) => ['session', 'workout-check', 'cardio-workout', 'cardio-check'].includes(segment))}>
+      <NativeTabs.Trigger name="(train)" disablePopToTop={protectedDraft || !canResetTrainingTab(segments)} disableScrollToTop disableAutomaticContentInsets contentStyle={{ backgroundColor: colors.bg }}>
         <NativeTabs.Trigger.Label>{t('tabs.train')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'dumbbell', selected: 'dumbbell.fill' }} md="fitness_center" />
       </NativeTabs.Trigger>

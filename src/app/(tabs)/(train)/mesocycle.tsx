@@ -62,14 +62,11 @@ export default function MesocycleScreen() {
   const selectedSession = selectedMicrocycle?.sessions[sessionIndex] ?? null;
   const openSelectedSession = () => {
     if (routine === null || selectedSession === null) return;
-    if (selectedSession.completedWorkoutId) {
-      router.push({ pathname: '/workout-history', params: { id: selectedSession.completedWorkoutId, edit: '1' } });
-      return;
-    }
     router.push({ pathname: '/routine', params: {
       mesocycleId: routine.mesocycleId,
       microcycleIndex: String(selectedIndex),
       plannedSessionIndex: String(selectedSession.plannedSessionIndex),
+      edit: '1',
     } });
   };
 

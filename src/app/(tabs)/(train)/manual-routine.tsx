@@ -19,11 +19,13 @@ import { mesocycleRepository, routineRepository } from '@/services/repositories'
 import { backToTraining } from '@/services/training/backNavigation';
 import { mergePrescriptionEdit } from '@/services/training/prescriptionEntry';
 import { countWorkingSets } from '@/services/training/sessionSummary';
+import { RoutineIdentityPicker, type RoutineIdentity } from '@/components/train/RoutineIdentityPicker';
 
 export default function ManualRoutineScreen() {
   const { t } = useTranslation(); const router = useRouter(); const insets = useSafeAreaInsets(); const { uid } = useAuth();
   const { catalogue, exercisesById } = useExerciseCatalogue(); const { surfaces, colors, spacing, radius, sectionAccent } = useTheme();
   const [name, setName] = useState(''); const goal = TrainingGoal.HYPERTROPHY;
+  const [routineIdentity, setRoutineIdentity] = useState<RoutineIdentity>(() => ({ icon: 'planet', color: sectionAccent.train }));
   const [microcycles, setMicrocycles] = useState(6);
   const [sessions, setSessions] = useState(() => resizeManualSessions([], 3));
   const [picker, setPicker] = useState<{ sessionIndex: number; order?: number } | null>(null);
@@ -54,7 +56,7 @@ export default function ManualRoutineScreen() {
       const identity = saveIdentity.current ?? { id: `${uid}-manual-${Date.now()}-${Math.random().toString(36).slice(2)}`, time: Date.now() };
       saveIdentity.current = identity;
       const documents = manualRoutineDocuments({ userId: uid, routineId: identity.id, now: identity.time, name, goal, microcycles,
-        sessions: planned, catalogue: exercisesById, accentColor: sectionAccent.train, active: shouldActivateNewRoutine(existing) });
+        sessions: planned, catalogue: exercisesById, icon: routineIdentity.icon, accentColor: sectionAccent.train, active: shouldActivateNewRoutine(existing) });
       // Persist the prescription before exposing a routine pointing to it. Retry uses the same identity.
       await mesocycleRepository.create(documents.mesocycle);
       await routineRepository.create(documents.routine);
@@ -69,6 +71,7 @@ export default function ManualRoutineScreen() {
       <Text style={{ color: colors.textMuted, marginVertical: spacing.md }}>{t('routineCreation.manualHint')}</Text>
       <TextInput value={name} onChangeText={setName} maxLength={MAX_ROUTINE_NAME_LENGTH} style={field}
         accessibilityLabel={t('generate.name')} placeholder={t('generate.namePlaceholder')} placeholderTextColor={colors.textMuted} />
+      <RoutineIdentityPicker value={routineIdentity} onChange={setRoutineIdentity} disabled={busy} />
       <View style={{ gap: spacing.md, marginVertical: spacing.lg }}>
         <Stepper label={t('generate.sessions')} value={sessions.length} min={1} max={7} onChange={(count) => {
           const apply = () => setSessions((old) => resizeManualSessions(old, count));

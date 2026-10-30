@@ -1,15 +1,15 @@
 /** Saved routine overview and future-plan editor. */
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, View } from 'react-native';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, BackHandler, Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { backToTraining } from '@/services/training/backNavigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { useRoutines } from '@/hooks/useRoutines';
-import { mesocycleRepository } from '@/services/repositories';
+import { mesocycleRepository, routineRepository, workoutSessionRepository } from '@/services/repositories';
 import { EXERCISE_CATALOGUE, filterCatalogue } from '@/services/training/exerciseCatalogue';
-import { baseSessionsForMicrocycle, changesForSessionEdit, sessionsForMicrocycle, withPlanRevision, sessionProgressionProposal, pendingOverridesAfterRevision,
+import { changesForSessionEdit, sessionsForMicrocycle, sessionProgressionProposal,
   type SessionEditScope } from '@/services/training/mesocycleEditing';
 import { applyPreviewEdits, appendPreviewExercises, previewEditKey, representativeSet, type PreviewAddition, type PreviewEdits, type PreviewExerciseEdit } from '@/services/training/previewEditing';
 import { exerciseMinutes } from '@/services/training/trainingCapacity';
@@ -37,23 +37,36 @@ import { sessionKey } from '@/services/training/mesocycleEditing';
 import { resizeExerciseSets } from '@/services/training/mesocycleEditing';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
+import { useProtectTrainingDraft } from '@/hooks/useTrainingDraftGuard';
+import { RoutineSessionSelector } from '@/components/train/RoutineSessionSelector';
+import { RecordedSessionEditor } from '@/components/train/RecordedSessionEditor';
+import { useAuth } from '@/hooks/useAuth';
+import { toRoutineView, type RoutineView } from '@/services/training/routineView';
 
 
 export default function RoutineDetailScreen() {
   const { catalogue, exercisesById: CATALOGUE } = useExerciseCatalogue();
+  const { uid } = useAuth();
   const { t } = useTranslation();
   const name = useExerciseName();
   const { surfaces, colors, typography, spacing, sectionAccent } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { mesocycleId, plannedSessionIndex, microcycleIndex } = useLocalSearchParams<{
-    mesocycleId?: string; plannedSessionIndex?: string; microcycleIndex?: string;
+  const navigation = useNavigation();
+  const { mesocycleId, plannedSessionIndex, microcycleIndex, edit } = useLocalSearchParams<{
+    mesocycleId?: string; plannedSessionIndex?: string; microcycleIndex?: string; edit?: string;
   }>();
   const { routines, reload } = useRoutines();
-  const routine = routines.find((entry) => entry.mesocycleId === mesocycleId);
+  const homeRoutine = routines.find((entry) => entry.mesocycleId === mesocycleId);
+  const [historicalRoutine, setHistoricalRoutine] = useState<{ owner: string; view: RoutineView } | null>(null);
+  const [revision, setRevision] = useState(0);
+  const routine = homeRoutine ?? (historicalRoutine?.owner === uid && historicalRoutine.view.mesocycleId === mesocycleId ? historicalRoutine.view : undefined);
   const [mesocycle, setMesocycle] = useState<Mesocycle | null>(null);
   const [loadFinished, setLoadFinished] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(edit === '1');
+  const [actualDirty, setActualDirty] = useState(false), [actualBusy, setActualBusy] = useState(false);
+  const scroll = useRef<ScrollView>(null);
+  const [viewMicrocycle, setViewMicrocycle] = useState<number | null>(null);
   const [selectedSessionIndex, setSelectedSessionIndex] = useState<number | null>(() => {
     const parsed = Number(plannedSessionIndex);
     return plannedSessionIndex !== undefined && Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
@@ -79,25 +92,34 @@ export default function RoutineDetailScreen() {
       .catch(() => { if (active) setMesocycle(null); })
       .finally(() => { if (active) setLoadFinished(true); });
     return () => { active = false; };
-  }, [mesocycleId]));
+  }, [mesocycleId, uid]));
+
+  useEffect(() => {
+    let alive = true;
+    if (homeRoutine || !uid || !mesocycle || mesocycle.userId !== uid || !mesocycle.routineId) return;
+    Promise.all([routineRepository.get(mesocycle.routineId), workoutSessionRepository.listByUser(uid)]).then(([template, actuals]) => {
+      if (!alive || !template || template.userId !== uid) return;
+      const view = toRoutineView({ ...template, isActive: template.isActive && template.activeMesocycleId === mesocycle.id }, mesocycle, CATALOGUE, {
+        focus: focus => t(`generate.focus${focus}`), goal: goal => t(goal === TrainingGoal.STRENGTH ? 'generate.goalStrength' : 'generate.goalHypertrophy'),
+      }, actuals.filter(item => item.userId === uid));
+      if (view) setHistoricalRoutine({ owner: uid, view });
+    }).catch(() => { /* The unavailable-state exit remains on this screen. */ });
+    return () => { alive = false; };
+  }, [homeRoutine, uid, mesocycle, CATALOGUE, t, revision]);
 
   const current = routine?.currentMicrocycleIndex ?? 0;
   const requestedMicrocycle = Number(microcycleIndex);
-  const sessionMicrocycle = microcycleIndex !== undefined && Number.isInteger(requestedMicrocycle)
+  const sessionMicrocycle = viewMicrocycle ?? (microcycleIndex !== undefined && Number.isInteger(requestedMicrocycle)
     && requestedMicrocycle >= 0 && requestedMicrocycle < (routine?.microcycles.length ?? 0)
-    ? requestedMicrocycle : current;
-  const hasCompletedCurrent = routine?.microcycles[current]?.sessions.some(
-    (session) => session.completedOn !== undefined || session.skippedOn !== undefined) ?? false;
-  const fromIndex = hasCompletedCurrent ? current + 1 : current;
+    ? requestedMicrocycle : current);
+  const hasPendingPlan = routine?.microcycles.some((micro, index) => index >= current && micro.sessions.some(
+    session => session.completedOn === undefined && session.skippedOn === undefined)) ?? false;
   const goal = routine?.generationGoal === TrainingGoal.STRENGTH
     ? TrainingGoal.STRENGTH : TrainingGoal.HYPERTROPHY;
-  const planEdit = editing && selectedSessionIndex === null;
-  const previewIndex = planEdit ? fromIndex : selectedSessionIndex === null ? current : sessionMicrocycle;
+  const previewIndex = selectedSessionIndex === null ? current : sessionMicrocycle;
   const base = useMemo(() => mesocycle === null ? []
-    : planEdit
-      ? baseSessionsForMicrocycle(mesocycle, goal, previewIndex)
-      : sessionsForMicrocycle(mesocycle, goal, previewIndex),
-  [mesocycle, goal, planEdit, previewIndex]);
+    : sessionsForMicrocycle(mesocycle, goal, previewIndex),
+  [mesocycle, goal, previewIndex]);
   const sessions = useMemo<PlannedSession[]>(() => {
     const filtered = orderedRoutineSessions(base, mesocycle?.sessionOrder).map((session) => ({
       ...session,
@@ -133,9 +155,6 @@ export default function RoutineDetailScreen() {
     : routine?.microcycles[previewIndex]?.sessions.find((session) =>
       session.plannedSessionIndex === selectedSessionIndex) ?? null;
   const completedWorkoutId = selectedView?.completedWorkoutId;
-  useEffect(() => {
-    if (completedWorkoutId) router.replace({ pathname: '/workout-history', params: { id: completedWorkoutId, edit: '1' } });
-  }, [completedWorkoutId, router]);
   const pendingSelection = selectedView !== null && selectedView.completedOn === undefined &&
     selectedView.skippedOn === undefined;
   const selectedMicrocycleHasHistory = routine?.microcycles[previewIndex]?.sessions.some(
@@ -143,16 +162,49 @@ export default function RoutineDetailScreen() {
   const visibleSessions = selected === null ? sessions : [selected];
   const rirChanged = !!selected && !!mesocycle && hasSessionRIRChanges(sessionsForMicrocycle(mesocycle, goal, previewIndex).find((entry) => entry.index === selected.index) ?? selected, selected);
   const lockedMicrocycles = routine?.microcycles.flatMap((microcycle, index) => microcycle.sessions.some((entry) => entry.plannedSessionIndex === selected?.index && (entry.completedOn !== undefined || entry.skippedOn !== undefined)) ? [index] : []) ?? [];
-  const resetDraft = () => { setEdits({}); setAdditions([]); setRemoved([]); setEditing(false);
+  const resetDraft = () => { setEdits({}); setAdditions([]); setRemoved([]); setEditing(false); setActualDirty(false);
     setDraftExercise(null); setProgression(null); };
+  const dirty = actualDirty || Object.keys(edits).length > 0 || additions.length > 0 || removed.length > 0;
+  const editorBusy = saving || actualBusy;
+  useProtectTrainingDraft(editing || dirty || editorBusy);
+  useEffect(() => { navigation.setOptions({ gestureEnabled: !editing && !dirty && !editorBusy }); }, [navigation, editing, dirty, editorBusy]);
+  const confirmDiscard = (action: () => void) => {
+    if (!dirty) action();
+    else Alert.alert(t('sharedRoutineEditor.unsaved'), t('sharedRoutineEditor.unsavedHint'), [
+      { text: t('generate.cancel'), style: 'cancel' }, { text: t('sharedRoutineEditor.discard'), style: 'destructive', onPress: action },
+    ]);
+  };
+  const back = () => {
+    if (editorBusy) return;
+    confirmDiscard(() => {
+      if (selectedSessionIndex !== null && plannedSessionIndex === undefined) { resetDraft(); setSelectedSessionIndex(null); }
+      else backToTraining(router);
+    });
+  };
+  useEffect(() => {
+    if (!editing && !dirty && !editorBusy) return;
+    const listener = BackHandler.addEventListener('hardwareBackPress', () => { back(); return true; });
+    return () => listener.remove();
+  });
+  const switchSelection = (cycle: number, session: number) => {
+    if (editorBusy) return;
+    if (cycle === previewIndex && session === selectedSessionIndex) return;
+    const change = () => { resetDraft(); setViewMicrocycle(cycle); setSelectedSessionIndex(session); setEditing(true);
+      scroll.current?.scrollTo({ y: 0, animated: false }); };
+    confirmDiscard(change);
+  };
+  const beginEditing = () => {
+    if (selectedSessionIndex !== null) { resetDraft(); setEditing(true); return; }
+    const first = routine?.microcycles[current]?.sessions[0];
+    if (first) switchSelection(current, first.plannedSessionIndex);
+  };
   const updateEdit = (sessionIndex: number, order: number, patch: PreviewExerciseEdit) => {
     const key = previewEditKey(sessionIndex, order);
     setEdits((currentEdits) => ({ ...currentEdits, [key]: { ...currentEdits[key], ...patch } }));
   };
 
   const save = async (scope?: SessionEditScope) => {
-    if (mesocycle === null || routine === undefined ||
-      (selectedSessionIndex === null && fromIndex >= routine.microcycles.length)) return;
+    if (mesocycle === null || routine === undefined || selectedSessionIndex === null) return;
     if (hasInvalidRepRanges(visibleSessions)) {
       Alert.alert(t('routine.editError'), t('exerciseEditor.invalidRange')); return;
     }
@@ -170,17 +222,6 @@ export default function RoutineDetailScreen() {
           ...changesForSessionEdit(fresh, goal, previewIndex, selected, scope,
             selectedMicrocycleHasHistory,
             lockedMicrocycles),
-          updatedAt: Date.now(),
-        });
-      } else if (selectedSessionIndex === null) {
-        await mesocycleRepository.update(fresh.id, {
-          prescriptionRevisions: withPlanRevision(fresh, fromIndex, sessions),
-          sessionOverrides: pendingOverridesAfterRevision(fresh, fromIndex, undefined, routine.microcycles.flatMap((microcycle, index) =>
-            microcycle.sessions.flatMap((entry) => entry.completedOn !== undefined || entry.skippedOn !== undefined ? [sessionKey(index, entry.plannedSessionIndex)] : []))),
-          ...(fresh.exerciseRestOverrides ? { exerciseRestOverrides: {
-            ...fresh.exerciseRestOverrides, ...Object.fromEntries(sessions.flatMap((session) => session.exercises
-              .filter((exercise) => fresh.exerciseRestOverrides?.[exercise.exerciseId] !== undefined && exercise.restSeconds !== undefined)
-              .map((exercise) => [exercise.exerciseId, exercise.restSeconds!]))) } } : {}),
           updatedAt: Date.now(),
         });
       } else return;
@@ -275,8 +316,11 @@ export default function RoutineDetailScreen() {
     setEditing(true);
   };
 
-  if (routine === undefined || mesocycle === null || completedWorkoutId) {
+  if (routine === undefined || mesocycle === null) {
     return <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }}>
+      <Pressable accessibilityRole="button" onPress={() => backToTraining(router)} style={{ minHeight: 48, paddingHorizontal: spacing.lg, justifyContent: 'center' }}>
+        <Text style={[typography.body, { color: colors.accentText }]}>‹ {t('generate.back')}</Text>
+      </Pressable>
       {loadFinished && routines.length > 0
         ? <Text style={[typography.body, { color: colors.textSecondary, padding: spacing.lg }]}>
           {t('train.sessionUnavailable')}
@@ -286,14 +330,9 @@ export default function RoutineDetailScreen() {
   }
 
   return <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg }}>
-    <ScrollView contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg,
+    <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg,
       paddingBottom: insets.bottom + spacing.xl }}>
-      <Pressable onPress={() => {
-        if (selectedSessionIndex !== null && plannedSessionIndex === undefined) {
-          resetDraft(); setSelectedSessionIndex(null);
-        }
-        else backToTraining(router);
-      }} accessibilityRole="button">
+      <Pressable onPress={back} accessibilityRole="button">
         <Text style={[typography.body, { color: colors.textSecondary }]}>‹ {selectedSessionIndex === null
           ? t('tabs.train') : routine.name}</Text>
       </Pressable>
@@ -323,21 +362,21 @@ export default function RoutineDetailScreen() {
           <Text style={[typography.body, { color: colors.textPrimary }]}>{t('home.viewMesocycle')} ↗</Text>
         </Pressable>}
         {!editing && (selectedSessionIndex === null
-          ? fromIndex < routine.microcycles.length : pendingSelection) &&
-          <Pressable onPress={() => { resetDraft(); setEditing(true); }} accessibilityRole="button"
+          ? hasPendingPlan || routine.microcycles.some(micro => micro.sessions.some(session => session.completedWorkoutId)) : pendingSelection || !!completedWorkoutId) &&
+          <Pressable onPress={beginEditing} accessibilityRole="button"
             style={{ paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: 12,
               ...surfaces.card, backgroundColor: colors.bgElevated, borderWidth: 1, borderColor: colors.surfaceBorder }}>
             <Text style={[typography.body, { color: colors.textPrimary }]}>
               {selectedSessionIndex === null ? t('routine.edit') : t('routine.editSession')}
             </Text>
           </Pressable>}
-        {editing && <>
-          <Pressable onPress={resetDraft} accessibilityRole="button"
+        {editing && !completedWorkoutId && <>
+          <Pressable onPress={() => confirmDiscard(resetDraft)} accessibilityRole="button"
             style={{ paddingVertical: spacing.sm, paddingHorizontal: spacing.md }}>
             <Text style={[typography.body, { color: colors.textSecondary }]}>{t('generate.cancel')}</Text>
           </Pressable>
-          <Pressable onPress={() => selectedSessionIndex === null ? void save() : confirmSessionScope()}
-            disabled={saving} accessibilityRole="button"
+          <Pressable onPress={confirmSessionScope}
+            disabled={saving || !pendingSelection} accessibilityRole="button"
             style={{ paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: 12,
               backgroundColor: sectionAccent.train }}>
             <Text style={[typography.body, { color: '#16191C', fontWeight: '700' }]}>
@@ -346,14 +385,16 @@ export default function RoutineDetailScreen() {
           </Pressable>
         </>}
       </View>
-      {planEdit && <Text style={[typography.caption, { color: colors.textMuted, marginBottom: spacing.md }]}>
-        {t('routine.futureOnly')}
-      </Text>}
+      {editing && selectedSessionIndex !== null && <RoutineSessionSelector cycle={previewIndex} cycles={routine.microcycles.length}
+        sessions={routine.microcycles[previewIndex]?.sessions ?? []} selected={selectedSessionIndex} disabled={editorBusy} onSelect={switchSelection} />}
+      {completedWorkoutId && selectedSessionIndex !== null && <RecordedSessionEditor key={`${mesocycleId}:${completedWorkoutId}`}
+        workoutId={completedWorkoutId} mesocycleId={routine.mesocycleId} cycle={previewIndex} sessionIndex={selectedSessionIndex}
+        editing={editing} onClose={saved => saved ? resetDraft() : confirmDiscard(resetDraft)} onSaved={() => { setRevision(value => value + 1); reload(); }} onDirtyChange={setActualDirty} onBusyChange={setActualBusy} />}
       {!editing && selectedSessionIndex === null && <Text
         style={[typography.caption, { color: colors.textMuted, marginBottom: spacing.md }]}>
         {t('routine.tapSession')}
       </Text>}
-      {selected !== null && !editing && <>
+      {selected !== null && !editing && !completedWorkoutId && <>
         <View style={{ marginBottom: spacing.xl }}>
           <MuscleVolumeCard title={t('routine.targetMuscles')} hint={t('generate.previewVolumeHint')}
             entries={previewVolumeBreakdownByMuscle([selected], CATALOGUE)} />
@@ -398,17 +439,16 @@ export default function RoutineDetailScreen() {
           </View>)}
         </Pressable>)}
       </>}
-      {(selectedSessionIndex === null || editing) && visibleSessions.length > 0 && <PlanPreview sessions={visibleSessions}
+      {!completedWorkoutId && (selectedSessionIndex === null || editing) && visibleSessions.length > 0 && <PlanPreview sessions={visibleSessions}
           showCycle={selectedSessionIndex === null} scheduleTemplate={mesocycle.scheduleTemplate}
-          editable={editing}
+          editable={editing && pendingSelection}
           summaryLabel={selectedSessionIndex === null ? undefined : t('generate.previewSetsShort', {
             count: visibleSessions.reduce((sum, session) => sum + session.exercises.reduce(
               (inner, exercise) => inner + countWorkingSets(exercise.sets), 0), 0),
           })}
           onPressSession={!editing && selectedSessionIndex === null ? (index) => {
             const completed = routine.microcycles[current]?.sessions.find((entry) => entry.plannedSessionIndex === index)?.completedWorkoutId;
-            if (completed) { router.push({ pathname: '/workout-history', params: { id: completed, edit: '1' } }); return; }
-            resetDraft(); setSelectedSessionIndex(index);
+            resetDraft(); setSelectedSessionIndex(index); setEditing(!!completed);
           } : undefined}
           performedSets={visibleSessions.reduce((sum, session) => sum + session.exercises.reduce(
             (inner, exercise) => inner + countWorkingSets(exercise.sets), 0), 0)} exercisesById={CATALOGUE}

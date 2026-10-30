@@ -19,7 +19,7 @@ export function useBioReadiness(night: ReturnType<typeof useBioNight>): BioReadi
     return () => { clearInterval(timer); listener.remove(); };
   }, []));
   const enabled = !!uid && preferences.ready && preferences.settings.bioHealthEnabled === true && preferences.settings.bioNightEnabled === true;
-  const state = !enabled ? 'OFF' : night.owner !== uid ? 'LOADING' : night.state;
+  const state = uid && !preferences.ready ? 'LOADING' : !enabled ? 'OFF' : night.owner !== uid ? 'LOADING' : night.state;
   return useMemo(() => ({ state, index: state === 'READY'
     ? buildReadinessIndex(night.analysis, preferences.settings.bioSleepGoalMinutes, Math.max(clock, Date.now())) : undefined }),
   [state, night.analysis, preferences.settings.bioSleepGoalMinutes, clock]);

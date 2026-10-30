@@ -20,7 +20,7 @@ function optionalNumber(value: unknown, min: number, max: number): boolean {
   return value === undefined || typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
 }
 
-/** Reject malformed draft data; this profile is deliberately not persisted by this slice. */
+/** Reject malformed modality-specific intake, including restored proposal snapshots. */
 export function validateCardioProfile(value: unknown): value is {
   schemaVersion: 1;
   modalities: Partial<Record<CardioPlanningModality, CardioModalityProfile>>;
@@ -43,6 +43,7 @@ export function validateCardioProfile(value: unknown): value is {
 
 function validateConstraints(input: CardioPlanningConstraints): void {
   if (!isIntegerInRange(input.cycleDays, 1, 31)
+    || input.placementPolicy !== undefined && input.placementPolicy !== 'BALANCED_V2'
     || !isIntegerInRange(input.maxSessions, 0, 31)
     || !isIntegerInRange(input.maxActiveDays, 0, input.cycleDays)
     || !Number.isFinite(input.totalMinutes) || input.totalMinutes < 0
@@ -78,6 +79,7 @@ function validCandidate(candidate: CardioPlanCandidate, cycleDays: number): bool
 function validStrengthAnchor(anchor: CardioStrengthAnchor, cycleDays: number): boolean {
   return !!anchor && typeof anchor.id === 'string' && anchor.id.trim().length > 0
     && isIntegerInRange(anchor.dayIndex, 0, cycleDays - 1)
+    && optionalNumber(anchor.estimatedMinutes, 0, 600)
     && ['LOW', 'HIGH'].includes(anchor.lowerBodyDemand);
 }
 
@@ -124,6 +126,11 @@ function dayCost(candidate: CardioPlanCandidate, day: number, input: CardioPlann
     }
   }
   if (fixedSame || cardioSame) cost += 10;
+  if (input.placementPolicy === 'BALANCED_V2' && fixedSame) {
+    // A tie-breaker, not a physiological fatigue score. Never outweigh proximity penalties.
+    cost += Math.min(5, input.fixedStrength.filter(anchor => anchor.dayIndex === day)
+      .reduce((sum, anchor) => sum + (anchor.estimatedMinutes ?? 0), 0) / 120);
+  }
   return cost;
 }
 

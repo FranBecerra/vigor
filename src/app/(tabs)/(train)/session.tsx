@@ -42,7 +42,7 @@ import { useWorkoutRecordHistory } from '@/hooks/useWorkoutRecordHistory';
 import { applyPreviousPerformance, previousPerformance } from '@/services/training/previousPerformance';
 import { endWorkoutActivity, useWorkoutActivity } from '@/hooks/useWorkoutActivity';
 import { clearWorkoutRestAlerts } from '@/hooks/useRestAlert';
-import { sessionProgress, toWorkoutSession, type SessionSetsByExercise } from '@/services/training/sessionMapper';
+import { sessionProgress, toWorkoutSession, isSetCompleted, type SessionSetsByExercise } from '@/services/training/sessionMapper';
 import { useHealthExport } from '@/hooks/useHealthExport';
 import { WorkoutHealthExport } from '@/components/train/WorkoutHealthExport';
 import { isNewSetCompletion, restAfterCompletion, nextExerciseAfterCompletion, replacementWorkoutSets, updateWorkoutSet } from '@/services/training/workoutExecution';
@@ -143,6 +143,9 @@ export default function EntrenamientoScreen() {
   const [performedAt, setPerformedAt] = useState(Date.now);
   const [busy, setBusy] = useState(false);
   const [finishError, setFinishError] = useState(false);
+  const [planUpdateError, setPlanUpdateError] = useState(false);
+  const finishLock = useRef(false);
+  const pendingPlanUpdate = useRef<{ route: string; prescription: PlannedSession } | null>(null);
   const [sessionFeedback, setSessionFeedback] = useState<WorkoutSession['sessionFeedback']>();
   const [sessionEffort, setSessionEffort] = useState<number | null>(null);
   const [discardConfirm, setDiscardConfirm] = useState(false);
@@ -170,6 +173,7 @@ export default function EntrenamientoScreen() {
   const plannedSessionIndex = Number(params.plannedSessionIndex);
   const routeIdentity = `${uid}:${mesocycleId}:${goal}:${microcycleIndex}:${plannedSessionIndex}`;
   const activeRoute = useRef(routeIdentity); activeRoute.current = routeIdentity;
+  useEffect(() => { activeRoute.current = routeIdentity; return () => { activeRoute.current = ''; }; }, [routeIdentity]);
   const validRoute =
     mesocycleId !== '' && goal !== '' && Number.isInteger(microcycleIndex) && microcycleIndex >= 0 &&
     Number.isInteger(plannedSessionIndex) && plannedSessionIndex >= 0;
@@ -209,6 +213,7 @@ export default function EntrenamientoScreen() {
       loadedIdentity.current = identity;
       protectedLoads.current.clear();
       setPerformedAt(Date.now()); setCompletedAt(undefined); setFinished(false); setFinishing(false);
+      pendingPlanUpdate.current = null; setPlanUpdateError(false); setFinishError(false); setBusy(false);
       setRestTimer(IDLE_REST_TIMER); setNotes({}); setSwappedFrom({}); setSupersets(session.supersets ?? {}); setPageIndex(0);
       setSessionNote(''); noteSnapshots.current = { mesocycleNote: '', exerciseNotes: {} };
       setSessionFeedback(undefined); setSessionEffort(null);
@@ -424,25 +429,48 @@ export default function EntrenamientoScreen() {
   const openFinish = () => {
     setFinishing(true); setFinishError(false);
   };
+  const applyPendingPlanUpdate = async () => {
+    const intent = pendingPlanUpdate.current;
+    if (!intent || activeRoute.current !== intent.route) return;
+    if (!historyReady) throw new Error('History unavailable');
+    const current = await mesocycleRepository.get(mesocycleId);
+    if (activeRoute.current !== intent.route || !current || current.userId !== uid) throw new Error('Missing plan');
+    const completedIndexes = history.filter(session => session.userId === uid && session.mesocycleId === mesocycleId
+      && session.plannedSessionIndex === plannedSessionIndex && session.discardedAt === undefined
+      && (session.completedAt !== undefined || session.exercises.some(entry => entry.sets.some(isSetCompleted))))
+      .map(session => session.microcycleIndex);
+    await mesocycleRepository.update(mesocycleId, { ...changesForSessionEdit(current, goal, microcycleIndex, intent.prescription,
+      'remaining-mesocycle', true, completedIndexes), updatedAt: Date.now() });
+    if (activeRoute.current === intent.route) { pendingPlanUpdate.current = null; setPlanUpdateError(false); }
+  };
+  const retryPlanUpdate = async () => {
+    if (finishLock.current || !pendingPlanUpdate.current) return;
+    const route = routeIdentity;
+    finishLock.current = true; setBusy(true);
+    try { await applyPendingPlanUpdate(); } catch { if (activeRoute.current === route) setPlanUpdateError(true); }
+    finally { finishLock.current = false; if (activeRoute.current === route) setBusy(false); }
+  };
   const finishWorkout = async (savePlan: boolean) => {
-    if (!sessionContext || !plannedSession || busy || !summary.completed) return;
-    setBusy(true); setFinishError(false);
+    if (!sessionContext || !plannedSession || finishLock.current || finished || !summary.completed) return;
+    finishLock.current = true; setBusy(true); setFinishError(false); setPlanUpdateError(false);
+    const route = routeIdentity;
+    const prescription = savePlan ? prescriptionFromWorkout(plannedSession, exercises, setsRef.current, supersets) : null;
     try {
-      if (savePlan) {
-        const current = await mesocycleRepository.get(mesocycleId);
-        if (!current || current.userId !== uid) throw new Error('Missing plan');
-        const prescription = prescriptionFromWorkout(plannedSession, exercises, setsByExercise, supersets);
-        await mesocycleRepository.update(mesocycleId, { ...changesForSessionEdit(current, goal, microcycleIndex, prescription, 'remaining-mesocycle', true), updatedAt: Date.now() });
-      }
       const ended = Date.now();
       const feedback = reviseSessionFeedback(sessionFeedback, sessionEffort, ended, 'AT_FINISH');
       if (!await flush(ended, feedback ? { sessionFeedback: feedback } : undefined)) throw new Error('Save failed');
+      if (activeRoute.current !== route) return;
       setSessionFeedback(feedback);
       setCompletedAt(ended); setRestTimer(cancelRest()); setFinished(true);
       void clearWorkoutRestAlerts().catch(() => undefined);
       // Health failures never roll back or block the athlete's primary save.
-      void health.service.export(toWorkoutSession({ ...sessionContext, completedAt: ended }, exerciseOrder, setsRef.current));
-    } catch { setFinishError(true); } finally { setBusy(false); }
+      void Promise.resolve().then(() => health.service.export(toWorkoutSession({ ...sessionContext, completedAt: ended }, exerciseOrder, setsRef.current))).catch(() => undefined);
+      if (prescription) {
+        pendingPlanUpdate.current = { route, prescription };
+        try { await applyPendingPlanUpdate(); } catch { if (activeRoute.current === route) setPlanUpdateError(true); }
+      }
+    } catch { if (activeRoute.current === route) setFinishError(true); }
+    finally { finishLock.current = false; if (activeRoute.current === route) setBusy(false); }
   };
   const chooseExercises = (chosen: Exercise[]) => {
     if (!plannedSession || !chosen.length) return;
@@ -657,6 +685,7 @@ export default function EntrenamientoScreen() {
           else await persistentNotes.save(scope, scope === 'EXERCISE' ? detail.id : mesocycleId, text);
         }} onClose={() => setDetail(null)} />}
       <WorkoutFinishSheet open={finishing} saved={finished} busy={busy} error={finishError} summary={summary} exercises={exercises} changed={changed} changes={changes} historyReady={historyReady} startedAt={performedAt} completedAt={completedAt}
+        planUpdateError={planUpdateError} onRetryPlan={() => { void retryPlanUpdate(); }}
         effortValue={sessionEffort} onChangeEffort={setSessionEffort}
         healthContent={completedSession ? <WorkoutHealthExport session={completedSession} /> : undefined}
         onFinish={(savePlan) => { void finishWorkout(savePlan); }} onClose={() => { if (finished) finishToTraining(router); else setFinishing(false); }} />

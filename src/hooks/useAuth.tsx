@@ -21,6 +21,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { User } from '@react-native-firebase/auth';
+import { loadAudit } from '@/services/performance/loadAudit';
 import {
   SignInCancelledError,
   onAuthChange,
@@ -55,13 +56,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    const end = loadAudit.begin('auth.restore', 'mount');
+    let previousOwner: string | null | undefined;
     // El listener es la única fuente de verdad: se dispara tanto con una sesión
     // restaurada del disco como con una recién creada.
     const unsubscribe = onAuthChange((nextUser) => {
+      if (previousOwner !== undefined && previousOwner !== (nextUser?.uid ?? null)) loadAudit.clear();
+      previousOwner = nextUser?.uid ?? null;
+      end();
       setUser(nextUser);
       setIsLoading(false);
     });
-    return unsubscribe;
+    return () => { end('cancelled'); unsubscribe(); };
   }, []);
 
   /** Envuelve un login: gestiona el estado y trata la cancelación como no-error. */

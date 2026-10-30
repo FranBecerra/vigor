@@ -91,6 +91,79 @@ public class VigorHealthModule: Module {
     }
   }
 
+  private func cardioKind(_ activity: HKWorkoutActivityType) -> String? {
+    switch activity {
+    case .running: return "RUNNING"
+    case .cycling: return "CYCLING"
+    case .walking: return "WALKING"
+    case .hiking: return "HIKING"
+    case .rowing: return "ROWING"
+    case .elliptical: return "ELLIPTICAL"
+    case .stairClimbing, .stairs, .stepTraining: return "STAIRS"
+    case .swimming: return "SWIMMING"
+    case .tennis: return "TENNIS"
+    case .soccer: return "FOOTBALL"
+    case .basketball: return "BASKETBALL"
+    case .highIntensityIntervalTraining: return "HIIT"
+    case .mixedCardio, .crossTraining, .swimBikeRun: return "MIXED"
+    default: return nil
+    }
+  }
+
+  private func readCardioHistory(startMs: Double, endMs: Double) async throws -> [String: Any] {
+    guard HKHealthStore.isHealthDataAvailable(), startMs.isFinite, endMs.isFinite,
+      startMs > 0, endMs > startMs, endMs - startMs <= 45 * 86400000,
+      endMs <= Date().timeIntervalSince1970 * 1000 else {
+      throw NSError(domain: "VigorHealth", code: 6, userInfo: [NSLocalizedDescriptionKey: "Invalid cardio history window"])
+    }
+    var earliestAllowed: Date?
+    if #available(iOS 27.0, *) {
+      let dates = try await self.store.earliestAuthorizedSampleDate(for: [HKObjectType.workoutType()])
+      earliestAllowed = dates[HKObjectType.workoutType()]
+    }
+    let requestedStart = Date(timeIntervalSince1970: startMs / 1000)
+    let queryStart = max(requestedStart, earliestAllowed ?? requestedStart)
+    let supported: [HKWorkoutActivityType] = [.running, .cycling, .walking, .hiking, .rowing, .elliptical,
+      .stairClimbing, .stairs, .stepTraining, .swimming, .tennis, .soccer, .basketball,
+      .highIntensityIntervalTraining, .mixedCardio, .crossTraining, .swimBikeRun]
+    let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+      HKQuery.predicateForSamples(withStart: queryStart,
+        end: Date(timeIntervalSince1970: endMs / 1000), options: [.strictStartDate, .strictEndDate]),
+      NSCompoundPredicate(orPredicateWithSubpredicates: supported.map { HKQuery.predicateForWorkouts(with: $0) })
+    ])
+    let samples: [HKSample] = try await withCheckedThrowingContinuation { continuation in
+      let query = HKSampleQuery(sampleType: HKObjectType.workoutType(), predicate: predicate, limit: 1001,
+        sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)]) { _, samples, error in
+        if let error { continuation.resume(throwing: error) }
+        else { continuation.resume(returning: samples ?? []) }
+      }
+      self.store.execute(query)
+    }
+    // Never treat the newest capped subset as a complete exposure history.
+    var result: [String: Any] = ["version": 1, "truncated": samples.count > 1000, "workouts": []]
+    if let earliestAllowed { result["earliestAllowedStart"] = earliestAllowed.timeIntervalSince1970 * 1000 }
+    if samples.count > 1000 { return result }
+    let observations: [[String: Any]] = samples.compactMap { sample in
+      guard let workout = sample as? HKWorkout, let kind = self.cardioKind(workout.workoutActivityType) else { return nil }
+      let source = workout.sourceRevision.source
+      let mixed = kind == "MIXED" || workout.workoutActivities.contains { self.cardioKind($0.workoutConfiguration.activityType) != kind }
+      var observation: [String: Any] = ["id": workout.uuid.uuidString, "kind": kind,
+        "start": workout.startDate.timeIntervalSince1970 * 1000, "end": workout.endDate.timeIntervalSince1970 * 1000,
+        "durationSeconds": workout.duration, "sourceId": source.bundleIdentifier, "sourceName": source.name,
+        "manuallyEntered": workout.metadata?[HKMetadataKeyWasUserEntered] as? Bool ?? false,
+        "ownExport": source.bundleIdentifier == Bundle.main.bundleIdentifier,
+        "mixedActivities": mixed]
+      // Workout summaries only: no route, pulse, energy or extra quantity queries/permissions.
+      if let distance = workout.totalDistance { observation["distanceMetres"] = distance.doubleValue(for: .meter()) }
+      if let external = workout.metadata?[HKMetadataKeyExternalUUID] as? String, !external.isEmpty, external.utf8.count <= 4096 {
+        observation["externalId"] = SHA256.hash(data: Data(external.utf8)).map { String(format: "%02x", $0) }.joined()
+      }
+      return observation
+    }
+    result["workouts"] = observations
+    return result
+  }
+
   private func syncIdentifier(_ input: VigorHealthWorkout) throws -> String {
     guard !input.identity.isEmpty, input.identity.utf8.count <= 4096,
       input.startMs.isFinite, input.endMs.isFinite,
@@ -105,6 +178,16 @@ public class VigorHealthModule: Module {
 
   public func definition() -> ModuleDefinition {
     Name("VigorHealth")
+    AsyncFunction("cardioHistoryAvailable") { HKHealthStore.isHealthDataAvailable() }
+    AsyncFunction("authorizeCardioHistory") { () async throws in
+      guard HKHealthStore.isHealthDataAvailable() else {
+        throw NSError(domain: "VigorHealth", code: 4, userInfo: [NSLocalizedDescriptionKey: "Health data unavailable"])
+      }
+      try await self.store.requestAuthorization(toShare: [], read: [HKObjectType.workoutType()])
+    }
+    AsyncFunction("readCardioHistory") { (startMs: Double, endMs: Double) async throws -> [String: Any] in
+      try await self.readCardioHistory(startMs: startMs, endMs: endMs)
+    }
     AsyncFunction("bioAvailable") { HKHealthStore.isHealthDataAvailable() }
     AsyncFunction("bioNightAvailable") { HKHealthStore.isHealthDataAvailable() }
     AsyncFunction("authorizeBioNight") { () async throws in

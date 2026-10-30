@@ -6,18 +6,20 @@ import { useAppSettings } from '@/hooks/useAppSettings';
 import { bioNightBridge } from '@/services/health/bioHealthClient';
 import { useTheme } from '@/theme/useTheme';
 import { BioSleepGoalSettings } from './BioSleepGoalSettings';
+import { HealthAccessReview } from './HealthAccessReview';
 
 /** Only explicit interaction requests additional pulse/RMSSD permissions. */
 export function BioNightSettings() {
   const { uid } = useAuth(), preferences = useAppSettings(), { t } = useTranslation();
   const { colors, typography, semantic } = useTheme();
   const [available, setAvailable] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState(false);
+  const [reviewOwner, setReviewOwner] = useState<string | null>(null);
   const owner = useRef({ uid, epoch: 0 }), working = useRef(false), alive = useRef(true);
   if (owner.current.uid !== uid) owner.current = { uid, epoch: owner.current.epoch + 1 };
   const epoch = owner.current.epoch;
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   useEffect(() => {
-    let current = true; working.current = false; setBusy(false); setError(false);
+    let current = true; working.current = false; setBusy(false); setError(false); setReviewOwner(null);
     bioNightBridge.available().then((value) => { if (current) setAvailable(value); }).catch(() => { if (current) setAvailable(false); });
     return () => { current = false; };
   }, [uid]);
@@ -28,8 +30,10 @@ export function BioNightSettings() {
     working.current = true; setBusy(true); setError(false);
     try {
       if (next) await bioNightBridge.authorize();
-      if (current() && !await preferences.change({ bioNightEnabled: next })) throw Error('bioNightSettingsFailed');
-    } catch { if (current()) setError(true); }
+      if (!current()) return false;
+      if (!await preferences.change({ bioNightEnabled: next })) throw Error('bioNightSettingsFailed');
+      return current();
+    } catch { if (current()) setError(true); return false; }
     finally { if (current()) { working.current = false; setBusy(false); } }
   };
   return <View style={{ gap: 12, borderTopWidth: 0.5, borderColor: colors.surfaceBorder, paddingTop: 16 }}>
@@ -42,9 +46,10 @@ export function BioNightSettings() {
     {!available && <Text style={[typography.caption, { color: colors.textSecondary }]}>{t('bioNight.updateRequired')}</Text>}
     {error && <Text accessibilityRole="alert" style={[typography.body, { color: semantic.warning }]}>{t('bioHealth.error')}</Text>}
     {enabled && available && <Pressable accessibilityRole="button" accessibilityLabel={t('bioNight.permissions')}
-      disabled={busy || preferences.busy} onPress={() => { void change(true); }} style={{ minHeight: 48, justifyContent: 'center' }}>
+      disabled={busy || preferences.busy} onPress={() => setReviewOwner(uid)} style={{ minHeight: 48, justifyContent: 'center' }}>
       <Text style={[typography.title, { color: colors.bioText }]}>{t('bioNight.permissions')}</Text>
     </Pressable>}
     <BioSleepGoalSettings />
+    {uid && reviewOwner === uid && enabled && preferences.settings.bioHealthEnabled === true && <HealthAccessReview key={uid} busy={busy || preferences.busy} onClose={() => setReviewOwner(null)} onRequest={() => change(true)} />}
   </View>;
 }

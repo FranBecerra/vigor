@@ -26,6 +26,23 @@ const openMetric = async (tree: any, metric='RESTING_HR') => {
 };
 beforeEach(()=>{jest.clearAllMocks();jest.spyOn(Date,'now').mockReturnValue(now);});
 afterEach(()=>jest.restoreAllMocks());
+it('keeps the same metric tiles during cold loading and warm revalidation without claiming missing/fresh data', async () => {
+  let tree: any;
+  await act(async () => { tree = create(<BioHealthCard health={health({ state: 'LOADING' })} />); });
+  for (const metric of ['RESTING_HR', 'HRV_SDNN', 'SLEEP']) expect(tree.root.findByProps({ testID: `bio-metric-${metric}` })).toBeDefined();
+  expect(text(tree)).toContain('bioMetricsRefreshing'); expect(text(tree)).not.toContain('bioHealth.missing');
+  const coldCards = tree.root.findAllByType(SoftMetricSurface).map((node: any) => node.props.testID);
+  await act(async () => tree.update(<BioHealthCard health={health({ state: 'READY', trends: [trend()] })} />));
+  const tile = tree.root.findByProps({ testID: 'bio-metric-RESTING_HR' });
+  expect(text(tree)).toContain('50');
+  await openMetric(tree);
+  await act(async () => tree.update(<BioHealthCard health={health({ state: 'LOADING', trends: [trend()] })} />));
+  expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  expect(tree.root.findAllByType(SoftMetricSurface).map((node: any) => node.props.testID)).toEqual(coldCards);
+  const press = tree.root.findByProps({ testID: 'bio-metric-RESTING_HR' }).findAll((node: any) => typeof node.props.onPress === 'function')[0];
+  expect(press.props.disabled).toBe(true); expect(text(tree)).toContain('50'); expect(tile).toBeDefined();
+  await act(async () => tree.unmount());
+});
 it('routes opt-in to settings and distinguishes loading, unsupported and failed reads', async () => {
   let tree: any; await act(async () => { tree = create(<BioHealthCard health={health()} />); });
   await act(async () => button(tree, 'bioHealth.openSettings').props.onPress()); expect(mockPush).toHaveBeenCalledWith('/settings');

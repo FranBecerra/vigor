@@ -15,3 +15,38 @@ it('translates every sport activity label and keeps interpolation parameters con
     }
   }
 });
+
+it('keeps all cardio planning labels and interpolation parameters aligned in every language', () => {
+  const expected = Object.keys(en.cardioPlan).sort();
+  const parameters = (value: string) => (value.match(/{{\w+}}/g) ?? []).sort();
+  for (const locale of [en, es, fr, ja]) {
+    expect(Object.keys(locale.cardioPlan).sort()).toEqual(expected);
+    for (const key of expected) {
+      const value = (locale.cardioPlan as Record<string, string>)[key];
+      expect(value.trim()).not.toBe('');
+      expect(parameters(value)).toEqual(parameters((en.cardioPlan as Record<string, string>)[key]));
+    }
+  }
+});
+
+it('translates saved proposal state, actions and sync semantics in every language', () => {
+  const keys = Object.keys(en.cardioSaved).sort();
+  for (const locale of [en, es, fr, ja]) {
+    expect(Object.keys(locale.cardioSaved).sort()).toEqual(keys);
+    for (const key of keys) {
+      const value = (locale.cardioSaved as Record<string, string>)[key]; expect(value.trim()).not.toBe('');
+      expect((value.match(/{{\w+}}/g) ?? []).sort()).toEqual(((en.cardioSaved as Record<string, string>)[key].match(/{{\w+}}/g) ?? []).sort());
+    }
+  }
+});
+
+it('translates the complete cardio execution and dated coordination flow', () => {
+  const keys = Object.keys(en.cardioTraining).sort();
+  for (const locale of [en, es, fr, ja]) {
+    expect(Object.keys(locale.cardioTraining).sort()).toEqual(keys);
+    for (const key of keys) {
+      const value = (locale.cardioTraining as Record<string, string>)[key]; expect(value.trim()).not.toBe('');
+      expect((value.match(/{{\w+}}/g) ?? []).sort()).toEqual(((en.cardioTraining as Record<string, string>)[key].match(/{{\w+}}/g) ?? []).sort());
+    }
+  }
+});

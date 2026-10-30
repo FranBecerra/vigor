@@ -1,10 +1,14 @@
 import React from 'react';
 import HistoryScreen from '@/app/workout-history';
 import { SetType } from '@/models';
+import { Alert } from 'react-native';
+import { RIRProgressionPreview } from '../RIRProgressionPreview';
 import { WorkoutHistoryEditor } from '../WorkoutHistoryEditor';
 const { create, act } = require('react-test-renderer');
 const mockList = jest.fn(); const mockDiscard = jest.fn(); const mockRemove = jest.fn();
 const mockEdit = jest.fn(); let mockParams: any = { id: 's' };
+const mockGetPlan = jest.fn(), mockUpdatePlan = jest.fn();
+const mockGetRoutine = jest.fn(), mockPush = jest.fn();
 let mockMenu: any; let mockEntries: any = {}; const mockCatalogue = new Map();
 const session: any = { id: 's', userId: 'owner', sessionName: 'Upper', performedAt: 1000, completedAt: 61000,
   mesocycleId: 'm', microcycleId: 'mi', microcycleIndex: 0,
@@ -14,10 +18,10 @@ const session: any = { id: 's', userId: 'owner', sessionName: 'Upper', performed
   ] }] };
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
-jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ canGoBack: () => true, back: jest.fn() }), useFocusEffect: (effect: any) => require('react').useEffect(effect, [effect]) }));
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => mockParams, useRouter: () => ({ push: mockPush, canGoBack: () => true, back: jest.fn() }), useFocusEffect: (effect: any) => require('react').useEffect(effect, [effect]) }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: 'owner' }) }));
 jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ exercisesById: mockCatalogue }) }));
-jest.mock('@/services/repositories', () => ({ workoutSessionRepository: {
+jest.mock('@/services/repositories', () => ({ routineRepository: { get: (...args: unknown[]) => mockGetRoutine(...args) }, mesocycleRepository: { get: (...args: unknown[]) => mockGetPlan(...args), update: (...args: unknown[]) => mockUpdatePlan(...args) }, workoutSessionRepository: {
   listByUser: (...args: unknown[]) => mockList(...args), discardLocally: (...args: unknown[]) => mockDiscard(...args),
   editCompletedLocally: (...args: unknown[]) => mockEdit(...args),
 } }));
@@ -32,6 +36,16 @@ const discardButton = (tree: any) => tree.root.findAll((node: any) =>
 beforeEach(() => {
   jest.clearAllMocks(); mockParams = { id: 's' }; mockEntries = {}; mockList.mockResolvedValue([session]); mockDiscard.mockResolvedValue(undefined);
   mockRemove.mockImplementation(async (_session, _alsoHealth, discard) => { await discard(); return true; });
+});
+it('opens a linked recorded session in the shared root-stack editor with its exact cycle, retaining History underneath', async () => {
+  mockList.mockResolvedValue([{ ...session, plannedSessionIndex: 4, microcycleIndex: 2 }]);
+  mockGetPlan.mockResolvedValue({ id: 'm', routineId: 'r', userId: 'owner', plannedSessions: [{ index: 4 }] });
+  mockGetRoutine.mockResolvedValue({ id: 'r', userId: 'owner' });
+  let tree: any; await act(async () => { tree = create(<HistoryScreen />); });
+  const edit = tree.root.findAll((node: any) => typeof node.props.onPress === 'function' && node.findAll((child: any) => child.props.children === 'historyEdit.title').length)[0];
+  await act(async () => edit.props.onPress());
+  expect(mockPush).toHaveBeenCalledWith({ pathname: '/routine-editor', params: { mesocycleId: 'm', microcycleIndex: '2', plannedSessionIndex: '4', edit: '1' } });
+  expect(tree.root.findAllByType(WorkoutHistoryEditor)).toHaveLength(0); await act(async () => tree.unmount());
 });
 it('opens the exact completed record for editing from the mesocycle and does not reopen after saving', async () => {
   mockParams.edit = '1';
@@ -75,4 +89,35 @@ it('discards only the confirmed record and retains it when local acceptance fail
   await act(async () => mockMenu.actions[0].onPress());
   expect(mockDiscard).toHaveBeenLastCalledWith(session); expect(discardButton(tree)).toBeUndefined();
   await act(async () => tree.unmount());
+});
+
+it('saves a correction before reviewing progression, then updates only pending future overrides on explicit acceptance', async () => {
+  mockParams.edit = '1';
+  const actual = { ...session, plannedSessionIndex: 0, trainingGoal: 'HYPERTROPHY' };
+  const corrected = { ...actual, exercises: actual.exercises.map((entry: any) => ({ ...entry, sets: entry.sets.map((set: any) => ({ ...set, actualRIR: 3 })) })) };
+  const plan = { id: 'm', userId: 'owner', status: 'ACTIVE', currentMicrocycleIndex: 1, projectedMicrocycles: 4, prescriptionMode: 'MANUAL',
+    plannedSessions: [{ index: 0, focus: 'UPPER', estimatedWorkMinutes: 10, exercises: [{ exerciseId: 'missing', order: 0, isEdited: false,
+      sets: [{ setType: SetType.NORMAL, targetReps: 10, targetRepsMin: 8, targetRIR: 2 }] }] }] };
+  mockList.mockResolvedValue([actual]); mockGetPlan.mockResolvedValue(plan); mockEdit.mockResolvedValue(corrected); mockUpdatePlan.mockResolvedValue(undefined);
+  let tree: any; await act(async () => { tree = create(<HistoryScreen />); });
+  const editor = tree.root.findByType(WorkoutHistoryEditor).props;
+  await act(async () => { await editor.onSave(corrected, true); editor.onClose(); });
+  expect(mockGetPlan.mock.invocationCallOrder[0]).toBeGreaterThan(mockEdit.mock.invocationCallOrder[0]);
+  expect(mockUpdatePlan).not.toHaveBeenCalled();
+  expect(tree.root.findByType(RIRProgressionPreview).props.steps.map((s: any) => s.index)).toEqual([1, 2, 3]);
+  mockList.mockResolvedValue([corrected]);
+  await act(async () => tree.root.findByType(RIRProgressionPreview).props.onApply());
+  expect(mockUpdatePlan).toHaveBeenCalledWith('m', expect.objectContaining({ sessionOverrides: expect.objectContaining({ '1:0': expect.any(Object), '3:0': expect.any(Object) }) }));
+  expect(mockUpdatePlan.mock.calls[0][1].sessionOverrides['0:0']).toBeUndefined();
+  expect(tree.root.findByType(RIRProgressionPreview).props.steps).toBeNull();
+  await act(async () => tree.unmount());
+});
+
+it('keeps a history correction saved if its plan is unavailable, without reporting the correction as failed', async () => {
+  mockParams.edit = '1'; mockEdit.mockResolvedValue(session); mockGetPlan.mockRejectedValueOnce(Error('offline'));
+  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {}); let tree: any;
+  await act(async () => { tree = create(<HistoryScreen />); });
+  await act(async () => tree.root.findByType(WorkoutHistoryEditor).props.onSave(session, true));
+  expect(alert).toHaveBeenCalledWith('workout.saved', 'historyProgression.failed');
+  expect(mockUpdatePlan).not.toHaveBeenCalled(); await act(async () => tree.unmount()); alert.mockRestore();
 });

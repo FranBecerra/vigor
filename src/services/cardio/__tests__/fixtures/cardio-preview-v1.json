@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "policy": "CARDIO_PREVIEW_V1",
+  "id": "policy-v1",
+  "userId": "owner",
+  "name": "Version one fixture",
+  "createdAt": 1793232000000,
+  "archivedAt": null,
+  "input": {
+    "modalities": [
+      "RUNNING",
+      "CYCLING"
+    ],
+    "cycleDays": 8,
+    "availableDays": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "sessions": 3,
+    "cardioMinutes": 50,
+    "sessionMinutes": 30,
+    "maxActiveDays": 5,
+    "allowDoubles": false,
+    "strength": [
+      {
+        "id": "r:0",
+        "name": "Lower",
+        "dayIndex": 0,
+        "estimatedMinutes": 50,
+        "lowerBodyDemand": "HIGH"
+      }
+    ],
+    "profile": {
+      "schemaVersion": 1,
+      "modalities": {}
+    }
+  },
+  "preview": {
+    "scheduled": [
+      {
+        "id": "easy-01-cycling",
+        "modality": "CYCLING",
+        "durationMinutes": 20,
+        "candidateDays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "lowerBodyDemand": "LOW",
+        "stimulus": "EASY",
+        "dayIndex": 1,
+        "overlap": "NONE"
+      },
+      {
+        "id": "easy-00-running",
+        "modality": "RUNNING",
+        "durationMinutes": 20,
+        "candidateDays": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "lowerBodyDemand": "HIGH",
+        "stimulus": "EASY",
+        "dayIndex": 2,
+        "overlap": "NONE"
+      }
+    ],
+    "omitted": [
+      {
+        "candidateId": "easy-02-running",
+        "reason": "TIME_CAP"
+      }
+    ],
+    "usedMinutes": 40,
+    "activeDays": [
+      0,
+      1,
+      2
+    ],
+    "prescriptions": [
+      {
+        "schemaVersion": 1,
+        "policy": "EASY_START_V1",
+        "id": "easy-01-cycling",
+        "modality": "CYCLING",
+        "stimulus": "EASY",
+        "durationSeconds": 1200,
+        "allowWalking": false,
+        "basis": "FAMILIARIZATION",
+        "adjustments": [
+          "UNKNOWN_DURATION"
+        ],
+        "segments": [
+          {
+            "phase": "WARMUP",
+            "durationSeconds": 240,
+            "effort": {
+              "scale": "VIGOR_CARDIO_EFFORT_0_10_V1",
+              "min": 1,
+              "max": 2
+            },
+            "talkTest": "COMFORTABLE_CONVERSATION"
+          },
+          {
+            "phase": "EASY",
+            "durationSeconds": 720,
+            "effort": {
+              "scale": "VIGOR_CARDIO_EFFORT_0_10_V1",
+              "min": 2,
+              "max": 4
+            },
+            "talkTest": "COMFORTABLE_CONVERSATION"
+          },
+          {
+            "phase": "COOLDOWN",
+            "durationSeconds": 240,
+            "effort": {
+              "scale": "VIGOR_CARDIO_EFFORT_0_10_V1",
+              "min": 1,
+              "max": 2
+            },
+            "talkTest": "COMFORTABLE_CONVERSATION"
+          }
+        ]
+      },
+      {
+        "schemaVersion": 1,
+        "policy": "EASY_START_V1",
+        "id": "easy-00-running",
+        "modality": "RUNNING",
+        "stimulus": "EASY",
+        "durationSeconds": 1200,
+        "allowWalking": true,
+        "basis": "FAMILIARIZATION",
+        "adjustments": [
+          "UNKNOWN_DURATION"
+        ],
+        "segments": [
+          {
+            "phase": "WARMUP",
+            "durationSeconds": 240,
+            "effort": {
+              "scale": "VIGOR_CARDIO_EFFORT_0_10_V1",
+              "min": 1,
+              "max": 2
+            },
+            "talkTest": "COMFORTABLE_CONVERSATION"
+          },
+          {
+            "phase": "EASY",
+            "durationSeconds": 720,
+            "effort": {
+              "scale": "VIGOR_CARDIO_EFFORT_0_10_V1",
+              "min": 2,
+              "max": 4
+            },
+            "talkTest": "COMFORTABLE_CONVERSATION"
+          },
+          {
+            "phase": "COOLDOWN",
+            "durationSeconds": 240,
+            "effort": {
+              "scale": "VIGOR_CARDIO_EFFORT_0_10_V1",
+              "min": 1,
+              "max": 2
+            },
+            "talkTest": "COMFORTABLE_CONVERSATION"
+          }
+        ]
+      }
+    ],
+    "closeDemandingSessions": false,
+    "days": [
+      {
+        "dayIndex": 0,
+        "strength": [
+          {
+            "id": "r:0",
+            "name": "Lower",
+            "dayIndex": 0,
+            "estimatedMinutes": 50,
+            "lowerBodyDemand": "HIGH"
+          }
+        ],
+        "cardio": []
+      },
+      {
+        "dayIndex": 1,
+        "strength": [],
+        "cardio": [
+          {
+            "id": "easy-01-cycling",
+            "modality": "CYCLING",
+            "durationMinutes": 20,
+            "candidateDays": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "lowerBodyDemand": "LOW",
+            "stimulus": "EASY",
+            "dayIndex": 1,
+            "overlap": "NONE"
+          }
+        ]
+      },
+      {
+        "dayIndex": 2,
+        "strength": [],
+        "cardio": [
+          {
+            "id": "easy-00-running",
+            "modality": "RUNNING",
+            "durationMinutes": 20,
+            "candidateDays": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "lowerBodyDemand": "HIGH",
+            "stimulus": "EASY",
+            "dayIndex": 2,
+            "overlap": "NONE"
+          }
+        ]
+      },
+      {
+        "dayIndex": 3,
+        "strength": [],
+        "cardio": []
+      },
+      {
+        "dayIndex": 4,
+        "strength": [],
+        "cardio": []
+      },
+      {
+        "dayIndex": 5,
+        "strength": [],
+        "cardio": []
+      },
+      {
+        "dayIndex": 6,
+        "strength": [],
+        "cardio": []
+      },
+      {
+        "dayIndex": 7,
+        "strength": [],
+        "cardio": []
+      }
+    ]
+  },
+  "strengthSource": {
+    "routineId": "r",
+    "fingerprint": "fixture-strength-source"
+  }
+}

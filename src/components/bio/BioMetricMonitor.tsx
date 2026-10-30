@@ -15,7 +15,7 @@ export function BioMetricMonitor({ health, sleepGoalMinutes }: { health: ReturnT
   const [info, setInfo] = useState(false);
   const [selected, setSelected] = useState<{ metric: BioHealthMetric; source?: string; owner: string | null } | null>(null);
   useEffect(() => { setSelected(null); setInfo(false); }, [health.owner, health.state]);
-  const rows = useMemo(() => health.state === 'READY'
+  const rows = useMemo(() => (health.state === 'READY' || health.state === 'LOADING')
     ? (['RESTING_HR', 'HRV_SDNN', 'SLEEP'] as const).map((metric) => {
       const trend: BioHealthTrend = health.trends.find((item) => item.metric === metric)
         ?? { metric, status: 'EMPTY', days: [], fresh: false };
@@ -34,14 +34,15 @@ export function BioMetricMonitor({ health, sleepGoalMinutes }: { health: ReturnT
     ? `${format(metric, view.range.lower)}–${full(metric, view.range.upper)}` : t('bioMetric.noRange');
   const button = (label: string, action: () => void) => <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={action}
     style={{ minHeight: 48, justifyContent: 'center' }}><Text style={[typography.title, { color: colors.bioText }]}>{label}</Text></Pressable>;
+  const pending = health.state === 'LOADING';
   const reading = (trend: BioHealthTrend, view: MetricMonitor) => <>
     <Text style={[typography.emphasis, { color: colors.textPrimary, fontVariant: ['tabular-nums'] }]}>
       {view.latest ? format(trend.metric, view.latest.value) : '—'}
       {!!view.latest && <Text style={[typography.caption, { color: colors.textSecondary }]}> {unit(trend.metric)}</Text>}
     </Text>
     <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-      <View accessible={false} style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: material[metricTone(view)] }} />
-      <Text style={[typography.caption, { flexShrink: 1, color: material[metricTone(view)], fontWeight: '600' }]}>{t(`bioMetric.position.${view.position}`)}</Text>
+      <View accessible={false} style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: pending ? colors.textSecondary : material[metricTone(view)] }} />
+      <Text style={[typography.caption, { flexShrink: 1, color: pending ? colors.textSecondary : material[metricTone(view)], fontWeight: '600' }]}>{pending ? t('bioMetricsRefreshing') : t(`bioMetric.position.${view.position}`)}</Text>
     </View>
   </>;
   return <View style={{ gap: 14, marginBottom: 16 }}>
@@ -56,24 +57,26 @@ export function BioMetricMonitor({ health, sleepGoalMinutes }: { health: ReturnT
       <Text style={[typography.body, { color: colors.textSecondary }]}>{t('bioMetric.method')}</Text>
       <Text style={[typography.caption, { color: colors.textSecondary }]}>{t('bioHealth.contextOnly')}</Text>
     </SoftMetricSurface>}
-    {health.state === 'LOADING' && <ActivityIndicator color={colors.bioText} />}
     {health.state === 'OFF' && <SoftMetricSurface style={{ padding: 20 }}>
       <Text style={[typography.body, { color: colors.textSecondary }]}>{t('bioHealth.connectIntro')}</Text>
       {button(t('bioHealth.openSettings'), () => router.push('/settings'))}
     </SoftMetricSurface>}
     {health.state === 'UNAVAILABLE' && <Text style={[typography.body, { color: colors.textSecondary }]}>{t('health.unavailable')}</Text>}
     {health.state === 'ERROR' && <Text accessibilityRole="alert" style={[typography.body, { color: colors.textPrimary }]}>{t('bioHealth.error')}</Text>}
-    {health.state === 'READY' && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+    {(health.state === 'READY' || pending) && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
       {rows.map(({ trend, view }) => <View key={trend.metric} style={{ width: trend.metric === 'SLEEP' ? '100%' : '47%', flexGrow: 1 }}>
         <SoftMetricSurface style={{ flex: 1 }} testID={`bio-metric-${trend.metric}`}>
           <Pressable accessibilityRole="button" accessibilityLabel={t('bioMetric.open', { metric: t(`bioMetric.label.${trend.metric}`) })}
-            accessibilityHint={t('bioMetric.openHint')} onPress={() => setSelected({ metric: trend.metric, source: trend.sourceId, owner: health.owner })}
-            style={{ padding: 16, gap: 10, flex: 1 }}>
+            accessibilityHint={t('bioMetric.openHint')} disabled={pending} accessibilityState={{ disabled: pending, busy: pending }}
+            onPress={() => setSelected({ metric: trend.metric, source: trend.sourceId, owner: health.owner })}
+            style={{ padding: 16, gap: 10, flex: 1, minHeight: 220 }}>
             <Text style={[typography.caption, { color: colors.textSecondary, minHeight: 32 }]}>{t(`bioMetric.label.${trend.metric}`)}</Text>
             {reading(trend, view)}
-            <BioIntervalBar view={view} label={t('bioMetric.intervalLabel', { value: view.latest ? full(trend.metric, view.latest.value) : '—', range: range(trend.metric, view) })} />
-            <Text style={[typography.caption, { color: colors.textSecondary }]}>{view.range ? `${t('bioMetric.range')}\n${range(trend.metric, view)}` : t(view.position === 'MISSING' ? 'bioHealth.missing' : view.position === 'ERROR' ? 'bioHealth.error' : 'bioMetric.noRange')}</Text>
-            {view.latest && <Text style={[typography.caption, { color: colors.textSecondary }]}>{date(view.latest.date)}</Text>}
+            <View style={{ height: 36, justifyContent: 'center' }}>
+              {pending && !view.latest ? <ActivityIndicator color={colors.bioText} /> : <BioIntervalBar view={view} label={t('bioMetric.intervalLabel', { value: view.latest ? full(trend.metric, view.latest.value) : '—', range: range(trend.metric, view) })} />}
+            </View>
+            <Text style={[typography.caption, { color: colors.textSecondary, minHeight: 36 }]}>{view.range ? `${t('bioMetric.range')}\n${range(trend.metric, view)}` : pending ? ' ' : t(view.position === 'MISSING' ? 'bioHealth.missing' : view.position === 'ERROR' ? 'bioHealth.error' : 'bioMetric.noRange')}</Text>
+            <Text style={[typography.caption, { color: colors.textSecondary }]}>{view.latest ? date(view.latest.date) : ' '}</Text>
           </Pressable>
         </SoftMetricSurface>
       </View>)}

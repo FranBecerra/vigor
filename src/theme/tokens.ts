@@ -13,7 +13,7 @@ export const sessionPalette = ['#9BE317', '#54A9F8', '#F28B69', '#B295EF', '#E9B
 /** Acentos por sección (misma familia armónica verde→ámbar, PRD §8.2). */
 export const sectionAccent = {
   train: BRAND_LIME, // Entrenar
-  bio: '#3FE0A9', // Bio (verde menta)
+  bio: BRAND_LIME,
   nutrition: '#A8D84A', // Nutrición (verde salvia)
   progress: '#5CCf9E', // Progreso (fase 2, misma familia)
   profile: '#9BE317', // Perfil (usa el principal)

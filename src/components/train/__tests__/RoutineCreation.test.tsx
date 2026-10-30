@@ -5,6 +5,7 @@ import CreateRoutineScreen from '@/app/(tabs)/(train)/create-routine';
 import { PlanPreview } from '../generate/PlanPreview';
 import { ExerciseSwapSheet } from '../generate/ExerciseSwapSheet';
 import { Stepper } from '../generate/GenerateControls';
+import { RoutineIdentityPicker } from '../RoutineIdentityPicker';
 import { NumericField } from '../NumericField';
 import { MusclePicture } from '../MusclePicture';
 import { ScheduleTemplateView } from '../ScheduleTemplateView';
@@ -46,6 +47,8 @@ it('offers both modes before opening a builder', async () => {
   expect(mockRouter.push).toHaveBeenCalledWith('/manual-routine');
   await act(async () => button(tree.root, 'routineCreation.AUTOMATIC').props.onPress());
   expect(mockRouter.push).toHaveBeenCalledWith('/generate');
+  await act(async () => button(tree.root, 'cardioPlan.create').props.onPress());
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/cardio-plan');
   await act(async () => tree.unmount());
 });
 it('keeps additions while switching tabs and persists a manual routine containing an inline-created exercise', async () => {
@@ -61,10 +64,11 @@ it('keeps additions while switching tabs and persists a manual routine containin
   expect(tree.root.findByType(PlanPreview).props.sessions[0].exercises[0].exerciseSnapshot).toEqual(custom);
   await act(async () => button(tree.root, 'routineCreation.overview').props.onPress());
   expect(tree.root.findByType(PlanPreview).props.sessions[0].exercises).toHaveLength(1);
+  await act(async () => tree.root.findByType(RoutineIdentityPicker).props.onChange({ icon: 'mountain', color: '#99A6B2' }));
   await act(async () => button(tree.root, 'generate.save').props.onPress());
   expect(mockMesocycle).toHaveBeenCalledWith(expect.objectContaining({ prescriptionMode: 'MANUAL', plannedSessions: [expect.objectContaining({
     exercises: [expect.objectContaining({ exerciseId: custom.id })] })] }));
-  expect(mockRoutine).toHaveBeenCalledWith(expect.objectContaining({ name: 'Manual test', generation: expect.objectContaining({ creationMode: 'MANUAL' }) }));
+  expect(mockRoutine).toHaveBeenCalledWith(expect.objectContaining({ name: 'Manual test', icon: 'mountain', accentColor: '#9BE317', generation: expect.objectContaining({ creationMode: 'MANUAL' }) }));
   expect(mockRouter.dismissTo).toHaveBeenCalledWith('/(tabs)/(train)');
   await act(async () => tree.unmount());
 });

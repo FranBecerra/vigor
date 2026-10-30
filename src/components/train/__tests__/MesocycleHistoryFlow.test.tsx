@@ -24,7 +24,7 @@ it('keeps exercise cards non-navigating and opens the pending session from its h
   let tree: any; await act(async () => { tree = create(<Screen />); });
   expect(buttons(tree).some((node: any) => node.findAllByType(Text).some((text: any) => text.props.children === 'Fixture exercise'))).toBe(false);
   await act(async () => header(tree).props.onPress());
-  expect(mockPush).toHaveBeenCalledWith({ pathname: '/routine', params: { mesocycleId: 'm', microcycleIndex: '0', plannedSessionIndex: '4' } });
+  expect(mockPush).toHaveBeenCalledWith({ pathname: '/routine', params: { mesocycleId: 'm', microcycleIndex: '0', plannedSessionIndex: '4', edit: '1' } });
   await act(async () => tree.unmount());
 });
 it('shows recorded effort, opens its editor and preserves the selected past microcycle after refresh', async () => {
@@ -38,6 +38,6 @@ it('shows recorded effort, opens its editor and preserves the selected past micr
   expect(JSON.stringify(tree.toJSON())).toContain('meso.recordedSession');
   expect(JSON.stringify(tree.toJSON())).toContain('—');
   await act(async () => header(tree).props.onPress());
-  expect(mockPush).toHaveBeenCalledWith({ pathname: '/workout-history', params: { id: 'actual', edit: '1' } });
+  expect(mockPush).toHaveBeenCalledWith({ pathname: '/routine', params: { mesocycleId: 'm', microcycleIndex: '0', plannedSessionIndex: '4', edit: '1' } });
   await act(async () => tree.unmount());
 });

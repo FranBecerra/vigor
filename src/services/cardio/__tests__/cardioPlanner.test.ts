@@ -46,6 +46,11 @@ describe('validateCardioProfile', () => {
 });
 
 describe('scheduleCardioCandidates', () => {
+  it('keeps unknown duration neutral in the v2 soft tie-breaker', () => {
+    const result = scheduleCardioCandidates(constraints({ placementPolicy: 'BALANCED_V2', availableDays: [0],
+      candidates: [candidate({ candidateDays: [0] })], fixedStrength: [{ id: 'upper', dayIndex: 0, lowerBodyDemand: 'LOW' }] }));
+    expect(result.scheduled[0].dayIndex).toBe(0);
+  });
   it('uses deterministic goal ordering and stable day/id tie breaks independent of input order', () => {
     const easy = candidate({ id: 'z-easy', candidateDays: [2, 1] });
     const quality = candidate({ id: 'a-quality', stimulus: 'QUALITY', durationMinutes: 20, candidateDays: [0] });
