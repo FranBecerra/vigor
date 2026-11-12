@@ -66,3 +66,20 @@ it('hands off only freshly recalculated numeric provenance after explicit Use, n
   await press(tree, 'healthPlanning.use'); expect(onPlan).not.toHaveBeenCalled(); expect(out(tree)).toContain('healthPlanning.expired');
   await act(async () => tree.unmount());
 });
+it('embeds history in an existing plan, reuses its capacity and invalidates tolerance after a source/exclusion change', async () => {
+  const onPlan = jest.fn(), context = { modality: 'RUNNING' as const, response: 'UNKNOWN' as const, comfortableMinutes: 40,
+    cycleDays: 8, maxSessions: 2, maxSessionMinutes: 60, totalMinutes: 120 }; let tree: any;
+  await act(async () => { tree = create(<CardioHealthReviewPanel state="READY" data={data} observedAt={now} onRead={jest.fn()} onClear={jest.fn()} onClose={jest.fn()} onPlan={onPlan} planningContext={context} />); });
+  expect(find(tree, 'cardioHealth.confirm')).toBeUndefined(); expect(find(tree, 'cardioStart.open')).toBeUndefined();
+  expect(out(tree)).not.toContain('healthPlanning.previewOnly'); expect(out(tree)).not.toContain('cardioHealth.noPrescription');
+  expect(find(tree, 'cardioStart.representative')).toBeDefined(); expect(find(tree, 'cardioHealth.includeShort')).toBeUndefined();
+  expect(tree.root.findAllByType(NumericField).map((n: any) => n.props.accessibilityLabel)).toEqual(['cardioStart.comfortableMinutes']);
+  await press(tree, 'cardioStart.representative'); await press(tree, 'cardioStart.response_RECOVERED'); await press(tree, 'cardioStart.calculate');
+  expect(out(tree)).toContain('cardioStart.proposal'); expect(find(tree, 'planningHistory.apply')).toBeDefined();
+  expect(out(tree)).toContain('planningHistory.easyShort'); expect(out(tree)).not.toContain('healthPlanning.handoff');
+  await press(tree, 'planningHistory.records');
+  const checkbox = tree.root.findAll((n: any) => typeof n.props.onPress === 'function' && n.props.accessibilityRole === 'checkbox' && n.props.accessibilityLabel.startsWith('cardioHealth.include:'))[0];
+  await act(async () => checkbox.props.onPress()); expect(out(tree)).not.toContain('cardioStart.proposal');
+  expect(find(tree, 'cardioStart.representative').props.accessibilityState.checked).toBe(false);
+  await press(tree, 'planningHistory.hideRecords'); expect(onPlan).not.toHaveBeenCalled(); await act(async () => tree.unmount());
+});

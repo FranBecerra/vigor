@@ -1,4 +1,5 @@
-import { Pressable, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { AppState, Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSportActivities } from '@/hooks/useSportActivities';
@@ -6,11 +7,19 @@ import { useTheme } from '@/theme/useTheme';
 import { SportActivityCard } from './SportActivityCard';
 import { SavedCardioPlans } from './SavedCardioPlans';
 import { CardioTrainingHome } from './CardioTrainingHome';
+import { upcomingSportActivities } from '@/services/cardio/sportActivities';
 
 export function SportActivitiesHome() {
   const { t } = useTranslation(); const { colors, surfaces, radius } = useTheme(); const router = useRouter();
   const activities = useSportActivities();
-  const upcoming = activities.entries.filter((item) => !item.record).sort((a, b) => a.planned!.startAt - b.planned!.startAt).slice(0, 3);
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => {
+    const refresh = () => setNow(Date.now());
+    const timer = setInterval(refresh, 60000);
+    const listener = AppState.addEventListener('change', (state) => { if (state === 'active') refresh(); });
+    return () => { clearInterval(timer); listener.remove(); };
+  }, []);
+  const upcoming = upcomingSportActivities(activities.entries, now);
   return <View style={{ marginTop: 20, gap: 10 }}>
     <CardioTrainingHome />
     <Pressable accessibilityRole="button" accessibilityLabel={t('cardioPlan.create')} onPress={() => router.push('/cardio-plan')}

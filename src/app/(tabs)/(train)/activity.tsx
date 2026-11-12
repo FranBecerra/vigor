@@ -21,6 +21,7 @@ export default function ActivityScreen() {
     {!sports.ready ? <ActivityIndicator color={colors.accentText} /> : !item ? <Text style={{ color: colors.textPrimary }}>{t('sportActivities.loadFailed')}</Text> : <>
       <Text style={{ color: colors.textPrimary, fontSize: 29, fontWeight: '700', marginVertical: 16 }}>{item.name || t(`sportActivities.sports.${item.sport}`)}</Text>
       <Text style={{ color: colors.textSecondary, fontSize: 17 }}>{t(`sportActivities.contexts.${item.context}`)} · {t(`sportActivities.${item.record ? 'recorded' : 'planned'}`)}</Text>
+      {item.occurrence && <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 12 }}>{t('sportRepeat.onlyThis')}</Text>}
       <View style={{ ...surfaces.card, borderRadius: radius.lg, padding: 20, marginVertical: 20, gap: 14 }}>
         <Text style={{ color: colors.textPrimary, fontSize: 19 }}>{new Intl.DateTimeFormat(i18n.language, { dateStyle: 'full', timeStyle: 'short', timeZone: (item.record ?? item.planned)!.timeZone }).format(sportActivityStart(item))}</Text>
         <Text style={{ color: colors.textPrimary, fontSize: 28, fontWeight: '700' }}>{t('sportActivities.minutes', { value: sportActivityMinutes(item) })}</Text>

@@ -9,11 +9,12 @@ import { coordinateCardioBlock, dateInZone, type DatedStrength } from '@/service
 import { shiftCalendarDate } from '@/services/training/trainingCalendar';
 import { cardioCycleDoses, cardioSlotPrescription } from '@/services/cardio/cardioProgressionPolicy';
 
-export function CardioTimeline({ block, sports, strength, workouts, onEdit, onOpen }: {
+export function CardioTimeline({ block, sports, strength, workouts, onEdit, onOpen, initialCycle = 0 }: {
   block: CardioBlock; sports: SportActivity[]; strength: DatedStrength[]; workouts: CardioWorkout[];
   onEdit?: (slot: CardioSlot) => void; onOpen?: (slot: CardioSlot, workout?: CardioWorkout) => void;
+  initialCycle?: number;
 }) {
-  const [cycle, setCycle] = useState(0); const { t } = useTranslation(); const { colors, surfaces, radius, semantic } = useTheme();
+  const [cycle, setCycle] = useState(Number.isInteger(initialCycle) && initialCycle >= 0 && initialCycle < block.cycles ? initialCycle : 0); const { t } = useTranslation(); const { colors, surfaces, radius, semantic } = useTheme();
   const rows = coordinateCardioBlock(block, sports, strength), current = Math.min(cycle, block.cycles - 1), doses = cardioCycleDoses(block);
   return <View style={{ gap: 10 }}>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
@@ -38,9 +39,9 @@ export function CardioTimeline({ block, sports, strength, workouts, onEdit, onOp
           const p = workout?.prescription ?? cardioSlotPrescription(block, slot.id, true);
           return <View key={slot.id} style={{ gap: 8 }}>
             <Text style={{ color: colors.textPrimary, fontSize: 18, fontWeight: '600', textDecorationLine: slot.disposition === 'SKIPPED' ? 'line-through' : 'none' }}>
-              {t(`cardioPlan.${p.modality}`)} · {workout ? `${Math.floor(workout.actualSeconds! / 60)}:${String(workout.actualSeconds! % 60).padStart(2, '0')} ✓` : `${p.durationSeconds / 60} min`}
+              {t(`cardioPlan.${p.modality}`)} · {workout ? `${Math.floor(workout.actualSeconds! / 60)}:${String(workout.actualSeconds! % 60).padStart(2, '0')} ✓` : p.durationSeconds ? `${p.durationSeconds / 60} min` : t('manualCardio.untimed')}
             </Text>
-            {workout && <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{t('cardioTraining.plannedDuration', { minutes: p.durationSeconds / 60 })}</Text>}
+            {workout && p.durationSeconds > 0 && <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{t('cardioTraining.plannedDuration', { minutes: p.durationSeconds / 60 })}</Text>}
             {!workout && block.progression && !doses[slot.cycle].confirmed && <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{t('cardioProgression.executionFallback', { minutes: cardioSlotPrescription(block, slot.id).durationSeconds / 60 })}</Text>}
             {slot.disposition !== 'CARDIO' && <Text style={{ color: colors.textSecondary }}>{t(slot.disposition === 'SKIPPED' ? 'cardioTraining.skipped' : coveredBySport ? 'cardioTraining.sportRecorded' : 'cardioTraining.sportReserved')}</Text>}
             {issues.map(issue => <Text key={issue} style={{ color: semantic.warning, fontSize: 13 }}>{t(`cardioTraining.issue_${issue}`)}</Text>)}

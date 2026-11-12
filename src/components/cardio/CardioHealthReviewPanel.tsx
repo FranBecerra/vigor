@@ -5,24 +5,28 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/theme/useTheme';
 import type { CardioHealthState } from '@/hooks/useCardioHealthReview';
 import type { CardioHealthRead } from '@/models/cardioHealth';
-import { reviewCardioHealth } from '@/services/cardio/cardioHealthReview';
+import { cardioWorkoutMetrics, reviewCardioHealth } from '@/services/cardio/cardioHealthReview';
 import { CheckIcon } from '@/components/icons/ActionIcons';
 import { CardioStartingPointPanel } from './CardioStartingPointPanel';
 import type { ReviewedCardioStart } from '@/services/cardio/reviewedCardioStart';
+import type { CardioStartContext } from '@/services/cardio/cardioStartingPoint';
 
 export interface CardioHealthPanelProps {
   state: CardioHealthState; data?: CardioHealthRead; observedAt?: number;
   onRead(): void; onClear(): void; onClose(): void;
-  onPlan?: (baseline: ReviewedCardioStart) => void;
+  onPlan?: (baseline: ReviewedCardioStart, remember?: boolean) => void;
+  canRemember?: boolean;
+  planningContext?: CardioStartContext;
 }
 export function CardioHealthReviewPanel(props: CardioHealthPanelProps) {
   // Fresh native reads reset source selection, exclusions and the ephemeral confirmation.
-  return <OwnedReview key={`${props.state}:${props.observedAt ?? ''}`} {...props} />;
+  return <OwnedReview key={`${props.state}:${props.observedAt ?? ''}:${JSON.stringify(props.planningContext)}`} {...props} />;
 }
-function OwnedReview({ state, data, observedAt, onRead, onClear, onClose, onPlan }: CardioHealthPanelProps) {
+function OwnedReview({ state, data, observedAt, onRead, onClear, onClose, onPlan, planningContext, canRemember }: CardioHealthPanelProps) {
   const { t } = useTranslation(), { colors, surfaces, radius, semantic, sectionAccent } = useTheme(), insets = useSafeAreaInsets();
   const [sourceId, setSourceId] = useState<string>(), [excluded, setExcluded] = useState<string[]>([]), [confirmed, setConfirmed] = useState(false);
   const [visibleRows, setVisibleRows] = useState(20);
+  const [showRecords, setShowRecords] = useState(!planningContext);
   const review = useMemo(() => data && observedAt ? reviewCardioHealth(data, observedAt, sourceId, excluded) : null, [data, observedAt, sourceId, excluded]);
   const busy = state === 'AUTHORIZING' || state === 'LOADING';
   const text = { color: colors.textPrimary, fontSize: 17 }, caption = { color: colors.textSecondary, fontSize: 14, lineHeight: 21 };
@@ -52,7 +56,7 @@ function OwnedReview({ state, data, observedAt, onRead, onClear, onClose, onPlan
       {review && <>
         <View style={card}>
           <Text style={{ ...text, fontWeight: '600' }}>{t('cardioHealth.window', { start: new Date(review.start).toLocaleDateString(), end: new Date(review.end).toLocaleDateString() })}</Text>
-          <Text style={caption}>{t('cardioHealth.incompleteAccess')}</Text>
+          <Text style={caption}>{t(planningContext ? 'planningHistory.availableScope' : 'cardioHealth.incompleteAccess')}</Text>
           {review.limited && <Text accessibilityRole="alert" style={{ ...caption, color: semantic.warning }}>{t('cardioHealth.limited')}</Text>}
           {review.truncated && <Text accessibilityRole="alert" style={{ ...text, color: semantic.warning }}>{t('cardioHealth.truncated')}</Text>}
           {count('duplicates', review.duplicateCount)}{count('ownExports', review.ownCount)}{count('manual', review.manualCount)}{count('mixed', review.mixedCount)}
@@ -78,14 +82,20 @@ function OwnedReview({ state, data, observedAt, onRead, onClear, onClose, onPlan
           <Text style={caption}>{t('cardioHealth.longest', { minutes: Math.round(group.longestMinutes) })}</Text>
           {group.distanceMetres !== null && <Text style={caption}>{t('cardioHealth.distance', { km: Math.round(group.distanceMetres / 100) / 10, count: group.distanceSessions })}</Text>}
         </View>)}
-        {!!review.rows.length && <Text style={{ ...text, fontWeight: '700', marginVertical: 16 }}>{t('cardioHealth.sessions')}</Text>}
-        {review.rows.slice(0, visibleRows).map(row => {
+        {planningContext && review.canConfirm && data && observedAt && <CardioStartingPointPanel key={JSON.stringify([sourceId, excluded])} data={data} observedAt={observedAt} sourceId={sourceId} excludedIds={excluded} onPlan={onPlan} planningContext={planningContext} canRemember={canRemember && !sourceId && !excluded.length} />}
+        {planningContext && !!review.rows.length && action(t(showRecords ? 'planningHistory.hideRecords' : 'planningHistory.records'), () => setShowRecords(value => !value))}
+        {showRecords && !!review.rows.length && <Text style={{ ...text, fontWeight: '700', marginVertical: 16 }}>{t('cardioHealth.sessions')}</Text>}
+        {showRecords && review.rows.slice(0, visibleRows).map(row => {
           const disabled = row.manuallyEntered || row.mixedActivities, selected = !excluded.includes(row.id);
+          const metrics = cardioWorkoutMetrics(row), pace = metrics.paceSecondsPerKm;
           return <View key={row.id} style={card}>
             <Text style={{ ...text, fontWeight: '600' }}>{t(`cardioHealth.kind_${row.kind}`)}</Text>
             <Text style={caption}>{new Date(row.start).toLocaleString()} · {Math.round(row.durationSeconds / 60)} min</Text>
             <Text style={caption}>{row.sourceName}</Text>
             {row.distanceMetres !== undefined && <Text style={caption}>{Math.round(row.distanceMetres / 100) / 10} km</Text>}
+            {!!pace && <Text style={caption}>{t('cardioHealth.pace', { pace: `${Math.floor(pace / 60)}:${String(pace % 60).padStart(2, '0')}` })}</Text>}
+            {!!metrics.averageHeartRateBpm && <Text style={caption}>{t('cardioHealth.pulse', { bpm: metrics.averageHeartRateBpm })}</Text>}
+            {!!row.heartRateZoneSeconds?.[1] && <Text style={caption}>{t('planningHistory.zoneTwo', { minutes: Math.round(row.heartRateZoneSeconds[1] / 60) })}</Text>}
             {row.manuallyEntered && <Text style={caption}>{t('cardioHealth.manualRow')}</Text>}
             {row.mixedActivities && <Text style={caption}>{t('cardioHealth.mixedRow')}</Text>}
             {review.overlappingIds.includes(row.id) && <Text style={{ ...caption, color: semantic.warning }}>{t('cardioHealth.overlapRow')}</Text>}
@@ -98,11 +108,11 @@ function OwnedReview({ state, data, observedAt, onRead, onClear, onClose, onPlan
               </View><Text style={{ ...text, color: colors.accentText }}>{t('cardioHealth.includeShort')}</Text></Pressable>}
           </View>;
         })}
-        {review.rows.length > visibleRows && action(t('cardioHealth.more'), () => setVisibleRows(value => value + 20))}
-        <Text style={{ ...caption, marginVertical: 12 }}>{t('cardioHealth.noPrescription')}</Text>
-        {action(t('cardioHealth.confirm'), () => setConfirmed(true), !review.canConfirm, true)}
+        {showRecords && review.rows.length > visibleRows && action(t('cardioHealth.more'), () => setVisibleRows(value => value + 20))}
+        {!planningContext && <Text style={{ ...caption, marginVertical: 12 }}>{t('cardioHealth.noPrescription')}</Text>}
+        {!planningContext && action(t('cardioHealth.confirm'), () => setConfirmed(true), !review.canConfirm, true)}
         {confirmed && <Text accessibilityRole="alert" style={{ ...text, marginVertical: 12 }}>{t('cardioHealth.confirmed')}</Text>}
-        {confirmed && review.canConfirm && data && observedAt && <CardioStartingPointPanel data={data} observedAt={observedAt} sourceId={sourceId} excludedIds={excluded} onPlan={onPlan} />}
+        {!planningContext && confirmed && review.canConfirm && data && observedAt && <CardioStartingPointPanel data={data} observedAt={observedAt} sourceId={sourceId} excludedIds={excluded} onPlan={onPlan} />}
         {action(t('cardioHealth.refresh'), onRead)}
         {action(t('cardioHealth.clear'), onClear)}
       </>}

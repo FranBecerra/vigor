@@ -1,0 +1,30 @@
+import React from 'react';
+import { CardioSelectRow } from '../CardioSelectRow';
+const {create,act}=require('react-test-renderer');
+const options=[{value:'NEW',label:'New'},{value:'REGULAR',label:'Regular'}];
+const button=(tree:any,label:string)=>tree.root.findAll((n:any)=>n.props.accessibilityLabel===label&&typeof n.props.onPress==='function')[0];
+it('opens in place, selects a value, closes and displays the controlled choice',async()=>{
+  let tree:any; const change=jest.fn();
+  const render=(value='NEW',disabled=false)=><CardioSelectRow label="Experience" value={value} options={options} onSelect={change} disabled={disabled}/>;
+  await act(async()=>{tree=create(render())});
+  expect(button(tree,'Experience').props.accessibilityState.expanded).toBe(false);
+  expect(button(tree,'Regular')).toBeUndefined();
+  await act(async()=>button(tree,'Experience').props.onPress());
+  expect(button(tree,'New').props.accessibilityState.checked).toBe(true);
+  await act(async()=>button(tree,'Regular').props.onPress()); expect(change).toHaveBeenCalledWith('REGULAR');
+  expect(button(tree,'Experience').props.accessibilityState.expanded).toBe(false);
+  await act(async()=>tree.update(render('REGULAR')));
+  await act(async()=>button(tree,'Experience').props.onPress());
+  expect(button(tree,'Regular').props.accessibilityState.checked).toBe(true);
+  await act(async()=>tree.update(render('REGULAR',true)));
+  expect(button(tree,'Experience').props.disabled).toBe(true);
+  expect(button(tree,'New').props.disabled).toBe(true);
+  await act(async()=>tree.unmount());
+});
+it('renders an unknown controlled value without inventing a selected option',async()=>{
+  let tree:any; await act(async()=>{tree=create(<CardioSelectRow label="Experience" value="UNKNOWN" options={[]} onSelect={jest.fn()}/>)});
+  expect(JSON.stringify(tree.toJSON())).toContain('UNKNOWN');
+  await act(async()=>button(tree,'Experience').props.onPress());
+  expect(tree.root.findAll((n:any)=>n.props.accessibilityRole==='radio')).toHaveLength(0);
+  await act(async()=>tree.unmount());
+});

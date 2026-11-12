@@ -8,7 +8,7 @@ import { CardioHealthReviewPanel } from '@/components/cardio/CardioHealthReviewP
 import type { CardioHealthBridge, CardioHealthWorkout } from '@/models/cardioHealth';
 import { CardioPlanBuilder } from '@/components/cardio/CardioPlanBuilder';
 import type { ReviewedCardioStart } from '@/services/cardio/reviewedCardioStart';
-import { saveCardioProposal } from '@/services/cardio/savedCardioPlan';
+import { cardioInputForSave, saveCardioProposal } from '@/services/cardio/savedCardioPlan';
 
 /** Synthetic native acceptance: no real Health bridge, permission or account write. */
 export default function CardioHealthCheck() {
@@ -39,7 +39,7 @@ export default function CardioHealthCheck() {
       <Text style={{ color: colors.accentText }}>Return to fixture</Text>
     </Pressable></View>;
   if (baseline) return <CardioPlanBuilder initialBaseline={baseline} ready error={false} onRetry={() => undefined} onCancel={() => setBaseline(null)}
-    onSave={async (name, input, accepted) => { saveCardioProposal('synthetic', 'synthetic-owner', name, input, null, Date.now(), accepted); setSaved(true); }} />;
+    onSave={async (name, input) => { saveCardioProposal('synthetic', 'synthetic-owner', name, cardioInputForSave(input, Date.now()), null, Date.now()); setSaved(true); }} />;
   return <View style={{ flex: 1, ...surfaces.screen, paddingTop: insets.top }}>
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16 }}>{(['RECORDS', 'BASELINE', 'EMPTY', 'ERROR', 'UNAVAILABLE', 'TRUNCATED'] as const).map(value => <Pressable key={value}
       accessibilityRole="button" accessibilityLabel={`Fixture ${value}`} onPress={() => { review.clear(); setScenario(value); }} style={{ minHeight: 44, padding: 8 }}>

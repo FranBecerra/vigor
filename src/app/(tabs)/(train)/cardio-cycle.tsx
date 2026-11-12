@@ -20,7 +20,9 @@ function OwnedCycle({ id }: { id?: string }) {
   const plans = useCardioPlans(), strength = useRoutines(); const router = useRouter(); const insets = useSafeAreaInsets();
   const { t } = useTranslation(); const { colors, surfaces, semantic } = useTheme();
   const plan = plans.entries.find(p => p.id === id);
-  const routine = strength.routines.find(r => r.isActive && r.domain === 'STRENGTH');
+  const linkedHybrid = strength.routines.find(r => r.id === plan?.strengthSource?.routineId && r.hybrid?.cardioPlanId === plan?.id);
+  const routine = linkedHybrid ?? strength.routines.find(r => r.isActive && r.domain === 'STRENGTH');
+  const inactiveHybrid = !!linkedHybrid && !linkedHybrid.isActive;
   const [busy, setBusy] = useState(false), [error, setError] = useState(false); const live = useRef(false), lock = useRef(false);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
   const back = () => router.dismissTo('/(tabs)/(train)');
@@ -34,10 +36,12 @@ function OwnedCycle({ id }: { id?: string }) {
       <Text accessibilityRole="header" style={{ color: colors.textPrimary, fontSize: 29, fontWeight: '700', marginVertical: 16 }}>{plan.name}</Text>
       <Text style={{ color: colors.bioText, fontSize: 15, marginBottom: 16 }}>{t('cardioSaved.proposal')}</Text>
       <Text style={{ color: colors.textSecondary, fontSize: 15, lineHeight: 21, marginBottom: 20 }}>{t('cardioSaved.notActive')}</Text>
+      {inactiveHybrid && <View><Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('hybridPlan.inactiveStrength')}</Text>
+        {button(t('hybridPlan.openTraining'), back)}</View>}
       {plan.strengthSource && (strength.status !== 'ready' || cardioStrengthChanged(plan, routine)) && <Text accessibilityRole="alert" style={{ color: semantic.warning, marginBottom: 16 }}>{t(strength.status !== 'ready' ? 'cardioSaved.contextUnavailable' : 'cardioSaved.contextChanged')}</Text>}
       {strength.status === 'error' && button(t('cardioSaved.retryStrength'), strength.reload)}
-      <CardioCycleView input={plan.input} preview={plan.preview} />
-      <CardioActivation plan={plan} routine={routine} ready={strength.status === 'ready' && !plans.error} />
+      <CardioCycleView input={plan.input} preview={plan.preview} currentStrengthDetails strengthRoutine={plan.strengthSource && strength.status === 'ready' && !cardioStrengthChanged(plan, routine) ? routine : undefined} />
+      <CardioActivation plan={plan} routine={routine} ready={strength.status === 'ready' && !plans.error && !inactiveHybrid} />
       {plans.pending && <Text style={{ color: colors.textSecondary, marginTop: 14 }}>{t('cardioSaved.pending')}</Text>}
       {!plans.error && button(t('cardioSaved.archive'), () => Alert.alert(t('cardioSaved.archive'), t('cardioSaved.confirmArchive'), [
         { text: t('generate.cancel'), style: 'cancel' }, { text: t('cardioSaved.archive'), style: 'destructive', onPress: async () => {

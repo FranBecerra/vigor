@@ -20,6 +20,7 @@ export function SportActivityCard({ activity, onPress }: { activity: SportActivi
       <Text style={{ color: colors.textPrimary, fontSize: 18, fontWeight: '600' }}>{title}</Text>
       <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short', timeZone }).format(sportActivityStart(activity))}</Text>
       <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t(`sportActivities.${activity.record ? 'recorded' : 'planned'}`)} · {t('sportActivities.minutes', { value: sportActivityMinutes(activity) })}{effort !== null ? ` · ${effort}/10` : ''}</Text>
+      {activity.occurrence && <Text style={{ color: colors.textSecondary, fontSize: 13 }}>{t('sportRepeat.recurring')}</Text>}
     </View>
     <Text style={{ color: colors.textMuted, fontSize: 22 }}>›</Text>
   </Pressable>;

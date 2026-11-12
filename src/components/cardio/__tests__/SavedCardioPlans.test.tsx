@@ -4,6 +4,10 @@ import { SavedCardioPlans } from '../SavedCardioPlans';
 import CardioCycleScreen from '@/app/(tabs)/(train)/cardio-cycle';
 import { CardioCycleView } from '../CardioCycleView';
 import { cardioStrengthSource, saveCardioProposal } from '@/services/cardio/savedCardioPlan';
+import { CardioActivation } from '../CardioActivation';
+import { hybridFixture } from '@/test-support/hybridFixture';
+import { prepareHybridBundle } from '@/services/cardio/hybridAuthoring';
+import { toRoutineView } from '@/services/training/routineView';
 const { create, act } = require('react-test-renderer');
 const mockRouter = { push: jest.fn(), dismissTo: jest.fn() };
 let mockUid = 'owner'; const mockStrength = { routines: [] as any[], status: 'ready', reload: jest.fn() };
@@ -34,7 +38,7 @@ it('reopens exactly the saved relative cycle and session prescription, including
   let tree: any; await act(async () => { tree = create(<CardioCycleScreen />); });
   expect(tree.root.findByType(CardioCycleView).props.preview).toBe(saved.preview); expect(output(tree)).toContain('cardioSaved.notActive');
   await act(async () => press(tree, 'cardioPlan.openSession')); expect(output(tree)).toContain('20:00'); expect(output(tree)).toContain('cardioPlan.walking');
-  await act(async () => press(tree, 'workout.done')); await act(async () => press(tree, 'generate.back'));
+  await act(async () => press(tree, 'cardioPlan.openSession')); await act(async () => press(tree, 'generate.back'));
   expect(mockRouter.dismissTo).toHaveBeenCalledWith('/(tabs)/(train)'); await act(async () => tree.unmount());
 });
 it('warns about changed or unavailable strength without rewriting or hiding the saved snapshot', async () => {
@@ -73,4 +77,19 @@ it('archives successfully and returns directly to training', async () => {
   await act(async () => { tree = create(<CardioCycleScreen />); }); await act(async () => press(tree, 'cardioSaved.archive'));
   await act(async () => alert.mock.calls[0][2]![1].onPress!()); expect(mockRouter.dismissTo).toHaveBeenCalledWith('/(tabs)/(train)');
   expect(mockPlans.archive).toHaveBeenCalledWith(saved); await act(async () => tree.unmount()); alert.mockRestore();
+});
+
+it('reviews the linked hybrid source rather than another active routine and blocks cardio activation until strength is active', async () => {
+  const f = hybridFixture(), b = prepareHybridBundle(f.draft, f.input, f.settings, f.exercises, f.labels, now);
+  // Route fixture uses p; retain a valid source-specific identity on its visible view.
+  const linked = toRoutineView(b.routine, b.mesocycle, f.exercises, f.labels)!;
+  linked.hybrid = { ...linked.hybrid!, cardioPlanId: 'p' };
+  mockPlans.entries = [{ ...b.cardio, id: 'p' }]; mockStrength.routines = [routine, linked]; let tree: any;
+  await act(async () => { tree = create(<CardioCycleScreen />); });
+  expect(tree.root.findByType(CardioActivation).props.routine).toBe(linked);
+  expect(tree.root.findByType(CardioActivation).props.ready).toBe(false); expect(output(tree)).toContain('hybridPlan.inactiveStrength');
+  await act(async () => press(tree, 'hybridPlan.openTraining')); expect(mockRouter.dismissTo).toHaveBeenCalledWith('/(tabs)/(train)');
+  linked.isActive = true; await act(async () => tree.update(<CardioCycleScreen />));
+  expect(tree.root.findByType(CardioActivation).props.ready).toBe(true); expect(output(tree)).not.toContain('hybridPlan.inactiveStrength');
+  await act(async () => tree.unmount());
 });

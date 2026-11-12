@@ -16,10 +16,10 @@ import type { CardioSlot } from '@/models/cardioTraining';
 import { CardioProgressionReview } from '@/components/cardio/CardioProgressionReview';
 
 export default function CardioBlockScreen() {
-  const { uid } = useAuth(), { id } = useLocalSearchParams<{ id?: string }>();
-  return <OwnedBlock key={`${uid}:${id}`} id={id} />;
+  const { uid } = useAuth(), { id, cycle } = useLocalSearchParams<{ id?: string; cycle?: string }>();
+  return <OwnedBlock key={`${uid}:${id}:${cycle}`} id={id} initialCycle={cycle ? Number(cycle) : 0} />;
 }
-function OwnedBlock({ id }: { id?: string }) {
+function OwnedBlock({ id, initialCycle }: { id?: string; initialCycle: number }) {
   const blocks = useCardioBlocks(), workouts = useCardioWorkouts(), sports = useSportActivities(), strength = useRoutines();
   const { t } = useTranslation(), { colors, surfaces, semantic } = useTheme(), insets = useSafeAreaInsets(), router = useRouter();
   const block = blocks.entries.find(b => b.id === id), routine = strength.routines.find(r => r.domain === 'STRENGTH' && r.isActive);
@@ -49,7 +49,7 @@ function OwnedBlock({ id }: { id?: string }) {
       {cardioStrengthChanged(block.proposal, routine) && <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('cardioSaved.contextChanged')}</Text>}
       {running.map(w => button(`${t('cardioTraining.resume')} · ${t(`cardioPlan.${w.prescription.modality}`)}`, () => router.push({ pathname: '/cardio-workout', params: { id: w.id } })))}
       <CardioProgressionReview block={block} workouts={workouts.entries} enabled={usable && !busy} onSave={(next, previous) => blocks.save(next, previous)} />
-      <CardioTimeline block={block} sports={sports.entries} strength={assigned} workouts={workouts.entries}
+      <CardioTimeline block={block} sports={sports.entries} strength={assigned} workouts={workouts.entries} initialCycle={initialCycle}
         onEdit={block.endedAt === null && usable && !busy ? setEditing : undefined}
         onOpen={usable && !busy ? (slot, workout) => {
           if (workout) { router.push({ pathname: '/cardio-workout', params: { id: workout.id } }); return; }

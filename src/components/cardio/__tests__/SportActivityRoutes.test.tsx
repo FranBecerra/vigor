@@ -1,10 +1,11 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import ActivityScreen from '@/app/(tabs)/(train)/activity';
 import ActivityEditorScreen from '@/app/(tabs)/(train)/activity-editor';
 import ActivitiesScreen from '@/app/(tabs)/(train)/activities';
 import { SportActivityForm } from '../SportActivityForm';
 import { SportActivitiesHome } from '../SportActivitiesHome';
+import { SportActivityCard } from '../SportActivityCard';
 import { saveSportDraft } from '@/services/cardio/sportActivities';
 const { create, act } = require('react-test-renderer');
 const mockRouter = { push: jest.fn(), back: jest.fn(), replace: jest.fn(), dismissTo: jest.fn(), canGoBack: jest.fn(() => true) };
@@ -27,8 +28,32 @@ function press(tree: any, label: string) {
   return tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0].props.onPress();
 }
 beforeEach(() => {
+  jest.spyOn(AppState, 'addEventListener').mockReturnValue({ remove: jest.fn() });
   jest.clearAllMocks(); mockParams = { id: 'a', mode: 'PLAN' }; mockUid = 'owner'; mockSports.entries = [planned];
   mockSports.ready = true; mockSports.error = false; mockSports.save.mockResolvedValue(completed); mockSports.discard.mockResolvedValue(undefined); mockRouter.canGoBack.mockReturnValue(true);
+});
+
+it('refreshes upcoming classes on the minute and foreground, without turning expired plans into records', async () => {
+  jest.useFakeTimers(); jest.setSystemTime(now);
+  const listeners: Array<(state: string) => void> = [], remove = jest.fn();
+  const appState = jest.spyOn(AppState, 'addEventListener').mockImplementation((_event, handler) => {
+    listeners.push(handler as any); return { remove };
+  });
+  let tree: any;
+  try {
+    const ongoing = saveSportDraft('ongoing', 'owner', { ...draft, startAt: now, durationMinutes: 1 }, now);
+    const next = saveSportDraft('next', 'owner', { ...draft, startAt: now + 7200000 }, now);
+    mockSports.entries = [planned, ongoing, next];
+    await act(async () => { tree = create(<SportActivitiesHome />); });
+    expect(tree.root.findAllByType(SportActivityCard).map((n: any) => n.props.activity.id)).toEqual(['ongoing', 'next']);
+    await act(async () => jest.advanceTimersByTime(60000));
+    expect(tree.root.findAllByType(SportActivityCard).map((n: any) => n.props.activity.id)).toEqual(['next']);
+    jest.setSystemTime(now + 14400000);
+    await act(async () => listeners.forEach((listener) => { listener('background'); listener('active'); }));
+    expect(tree.root.findAllByType(SportActivityCard)).toHaveLength(0);
+    expect(mockSports.entries.every((e) => e.record === null)).toBe(true);
+    await act(async () => tree.unmount()); expect(remove).toHaveBeenCalled();
+  } finally { appState.mockRestore(); jest.useRealTimers(); }
 });
 
 it('opens edit or recording from a plan and requires explicit confirmation before discarding it', async () => {

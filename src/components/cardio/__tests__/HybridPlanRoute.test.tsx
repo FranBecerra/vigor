@@ -1,0 +1,35 @@
+import React from 'react';
+import HybridPlanScreen from '@/app/(tabs)/(train)/hybrid-plan';
+import { hybridFixture } from '@/test-support/hybridFixture';
+import { prepareHybridBundle } from '@/services/cardio/hybridAuthoring';
+const { create, act } = require('react-test-renderer');
+let mockOwner: string | null = 'owner', mockProps: any;
+const mockSave = jest.fn(), mockRouter = { replace: jest.fn(), canGoBack: () => true, back: jest.fn() };
+jest.mock('expo-router', () => ({ useLocalSearchParams: () => ({}), useFocusEffect: (effect: any) => require('react').useEffect(effect, [effect]), Stack: { Screen: () => null }, useRouter: () => mockRouter }));
+jest.mock('@/app/(tabs)/(train)/generate', () => ({ StrengthPlanBuilder: () => null }));
+jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: mockOwner }) }));
+jest.mock('@/hooks/useCardioTraining', () => ({ useCardioWorkouts: () => ({ owner: mockOwner, ready: true, error: false, entries: [], reload: jest.fn() }) }));
+jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ exercisesById: new Map() }) }));
+jest.mock('../HybridPlanBuilder', () => ({ HybridPlanBuilder: (props: unknown) => { mockProps = props; return null; } }));
+jest.mock('@/services/cardio/hybridAuthoringRepository', () => ({ saveHybridBundle: (...args: unknown[]) => mockSave(...args) }));
+jest.mock('@react-native-firebase/firestore', () => ({ collection: () => ({}), doc: () => ({ id: 'abcdefghijklmnopqrst' }) }));
+jest.mock('@/services/firebase', () => ({ db: {} }));
+beforeEach(() => { jest.clearAllMocks(); mockOwner = 'owner'; mockSave.mockResolvedValue(undefined); });
+it('opens only the saved cardio review after atomic acceptance and returns cancellation directly to its caller', async () => {
+  const f = hybridFixture(), b = prepareHybridBundle(f.draft, f.input, f.settings, f.exercises, f.labels, 1800000000000); let tree: any;
+  await act(async () => { tree = create(<HybridPlanScreen />); });
+  await act(async () => mockProps.onSave(b)); expect(mockSave).toHaveBeenCalledWith(b, 'owner', expect.any(Function));
+  expect(mockRouter.replace).toHaveBeenCalledWith({ pathname: '/cardio-cycle', params: { id: b.cardio.id } });
+  await act(async () => mockProps.onCancel()); expect(mockRouter.back).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount());
+});
+it('suppresses late navigation and permanently invalidates an old owner across an account round trip', async () => {
+  const f = hybridFixture(), b = prepareHybridBundle(f.draft, f.input, f.settings, f.exercises, f.labels, 1800000000000); let tree: any, release: () => void;
+  mockSave.mockImplementation(() => new Promise<void>(resolve => { release = resolve; }));
+  await act(async () => { tree = create(<HybridPlanScreen />); }); const previous = mockProps;
+  let result: Promise<void>; await act(async () => { result = previous.onSave(b); });
+  mockOwner = 'other'; await act(async () => tree.update(<HybridPlanScreen />));
+  mockOwner = 'owner'; await act(async () => tree.update(<HybridPlanScreen />));
+  await act(async () => { release!(); await result!; }); expect(mockRouter.replace).not.toHaveBeenCalled();
+  await expect(previous.onSave(b)).rejects.toThrow('staleHybridOwner'); await act(async () => tree.unmount());
+});

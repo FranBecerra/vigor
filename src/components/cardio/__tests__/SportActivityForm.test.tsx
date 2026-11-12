@@ -7,6 +7,8 @@ import { SessionEffortInput } from '@/components/train/SessionEffortInput';
 import { saveSportDraft } from '@/services/cardio/sportActivities';
 import { SportActivityIcon } from '@/components/icons/SportActivityIcon';
 import { SPORT_KINDS } from '@/models/sportActivity';
+import { SportRecurrenceFields } from '../SportRecurrenceFields';
+import { createSportActivitySeries } from '@/services/cardio/sportActivitySeries';
 import es from '@/i18n/locales/es.json';
 const { create, act } = require('react-test-renderer');
 let mockLocalized = false;
@@ -108,5 +110,60 @@ it('lists all sports alphabetically in the current language, with icons and acce
     expect(row.props.accessibilityRole).toBe('radio'); expect(row.props.style.minHeight).toBeGreaterThanOrEqual(48);
     await act(async () => row.props.onPress());
   }
+  await act(async () => tree.unmount());
+});
+
+it('previews weekly and monthly recurrence, stages its end date, and saves only on explicit confirmation', async () => {
+  const save = jest.fn().mockResolvedValue(undefined), cancel = jest.fn(); let tree: any;
+  await act(async () => { tree = create(<SportActivityForm activity={null} mode="PLAN" onSave={save} onCancel={cancel} />); });
+  await act(async () => press(tree, 'sportRepeat.WEEKLY'));
+  let recurrence = tree.root.findByType(SportRecurrenceFields);
+  expect(recurrence.props.rule).toMatchObject({ frequency: 'WEEKLY', interval: 1 });
+  expect(save).not.toHaveBeenCalled();
+  await act(async () => press(tree, 'sportRepeat.allDates')); await act(async () => press(tree, 'sportRepeat.fewerDates'));
+  await act(async () => press(tree, 'sportRepeat.until'));
+  expect(tree.root.findByType(DateTimePicker).props.timeZoneName).toBe('UTC');
+  await act(async () => tree.root.findByType(DateTimePicker).props.onValueChange({}, new Date('2026-12-31T12:00Z')));
+  expect(tree.root.findByType(SportRecurrenceFields).props.rule.untilDate).toBe('2026-12-31');
+  await act(async () => press(tree, 'sportRepeat.MONTHLY'));
+  recurrence = tree.root.findByType(SportRecurrenceFields);
+  expect(recurrence.props.rule.weekdays).toBeUndefined();
+  await act(async () => press(tree, 'sportRepeat.save'));
+  expect(save).toHaveBeenLastCalledWith(expect.objectContaining({ repeat: { frequency: 'MONTHLY', interval: 1, untilDate: '2026-12-31' } }));
+  await act(async () => press(tree, 'sportRepeat.NONE'));
+  await act(async () => press(tree, 'sportActivities.save'));
+  expect(save.mock.calls.at(-1)![0].repeat).toBeUndefined();
+  await act(async () => press(tree, 'generate.cancel')); expect(cancel).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount());
+});
+
+it('exposes invalid intervals/weekdays, retains failed recurring drafts and preserves an existing occurrence timezone', async () => {
+  const save = jest.fn().mockRejectedValueOnce(Error('sportRecurrenceTooLarge')).mockRejectedValueOnce(Error('invalidSportRecurrence'));
+  let tree: any;
+  await act(async () => { tree = create(<SportActivityForm activity={null} mode="PLAN" onSave={save} onCancel={jest.fn()} />); });
+  await act(async () => press(tree, 'sportRepeat.WEEKLY'));
+  const interval = tree.root.findAllByType(NumericField).find((field: any) => field.props.accessibilityLabel === 'sportRepeat.interval');
+  await act(async () => interval.props.onChangeValue(undefined));
+  expect(tree.root.findAll((n: any) => n.props.accessibilityRole === 'alert').some((n: any) => n.props.children === 'sportRepeat.invalid')).toBe(true);
+  await act(async () => interval.props.onChangeValue(1));
+  const days = () => tree.root.findAll((n: any) => n.props.accessibilityRole === 'checkbox' && typeof n.props.onPress === 'function' && n.props.accessibilityLabel?.length < 6);
+  const selected = days().find((n: any) => n.props.accessibilityState.checked);
+  await act(async () => selected.props.onPress());
+  expect(tree.root.findByType(SportRecurrenceFields).props.rule.weekdays).toEqual([]);
+  await act(async () => days()[0].props.onPress());
+  await act(async () => press(tree, 'sportRepeat.save'));
+  expect(tree.root.findByType(SportRecurrenceFields).props.rule.frequency).toBe('WEEKLY');
+  await act(async () => press(tree, 'sportRepeat.save'));
+  expect(tree.root.findAll((n: any) => n.props.accessibilityRole === 'alert').some((n: any) => n.props.children === 'sportRepeat.invalid')).toBe(true);
+  await act(async () => tree.unmount());
+  const series = createSportActivitySeries('s', 'owner', { sport: 'PADEL', context: 'CLASS', name: '', notes: '', mode: 'PLAN',
+    startAt: now + 3600000, timeZone: 'Pacific/Kiritimati', durationMinutes: 60, effort: null,
+    repeat: { frequency: 'WEEKLY', interval: 1, weekdays: [4], untilDate: '2026-11-12' } }, now);
+  await act(async () => { tree = create(<SportActivityForm activity={series.occurrences['0']} mode="RECORD" onSave={jest.fn()} onCancel={jest.fn()} />); });
+  expect(tree.root.findAllByType(SportRecurrenceFields)).toHaveLength(0);
+  expect(tree.root.findAll((n: any) => n.type === 'Text').some((n: any) => n.props.children === 'sportRepeat.onlyThis')).toBe(true);
+  const buttons = tree.root.findAll((n: any) => typeof n.props.onPress === 'function' && n.props.accessibilityLabel?.includes('Oct'));
+  expect(buttons[0].props.accessibilityLabel).toBe(new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'Pacific/Kiritimati' }).format(series.occurrences['0'].planned!.startAt));
+  await act(async () => buttons[0].props.onPress()); expect(tree.root.findByType(DateTimePicker).props.timeZoneName).toBe('Pacific/Kiritimati');
   await act(async () => tree.unmount());
 });

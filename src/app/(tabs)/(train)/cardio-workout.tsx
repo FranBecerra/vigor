@@ -1,3 +1,4 @@
+import { manualTargetLabels } from '@/components/cardio/manualCardioLabels';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, AppState, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -6,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { useAuth } from '@/hooks/useAuth';
 import { useCardioWorkouts } from '@/hooks/useCardioTraining';
-import { cardioElapsed, cardioPhase, correctCardioWorkout, transitionCardioWorkout } from '@/services/cardio/cardioWorkout';
+import { advanceManualCardioPhase, cardioElapsed, cardioPhase, correctCardioWorkout, transitionCardioWorkout } from '@/services/cardio/cardioWorkout';
 import { SessionEffortInput } from '@/components/train/SessionEffortInput';
 import { NumericField } from '@/components/train/NumericField';
 import { sessionEffortValue } from '@/services/training/sessionFeedback';
@@ -78,13 +79,18 @@ export function CardioWorkoutPanel({ id, workouts, onExit }: { id?: string; work
         {button(t('cardioTraining.continue'), () => { if (editing) setEditing(false); else setSummary(false); })}
       </> : <>
         <View style={{ ...surfaces.hero, borderRadius: radius.lg, padding: 24, gap: 16 }}>
-          <Text style={{ color: colors.bioText, fontSize: 18 }}>{t(`cardioPlan.${phase!.phase === 'READY' ? 'EASY' : phase!.phase}`)}</Text>
-          <Text style={{ color: colors.textPrimary, fontSize: 48, fontWeight: '700' }}>{duration(phase!.remaining * 1000)}</Text>
+          <Text style={{ color: colors.bioText, fontSize: 18 }}>{t(`cardioPlan.${phase!.phase === 'READY' ? workout.prescription.policy === 'MANUAL_PHASES_V1' ? 'MAIN' : 'EASY' : phase!.phase}`)}</Text>
+          <Text style={{ color: colors.textPrimary, fontSize: 48, fontWeight: '700' }}>{phase!.remaining === null ? t('manualCardio.untimed') : duration(phase!.remaining * 1000)}</Text>
           <Text style={{ color: colors.textSecondary }}>{t('cardioTraining.elapsed')} {duration(cardioElapsed(workout, now))}</Text>
           {phase!.effort && <Text style={{ color: colors.textPrimary, fontSize: 18 }}>{t('cardioPlan.effortRange', phase!.effort)}</Text>}
           {phase!.phase === 'READY' && <Text style={{ color: colors.textPrimary }}>{t('cardioTraining.readyToFinish')}</Text>}
-          <Text style={{ color: colors.textSecondary }}>{t('cardioPlan.talkTest')}</Text>
-          {workout.prescription.allowWalking && <Text style={{ color: colors.textSecondary }}>{t('cardioPlan.walking')}</Text>}
+          {workout.prescription.policy === 'MANUAL_PHASES_V1' ? <>
+            {phase?.targets && manualTargetLabels(phase.targets, t).map(label => <Text key={label} style={{ color: colors.textPrimary }}>{label}</Text>)}
+            {phase?.phase !== 'READY' && button(t('manualCardio.nextPhase'), () => action(() => advanceManualCardioPhase(workout, Date.now())), false, workout.status !== 'RUNNING')}
+          </> : <>
+            <Text style={{ color: colors.textSecondary }}>{t('cardioPlan.talkTest')}</Text>
+            {workout.prescription.allowWalking && <Text style={{ color: colors.textSecondary }}>{t('cardioPlan.walking')}</Text>}
+          </>}
         </View>
         {button(t(workout.status === 'RUNNING' ? 'cardioTraining.pause' : 'cardioTraining.resume'), () => action(() => transitionCardioWorkout(workout, workout.status === 'RUNNING' ? 'PAUSE' : 'RESUME', Date.now())))}
         {button(t('cardioTraining.finish'), beginSummary)}

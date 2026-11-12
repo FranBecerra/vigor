@@ -9,6 +9,7 @@ import { NumericField } from '@/components/train/NumericField';
 import { SessionEffortInput } from '@/components/train/SessionEffortInput';
 import { useTheme } from '@/theme/useTheme';
 import { SportActivityIcon } from '@/components/icons/SportActivityIcon';
+import { SportRecurrenceFields } from './SportRecurrenceFields';
 
 /** Staged draft. The only persistence action is the explicit Save button. */
 export function SportActivityForm({ activity, mode, onSave, onCancel }: {
@@ -16,11 +17,10 @@ export function SportActivityForm({ activity, mode, onSave, onCancel }: {
   onSave: (draft: SportActivityDraft) => Promise<unknown>; onCancel: () => void;
 }) {
   const { t, i18n } = useTranslation(); const { colors, surfaces, radius, semantic, spacing, scheme, sectionAccent } = useTheme(); const insets = useSafeAreaInsets();
-  const [draft, setDraft] = useState(() => ({ ...sportDraft(activity, mode, Date.now(), Intl.DateTimeFormat().resolvedOptions().timeZone),
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }));
+  const [draft, setDraft] = useState(() => sportDraft(activity, mode, Date.now(), Intl.DateTimeFormat().resolvedOptions().timeZone));
   const [busy, setBusy] = useState(false), [error, setError] = useState<string | null>(null);
   const title = activity?.record || activity && mode === 'PLAN' ? 'edit' : mode === 'PLAN' ? 'plan' : 'record';
-  const saving = useRef(false); const [picker, setPicker] = useState<'date' | 'time' | null>(null);
+  const saving = useRef(false); const [picker, setPicker] = useState<'date' | 'time' | 'until' | null>(null);
   const patch = (change: Partial<SportActivityDraft>) => setDraft((old) => ({ ...old, ...change }));
   const choice = (label: string, selected: boolean, action: () => void) => <Pressable key={label} accessibilityRole="radio" accessibilityLabel={label}
     accessibilityState={{ selected, disabled: busy }} disabled={busy} onPress={action}
@@ -33,6 +33,7 @@ export function SportActivityForm({ activity, mode, onSave, onCancel }: {
     contentContainerStyle={{ padding: spacing.lg, paddingTop: insets.top + 12, paddingBottom: insets.bottom + 110, gap: 16 }}>
     <Pressable accessibilityRole="button" accessibilityLabel={t('generate.cancel')} disabled={busy} onPress={onCancel} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={{ color: colors.accentText, fontSize: 17 }}>{t('generate.cancel')}</Text></Pressable>
     <Text style={{ color: colors.textPrimary, fontSize: 29, fontWeight: '700' }}>{t(`sportActivities.${title}`)}</Text>
+    {activity?.occurrence && <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('sportRepeat.onlyThis')}</Text>}
     <View accessibilityRole="radiogroup" style={{ ...surfaces.card, borderRadius: radius.lg, paddingHorizontal: 16 }}>
       {[...SPORT_KINDS].sort((a, b) => t(`sportActivities.sports.${a}`).localeCompare(t(`sportActivities.sports.${b}`), i18n.resolvedLanguage ?? i18n.language)).map((sport, index) => <Pressable key={sport}
         accessibilityRole="radio" accessibilityLabel={t(`sportActivities.sports.${sport}`)} accessibilityState={{ selected: draft.sport === sport, disabled: busy }}
@@ -54,13 +55,15 @@ export function SportActivityForm({ activity, mode, onSave, onCancel }: {
       style={{ ...surfaces.field, borderRadius: radius.md, color: colors.textPrimary, fontSize: 17, minHeight: 48, padding: 12 }} />
     <Text style={{ color: colors.textSecondary }}>{t('sportActivities.starts')}</Text>
     <View style={{ flexDirection: 'row', gap: 10 }}>
-      {button(new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(draft.startAt), () => setPicker(picker === 'date' ? null : 'date'))}
-      {button(new Intl.DateTimeFormat(i18n.language, { timeStyle: 'short' }).format(draft.startAt), () => setPicker(picker === 'time' ? null : 'time'))}
+      {button(new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeZone: draft.timeZone }).format(draft.startAt), () => setPicker(picker === 'date' ? null : 'date'))}
+      {button(new Intl.DateTimeFormat(i18n.language, { timeStyle: 'short', timeZone: draft.timeZone }).format(draft.startAt), () => setPicker(picker === 'time' ? null : 'time'))}
     </View>
-    {picker && <DateTimePicker value={new Date(draft.startAt)} mode={picker} display="compact" locale={i18n.language} themeVariant={scheme}
-      accentColor={colors.accentText} timeZoneName={draft.timeZone} maximumDate={mode === 'RECORD' ? new Date() : undefined}
-      onValueChange={(_event, value) => { patch({ startAt: value.getTime() }); setPicker(null); }} onDismiss={() => setPicker(null)} />}
+    {picker && <DateTimePicker value={new Date(picker === 'until' ? `${draft.repeat!.untilDate}T12:00:00Z` : draft.startAt)} mode={picker === 'until' ? 'date' : picker} display="compact" locale={i18n.language} themeVariant={scheme}
+      accentColor={colors.accentText} timeZoneName={picker === 'until' ? 'UTC' : draft.timeZone} maximumDate={mode === 'RECORD' ? new Date() : undefined}
+      onValueChange={(_event, value) => { patch(picker === 'until' ? { repeat: { ...draft.repeat!, untilDate: value.toISOString().slice(0, 10) } } : { startAt: value.getTime() }); setPicker(null); }} onDismiss={() => setPicker(null)} />}
     <Text style={{ color: colors.textMuted, fontSize: 13 }}>{draft.timeZone}</Text>
+    {!activity && mode === 'PLAN' && <SportRecurrenceFields rule={draft.repeat} startAt={draft.startAt} timeZone={draft.timeZone} disabled={busy}
+      onChange={(repeat) => { patch({ repeat }); setPicker(null); }} onPickUntil={() => setPicker(picker === 'until' ? null : 'until')} />}
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}><Text style={{ flex: 1, color: colors.textPrimary, fontSize: 17 }}>{t('sportActivities.duration')}</Text>
       <View style={{ width: 110 }}><NumericField compact value={Number.isFinite(draft.durationMinutes) ? draft.durationMinutes : undefined}
         onChangeValue={(value) => patch({ durationMinutes: value ?? Number.NaN })} accessibilityLabel={t('sportActivities.duration')} editable={!busy} /></View></View>
@@ -69,12 +72,14 @@ export function SportActivityForm({ activity, mode, onSave, onCancel }: {
     <TextInput accessibilityLabel={t('sportActivities.notes')} multiline value={draft.notes} maxLength={2000} editable={!busy} onChangeText={(notes) => patch({ notes })}
       style={{ ...surfaces.field, borderRadius: radius.md, color: colors.textPrimary, fontSize: 17, minHeight: 90, padding: 12, textAlignVertical: 'top' }} />
     {error && <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t(error)}</Text>}
-    <Pressable accessibilityRole="button" accessibilityLabel={t('sportActivities.save')} accessibilityState={{ disabled: busy }} disabled={busy} onPress={async () => {
+    <Pressable accessibilityRole="button" accessibilityLabel={t(draft.repeat ? 'sportRepeat.save' : 'sportActivities.save')} accessibilityState={{ disabled: busy }} disabled={busy} onPress={async () => {
       if (saving.current) return; saving.current = true; setBusy(true); setError(null);
-      try { await onSave(draft); } catch (cause) { setError(cause instanceof Error && ['invalidSportActivity', 'invalidSessionFeedback'].includes(cause.message) ? 'sportActivities.invalid' : 'sportActivities.saveFailed'); }
+      try { await onSave(draft); } catch (cause) { setError(cause instanceof Error && cause.message === 'sportRecurrenceTooLarge' ? 'sportRepeat.tooMany'
+        : cause instanceof Error && cause.message === 'invalidSportRecurrence' ? 'sportRepeat.invalid'
+        : cause instanceof Error && ['invalidSportActivity', 'invalidSessionFeedback'].includes(cause.message) ? 'sportActivities.invalid' : 'sportActivities.saveFailed'); }
       finally { saving.current = false; setBusy(false); }
     }} style={{ ...surfaces.primary, backgroundColor: sectionAccent.train, minHeight: 52, justifyContent: 'center', alignItems: 'center', borderRadius: radius.pill }}>
-      <Text style={{ color: colors.onAccent, fontSize: 18, fontWeight: '700' }}>{t('sportActivities.save')}</Text>
+      <Text style={{ color: colors.onAccent, fontSize: 18, fontWeight: '700' }}>{t(draft.repeat ? 'sportRepeat.save' : 'sportActivities.save')}</Text>
     </Pressable>
   </ScrollView>;
 }

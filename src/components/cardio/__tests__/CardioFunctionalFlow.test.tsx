@@ -15,6 +15,12 @@ import { startCardioWorkout, transitionCardioWorkout } from '@/services/cardio/c
 import { saveSportDraft } from '@/services/cardio/sportActivities';
 import { withCardioProgression } from '@/services/cardio/cardioProgression';
 import { CardioProgressionReview } from '../CardioProgressionReview';
+import { SportActivityForm } from '../SportActivityForm';
+import { hybridFixture } from '@/test-support/hybridFixture';
+import { prepareHybridBundle } from '@/services/cardio/hybridAuthoring';
+import { toRoutineView } from '@/services/training/routineView';
+import { HybridCapacityPanel } from '../HybridCapacityPanel';
+import { CardioActivationPanel } from '../CardioActivation';
 const { create, act } = require('react-test-renderer');
 let mockUid = 'owner', mockParams: any = { id: 'block' };
 const mockRouter = { push: jest.fn(), replace: jest.fn(), dismissTo: jest.fn(), canGoBack: jest.fn(() => true), back: jest.fn() };
@@ -23,13 +29,15 @@ const mockWorkouts = { entries: [] as any[], ready: true, error: false, pending:
 const mockSports = { entries: [] as any[], ready: true, error: false, reload: jest.fn() };
 const mockStrength = { routines: [] as any[], status: 'ready', reload: jest.fn() };
 jest.mock('expo-router', () => ({ useRouter: () => mockRouter, useLocalSearchParams: () => mockParams }));
+jest.mock('@/app/(tabs)/(train)/generate', () => ({ StrengthPlanBuilder: () => null }));
+jest.mock('@/test-support/CardioHomeCheck', () => ({ CardioHomeCheck: () => null }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: mockUid }) }));
 jest.mock('@/hooks/useCardioTraining', () => ({ useCardioBlocks: () => mockBlocks, useCardioWorkouts: () => mockWorkouts }));
 jest.mock('@/hooks/useSportActivities', () => ({ useSportActivities: () => mockSports }));
 jest.mock('@/hooks/useRoutines', () => ({ useRoutines: () => mockStrength }));
 jest.mock('@expo/ui/community/datetime-picker', () => ({ __esModule: true, default: () => null }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
-jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 const block = cardioFixture();
 const button = (tree: any, label: string) => tree.root.findAll((n: any) => n.props.accessibilityLabel === label && typeof n.props.onPress === 'function')[0];
 const press = async (tree: any, label: string) => act(async () => button(tree, label).props.onPress());
@@ -40,6 +48,14 @@ beforeEach(() => {
   for (const store of [mockBlocks, mockWorkouts, mockSports]) { store.ready = true; store.error = false; }
   mockBlocks.save.mockReset().mockImplementation(async (next: any) => { mockBlocks.entries = [...mockBlocks.entries.filter(b => b.id !== next.id), next]; return next; });
   mockWorkouts.save.mockReset().mockImplementation(async (next: any) => { mockWorkouts.entries = [...mockWorkouts.entries.filter(w => w.id !== next.id), next]; return next; });
+});
+
+it.each(['1', '-1', '99', 'invalid'])('opens the requested cardio cycle with bounded selection: %s', async cycle => {
+  mockBlocks.entries = [block]; mockParams = { id: block.id, cycle };
+  let tree: any; await act(async () => { tree = create(<CardioBlockScreen />); });
+  const tabs = tree.root.findByType(CardioTimeline).findAll((node: any) => node.props.accessibilityRole === 'tab' && node.props.onPress);
+  expect(tabs.map((tab: any) => tab.props.accessibilityState.selected)).toEqual(cycle === '1' ? [false, true] : [true, false]);
+  await act(async () => tree.unmount());
 });
 afterEach(() => { jest.useRealTimers(); });
 it('completes proposal review → activation → start → pause/resume → finish → actual correction', async () => {
@@ -78,6 +94,53 @@ it('requires loaded context, blocks a second active block and resets acknowledge
   await act(async () => tree.update(<CardioActivation plan={block.proposal} ready />)); expect(tree.root.findByType(Switch).props.value).toBe(false);
   mockBlocks.entries = [block]; await act(async () => tree.update(<CardioActivation plan={block.proposal} ready />)); expect(button(tree, 'cardioTraining.activate').props.disabled).toBe(true);
   expect(output(tree)).toContain('cardioTraining.activeExists'); await act(async () => tree.unmount());
+});
+
+function hybridActivation() {
+  const f = hybridFixture(), bundle = prepareHybridBundle(f.draft, f.input, { ...f.settings, totalMinutesPerCycle: 100 }, f.exercises, f.labels, now);
+  return { plan: bundle.cardio, routine: toRoutineView(bundle.routine, bundle.mesocycle, f.exercises, f.labels)! };
+}
+it('blocks an oversubscribed hybrid horizon until explicit slot adjustment and requires fresh acknowledgement', async () => {
+  const f = hybridActivation(); let tree: any;
+  mockSports.entries = [saveSportDraft('padel', 'owner', { sport: 'PADEL', context: 'CLASS', name: '', notes: '', mode: 'PLAN',
+    startAt: now + 86400000, durationMinutes: 60, timeZone: 'UTC', effort: null }, now)];
+  await act(async () => { tree = create(<CardioActivation {...f} ready />); });
+  await press(tree, 'cardioTraining.reviewDates');
+  expect(tree.root.findByType(HybridCapacityPanel).props.review.fits).toBe(false);
+  expect(output(tree)).toContain('hybridCapacity.over');
+  await act(async () => tree.root.findByType(Switch).props.onValueChange(true));
+  await press(tree, 'cardioTraining.activate'); expect(mockBlocks.save).not.toHaveBeenCalled();
+  const old = button(tree, 'cardioTraining.activate').props.onPress;
+  // Remove an actual reservation from context: it never auto-skips a cardio prescription.
+  mockSports.entries = []; await act(async () => tree.update(<CardioActivation {...f} ready />));
+  expect(tree.root.findByType(HybridCapacityPanel).props.review.fits).toBe(true);
+  expect(tree.root.findByType(Switch).props.value).toBe(false);
+  await act(async () => old()); expect(mockBlocks.save).not.toHaveBeenCalled();
+  await act(async () => tree.root.findByType(Switch).props.onValueChange(true));
+  mockBlocks.save.mockRejectedValueOnce(Error('offline')); await press(tree, 'cardioTraining.activate');
+  expect(output(tree)).toContain('cardioTraining.saveFailed'); expect(tree.root.findByType(HybridCapacityPanel)).toBeDefined();
+  await press(tree, 'cardioTraining.activate'); expect(mockBlocks.save).toHaveBeenCalledTimes(2);
+  expect(mockBlocks.save.mock.calls[1][0].id).toBe(mockBlocks.save.mock.calls[0][0].id);
+  await act(async () => tree.unmount());
+});
+it('rechecks skipped/replaced cardio and never treats missing or malformed context as free capacity', async () => {
+  const f = hybridActivation(); let tree: any;
+  await act(async () => { tree = create(<CardioActivation {...f} ready />); });
+  await press(tree, 'cardioTraining.reviewDates');
+  const before = tree.root.findByType(HybridCapacityPanel).props.review.cycles[0].cardioMinutes;
+  const editor = tree.root.findByType(CardioSlotEditor);
+  await act(async () => tree.root.findByType(CardioTimeline).props.onEdit(editor.props.block.slots[0]));
+  await act(async () => tree.root.findByType(CardioSlotEditor).props.onSave(editor.props.block.slots[0].date, 'SKIPPED', null));
+  expect(tree.root.findByType(HybridCapacityPanel).props.review.cycles[0].cardioMinutes).toBe(before - 20);
+  await act(async () => tree.root.findByType(Switch).props.onValueChange(true));
+  const old = button(tree, 'cardioTraining.activate').props.onPress;
+  mockSports.ready = false; await act(async () => tree.update(<CardioActivation {...f} ready />));
+  expect(output(tree)).toContain('hybridCapacity.unavailable'); expect(tree.root.findAllByType(HybridCapacityPanel)).toHaveLength(0);
+  await act(async () => old()); expect(mockBlocks.save).not.toHaveBeenCalled();
+  mockSports.ready = true; mockSports.entries = [{ userId: 'owner', id: 'invalid' }];
+  await act(async () => tree.update(<CardioActivation {...f} ready />));
+  expect(output(tree)).toContain('hybridCapacity.unavailable'); expect(button(tree, 'cardioTraining.activate').props.disabled).toBe(true);
+  await act(async () => tree.unmount());
 });
 it('edits an unexecuted opportunity, supports explicit skip and preserves a rejected save', async () => {
   mockBlocks.entries = [block]; let tree: any; await act(async () => { tree = create(<CardioBlockScreen />); });
@@ -145,11 +208,13 @@ it('reviews a completed microcycle, confirms the next dose and starts from it wi
   jest.setSystemTime(now + 8 * 86400000);
   let tree: any; await act(async () => { tree = create(<CardioBlockScreen />); });
   await press(tree, 'cardioProgression.review');
-  expect(output(tree)).not.toContain('cardioProgression.smallStep');
-  await press(tree, 'cardioProgression.about'); expect(output(tree)).toContain('cardioProgression.smallStep');
+  expect(button(tree, 'cardioProgression.about')).toBeUndefined();
   expect(button(tree, 'cardioProgression.increase').props.disabled).toBe(true);
+  expect(button(tree, 'cardioProgression.repeat').props.disabled).toBe(false);
+  expect(output(tree)).toContain('cardioProgression.current'); expect(output(tree)).not.toContain('cardioProgression.next');
   for (const key of ['easy_YES', 'recovered_YES', 'symptoms_NONE']) await press(tree, `cardioProgression.answer_${key}`);
   expect(button(tree, 'cardioProgression.increase').props.disabled).toBe(false);
+  expect(output(tree)).toContain('cardioProgression.next');
   expect(mockBlocks.save).not.toHaveBeenCalled();
   mockBlocks.save.mockRejectedValueOnce(Error('offline'));
   await press(tree, 'cardioProgression.increase'); expect(output(tree)).toContain('cardioTraining.saveFailed');
@@ -160,6 +225,17 @@ it('reviews a completed microcycle, confirms the next dose and starts from it wi
   await act(async () => tree.update(<CardioBlockScreen />));
   expect(startCardioWorkout(mockBlocks.entries[0], block.slots[2].id, Date.now(), 'confirmed').prescription.durationSeconds).toBe(1260);
   expect(mockWorkouts.save).not.toHaveBeenCalled(); await act(async () => tree.unmount());
+});
+
+it('shows no microcycle review right after activation and offers it once the first microcycle has ended', async () => {
+  const progressive = withCardioProgression(block); mockBlocks.entries = [progressive];
+  let tree: any; await act(async () => { tree = create(<CardioBlockScreen />); });
+  expect(tree.root.findAllByType(CardioProgressionReview)).toHaveLength(1);
+  expect(button(tree, 'cardioProgression.review')).toBeUndefined();
+  expect(output(tree)).not.toContain('cardioProgression.title');
+  jest.setSystemTime(now + 8 * 86400000); await act(async () => tree.update(<CardioBlockScreen />));
+  expect(button(tree, 'cardioProgression.review').props.disabled).toBe(false);
+  await act(async () => tree.unmount());
 });
 
 it('keeps a pending review read-only when context is unavailable and can explicitly repeat an unknown dose', async () => {
@@ -185,6 +261,16 @@ it('saves a final microcycle evaluation without offering a nonexistent next-dose
   expect(mockWorkouts.save).not.toHaveBeenCalled(); await act(async () => tree.unmount());
 });
 
+it('stages a memory-only just-activated block without a microcycle review', async () => {
+  let tree: any; await act(async () => { tree = create(<CardioCheck />); });
+  await press(tree, 'Preview just-activated block (fixture)');
+  expect(tree.root.findByType(CardioProgressionReview).props.block.progression.reviews).toEqual([]);
+  expect(button(tree, 'cardioProgression.review')).toBeUndefined();
+  await press(tree, 'Preview completed cycle (fixture)');
+  expect(button(tree, 'cardioProgression.review')).toBeDefined();
+  expect(mockBlocks.save).not.toHaveBeenCalled(); await act(async () => tree.unmount());
+});
+
 it('stages the memory-only completed-cycle fixture by civil days across the autumn DST change', async () => {
   jest.setSystemTime(Date.UTC(2026, 9, 29, 22, 30));
   let tree: any; await act(async () => { tree = create(<CardioCheck />); });
@@ -192,5 +278,52 @@ it('stages the memory-only completed-cycle fixture by civil days across the autu
   for (const key of ['easy_YES', 'recovered_YES', 'symptoms_NONE']) await press(tree, `cardioProgression.answer_${key}`);
   expect(button(tree, 'cardioProgression.increase').props.disabled).toBe(false);
   await press(tree, 'cardioProgression.increase'); expect(mockBlocks.save).not.toHaveBeenCalled(); expect(mockWorkouts.save).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+
+it('keeps recurring creation/failure/retry and a single-occurrence edit entirely in memory', async () => {
+  let tree: any; await act(async () => { tree = create(<CardioCheck />); });
+  await press(tree, 'Preview recurring save failure (memory only)');
+  const draft = { sport: 'PADEL' as const, context: 'CLASS' as const, name: 'Synthetic class', notes: '', mode: 'PLAN' as const,
+    startAt: now + 86400000, durationMinutes: 60, timeZone: 'UTC', effort: null,
+    repeat: { frequency: 'WEEKLY' as const, interval: 1, weekdays: [4], untilDate: '2026-11-12' } };
+  await act(async () => { await expect(tree.root.findByType(SportActivityForm).props.onSave(draft)).rejects.toThrow('syntheticSaveFailure'); });
+  expect(tree.root.findByType(SportActivityForm)).toBeDefined();
+  await act(async () => tree.root.findByType(SportActivityForm).props.onSave(draft));
+  expect(output(tree)).toContain('Synthetic activities saved in memory only: ');
+  await press(tree, 'Edit first occurrence (memory only)');
+  const form = tree.root.findByType(SportActivityForm); expect(form.props.activity.occurrence.index).toBe(0);
+  const original = form.props.activity;
+  await act(async () => form.props.onSave({ ...draft, repeat: undefined, name: 'Only first' }));
+  expect(output(tree)).toContain('Synthetic class');
+  await press(tree, 'Edit first occurrence (memory only)');
+  expect(tree.root.findByType(SportActivityForm).props.activity.name).toBe('Only first');
+  expect(tree.root.findByType(SportActivityForm).props.activity.occurrence.seriesId).toBe(original.occurrence.seriesId);
+  await act(async () => tree.root.findByType(SportActivityForm).props.onCancel());
+  await press(tree, 'Preview recurring activity (memory only)');
+  await act(async () => tree.root.findByType(SportActivityForm).props.onCancel());
+  expect('save' in mockSports).toBe(false); expect(mockBlocks.save).not.toHaveBeenCalled(); expect(mockWorkouts.save).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+
+it('exercises native shared-capacity acceptance through the production panel without invoking account saves', async () => {
+  let tree: any; await act(async () => { tree = create(<CardioCheck />); });
+  await press(tree, 'Preview shared capacity (memory only)');
+  expect(tree.root.findByType(CardioActivationPanel)).toBeDefined();
+  await press(tree, 'cardioTraining.reviewDates');
+  expect(tree.root.findByType(HybridCapacityPanel).props.review.fits).toBe(false);
+  expect(output(tree)).not.toContain('hybridCapacity.scope');
+  await press(tree, 'hybridCapacity.info'); expect(output(tree)).toContain('hybridCapacity.scope');
+  await press(tree, 'hybridCapacity.info'); expect(output(tree)).not.toContain('hybridCapacity.scope');
+  await act(async () => tree.root.findByType(Switch).props.onValueChange(true));
+  expect(button(tree, 'cardioTraining.activate').props.disabled).toBe(true);
+  await press(tree, 'Remove synthetic reservation');
+  expect(tree.root.findByType(Switch).props.value).toBe(false);
+  expect(tree.root.findByType(HybridCapacityPanel).props.review.fits).toBe(true);
+  await act(async () => tree.root.findByType(Switch).props.onValueChange(true));
+  await press(tree, 'cardioTraining.activate'); expect(output(tree)).toContain('cardioTraining.saveFailed');
+  await press(tree, 'cardioTraining.activate'); expect(output(tree)).toContain('Synthetic activation accepted in memory only');
+  expect(mockBlocks.save).not.toHaveBeenCalled(); expect(mockWorkouts.save).not.toHaveBeenCalled();
+  await press(tree, 'Exit capacity check (memory only)'); expect(output(tree)).toContain('CARDIO CHECK');
   await act(async () => tree.unmount());
 });

@@ -9,13 +9,14 @@ export function CardioProgressionReview({ block, workouts, enabled, onSave }: {
   block: CardioBlock; workouts: CardioWorkout[]; enabled: boolean; onSave: (next: CardioBlock, previous: CardioBlock) => Promise<unknown>;
 }) {
   const [open, setOpen] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState(false);
-  const [details, setDetails] = useState(false);
   const [responses, setResponses] = useState<CardioCycleResponses>({ easy: 'UNKNOWN', recovered: 'UNKNOWN', symptoms: 'UNKNOWN' });
   const lock = useRef(false), epoch = useRef(0);
   useEffect(() => () => { epoch.current += 1; }, []);
   const { t } = useTranslation(), { colors, surfaces, radius, semantic } = useTheme();
   if (!block.progression || block.endedAt !== null || block.progression.reviews.length >= block.cycles) return null;
   const review = reviewCardioCycle(block, workouts, responses, Date.now());
+  if (!review.due) return null;
+  const minutes = (seconds: number[]) => seconds.reduce((n, s) => n + s, 0) / 60;
   const button = (label: string, action: () => void, disabled = false) => <Pressable accessibilityRole="button" accessibilityLabel={label}
     disabled={busy || disabled} onPress={action} style={{ ...surfaces.field, padding: 14, minHeight: 48, borderRadius: radius.md, opacity: disabled ? .45 : 1 }}>
     <Text style={{ color: colors.accentText, fontSize: 17 }}>{label}</Text></Pressable>;
@@ -47,9 +48,9 @@ export function CardioProgressionReview({ block, workouts, enabled, onSave }: {
           </Pressable>)}</View>
         </View>)}
         {review.reasons.map(reason => <Text key={reason} style={{ color: reason === 'SYMPTOMS' ? semantic.warning : colors.textSecondary }}>{t(`cardioProgression.reason_${reason}`)}</Text>)}
-        <Text style={{ color: colors.textPrimary, fontSize: 18 }}>{t('cardioProgression.next', { current: review.current.reduce((n, s) => n + s, 0) / 60, next: review.next.reduce((n, s) => n + s, 0) / 60 })}</Text>
-        {button(t('cardioProgression.about'), () => setDetails(value => !value))}
-        {details && <Text style={{ color: colors.textSecondary }}>{t('cardioProgression.smallStep')}</Text>}
+        <Text style={{ color: colors.textPrimary, fontSize: 18 }}>{minutes(review.next) === minutes(review.current)
+          ? t('cardioProgression.current', { current: minutes(review.current) })
+          : t('cardioProgression.next', { current: minutes(review.current), next: minutes(review.next) })}</Text>
         {!review.reasons.includes('NO_FUTURE') && button(t('cardioProgression.increase'), () => { void save('INCREASE'); }, !enabled || !review.canIncrease)}
         {button(t(review.reasons.includes('NO_FUTURE') ? 'cardioProgression.finishReview' : 'cardioProgression.repeat'), () => { void save('REPEAT'); }, !enabled || !review.ready)}
         {error && <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('cardioTraining.saveFailed')}</Text>}

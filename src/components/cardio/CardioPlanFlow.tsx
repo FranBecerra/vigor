@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRoutines } from '@/hooks/useRoutines';
 import { useCardioPlans } from '@/hooks/useCardioPlans';
 import { backToTraining } from '@/services/training/backNavigation';
-import { cardioPlanPolicy, cardioStrengthSource, saveCardioProposal } from '@/services/cardio/savedCardioPlan';
+import { cardioInputForSave, cardioPlanPolicy, cardioStrengthSource, saveCardioProposal } from '@/services/cardio/savedCardioPlan';
 import { freshReviewedCardioStart, type ReviewedCardioStart } from '@/services/cardio/reviewedCardioStart';
 
 /** Shared new-plan flow; cancellation may return directly to its caller's review. */
@@ -21,10 +21,11 @@ function OwnedCardioPlanner({ owner, initialBaseline, onCancel }: { owner: strin
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
   const routine = routines.find(item => item.isActive && item.domain === 'STRENGTH');
   return <CardioPlanBuilder routine={routine} initialBaseline={initialBaseline} ready={!!owner && status === 'ready' && plans.ready} error={status === 'error' || plans.error}
-    onRetry={() => { reload(); plans.reload(); }} onCancel={onCancel ?? (() => backToTraining(router))} onSave={async (name, input, healthSaveAccepted) => {
+    onRetry={() => { reload(); plans.reload(); }} onCancel={onCancel ?? (() => backToTraining(router))} onSave={async (name, input) => {
       if (!owner || !live.current || input.healthBaseline && !freshReviewedCardioStart(input.healthBaseline, Date.now())) throw Error('staleCardioOwner');
       id.current ??= plans.newId(); createdAt.current ??= Date.now();
-      const plan = saveCardioProposal(id.current, owner, name, input, cardioStrengthSource(routine, cardioPlanPolicy(input)), createdAt.current, healthSaveAccepted);
+      const authored = cardioInputForSave(input, Date.now());
+      const plan = saveCardioProposal(id.current, owner, name, authored, cardioStrengthSource(routine, cardioPlanPolicy(authored)), createdAt.current);
       await plans.save(plan);
       if (live.current) router.replace({ pathname: '/cardio-cycle', params: { id: plan.id } });
     }} />;
