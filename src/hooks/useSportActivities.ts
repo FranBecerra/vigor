@@ -3,7 +3,8 @@ import { collection, onSnapshot } from '@react-native-firebase/firestore';
 import type { SportActivity, SportActivityDraft } from '@/models/sportActivity';
 import { db } from '@/services/firebase';
 import { SportActivityRepository, sportActivityPath } from '@/services/cardio/sportActivityRepository';
-import { sportActivityStart, validSportActivity } from '@/services/cardio/sportActivities';
+import { sportActivityStart } from '@/services/cardio/sportActivities';
+import { sportDocumentEntries } from '@/services/cardio/sportActivitySeries';
 import { useAuth } from './useAuth';
 
 /** Owner-scoped subscription. No athlete record is created by mounting a screen. */
@@ -26,26 +27,28 @@ export function useSportActivities() {
     const stop = onSnapshot(collection(db, sportActivityPath(uid)), { includeMetadataChanges: true }, (snapshot) => {
       if (!alive) return;
       const received = snapshot.docs.map((item) => ({ ...item.data(), id: item.id }));
-      const valid = received.filter((item): item is SportActivity => validSportActivity(item, uid));
-      setState({ owner: uid, entries: valid.filter((item) => item.discardedAt === null)
-        .sort((a, b) => sportActivityStart(b) - sportActivityStart(a) || a.id.localeCompare(b.id)), ready: true, error: valid.length !== received.length });
+      const parsed = received.map((item) => sportDocumentEntries(item, uid));
+      setState({ owner: uid, entries: parsed.flatMap((items) => items ?? []).filter((item) => item.discardedAt === null)
+        .sort((a, b) => sportActivityStart(b) - sportActivityStart(a) || a.id.localeCompare(b.id)), ready: true, error: parsed.some((items) => items === null) });
     }, () => { if (alive) setState((old) => ({ ...old, ready: true, error: true })); });
     return () => { alive = false; live.current = false; subscription.current += 1; stop(); };
   }, [uid, retry]);
   const isCurrent = () => live.current && owner.current.uid === uid && owner.current.epoch === epoch;
   const visible = state.owner === uid ? state : { owner: uid, entries: [], ready: false, error: false };
-  const write = async (action: (repo: SportActivityRepository, current: () => boolean, reject: () => void) => Promise<SportActivity>) => {
+  const write = async (action: (repo: SportActivityRepository, current: () => boolean, reject: () => void) => Promise<SportActivity | SportActivity[]>) => {
     if (!repository || !isCurrent() || !visible.ready || visible.error || busy.current) throw Error('sportsUnavailable');
     busy.current = true;
     const token = subscription.current;
     const current = () => isCurrent() && token === subscription.current;
     const reject = () => { if (current()) setState((old) => ({ ...old, error: true })); };
     try {
-      const entry = await action(repository, current, reject);
+      const result = await action(repository, current, reject);
+      const entries = Array.isArray(result) ? result : [result];
       if (!current()) throw Error('staleSportOwner');
-      setState((old) => ({ ...old, entries: [...old.entries.filter((item) => item.id !== entry.id), ...(entry.discardedAt === null ? [entry] : [])]
+      const ids = new Set(entries.map((entry) => entry.id));
+      setState((old) => ({ ...old, entries: [...old.entries.filter((item) => !ids.has(item.id)), ...entries.filter((entry) => entry.discardedAt === null)]
         .sort((a, b) => sportActivityStart(b) - sportActivityStart(a) || a.id.localeCompare(b.id)) }));
-      return entry;
+      return entries[0];
     } finally { if (current()) busy.current = false; }
   };
   return { ...visible, reload: () => setRetry((value) => value + 1),

@@ -34,8 +34,14 @@ it('keeps legacy blocks frozen and gives unknown capacity an adaptation repeat b
 });
 it.each([7, 8, 10, 31])('uses full %s-day microcycles, not a seven-day conversion or elapsed-24-hour assumption', days => {
   const b = make(days), records = done(b), stamp = now + days * 86400000;
-  expect(reviewCardioCycle(b, records, yes, now + (days - 1) * 86400000).ready).toBe(false);
-  expect(reviewCardioCycle(b, records, yes, stamp).canIncrease).toBe(true);
+  expect(reviewCardioCycle(b, records, yes, now + (days - 1) * 86400000)).toMatchObject({ due: false, ready: false });
+  expect(reviewCardioCycle(b, records, yes, stamp)).toMatchObject({ due: true, canIncrease: true });
+});
+it('is not due on the first day of a freshly activated block, even with every session already finished', () => {
+  const b = make();
+  expect(reviewCardioCycle(b, [], unknown, now)).toMatchObject({ cycle: 0, due: false, ready: false });
+  expect(reviewCardioCycle(b, done(b), yes, now + 3600000)).toMatchObject({ due: false, ready: false });
+  expect(reviewCardioCycle(b, [], unknown, later)).toMatchObject({ due: true, ready: true, canIncrease: false });
 });
 it('confirms only after explicit acceptance and snapshots actual execution from the confirmed dose', () => {
   const b = make(), records = done(b), original = JSON.stringify([b, records]);
@@ -51,8 +57,11 @@ it('confirms only after explicit acceptance and snapshots actual execution from 
   expect(startCardioWorkout(accepted, accepted.slots[2].id, later, 'next').prescription.durationSeconds).toBe(1260);
   expect(startCardioWorkout(accepted, accepted.slots[2].id, later, 'next').prescription.policy).toBe('REVIEWED_EASY_DURATION_V1');
   const p = cardioSlotPrescription(accepted, accepted.slots[2].id);
+  if (p.policy === 'MANUAL_PHASES_V1') throw Error('Expected an easy prescription');
+  const originalPrescription = accepted.proposal.preview.prescriptions[0];
+  if (originalPrescription.policy === 'MANUAL_PHASES_V1') throw Error('Expected an easy prescription');
   expect(p.segments.reduce((n, s) => n + s.durationSeconds, 0)).toBe(p.durationSeconds);
-  p.segments[0].effort.min = 99; expect(accepted.proposal.preview.prescriptions[0].segments[0].effort.min).toBe(1);
+  p.segments[0].effort.min = 99; expect(originalPrescription.segments[0].effort.min).toBe(1);
   expect(JSON.stringify([b, records])).toBe(original);
   expect(() => cardioSlotPrescription(b, 'missing')).toThrow();
 });

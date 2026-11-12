@@ -9,7 +9,7 @@ import type { CardioHealthBridge, CardioHealthRead } from '@/models/cardioHealth
 export type CardioHealthState = 'IDLE' | 'AUTHORIZING' | 'LOADING' | 'READY' | 'UNAVAILABLE' | 'ERROR';
 interface Snapshot { owner: string | null; epoch: number; state: CardioHealthState; data?: CardioHealthRead; observedAt?: number }
 
-/** Explicit, one-screen review. No automatic authorization/read, persistence or foreground reread. */
+/** Raw observations stay in memory. A remembered planner may read without requesting authorization. */
 export function useCardioHealthReview(bridge: CardioHealthBridge = cardioHealthBridge) {
   const { uid, isLoading } = useAuth();
   const life = useRef({ owner: uid, authLoading: isLoading, epoch: 0, focused: false, mounted: true, busy: false });
@@ -17,6 +17,7 @@ export function useCardioHealthReview(bridge: CardioHealthBridge = cardioHealthB
     life.current.owner = uid; life.current.authLoading = isLoading; life.current.epoch++; life.current.busy = false;
   }
   const [snapshot, setSnapshot] = useState<Snapshot>({ owner: uid, epoch: 0, state: 'IDLE' });
+  const [focused, setFocused] = useState(false);
   const clear = useCallback(() => {
     life.current.epoch++; life.current.busy = false;
     if (life.current.mounted) setSnapshot({ owner: life.current.owner, epoch: life.current.epoch, state: 'IDLE' });
@@ -24,7 +25,8 @@ export function useCardioHealthReview(bridge: CardioHealthBridge = cardioHealthB
   useEffect(() => { life.current.mounted = true; return () => { life.current.mounted = false; life.current.epoch++; }; }, []);
   useFocusEffect(useCallback(() => {
     life.current.focused = true;
-    return () => { life.current.focused = false; clear(); };
+    setFocused(true);
+    return () => { life.current.focused = false; setFocused(false); clear(); };
   }, [uid, isLoading, clear]));
   useEffect(() => {
     const listener = AppState.addEventListener('change', state => {
@@ -33,15 +35,15 @@ export function useCardioHealthReview(bridge: CardioHealthBridge = cardioHealthB
     });
     return () => listener.remove();
   }, [clear]);
-  const read = async () => {
+  const read = async (authorize = true) => {
     if (!uid || isLoading || life.current.owner !== uid || !life.current.focused || life.current.busy || AppState.currentState === 'background') return;
     const owner = uid, epoch = ++life.current.epoch;
-    life.current.busy = true; setSnapshot({ owner, epoch, state: 'AUTHORIZING' });
+    life.current.busy = true; setSnapshot({ owner, epoch, state: authorize ? 'AUTHORIZING' : 'LOADING' });
     const current = () => life.current.mounted && life.current.focused && life.current.owner === owner && life.current.epoch === epoch;
     try {
       if (!await bridge.available()) { if (current()) setSnapshot({ owner, epoch, state: 'UNAVAILABLE' }); return; }
       if (!current()) return;
-      await bridge.authorize();
+      if (authorize) await bridge.authorize();
       if (!current()) return;
       setSnapshot({ owner, epoch, state: 'LOADING' });
       const now = Date.now(), window = cardioHealthWindow(now), data = await bridge.read(window.start, window.end);
@@ -53,5 +55,5 @@ export function useCardioHealthReview(bridge: CardioHealthBridge = cardioHealthB
     finally { if (current()) life.current.busy = false; }
   };
   const visible: Snapshot = !isLoading && uid && snapshot.owner === uid && snapshot.epoch === life.current.epoch ? snapshot : { owner: uid, epoch: life.current.epoch, state: 'IDLE' };
-  return { ...visible, read, clear };
+  return { ...visible, read, clear, focused };
 }

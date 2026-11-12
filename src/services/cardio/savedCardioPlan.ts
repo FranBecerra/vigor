@@ -6,7 +6,7 @@ import { copyReviewedCardioStart, freshReviewedCardioStart } from './reviewedCar
 /** Immutable proposal snapshot. Saving is not activation or performed training. */
 export interface SavedCardioPlan {
   schemaVersion: 1;
-  policy: 'CARDIO_PREVIEW_V1' | 'CARDIO_PREVIEW_V2' | 'CARDIO_PREVIEW_V3';
+  policy: 'CARDIO_PREVIEW_V1' | 'CARDIO_PREVIEW_V2' | 'CARDIO_PREVIEW_V3' | 'CARDIO_MANUAL_V1';
   healthPlanningConsent?: { policy: 'HEALTH_DERIVED_PRIVATE_PLAN_V1'; acceptedAt: number };
   id: string;
   userId: string;
@@ -27,7 +27,9 @@ const canonical = (value: unknown): string => {
 
 /** Only declared planning fields may leave the draft; never persist arbitrary context. */
 function planningInput(input: CardioPreviewInput): CardioPreviewInput {
-  return { ...(input.healthBaseline ? { healthBaseline: copyReviewedCardioStart(input.healthBaseline) } : {}),
+  return { ...(input.manualSessions ? { manualSessions: input.manualSessions } : {}), ...(input.healthBaseline ? { healthBaseline: copyReviewedCardioStart(input.healthBaseline) } : {}),
+    ...(input.spacingPolicy ? { spacingPolicy: input.spacingPolicy } : {}),
+    ...(input.doublePolicy ? { doublePolicy: input.doublePolicy } : {}),
     ...(input.placementPolicy ? { placementPolicy: input.placementPolicy } : {}), modalities: [...input.modalities], cycleDays: input.cycleDays, availableDays: [...input.availableDays],
     sessions: input.sessions, cardioMinutes: input.cardioMinutes, sessionMinutes: input.sessionMinutes,
     maxActiveDays: input.maxActiveDays, allowDoubles: input.allowDoubles,
@@ -40,7 +42,7 @@ function planningInput(input: CardioPreviewInput): CardioPreviewInput {
 }
 
 export function cardioPlanPolicy(input: CardioPreviewInput): SavedCardioPlan['policy'] {
-  return input.healthBaseline ? 'CARDIO_PREVIEW_V3' : input.placementPolicy ? 'CARDIO_PREVIEW_V2' : 'CARDIO_PREVIEW_V1';
+  return input.manualSessions ? 'CARDIO_MANUAL_V1' : input.healthBaseline ? 'CARDIO_PREVIEW_V3' : input.placementPolicy ? 'CARDIO_PREVIEW_V2' : 'CARDIO_PREVIEW_V1';
 }
 export function cardioStrengthSource(routine?: RoutineView, policy: SavedCardioPlan['policy'] = 'CARDIO_PREVIEW_V1'): SavedCardioPlan['strengthSource'] {
   return routine ? { routineId: routine.id, fingerprint: canonical(strengthPlacements(routine, policy !== 'CARDIO_PREVIEW_V1')),
@@ -56,7 +58,7 @@ export function validSavedCardioPlan(value: unknown, owner: string): value is Sa
   try {
     if (!value || typeof value !== 'object' || !validSportIdentity(owner)) return false;
     const p = value as SavedCardioPlan;
-    if (p.schemaVersion !== 1 || !['CARDIO_PREVIEW_V1', 'CARDIO_PREVIEW_V2', 'CARDIO_PREVIEW_V3'].includes(p.policy)
+    if (p.schemaVersion !== 1 || !['CARDIO_PREVIEW_V1', 'CARDIO_PREVIEW_V2', 'CARDIO_PREVIEW_V3', 'CARDIO_MANUAL_V1'].includes(p.policy)
       || !p.input || p.policy !== cardioPlanPolicy(p.input)
       || (p.policy !== 'CARDIO_PREVIEW_V1') !== (p.input.placementPolicy === 'BALANCED_V2') || !validSportIdentity(p.id) || p.userId !== owner
       || typeof p.name !== 'string' || !p.name.trim() || p.name !== p.name.trim() || p.name.length > 80
@@ -79,6 +81,18 @@ export function validSavedCardioPlan(value: unknown, owner: string): value is Sa
     // Policy v1 is frozen: future algorithm changes must introduce a new policy reader.
     return expected.scheduled.length > 0 && canonical(expected) === canonical(p.preview);
   } catch { return false; }
+}
+
+/** Save the accepted prescription without copying Health observations or aggregate provenance. */
+export function cardioInputForSave(input: CardioPreviewInput, now: number): CardioPreviewInput {
+  if (!input.healthBaseline) return input;
+  if (!freshReviewedCardioStart(input.healthBaseline, now) || cardioPreviewIssue(input)) throw Error('invalidCardioPlan');
+  const { healthBaseline, ...plan } = input;
+  return { ...plan, sessionMinutes: Math.min(plan.sessionMinutes, healthBaseline.sessionMinutes),
+    profile: { ...plan.profile, modalities: { ...plan.profile.modalities, [healthBaseline.modality]: {
+      status: plan.profile.modalities[healthBaseline.modality]?.status ?? 'UNSURE', qualityExposure: 'UNKNOWN',
+      typicalSessionMinutes: healthBaseline.sessionMinutes,
+    } } } };
 }
 
 export function saveCardioProposal(id: string, owner: string, name: string, input: CardioPreviewInput,

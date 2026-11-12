@@ -42,8 +42,8 @@ it('seeds current answers without fabricating a regular/advanced experience leve
 it('freezes v3 initial dose while retaining availability for later reviewed progression', () => {
   const input = reviewedInput(), preview = buildCardioPreview(input);
   expect(preview.usedMinutes).toBe(60); expect(preview.prescriptions.map(p => p.durationSeconds)).toEqual([1800, 1800]);
-  expect(preview.prescriptions.every(p => p.basis === 'REVIEWED_HISTORY')).toBe(true);
-  expect(suggestCardioCapacity(input)).toEqual({ sessions: 2, sessionMinutes: 40, cardioMinutes: 80, maxActiveDays: 2 });
+  expect(preview.prescriptions.every(p => p.policy !== 'MANUAL_PHASES_V1' && p.basis === 'REVIEWED_HISTORY')).toBe(true);
+  expect(suggestCardioCapacity(input)).toEqual({ sessions: 2, sessionMinutes: 30, cardioMinutes: 60, maxActiveDays: 2 });
   expect(buildCardioPreview({ ...input, sessions: 1 }).usedMinutes).toBe(30);
   expect(buildCardioPreview({ ...input, sessionMinutes: 15 }).usedMinutes).toBe(30);
   expect(buildCardioPreview({ ...input, sessionMinutes: 100, cardioMinutes: 500 }).usedMinutes).toBe(60);
@@ -75,5 +75,5 @@ it('pins strength context for v3 and keeps accepted prescriptions executable wit
   const plan = saveCardioProposal('p', 'owner', 'Base', reviewedInput(), null, now, true);
   const block = createCardioBlock('b', plan, '2026-10-30', 4, 'Europe/Madrid', now);
   const workout = startCardioWorkout(block, block.slots[0].id, now, 'w');
-  expect(workout.prescription.basis).toBe('REVIEWED_HISTORY'); expect(validCardioWorkout(workout, 'owner')).toBe(true);
+  expect(workout.prescription).toMatchObject({ basis: 'REVIEWED_HISTORY' }); expect(validCardioWorkout(workout, 'owner')).toBe(true);
 });

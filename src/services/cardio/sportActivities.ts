@@ -19,6 +19,10 @@ function validTiming(value: unknown): value is SportTiming {
 export function validSportActivity(value: unknown, owner: string): value is SportActivity {
   if (!value || typeof value !== 'object' || !validSportIdentity(owner)) return false;
   const item = value as SportActivity;
+  if (item.occurrence !== undefined && (!item.occurrence || typeof item.occurrence !== 'object'
+    || !validSportIdentity(item.occurrence.seriesId) || item.occurrence.seriesId.length > 120
+    || !Number.isInteger(item.occurrence.index) || item.occurrence.index < 0 || item.occurrence.index >= 52
+    || item.id !== `${item.occurrence.seriesId}~${item.occurrence.index}` || !epoch(item.occurrence.originalStartAt))) return false;
   if (item.schemaVersion !== 1 || !validSportIdentity(item.id) || item.userId !== owner
     || !SPORT_KINDS.includes(item.sport) || !['CLASS', 'MATCH', 'FREE'].includes(item.context)
     || typeof item.name !== 'string' || item.name.length > 80 || item.name !== item.name.trim()
@@ -40,7 +44,7 @@ export function validSportActivity(value: unknown, owner: string): value is Spor
 /** A reservation never becomes performed exposure merely because its date passed. */
 export function saveSportDraft(id: string, owner: string, draft: SportActivityDraft, now: number, previous?: SportActivity): SportActivity {
   if (!validSportIdentity(id) || !validSportIdentity(owner) || !epoch(now) || !draft
-    || !['PLAN', 'RECORD'].includes(draft.mode) || !validTiming(draft)
+    || draft.repeat !== undefined || !['PLAN', 'RECORD'].includes(draft.mode) || !validTiming(draft)
     || previous && (!validSportActivity(previous, owner) || previous.id !== id || previous.discardedAt !== null
       || now < previous.updatedAt || previous.record && draft.mode === 'PLAN')) throw Error('invalidSportActivity');
   const timing = { startAt: draft.startAt, durationMinutes: draft.durationMinutes, timeZone: draft.timeZone };
@@ -48,6 +52,7 @@ export function saveSportDraft(id: string, owner: string, draft: SportActivityDr
     feedback: reviseSessionFeedback(previous?.record?.feedback ?? undefined, draft.effort, now,
       previous?.record ? 'HISTORY_EDIT' : 'MANUAL_ENTRY') ?? null } : previous?.record ?? null;
   const next: SportActivity = { schemaVersion: 1, id, userId: owner, sport: draft.sport, context: draft.context,
+    ...(previous?.occurrence ? { occurrence: { ...previous.occurrence } } : {}),
     name: typeof draft.name === 'string' ? draft.name.trim() : draft.name,
     notes: typeof draft.notes === 'string' ? draft.notes.trim() : draft.notes,
     planned: draft.mode === 'PLAN' ? timing : previous?.planned ?? null, record,
@@ -71,3 +76,11 @@ export function sportDraft(item: SportActivity | null, mode: SportActivityDraft[
 
 export function sportActivityStart(item: SportActivity): number { return (item.record ?? item.planned)!.startAt; }
 export function sportActivityMinutes(item: SportActivity): number { return (item.record ?? item.planned)!.durationMinutes; }
+
+/** Expired reservations remain in the activity list, but must not crowd out upcoming classes. */
+export function upcomingSportActivities(entries: readonly SportActivity[], now: number, limit = 3): SportActivity[] {
+  if (!epoch(now) || !Number.isInteger(limit) || limit < 1 || limit > 52) return [];
+  return entries.filter((item) => item.discardedAt === null && item.record === null && item.planned
+    && item.planned.startAt + item.planned.durationMinutes * 60000 > now)
+    .sort((a, b) => a.planned!.startAt - b.planned!.startAt || a.id.localeCompare(b.id)).slice(0, limit);
+}

@@ -6,10 +6,21 @@ import { shiftCalendarDate } from '@/services/training/trainingCalendar';
 
 const sport = (date = now, id = 'padel', mode: 'PLAN' | 'RECORD' = 'PLAN') => saveSportDraft(id, 'owner', { sport: 'PADEL', context: 'CLASS', name: '', notes: '', mode,
   startAt: date, durationMinutes: 60, timeZone: 'Europe/Madrid', effort: null }, Math.max(now, date + 3600000));
+it('keeps the opt-in cross-discipline double rule after date changes without altering legacy blocks', () => {
+  const next = cardioFixture({ modalities: ['CYCLING'], allowDoubles: true, doublePolicy: 'STRENGTH_CARDIO_ONLY_V1' });
+  const crowded = { ...next, slots: next.slots.map((s, i) => i === 1 ? { ...s, date: next.slots[0].date } : s) };
+  expect(coordinateCardioBlock(crowded, [], [])[0].issues).toContain('CARDIO');
+  const legacy = cardioFixture({ modalities: ['CYCLING'], allowDoubles: true });
+  const oldCrowded = { ...legacy, slots: legacy.slots.map((s, i) => i === 1 ? { ...s, date: legacy.slots[0].date } : s) };
+  expect(coordinateCardioBlock(oldCrowded, [], [])[0].issues).not.toContain('CARDIO');
+  const strength = [{ id: 'one', date: next.slots[0].date, demand: 'LOW' as const }, { id: 'two', date: next.slots[0].date, demand: 'LOW' as const }];
+  expect(coordinateCardioBlock(next, [], strength)[0].issues).toContain('STRENGTH');
+  expect(coordinateCardioBlock(next, [], [strength[0]])[0].issues).not.toContain('STRENGTH');
+});
 it('creates a finite eight-day block with exact easy prescriptions and no automatic progression', () => {
   const b = cardioFixture(), before = JSON.stringify(b.proposal);
   expect(b.slots).toHaveLength(4); expect(b.slots[2].date).toBe(shiftCalendarDate(b.slots[0].date, 8));
-  expect(b.proposal.preview.prescriptions.every(p => p.stimulus === 'EASY')).toBe(true);
+  expect(b.proposal.preview.prescriptions.every(p => p.policy !== 'MANUAL_PHASES_V1' && p.stimulus === 'EASY')).toBe(true);
   b.slots[0].date = '2026-11-01'; expect(JSON.stringify(b.proposal)).toBe(before); expect(validCardioBlock(b, 'owner')).toBe(true);
   expect(dateInZone(Date.UTC(2026, 9, 29, 0, 30), 'America/New_York')).toBe('2026-10-28');
   expect(dateInZone(Date.UTC(2026, 9, 25, 2, 30), 'Europe/Madrid')).toBe('2026-10-25');

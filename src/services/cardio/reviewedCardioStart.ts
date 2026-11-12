@@ -5,7 +5,7 @@ import { proposeCardioStartingPoint, type CardioStartContext } from './cardioSta
 /** Minimal numeric provenance. No workout IDs, sources, traces or symptom responses. */
 export interface ReviewedCardioStart {
   version: 1;
-  policy: 'OBSERVED_EASY_START_POC_V1';
+  policy: 'OBSERVED_EASY_START_POC_V1' | 'OBSERVED_REPEATABLE_START_V2';
   modality: 'RUNNING' | 'CYCLING';
   observedAt: number;
   acceptedAt: number;
@@ -33,7 +33,7 @@ const DAY = 86400000;
 export function validReviewedCardioStart(value: unknown): value is ReviewedCardioStart {
   const v = value as ReviewedCardioStart;
   if (!v || Object.keys(v).length !== keys.length || keys.some(key => !Object.prototype.hasOwnProperty.call(v, key))
-    || v.version !== 1 || v.policy !== 'OBSERVED_EASY_START_POC_V1' || !['RUNNING', 'CYCLING'].includes(v.modality)
+    || v.version !== 1 || !['OBSERVED_EASY_START_POC_V1', 'OBSERVED_REPEATABLE_START_V2'].includes(v.policy) || !['RUNNING', 'CYCLING'].includes(v.modality)
     || !integer(v.observedAt, 42 * DAY + 1, 8.64e15) || !integer(v.acceptedAt, v.observedAt, Math.min(8.64e15, v.observedAt + DAY))
     || !integer(v.cycleDays, 7, 31) || !integer(v.sessions, 1, 14) || !integer(v.sessionMinutes, 1, 600)
     || !integer(v.totalMinutes, 1, 1440) || !integer(v.comfortableMinutes, 1, 600)
@@ -63,7 +63,7 @@ export function acceptReviewedCardioStart(raw: unknown, observedAt: number, now:
   if (result.state !== 'READY') throw Error('unavailableReviewedCardioStart');
   const value: ReviewedCardioStart = { version: 1, policy: result.policy, modality: result.modality, observedAt, acceptedAt: now,
     cycleDays: result.cycleDays, sessions: result.sessions, sessionMinutes: result.sessionMinutes, totalMinutes: result.totalMinutes,
-    comfortableMinutes: context.comfortableMinutes!, maxSessions: context.maxSessions, maxSessionMinutes: context.maxSessionMinutes,
+    comfortableMinutes: result.comfortableMinutes, maxSessions: context.maxSessions, maxSessionMinutes: context.maxSessionMinutes,
     availableMinutes: context.totalMinutes, observedSessions: result.observedSessions, representedWeeks: result.representedWeeks,
     typicalMinutes: result.typicalMinutes, weeklySessions: result.weeklySessions, weeklyMinutes: result.weeklyMinutes };
   return copyReviewedCardioStart(value);

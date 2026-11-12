@@ -8,6 +8,7 @@ import { sessionEffortValue } from '@/services/training/sessionFeedback';
 /** An explicit new-block policy; absence keeps legacy easy blocks frozen. */
 export function withCardioProgression(block: CardioBlock): CardioBlock {
   if (!validCardioBlock(block, block?.userId) || block.progression || block.revision !== 1) throw Error('invalidCardioProgression');
+  if (block.proposal.policy === 'CARDIO_MANUAL_V1') return block;
   return { ...block, progression: { policy: 'REVIEWED_DURATION_V1', reviews: [] } };
 }
 
@@ -44,7 +45,7 @@ export function reviewCardioCycle(block: CardioBlock, workouts: readonly CardioW
   const canIncrease = !reasons.length && positiveCycleResponses(responses);
   const ready = !reasons.some(r => ['PENDING', 'NEXT_STARTED'].includes(r));
   const fingerprint = JSON.stringify([block.revision, cycle, slots, responses, own.map(w => [w.id, w.revision, w.status, w.actualSeconds, w.feedback, w.prescription]).sort((a, b) => String(a[0]).localeCompare(String(b[0])))]);
-  return { cycle, ready, canIncrease, reasons, current, next: canIncrease ? increased : [...current], fingerprint,
+  return { cycle, due: elapsed, ready, canIncrease, reasons, current, next: canIncrease ? increased : [...current], fingerprint,
     completed: records.filter(rs => rs.some(w => w.status === 'FINISHED')).length, total: slots.length };
 }
 

@@ -2,6 +2,7 @@ import { SportActivityRepository, sportActivityPath } from '../sportActivityRepo
 import { BaseRepository } from '@/services/repositories/BaseRepository';
 import { saveSportDraft } from '../sportActivities';
 import type { SportActivityDraft } from '@/models/sportActivity';
+import { createSportActivitySeries } from '../sportActivitySeries';
 jest.mock('@/services/firebase', () => ({ db: {} }));
 jest.mock('@react-native-firebase/firestore', () => ({ collection: (_db: unknown, path: string) => path, doc: (path: string) => ({ id: 'auto-id', path }) }));
 const now = Date.UTC(2026, 9, 28, 12);
@@ -57,4 +58,51 @@ it('propagates local rejection, reports later server rejection, and ignores a la
   await repo.save('new', null, draft, now, () => current, rejected);
   const late = write.mock.calls.at(-1)![2]; late(); expect(rejected).toHaveBeenCalledTimes(2);
   current = false; late(); expect(rejected).toHaveBeenCalledTimes(2);
+});
+
+const repeated: SportActivityDraft = { ...draft, mode: 'PLAN', startAt: now + 3600000,
+  repeat: { frequency: 'WEEKLY', interval: 1, weekdays: [3], untilDate: '2026-11-11' } };
+it('saves a whole recurring reservation in one local write, with no partial multi-document creation', async () => {
+  const repo = new SportActivityRepository('owner');
+  const entries = await repo.save('series', null, repeated, now, () => true, jest.fn());
+  expect(Array.isArray(entries)).toBe(true); expect(entries).toHaveLength(3);
+  expect(write).toHaveBeenCalledTimes(1); expect(write.mock.calls[0][0]).toMatchObject({ schemaVersion: 2, id: 'series' });
+  expect(get).not.toHaveBeenCalled();
+  await expect(repo.save(original.id, original, repeated, now, () => true, jest.fn())).rejects.toThrow('invalidSportRecurrence');
+  await expect(repo.save('new', null, repeated, now, () => false, jest.fn())).rejects.toThrow();
+  const changing = jest.fn().mockReturnValueOnce(true).mockReturnValue(false);
+  await expect(repo.save('new', null, repeated, now, changing, jest.fn())).rejects.toThrow('staleSportActivity');
+  expect(write).toHaveBeenCalledTimes(1);
+});
+it('edits or cancels only an occurrence leaf and leaves sibling actuals untouched', async () => {
+  const series = createSportActivitySeries('series', 'owner', repeated, now), first = series.occurrences['0'];
+  get.mockResolvedValue(series);
+  const update = jest.spyOn(BaseRepository.prototype, 'updateLocally').mockResolvedValue('pending');
+  const repo = new SportActivityRepository('owner');
+  const next = await repo.save(first.id, first, { ...repeated, repeat: undefined, name: 'Only this class' }, now + 1, () => true, jest.fn());
+  expect(get).toHaveBeenLastCalledWith('series');
+  expect(update).toHaveBeenLastCalledWith('series', { occurrences: { '0': next } }, expect.any(Function));
+  const cancelled = await repo.discard(first, now + 2, () => true, jest.fn());
+  expect(update).toHaveBeenLastCalledWith('series', { occurrences: { '0': cancelled } }, expect.any(Function));
+  expect(write).not.toHaveBeenCalled(); expect(series.occurrences['1'].record).toBeNull();
+  for (const stale of [null, { ...series, userId: 'other' }, { ...series, occurrences: { ...series.occurrences, '0': { ...first, revision: 2 } } }]) {
+    get.mockResolvedValueOnce(stale);
+    await expect(repo.discard(first, now + 3, () => true, jest.fn())).rejects.toThrow('staleSportActivity');
+  }
+  expect(update).toHaveBeenCalledTimes(2);
+});
+it('guards local acceptance and late rejection for an entire series and an occurrence patch', async () => {
+  const repo = new SportActivityRepository('owner'), rejected = jest.fn(); let current = true;
+  write.mockImplementationOnce(async () => { current = false; });
+  await expect(repo.save('series', null, repeated, now, () => current, rejected)).rejects.toThrow('sportSaveFailed');
+  current = true;
+  write.mockImplementationOnce(async (_value, _synced, reject) => { reject(); });
+  await expect(repo.save('series', null, repeated, now, () => current, rejected)).rejects.toThrow('sportSaveFailed');
+  await repo.save('series', null, repeated, now, () => current, rejected);
+  const late = write.mock.calls.at(-1)![2]; current = false; late(); expect(rejected).toHaveBeenCalledTimes(1);
+  const series = createSportActivitySeries('series', 'owner', repeated, now), first = series.occurrences['0'];
+  current = true; get.mockResolvedValue(series);
+  jest.spyOn(BaseRepository.prototype, 'updateLocally').mockImplementationOnce(async (_id, _patch, reject) => { reject?.(Error('denied')); return 'pending'; });
+  await expect(repo.discard(first, now + 1, () => current, rejected)).rejects.toThrow('sportSaveFailed');
+  expect(rejected).toHaveBeenCalledTimes(2);
 });

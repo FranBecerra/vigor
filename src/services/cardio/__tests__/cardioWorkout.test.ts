@@ -25,6 +25,7 @@ it.each([null, { schemaVersion: 2 }, { userId: 'other' }, { blockId: '../bad' },
 });
 it('rejects malformed prescriptions and inconsistent actual records without inventing sensor metrics', () => {
   const w = make(), p = w.prescription;
+  if (p.policy === 'MANUAL_PHASES_V1') throw Error('Expected an easy prescription');
   for (const patch of [{ policy: 'UNKNOWN' }, { modality: 'HIIT' }, { stimulus: 'QUALITY' }, { basis: 'BAD' }, { durationSeconds: 0 }, { allowWalking: null }, { adjustments: ['BAD'] }, { segments: [] },
     { segments: p.segments.map((s, i) => i ? s : { ...s, phase: 'EASY' }) }, { segments: p.segments.map(s => ({ ...s, durationSeconds: 0 })) },
     { segments: p.segments.map(s => ({ ...s, effort: { ...s.effort, max: 10 } })) }, { durationSeconds: 1500 }]) expect(validCardioWorkout({ ...w, prescription: { ...p, ...patch } }, 'owner')).toBe(false);

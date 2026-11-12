@@ -3,6 +3,7 @@ import type { RoutineView } from '@/services/training/routineView';
 import { estimateSessionMinutes } from '@/services/training/sessionSummary';
 import { routineDays, routineRestDays } from '@/services/training/routineRestDays';
 import { validateCardioProfile } from './cardioPlanner';
+import { buildManualCardioPlan, manualCardioFits, type ManualCardioSession } from './manualCardio';
 import { draftEasyCardioPlan } from './easyCardio';
 import { validReviewedCardioStart, type ReviewedCardioStart } from './reviewedCardioStart';
 
@@ -15,6 +16,9 @@ export interface CardioStrengthPlacement {
   lowerBodyDemand: 'LOW' | 'HIGH';
 }
 export interface CardioPreviewInput {
+  manualSessions?: ManualCardioSession[];
+  spacingPolicy?: 'SPREAD_EASY_V1';
+  doublePolicy?: 'STRENGTH_CARDIO_ONLY_V1';
   healthBaseline?: ReviewedCardioStart;
   placementPolicy?: 'BALANCED_V2';
   modalities: CardioPlanningModality[];
@@ -28,7 +32,7 @@ export interface CardioPreviewInput {
   allowDoubles: boolean;
   strength: CardioStrengthPlacement[];
 }
-export type CardioPreviewIssue = 'MODALITIES' | 'PROFILE' | 'LIMITS' | 'AVAILABILITY' | 'STRENGTH_DAY' | 'STRENGTH_COLLISION' | 'ACTIVE_DAYS' | 'HEALTH_BASELINE';
+export type CardioPreviewIssue = 'MANUAL_SESSIONS' | 'MODALITIES' | 'PROFILE' | 'LIMITS' | 'AVAILABILITY' | 'STRENGTH_DAY' | 'STRENGTH_COLLISION' | 'ACTIVE_DAYS' | 'HEALTH_BASELINE';
 const integer = (n: unknown, min: number, max: number): n is number => typeof n === 'number' && Number.isInteger(n) && n >= min && n <= max;
 
 export function cardioPreviewIssue(input: CardioPreviewInput): CardioPreviewIssue | null {
@@ -38,7 +42,9 @@ export function cardioPreviewIssue(input: CardioPreviewInput): CardioPreviewIssu
   if (input.healthBaseline !== undefined && (!validReviewedCardioStart(input.healthBaseline)
     || input.placementPolicy !== 'BALANCED_V2' || input.modalities.length !== 1 || input.modalities[0] !== input.healthBaseline.modality
     || input.cycleDays !== input.healthBaseline.cycleDays || input.sessions > input.healthBaseline.sessions)) return 'HEALTH_BASELINE';
-  if (input.placementPolicy !== undefined && input.placementPolicy !== 'BALANCED_V2'
+  if (input.spacingPolicy !== undefined && (input.spacingPolicy !== 'SPREAD_EASY_V1' || input.placementPolicy !== 'BALANCED_V2')
+    || input.doublePolicy !== undefined && input.doublePolicy !== 'STRENGTH_CARDIO_ONLY_V1'
+    || input.placementPolicy !== undefined && input.placementPolicy !== 'BALANCED_V2'
     || !integer(input.cycleDays, 7, 31) || !integer(input.sessions, input.modalities.length, 14)
     || !integer(input.cardioMinutes, 1, 1440) || !integer(input.sessionMinutes, 1, 600)
     || !integer(input.maxActiveDays, 1, input.cycleDays) || typeof input.allowDoubles !== 'boolean') return 'LIMITS';
@@ -51,6 +57,7 @@ export function cardioPreviewIssue(input: CardioPreviewInput): CardioPreviewIssu
     || new Set(input.strength.map(s => s.id)).size !== input.strength.length) return 'STRENGTH_DAY';
   if (new Set(input.strength.map(s => s.dayIndex)).size !== input.strength.length) return 'STRENGTH_COLLISION';
   if (input.strength.length > input.maxActiveDays) return 'ACTIVE_DAYS';
+  if (input.manualSessions !== undefined && !manualCardioFits(input)) return 'MANUAL_SESSIONS';
   return null;
 }
 
@@ -58,7 +65,9 @@ export function cardioPreviewIssue(input: CardioPreviewInput): CardioPreviewIssu
 export function buildCardioPreview(input: CardioPreviewInput) {
   const issue = cardioPreviewIssue(input);
   if (issue) throw Error(issue);
-  const plan = draftEasyCardioPlan({
+  const automatic = () => draftEasyCardioPlan({
+    ...(input.spacingPolicy ? { spacingPolicy: input.spacingPolicy } : {}),
+    ...(input.doublePolicy ? { doublePolicy: input.doublePolicy } : {}),
     ...(input.placementPolicy ? { placementPolicy: input.placementPolicy } : {}),
     cycleDays: input.cycleDays, availableDays: [...input.availableDays], maxSessions: input.sessions,
     totalMinutes: input.cardioMinutes, maxSessionMinutes: input.sessionMinutes, maxActiveDays: input.maxActiveDays,
@@ -71,7 +80,10 @@ export function buildCardioPreview(input: CardioPreviewInput) {
       durationMinutes: Math.min(input.sessionMinutes, input.healthBaseline?.sessionMinutes ?? input.sessionMinutes),
       candidateDays: [...input.availableDays], lowerBodyDemand: modality === 'CYCLING' ? 'LOW' as const : 'HIGH' as const };
   }));
-  if (input.healthBaseline) plan.prescriptions = plan.prescriptions.map(p => ({ ...p, basis: 'REVIEWED_HISTORY' as const }));
+  const plan = input.manualSessions ? buildManualCardioPlan(input) : automatic();
+  const prescriptions = input.healthBaseline
+    ? (plan as ReturnType<typeof automatic>).prescriptions.map(p => ({ ...p, basis: 'REVIEWED_HISTORY' as const }))
+    : plan.prescriptions;
   const demanding = [
     ...input.strength.filter(s => s.lowerBodyDemand === 'HIGH').map(s => ({ id: `strength:${s.id}`, day: s.dayIndex! })),
     ...plan.scheduled.filter(s => s.lowerBodyDemand === 'HIGH').map(s => ({ id: s.id, day: s.dayIndex })),
@@ -80,12 +92,29 @@ export function buildCardioPreview(input: CardioPreviewInput) {
     const distance = Math.abs(s.dayIndex - other.day);
     return s.id !== other.id && Math.min(distance, input.cycleDays - distance) <= 1;
   }));
-  return { ...plan, closeDemandingSessions, days: Array.from({ length: input.cycleDays }, (_, dayIndex) => ({
+  return { ...plan, prescriptions, closeDemandingSessions, days: Array.from({ length: input.cycleDays }, (_, dayIndex) => ({
     dayIndex, strength: input.strength.filter(s => s.dayIndex === dayIndex).map(s => ({ ...s })),
     cardio: plan.scheduled.filter(s => s.dayIndex === dayIndex).map(s => ({ ...s })),
   })) };
 }
 export type CardioPreview = ReturnType<typeof buildCardioPreview>;
+
+const lower = new Set(['QUADS', 'HAMSTRINGS', 'GLUTES', 'ADDUCTORS', 'CALVES', 'ERECTORS', 'UNCLASSIFIED']);
+
+/** Count direct working sets once per exercise, including multi-primary movements. */
+export function hybridLegSets(routine: RoutineView): Map<string, number> {
+  const result = new Map<string, number>();
+  for (const session of routine.microcycles[routine.currentMicrocycleIndex]?.sessions ?? []) {
+    let sets = 0;
+    for (const exercise of session.exercises) {
+      if (!exercise.excludeFromVolume && [exercise.primaryMuscle, ...(exercise.primaryMuscles ?? [])].some(m => m !== 'UNCLASSIFIED' && lower.has(m))) {
+        sets += exercise.sets.filter(s => s.setType !== 'WARMUP').length;
+      }
+    }
+    result.set(`${routine.id}:${session.plannedSessionIndex}`, sets);
+  }
+  return result;
+}
 
 /** Reuses explicit relative rhythm only; absent scheduling metadata stays unplaced. */
 export function strengthPlacements(routine: RoutineView, primaryOnly = false): { cycleDays?: number; sessions: CardioStrengthPlacement[] } {
@@ -95,7 +124,6 @@ export function strengthPlacements(routine: RoutineView, primaryOnly = false): {
   if (source && (source.restDays !== undefined || source.scheduleTemplate !== undefined)) {
     try { slots = routineDays(sessions.map(s => ({ index: s.plannedSessionIndex })), routineRestDays(source)); } catch { /* Invalid rhythm requires explicit placement. */ }
   }
-  const lower = new Set(['QUADS', 'HAMSTRINGS', 'GLUTES', 'ADDUCTORS', 'CALVES', 'ERECTORS', 'UNCLASSIFIED']);
   return { ...(slots?.length ? { cycleDays: slots.length } : {}), sessions: sessions.map(s => {
     const day = slots?.findIndex(slot => slot.kind === 'workout' && slot.sessionIndex === s.plannedSessionIndex);
     return { id: `${routine.id}:${s.plannedSessionIndex}`, name: s.name,
@@ -115,15 +143,17 @@ export function suggestCardioCapacity(input: CardioPreviewInput) {
   if (input.healthBaseline) {
     if (!validReviewedCardioStart(input.healthBaseline) || input.cycleDays !== input.healthBaseline.cycleDays
       || input.modalities.length !== 1 || input.modalities[0] !== input.healthBaseline.modality) throw Error('invalidCardioSuggestion');
-    return { sessions: input.healthBaseline.sessions, sessionMinutes: input.healthBaseline.maxSessionMinutes,
-      cardioMinutes: input.healthBaseline.availableMinutes, maxActiveDays: Math.min(input.cycleDays, input.strength.length + input.healthBaseline.sessions) };
+    return { sessions: input.healthBaseline.sessions, sessionMinutes: input.healthBaseline.sessionMinutes,
+      cardioMinutes: input.healthBaseline.totalMinutes, maxActiveDays: Math.min(input.cycleDays, input.strength.length + input.healthBaseline.sessions) };
   }
   const frequency = input.modalities.map(modality => input.profile.modalities[modality]?.sessionsPerWeek);
   const knownWeekly = frequency.every(n => n !== undefined) ? frequency.reduce<number>((sum, n) => sum + n!, 0) : undefined;
   const weekly = regular && knownWeekly !== undefined && knownWeekly > 0 ? Math.min(3, knownWeekly) : 2;
   const sessions = Math.min(14, Math.max(input.modalities.length, Math.round(weekly * input.cycleDays / 7)));
   // Integer controls must not round a reported tolerance upward.
-  const duration = (modality: CardioPlanningModality) => Math.floor(Math.min(regular ? 40 : 25, input.profile.modalities[modality]?.typicalSessionMinutes ?? 20));
+  // A beginner label is not evidence that a declared comfortable 40-minute session must be cut to 20–25.
+  // Forty remains a reviewable starter-suggestion ceiling, not a tolerance estimate or a saved-history cap.
+  const duration = (modality: CardioPlanningModality) => Math.floor(Math.min(40, input.profile.modalities[modality]?.typicalSessionMinutes ?? 20));
   return { sessions, sessionMinutes: Math.max(...input.modalities.map(duration)),
     cardioMinutes: Array.from({ length: sessions }, (_, index) => duration(input.modalities[index % input.modalities.length])).reduce((a, b) => a + b, 0),
     maxActiveDays: Math.min(input.cycleDays, input.strength.length + sessions) };

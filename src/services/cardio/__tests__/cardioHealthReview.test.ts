@@ -1,10 +1,21 @@
-import { CARDIO_HEALTH_CAP, cardioHealthWindow, reviewCardioHealth } from '../cardioHealthReview';
+import { CARDIO_HEALTH_CAP, cardioHealthWindow, cardioWorkoutMetrics, reviewCardioHealth } from '../cardioHealthReview';
 import type { CardioHealthRead, CardioHealthWorkout } from '@/models/cardioHealth';
 const now = Date.UTC(2026, 9, 30, 12), day = 86400000;
 const workout = (id = 'a', patch: Partial<CardioHealthWorkout> = {}): CardioHealthWorkout => ({ id, kind: 'RUNNING',
   start: now - day, end: now - day + 3600000, durationSeconds: 1800, sourceId: 'watch', sourceName: 'Watch',
   manuallyEntered: false, ownExport: false, mixedActivities: false, ...patch });
 const read = (workouts: CardioHealthWorkout[] = [], patch: Partial<CardioHealthRead> = {}) => ({ version: 1 as const, truncated: false, workouts, ...patch });
+it('preserves measured heart rate and calculates pace from the same running workout', () => {
+  const review = reviewCardioHealth(read([
+    workout('fast', { durationSeconds: 1200, distanceMetres: 5000, averageHeartRateBpm: 177.2 }),
+    workout('easy', { durationSeconds: 1200, distanceMetres: 2500, averageHeartRateBpm: 130.2 }),
+    workout('invalid', { distanceMetres: 0, averageHeartRateBpm: NaN }),
+  ]), now);
+  expect(cardioWorkoutMetrics(review.rows.find(row => row.id === 'fast')!)).toEqual({ paceSecondsPerKm: 240, averageHeartRateBpm: 177 });
+  expect(cardioWorkoutMetrics(review.rows.find(row => row.id === 'easy')!)).toEqual({ paceSecondsPerKm: 480, averageHeartRateBpm: 130 });
+  expect(cardioWorkoutMetrics(review.rows.find(row => row.id === 'invalid')!)).toEqual({ paceSecondsPerKm: undefined, averageHeartRateBpm: undefined });
+  expect(cardioWorkoutMetrics(workout('bike', { kind: 'CYCLING', distanceMetres: 12_000 })).paceSecondsPerKm).toBeUndefined();
+});
 it('uses an exact six-week observation window, not a seven-day training microcycle', () => {
   expect(cardioHealthWindow(now)).toEqual({ start: now - 42 * day, end: now });
   for (const value of [0, 1, -1, NaN, Infinity, '1']) expect(() => cardioHealthWindow(value as number)).toThrow('invalidCardioHealthWindow');

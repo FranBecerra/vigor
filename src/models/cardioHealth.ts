@@ -8,6 +8,10 @@ export interface CardioHealthWorkout {
   end: number;
   durationSeconds: number;
   distanceMetres?: number;
+  /** Workout-associated average only, when provided by HealthKit. */
+  averageHeartRateBpm?: number;
+  /** Associated system or user five-zone durations, ordered from lowest to highest. */
+  heartRateZoneSeconds?: number[];
   sourceId: string;
   sourceName: string;
   manuallyEntered: boolean;

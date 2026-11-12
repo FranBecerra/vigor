@@ -6,6 +6,21 @@ const day = 86400000;
 const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const text = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= 512;
 const optionalId = (v: unknown) => v === undefined || text(v);
+const validPulse = (v: unknown): v is number => finite(v) && v >= 20 && v <= 260;
+
+function validZones(value: unknown, duration: number): value is number[] {
+  return Array.isArray(value) && value.length === 5 && Array.from(value).every(n => finite(n) && n >= 0)
+    && value.some(n => n > 0) && value.reduce((sum, n) => sum + n, 0) <= duration + 5;
+}
+
+export function cardioWorkoutMetrics(workout: CardioHealthWorkout) {
+  const km = (workout.distanceMetres ?? 0) / 1000;
+  const secondsPerKm = workout.durationSeconds / km;
+  return {
+    paceSecondsPerKm: workout.kind === 'RUNNING' && finite(secondsPerKm) && secondsPerKm > 0 ? Math.round(secondsPerKm) : undefined,
+    averageHeartRateBpm: validPulse(workout.averageHeartRateBpm) ? Math.round(workout.averageHeartRateBpm) : undefined,
+  };
+}
 
 export function cardioHealthWindow(now: number) {
   if (!finite(now) || now <= CARDIO_HEALTH_DAYS * day) throw Error('invalidCardioHealthWindow');
@@ -39,6 +54,8 @@ export function reviewCardioHealth(raw: unknown, now: number, sourceId?: string,
       durationSeconds: value.durationSeconds, sourceId: value.sourceId, sourceName: value.sourceName,
       manuallyEntered: value.manuallyEntered, ownExport: false, mixedActivities: value.mixedActivities,
       ...(value.distanceMetres === undefined ? {} : { distanceMetres: value.distanceMetres }),
+      ...(validZones(value.heartRateZoneSeconds, value.durationSeconds) ? { heartRateZoneSeconds: [...value.heartRateZoneSeconds] } : {}),
+      ...(validPulse(value.averageHeartRateBpm) ? { averageHeartRateBpm: value.averageHeartRateBpm } : {}),
       ...(value.externalId === undefined ? {} : { externalId: value.externalId }) };
     const previous = unique.get(v.id);
     if (previous) {

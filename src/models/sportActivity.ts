@@ -4,6 +4,19 @@ export const SPORT_KINDS = ['PADEL', 'FOOTBALL', 'TENNIS', 'BASKETBALL', 'HIKING
 export type SportKind = typeof SPORT_KINDS[number];
 export type SportContext = 'CLASS' | 'MATCH' | 'FREE';
 
+/** Finite civil-calendar recurrence. Weekdays use Sunday=0; missing month days are skipped. */
+export interface SportRepeatRule {
+  frequency: 'WEEKLY' | 'MONTHLY';
+  interval: number;
+  untilDate: string;
+  weekdays?: number[];
+}
+export interface SportOccurrenceIdentity {
+  seriesId: string;
+  index: number;
+  originalStartAt: number;
+}
+
 export interface SportTiming {
   startAt: number;
   durationMinutes: number;
@@ -18,6 +31,7 @@ export interface SportRecord extends SportTiming {
 
 /** Private, versioned activity aggregate. Raw health samples never enter this document. */
 export interface SportActivity {
+  occurrence?: SportOccurrenceIdentity;
   schemaVersion: 1;
   id: string;
   userId: string;
@@ -34,6 +48,8 @@ export interface SportActivity {
 }
 
 export interface SportActivityDraft {
+  /** Only new planned activities may create a series; editing always affects one occurrence. */
+  repeat?: SportRepeatRule;
   sport: SportKind;
   context: SportContext;
   name: string;
@@ -43,6 +59,18 @@ export interface SportActivityDraft {
   durationMinutes: number;
   timeZone: string;
   effort: number | null;
+}
+
+/** One atomic, bounded private document; individual occurrences remain independent records. */
+export interface SportActivitySeries {
+  schemaVersion: 2;
+  id: string;
+  userId: string;
+  rule: SportRepeatRule;
+  anchorStartAt: number;
+  timeZone: string;
+  createdAt: number;
+  occurrences: Record<string, SportActivity>;
 }
 
 /** Device-local contract for the mandatory subsequent sensor phase. */

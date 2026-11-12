@@ -2,6 +2,7 @@ import React from 'react';
 import { useSportActivities } from '../useSportActivities';
 import { saveSportDraft } from '@/services/cardio/sportActivities';
 import type { SportActivityDraft } from '@/models/sportActivity';
+import { createSportActivitySeries } from '@/services/cardio/sportActivitySeries';
 const { create, act } = require('react-test-renderer');
 let mockUid: string | null = 'owner'; const mockSave = jest.fn(), mockDiscard = jest.fn();
 const mockListeners = new Map<string, { next: (snapshot: any) => void; error: () => void; stop: jest.Mock }>();
@@ -75,5 +76,25 @@ it('sorts snapshots and optimistic saves deterministically and blocks writes whi
   await act(async () => sports.save('a', a, draft)); expect(sports.entries.map((item) => item.id)).toEqual(['later', 'a', 'b']);
   await act(async () => mockListeners.get('users/owner/sportActivities')!.error());
   await expect(sports.save('new', null, draft)).rejects.toThrow('sportsUnavailable');
+  await act(async () => tree.unmount());
+});
+
+it('flattens one series into independent appointments and applies an optimistic series save atomically', async () => {
+  const series = createSportActivitySeries('series', 'owner', { ...draft, mode: 'PLAN', startAt: now + 3600000,
+    repeat: { frequency: 'WEEKLY', interval: 1, weekdays: [3], untilDate: '2026-11-11' } }, now);
+  let tree: any; await act(async () => { tree = create(<Probe />); });
+  await act(async () => publish([entry, series]));
+  expect(sports.entries).toHaveLength(4); expect(sports.error).toBe(false);
+  expect(sports.entries.filter((e) => e.occurrence).every((e) => e.record === null)).toBe(true);
+  await act(async () => publish([entry])); mockSave.mockResolvedValueOnce(Object.values(series.occurrences));
+  await act(async () => sports.save(series.id, null, { ...draft, mode: 'PLAN' }));
+  expect(sports.entries).toHaveLength(4);
+  const first = series.occurrences['0'];
+  mockDiscard.mockResolvedValueOnce({ ...first, discardedAt: now + 1, updatedAt: now + 1, revision: 2 });
+  await act(async () => sports.discard(first)); expect(sports.entries).toHaveLength(3);
+  expect(sports.entries.some((e) => e.id === 'series~1')).toBe(true);
+  const changed = { ...series, occurrences: { ...series.occurrences, '0': { ...first, discardedAt: now + 1, updatedAt: now + 1, revision: 2 } } };
+  await act(async () => publish([entry, changed])); expect(sports.entries).toHaveLength(3);
+  await act(async () => publish([entry, { ...series, occurrences: {} }])); expect(sports.entries).toEqual([entry]); expect(sports.error).toBe(true);
   await act(async () => tree.unmount());
 });

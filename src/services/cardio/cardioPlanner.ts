@@ -7,6 +7,7 @@ import type {
   CardioPlanningModality,
   CardioStrengthAnchor,
 } from '@/models/cardio';
+import { spreadEasyCardio } from './cardioSpacing';
 
 const modalities: CardioPlanningModality[] = ['RUNNING', 'CYCLING', 'MACHINE'];
 const statuses = ['NEW', 'RETURNING', 'REGULAR', 'UNSURE'];
@@ -43,6 +44,8 @@ export function validateCardioProfile(value: unknown): value is {
 
 function validateConstraints(input: CardioPlanningConstraints): void {
   if (!isIntegerInRange(input.cycleDays, 1, 31)
+    || input.spacingPolicy !== undefined && (input.spacingPolicy !== 'SPREAD_EASY_V1' || input.placementPolicy !== 'BALANCED_V2')
+    || input.doublePolicy !== undefined && input.doublePolicy !== 'STRENGTH_CARDIO_ONLY_V1'
     || input.placementPolicy !== undefined && input.placementPolicy !== 'BALANCED_V2'
     || !isIntegerInRange(input.maxSessions, 0, 31)
     || !isIntegerInRange(input.maxActiveDays, 0, input.cycleDays)
@@ -114,6 +117,8 @@ function dayCost(candidate: CardioPlanCandidate, day: number, input: CardioPlann
   let cost = 0;
   const fixedSame = input.fixedStrength.some(anchor => anchor.dayIndex === day);
   const cardioSame = assigned.some(item => item.dayIndex === day);
+  if (input.doublePolicy === 'STRENGTH_CARDIO_ONLY_V1'
+    && (cardioSame || input.fixedStrength.filter(anchor => anchor.dayIndex === day).length > 1)) return Number.POSITIVE_INFINITY;
   if (!input.allowDoubles && (fixedSame || cardioSame)) return Number.POSITIVE_INFINITY;
   if (candidate.lowerBodyDemand === 'HIGH') {
     if (dayOverlap(candidate, day, input.fixedStrength, input.cycleDays) === 'SAME_DAY') cost += 100;
@@ -140,7 +145,7 @@ function dayCost(candidate: CardioPlanCandidate, day: number, input: CardioPlann
  */
 export function scheduleCardioCandidates(input: CardioPlanningConstraints): CardioConstraintPlan {
   validateConstraints(input);
-  const assigned: Array<{ candidate: CardioPlanCandidate; dayIndex: number }> = [];
+  let assigned: Array<{ candidate: CardioPlanCandidate; dayIndex: number }> = [];
   const omitted: CardioPlanOmission[] = [];
   let usedMinutes = 0;
   const existingStrengthDays = new Set(input.fixedStrength.map(anchor => anchor.dayIndex));
@@ -176,6 +181,7 @@ export function scheduleCardioCandidates(input: CardioPlanningConstraints): Card
     usedMinutes += candidate.durationMinutes;
   }
 
+  if (input.spacingPolicy === 'SPREAD_EASY_V1') assigned = spreadEasyCardio(input, assigned);
   const scheduled = assigned.map(({ candidate, dayIndex }) => ({
     ...candidate,
     candidateDays: [...candidate.candidateDays],

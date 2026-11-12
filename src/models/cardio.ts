@@ -75,6 +75,10 @@ export interface CardioStrengthAnchor {
 }
 
 export interface CardioPlanningConstraints {
+  /** Opt-in, immutable relative-day easy-cardio spacing policy. */
+  spacingPolicy?: 'SPREAD_EASY_V1';
+  /** New hybrid availability permits only one strength plus one cardio workout per day. */
+  doublePolicy?: 'STRENGTH_CARDIO_ONLY_V1';
   /** Opt-in version: legacy saved proposals retain their original placement. */
   placementPolicy?: 'BALANCED_V2';
   cycleDays: number;
@@ -125,6 +129,18 @@ export interface EasyCardioPrescription {
     talkTest: 'COMFORTABLE_CONVERSATION';
   }>;
 }
+
+export interface ManualCardioPrescription {
+  schemaVersion: 1;
+  policy: 'MANUAL_PHASES_V1';
+  id: string;
+  modality: CardioPlanningModality;
+  /** Estimated calendar duration. Zero means unknown. Phase timing uses explicit targets only. */
+  durationSeconds: number;
+  segments: Array<{ phase: import('@/services/cardio/manualCardio').ManualPhase; targets: import('@/services/cardio/manualCardio').ManualCardioTargets }>;
+}
+
+export type CardioPrescription = EasyCardioPrescription | ManualCardioPrescription;
 
 export interface EasyCardioRequest {
   id: string;

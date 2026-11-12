@@ -1,5 +1,6 @@
 import type { CardioBlock, CardioCycleResponses, CardioProgression } from '@/models/cardioTraining';
-import type { EasyCardioPrescription } from '@/models/cardio';
+import type { CardioPrescription } from '@/models/cardio';
+import { copyManualTargets } from './manualCardio';
 
 const answers = ['YES', 'NO', 'UNKNOWN'];
 export const validCycleResponses = (v: unknown): v is CardioCycleResponses => {
@@ -19,7 +20,7 @@ export function nextEasyDurations(block: CardioBlock, previous: readonly number[
 /** Validate additive state without changing reconstruction of any legacy proposal. */
 export function validCardioProgression(value: unknown, block: CardioBlock): value is CardioProgression {
   const p = value as CardioProgression | null;
-  if (!p || p.policy !== 'REVIEWED_DURATION_V1' || !Array.isArray(p.reviews) || p.reviews.length > block.cycles) return false;
+  if (block.proposal.policy === 'CARDIO_MANUAL_V1' || !p || p.policy !== 'REVIEWED_DURATION_V1' || !Array.isArray(p.reviews) || p.reviews.length > block.cycles) return false;
   let previous = block.proposal.preview.prescriptions.map(s => s.durationSeconds), at = block.createdAt;
   return Array.from(p.reviews).every((r, i) => {
     if (!r || r.cycle !== i || !Number.isSafeInteger(r.recordedAt) || r.recordedAt < at || r.recordedAt > block.updatedAt
@@ -48,11 +49,12 @@ export function cardioCycleDoses(block: CardioBlock) {
 }
 
 /** Provisional future doses never become executable increases without a review. */
-export function cardioSlotPrescription(block: CardioBlock, slotId: string, forecast = false): EasyCardioPrescription {
+export function cardioSlotPrescription(block: CardioBlock, slotId: string, forecast = false): CardioPrescription {
   const slot = block.slots.find(s => s.id === slotId);
   if (!slot) throw Error('invalidCardioSlot');
   const index = block.proposal.preview.prescriptions.findIndex(p => p.id === slot.prescriptionId);
   const base = block.proposal.preview.prescriptions[index];
+  if (base.policy === 'MANUAL_PHASES_V1') return { ...base, segments: base.segments.map(segment => ({ ...segment, targets: copyManualTargets(segment.targets) })) };
   const cycle = !forecast && block.progression ? Math.min(slot.cycle, block.progression.reviews.length) : slot.cycle;
   const durationSeconds = cardioCycleDoses(block)[cycle].seconds[index];
   const edge = Math.min(300, Math.floor(durationSeconds * .2));

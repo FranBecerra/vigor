@@ -1,4 +1,4 @@
-import type { EasyCardioPrescription } from './cardio';
+import type { CardioPrescription } from './cardio';
 import type { SessionFeedback } from './sessionFeedback';
 import type { SavedCardioPlan } from '@/services/cardio/savedCardioPlan';
 
@@ -53,7 +53,8 @@ export interface CardioWorkout {
   blockId: string;
   slotId: string;
   name: string;
-  prescription: EasyCardioPrescription;
+  prescription: CardioPrescription;
+  manualPhase?: { index: number; startedAtElapsedMs: number };
   status: 'RUNNING' | 'PAUSED' | 'FINISHED' | 'DISCARDED';
   startedAt: number;
   updatedAt: number;

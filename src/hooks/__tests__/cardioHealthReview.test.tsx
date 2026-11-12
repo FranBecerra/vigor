@@ -37,6 +37,14 @@ it('supports explicit retry after authorization/read errors and unsupported bina
   await act(async () => result.read()); expect(result.state).toBe('READY');
   await act(async () => result.clear()); expect(result.state).toBe('IDLE'); await act(async () => tree.unmount());
 });
+it('reads on an explicit remembered request without prompting for authorization', async () => {
+  let tree: any; await act(async () => { tree = create(<Probe />); });
+  await act(async () => result.read(false));
+  expect(mockRead).toHaveBeenCalledTimes(1);
+  expect(mockAuthorize).not.toHaveBeenCalled();
+  expect(result.state).toBe('READY');
+  await act(async () => tree.unmount());
+});
 it('ignores duplicate taps, background/blur completions and never restarts a cleared read automatically', async () => {
   let release!: (value: unknown) => void;
   mockRead.mockImplementationOnce(() => new Promise(resolve => { release = resolve; }));

@@ -19,7 +19,7 @@ it('authors real easy sessions, accounts for full durations and returns every re
   expect(result.usedMinutes).toBe(40); expect(result.days).toHaveLength(8);
   expect(result.days[0].strength[0].id).toBe('lower');
   expect(result.scheduled.find(s => s.modality === 'RUNNING')!.dayIndex).not.toBe(7);
-  expect(result.prescriptions.every(s => s.basis === 'FAMILIARIZATION')).toBe(true);
+  expect(result.prescriptions.every(s => s.policy !== 'MANUAL_PHASES_V1' && s.basis === 'FAMILIARIZATION')).toBe(true);
   result.days[0].strength[0].name = 'Changed'; result.scheduled[0].candidateDays.pop();
   expect(JSON.stringify(input)).toBe(copy);
 });
@@ -28,7 +28,7 @@ it('respects requested modality order, count, per-session duration and cardio bu
     profile: { schemaVersion: 1, modalities: { CYCLING: { status: 'REGULAR', qualityExposure: 'CURRENTLY_TOLERATED', typicalSessionMinutes: 10 } } }, cardioMinutes: 35 }));
   expect(result.usedMinutes).toBe(30); expect(result.scheduled).toHaveLength(2);
   expect(result.omitted).toEqual([{ candidateId: 'easy-02-cycling', reason: 'TIME_CAP' }]);
-  expect(result.prescriptions[0].segments.reduce((n, s) => n + s.durationSeconds, 0)).toBe(result.prescriptions[0].durationSeconds);
+  expect(result.prescriptions[0].segments.reduce((n, s) => n + ('durationSeconds' in s ? s.durationSeconds : 0), 0)).toBe(result.prescriptions[0].durationSeconds);
 });
 it('reports empty availability rather than inventing training or interpreting it as completion', () => {
   const result = buildCardioPreview(base({ availableDays: [] }));
@@ -115,6 +115,14 @@ it('offers a conservative editable starting point, scales non-seven-day frequenc
   expect(suggestCardioCapacity(short)).toMatchObject({ sessions: 3, sessionMinutes: 12, cardioMinutes: 36 });
   const mixed = base({ modalities: ['RUNNING', 'CYCLING', 'MACHINE'], cycleDays: 31 });
   expect(suggestCardioCapacity(mixed)).toEqual({ sessions: 9, sessionMinutes: 20, cardioMinutes: 180, maxActiveDays: 9 });
+});
+it('does not turn a current forty-minute tolerance into twenty minutes because the athlete selected NEW', () => {
+  const input = base({ modalities: ['RUNNING'], profile: { schemaVersion: 1, modalities: { RUNNING: {
+    status: 'NEW', qualityExposure: 'UNKNOWN', typicalSessionMinutes: 40,
+  } } } });
+  expect(suggestCardioCapacity(input)).toMatchObject({ sessionMinutes: 40, cardioMinutes: 80 });
+  const suggestion = suggestCardioCapacity(input);
+  expect(buildCardioPreview({ ...input, ...suggestion }).prescriptions.every(p => p.durationSeconds === 2400)).toBe(true);
 });
 it.each([null, { modalities: null }, { modalities: [] }, { modalities: ['BAD'] }, { modalities: ['RUNNING', 'RUNNING'] },
   { profile: null }, { cycleDays: 6 }, { cycleDays: 32 }, { strength: null }, { strength: Array(9).fill({}) }])('rejects invalid suggestion context %p', patch => {

@@ -85,24 +85,29 @@ export function datedStrength(routine?: RoutineView, timeZone = 'UTC'): DatedStr
 }
 export type CardioCoordinationIssue = 'STRENGTH' | 'SPORT' | 'CARDIO' | 'ACTIVE_DAYS' | 'AVAILABILITY' | 'SPORT_CHANGED' | 'TIME';
 
+/** Shared dated/forecast source. Assigned sessions replace their original forecast, even when moved outside the horizon. */
+export function strengthCalendarLoad(block: CardioBlock, actualStrength: readonly DatedStrength[]) {
+  const input = block.proposal.input, origin = block.proposal.strengthSource?.microcycleIndex;
+  const day = (date: string) => Math.round((Date.parse(`${date}T12:00:00Z`) - Date.parse(`${block.startDate}T12:00:00Z`)) / 86400000);
+  const assigned = new Set(actualStrength.filter(s => s.placementId && s.microcycleIndex !== undefined && origin !== undefined)
+    .map(s => `${s.microcycleIndex! - origin!}:${s.placementId}`));
+  return [...actualStrength.map(s => ({ day: day(s.date), demand: s.demand,
+    minutes: s.estimatedMinutes ?? input.strength.find(p => p.id === s.placementId)?.estimatedMinutes ?? 0 })),
+    ...Array.from({ length: block.cycles }, (_, cycle) => input.strength.filter(s => !assigned.has(`${cycle}:${s.id}`))
+      .map(s => ({ day: cycle * input.cycleDays + s.dayIndex!, demand: s.lowerBodyDemand, minutes: s.estimatedMinutes }))).flat()];
+}
+
 /** Cache civil-day arithmetic and sport timezone conversion once per review. */
 function coordinationContext(block: CardioBlock, sports: readonly SportActivity[], actualStrength: readonly DatedStrength[]) {
   const input = block.proposal.input;
   const start = Date.parse(`${block.startDate}T12:00:00Z`), cache = new Map<string, number>();
   const day = (date: string) => { if (!cache.has(date)) cache.set(date, Math.round((Date.parse(`${date}T12:00:00Z`) - start) / 86400000)); return cache.get(date)!; };
-  const origin = block.proposal.strengthSource?.microcycleIndex;
-  // Anchor to the saved source cycle, never to a routine's advancing current cycle.
-  const assigned = new Set(actualStrength.filter(s => s.placementId && s.microcycleIndex !== undefined && origin !== undefined)
-    .map(s => `${s.microcycleIndex! - origin!}:${s.placementId}`));
-  const strength = [...actualStrength.map(s => ({ day: day(s.date), demand: s.demand,
-    minutes: s.estimatedMinutes ?? input.strength.find(p => p.id === s.placementId)?.estimatedMinutes ?? 0 })),
-    ...Array.from({ length: block.cycles }, (_, cycle) => input.strength.filter(s => !assigned.has(`${cycle}:${s.id}`))
-      .map(s => ({ day: cycle * input.cycleDays + s.dayIndex!, demand: s.lowerBodyDemand, minutes: s.estimatedMinutes }))).flat()];
+  const strength = strengthCalendarLoad(block, actualStrength);
   const usable = new Map(sports.filter(s => validSportActivity(s, block.userId) && s.discardedAt === null)
     .map(s => [s.id, { day: day(dateInZone((s.record ?? s.planned)!.startAt, block.timeZone)), recorded: !!s.record }]));
-  const strengthMinutes = new Map<number, number>();
-  strength.forEach(s => strengthMinutes.set(s.day, (strengthMinutes.get(s.day) ?? 0) + s.minutes));
-  return { day, strengthDays: new Set(strength.map(s => s.day)), highDays: new Set(strength.filter(s => s.demand === 'HIGH').map(s => s.day)), strengthMinutes,
+  const strengthMinutes = new Map<number, number>(), strengthCount = new Map<number, number>();
+  strength.forEach(s => { strengthMinutes.set(s.day, (strengthMinutes.get(s.day) ?? 0) + s.minutes); strengthCount.set(s.day, (strengthCount.get(s.day) ?? 0) + 1); });
+  return { day, strengthDays: new Set(strength.map(s => s.day)), highDays: new Set(strength.filter(s => s.demand === 'HIGH').map(s => s.day)), strengthMinutes, strengthCount,
     sports: usable, sportDays: new Set([...usable.values()].map(s => s.day)), prescriptions: new Map(block.slots.map(slot => {
       const base = block.proposal.preview.scheduled.find(p => p.id === slot.prescriptionId)!;
       return [slot.id, block.progression ? { ...base, durationMinutes: cardioSlotPrescription(block, slot.id, true).durationSeconds / 60 } : base];
@@ -136,9 +141,11 @@ function coordinated(block: CardioBlock, context: ReturnType<typeof coordination
       return { slot, issues, coveredBySport: !!sport?.recorded && !issues.length };
     }
     const high = context.prescriptions.get(slot.id)!.lowerBodyDemand === 'HIGH';
-    if (!input.allowDoubles && context.strengthDays.has(day) || high && [day - 1, day, day + 1].some(d => context.highDays.has(d))) issues.push('STRENGTH');
+    if (!input.allowDoubles && context.strengthDays.has(day) || input.doublePolicy === 'STRENGTH_CARDIO_ONLY_V1' && (context.strengthCount.get(day) ?? 0) > 1
+      || high && [day - 1, day, day + 1].some(d => context.highDays.has(d))) issues.push('STRENGTH');
     if ((high ? [day - 1, day, day + 1] : [day]).some(d => context.sportDays.has(d))) issues.push('SPORT');
-    if (!input.allowDoubles && counts.get(day)! > 1 || high && (highs.get(day)! > 1 || highs.has(day - 1) || highs.has(day + 1))) issues.push('CARDIO');
+    if ((!input.allowDoubles || input.doublePolicy === 'STRENGTH_CARDIO_ONLY_V1') && counts.get(day)! > 1
+      || high && (highs.get(day)! > 1 || highs.has(day - 1) || highs.has(day + 1))) issues.push('CARDIO');
     if (!input.availableDays.includes(day % input.cycleDays)) issues.push('AVAILABILITY');
     if (active[cycle].size > input.maxActiveDays) issues.push('ACTIVE_DAYS');
     if (sessions[cycle] > input.sessions || minutes[cycle] > input.cardioMinutes) issues.push('TIME');

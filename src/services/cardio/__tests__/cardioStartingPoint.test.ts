@@ -11,11 +11,45 @@ const result = (ctx: Partial<CardioStartContext> = {}, raw: unknown = data) => p
 it('uses repeated modality-specific exposure, never a maximum or the beginner label, and mutates nothing', () => {
   const before = JSON.stringify(data);
   expect(result()).toEqual({ policy: 'OBSERVED_EASY_START_POC_V1', state: 'READY', modality: 'RUNNING', cycleDays: 7,
-    sessions: 2, sessionMinutes: 30, totalMinutes: 60, observedSessions: 8, representedWeeks: 4,
+    sessions: 2, sessionMinutes: 30, totalMinutes: 60, comfortableMinutes: 40, observedSessions: 8, representedWeeks: 4,
     typicalMinutes: 30, weeklySessions: 2, weeklyMinutes: 60, cappedBy: [] });
   expect(JSON.stringify(data)).toBe(before);
   expect(result({ modality: 'CYCLING' }).state).toBe('INSUFFICIENT_HISTORY');
   expect(result({ modality: 'CYCLING' }, { ...data, workouts: data.workouts.map(w => ({ ...w, kind: 'CYCLING' })) })).toMatchObject({ state: 'READY', sessionMinutes: 30 });
+});
+const fragments = (days: number) => {
+  const start = now - days * day;
+  return [5, 5, 15].map((minutes, index) => {
+    const fragmentStart = start + index * 6 * 60_000;
+    return workout(days, { id: `run-${days}-${index}`, start: fragmentStart,
+      end: fragmentStart + minutes * 60_000, durationSeconds: minutes * 60,
+      distanceMetres: index === 2 ? 3000 : 1000 });
+  });
+};
+it('counts interrupted 1 + 1 + 3 km outings once and sums only active time', () => {
+  const raw = { ...data, workouts: [1, 8, 15, 22].flatMap(fragments).reverse() };
+  const before = JSON.stringify(raw);
+  expect(result({}, raw)).toMatchObject({ state: 'READY', observedSessions: 4, weeklySessions: 1,
+    typicalMinutes: 25, weeklyMinutes: 25, sessionMinutes: 25 });
+  expect(JSON.stringify(raw)).toBe(before);
+  expect(result({}, { ...data, workouts: fragments(1) }).state).toBe('INSUFFICIENT_HISTORY');
+});
+it('keeps different sources and separate outings distinct even on the same day', () => {
+  const workouts = [1, 8, 15, 22].flatMap(days => {
+    const [first, second, third] = fragments(days);
+    return [first, { ...second, sourceId: 'phone' },
+      { ...third, start: third.start + 3_600_000, end: third.end + 3_600_000 }];
+  });
+  expect(result({}, { ...data, workouts })).toMatchObject({ state: 'READY', observedSessions: 12, typicalMinutes: 5 });
+});
+it('bounds chained pauses and does not pull partial outings into the observation window', () => {
+  const chained = [1, 8, 15, 22].flatMap(days => Array.from({ length: 5 }, (_, index) => {
+    const start = now - days * day + index * 4 * 60_000;
+    return workout(days, { id: `chain-${days}-${index}`, start, end: start + 120_000, durationSeconds: 120 });
+  }));
+  expect(result({}, { ...data, workouts: chained })).toMatchObject({ state: 'READY', observedSessions: 8, weeklyMinutes: 10 });
+  const boundary = fragments(28 + 3 / 1440);
+  expect(result({}, { ...data, workouts: [...data.workouts, ...boundary] })).toMatchObject({ state: 'READY', observedSessions: 8 });
 });
 it.each([null, { modality: 'MACHINE' }, { response: 'INVALID' }, { representative: 1 }, { comfortableMinutes: 0 },
   { comfortableMinutes: 601 }, { comfortableMinutes: NaN }, { comfortableMinutes: 1.5 }, { cycleDays: 6 }, { cycleDays: 32 },
@@ -90,4 +124,28 @@ it.each([8, 10, 14, 31])('scales observation frequency to a %i-day cycle without
 });
 it('handles sub-minute active records without inventing a one-minute prescription', () => {
   expect(result({}, { ...data, workouts: data.workouts.map(w => ({ ...w, durationSeconds: 20 })) }).state).toBe('TIME_TOO_LOW');
+});
+
+it('uses a repeated longer outing across the 42-day window while keeping frequency anchored to 28 days', () => {
+  const observedAt = Date.UTC(2026, 10, 5, 18), day = 86400000;
+  const workout = (age: number, minutes: number, suffix = '') => ({
+    id: `run-${age}-${suffix}`, kind: 'RUNNING' as const, start: observedAt - age * day, end: observedAt - age * day + minutes * 60000,
+    durationSeconds: minutes * 60, sourceId: 'watch', sourceName: 'Watch', manuallyEntered: false, ownExport: false, mixedActivities: false,
+  });
+  const data = { version: 1, truncated: false, workouts: [workout(30, 42), workout(22, 25), workout(18, 26), workout(12, 45), workout(5, 46)] };
+  const context = { modality: 'RUNNING' as const, response: 'UNKNOWN' as const, inferFromHistory: true,
+    cycleDays: 7, maxSessions: 1, maxSessionMinutes: 60, totalMinutes: 60 };
+  expect(propose(data, observedAt, observedAt, context)).toMatchObject({
+    policy: 'OBSERVED_REPEATABLE_START_V2', state: 'READY', typicalMinutes: 45, observedSessions: 4,
+    sessionMinutes: 35, sessions: 1, cappedBy: ['OBSERVED_VOLUME'],
+  });
+  expect(propose({ ...data, workouts: [...data.workouts.filter(row => row.id !== 'run-18-'), workout(18, 45)] },
+    observedAt, observedAt, context)).toMatchObject({ state: 'READY', sessionMinutes: 45, sessions: 1 });
+  expect(propose(data, observedAt, observedAt, context, undefined, ['run-12-'])).toMatchObject({ state: 'INSUFFICIENT_HISTORY' });
+  const zones = { ...data, workouts: data.workouts.map(row => ({ ...row,
+    heartRateZoneSeconds: row.durationSeconds <= 42 * 60 ? [0, row.durationSeconds, 0, 0, 0] : [0, 0, 0, row.durationSeconds, 0] })) };
+  expect(propose(zones, observedAt, observedAt, context)).toMatchObject({
+    state: 'READY', typicalMinutes: 26, sessionMinutes: 26, usedZones: true,
+  });
+  expect(propose(data, observedAt, observedAt, { ...context, response: 'DISCOMFORT' })).toMatchObject({ state: 'DISCOMFORT' });
 });

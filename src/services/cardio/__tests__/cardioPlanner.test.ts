@@ -20,6 +20,15 @@ const constraints = (overrides: Partial<CardioPlanningConstraints> = {}): Cardio
   profile, candidates: [candidate()], fixedStrength: [], ...overrides,
 });
 
+it('opts new hybrids into cross-discipline doubles without changing legacy repeated-cardio reconstruction', () => {
+  const dense = constraints({ availableDays: [0], maxActiveDays: 1, candidates: [candidate({ id: 'a', candidateDays: [0] }), candidate({ id: 'b', candidateDays: [0] })] });
+  expect(scheduleCardioCandidates(dense).scheduled).toHaveLength(2);
+  const next = { ...dense, doublePolicy: 'STRENGTH_CARDIO_ONLY_V1' as const };
+  expect(scheduleCardioCandidates(next).scheduled).toHaveLength(1);
+  expect(scheduleCardioCandidates({ ...next, fixedStrength: [{ id: 's1', dayIndex: 0, lowerBodyDemand: 'LOW' }, { id: 's2', dayIndex: 0, lowerBodyDemand: 'LOW' }] }).scheduled).toHaveLength(0);
+  expect(() => scheduleCardioCandidates({ ...next, doublePolicy: 'unknown' as any })).toThrow('invalidCardioPlanningConstraints');
+});
+
 describe('validateCardioProfile', () => {
   it('accepts an empty draft and valid modality-specific self-report', () => {
     expect(validateCardioProfile({ schemaVersion: 1, modalities: {} })).toBe(true);

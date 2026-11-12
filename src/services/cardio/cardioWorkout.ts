@@ -2,6 +2,7 @@ import type { CardioBlock, CardioWorkout } from '@/models/cardioTraining';
 import { reviseSessionFeedback, sessionEffortValue, SESSION_EFFORT_SCALE } from '@/services/training/sessionFeedback';
 import { validSportIdentity } from './sportActivities';
 import { validCardioBlock } from './cardioBlock';
+import { validManualPrescription } from './manualCardio';
 import { cardioSlotPrescription } from './cardioProgressionPolicy';
 
 const stamp = (v: unknown): v is number => typeof v === 'number' && Number.isSafeInteger(v) && v > 0 && v <= 8.64e15;
@@ -13,7 +14,13 @@ export function validCardioWorkout(value: unknown, owner: string): value is Card
     || !validSportIdentity(w.slotId) || typeof w.name !== 'string' || !w.name || w.name.length > 80
     || !['RUNNING', 'PAUSED', 'FINISHED', 'DISCARDED'].includes(w.status) || !stamp(w.startedAt) || !stamp(w.updatedAt) || w.updatedAt < w.startedAt
     || !Number.isSafeInteger(w.revision) || w.revision < 1 || !Number.isSafeInteger(w.elapsedMs) || w.elapsedMs < 0 || w.elapsedMs > w.updatedAt - w.startedAt
-    || w.source !== 'TIMER_TIME_EFFORT_V1' || !p || p.schemaVersion !== 1 || !['EASY_START_V1', 'REVIEWED_EASY_DURATION_V1'].includes(p.policy) || !validSportIdentity(p.id)
+    || w.source !== 'TIMER_TIME_EFFORT_V1' || !p || !validSportIdentity(p.id)) return false;
+  if (p.policy === 'MANUAL_PHASES_V1') {
+    const phase = w.manualPhase;
+    if (!validManualPrescription(p) || !phase || !Number.isInteger(phase.index)
+      || phase.index < 0 || phase.index > p.segments.length || !Number.isSafeInteger(phase.startedAtElapsedMs)
+      || phase.startedAtElapsedMs < 0 || phase.startedAtElapsedMs > w.elapsedMs) return false;
+  } else if (w.manualPhase !== undefined || p.schemaVersion !== 1 || !['EASY_START_V1', 'REVIEWED_EASY_DURATION_V1'].includes(p.policy)
     || !['RUNNING', 'CYCLING', 'MACHINE'].includes(p.modality) || p.stimulus !== 'EASY' || !['CURRENT_PRACTICE', 'FAMILIARIZATION', 'REVIEWED_HISTORY'].includes(p.basis)
     || !Number.isInteger(p.durationSeconds) || p.durationSeconds < 60 || p.durationSeconds > 36000 || typeof p.allowWalking !== 'boolean'
     || !Array.isArray(p.adjustments) || p.adjustments.some(a => !['UNKNOWN_DURATION', 'TOLERATED_DURATION_CAP', 'AVAILABILITY_CAP'].includes(a))
@@ -32,8 +39,9 @@ export function startCardioWorkout(block: CardioBlock, slotId: string, now: numb
   if (!validCardioBlock(block, block?.userId)) throw Error('invalidCardioStart');
   const slot = block.slots.find(s => s.id === slotId);
   if (block.endedAt !== null || !slot || slot.disposition !== 'CARDIO' || !stamp(now) || now < block.createdAt || !validSportIdentity(id)) throw Error('invalidCardioStart');
+  const prescription = cardioSlotPrescription(block, slot.id);
   return { schemaVersion: 1, id, userId: block.userId, blockId: block.id, slotId, name: block.proposal.name,
-    prescription: cardioSlotPrescription(block, slot.id),
+    prescription, ...(prescription.policy === 'MANUAL_PHASES_V1' ? { manualPhase: { index: 0, startedAtElapsedMs: 0 } } : {}),
     startedAt: now, updatedAt: now, revision: 1, elapsedMs: 0, status: 'RUNNING', finishedAt: null, actualSeconds: null, feedback: null, source: 'TIMER_TIME_EFFORT_V1' };
 }
 
@@ -41,7 +49,23 @@ export function startCardioWorkout(block: CardioBlock, slotId: string, now: numb
 export function cardioElapsed(w: CardioWorkout, now: number): number {
   return w.elapsedMs + (w.status === 'RUNNING' ? Math.max(0, now - w.updatedAt) : 0);
 }
+export function advanceManualCardioPhase(w: CardioWorkout, now: number): CardioWorkout {
+  if (!validCardioWorkout(w, w.userId) || w.prescription.policy !== 'MANUAL_PHASES_V1' || w.status !== 'RUNNING'
+    || w.manualPhase!.index >= w.prescription.segments.length || !stamp(now) || now < w.updatedAt
+    || w.revision === Number.MAX_SAFE_INTEGER) throw Error('invalidCardioTransition');
+  const elapsedMs = cardioElapsed(w, now);
+  return { ...w, updatedAt: now, elapsedMs, revision: w.revision + 1,
+    manualPhase: { index: w.manualPhase!.index + 1, startedAtElapsedMs: elapsedMs } };
+}
+
 export function cardioPhase(w: CardioWorkout, now: number) {
+  if (w.prescription.policy === 'MANUAL_PHASES_V1') {
+    const segment = w.prescription.segments[w.manualPhase?.index ?? 0];
+    const elapsed = Math.floor((cardioElapsed(w, now) - (w.manualPhase?.startedAtElapsedMs ?? 0)) / 1000);
+    return { phase: segment?.phase ?? 'READY' as const,
+      remaining: !segment ? 0 : segment.targets.durationSeconds === undefined ? null : Math.max(0, segment.targets.durationSeconds - elapsed),
+      targets: segment?.targets, effort: null };
+  }
   let elapsed = Math.floor(cardioElapsed(w, now) / 1000);
   for (const segment of w.prescription.segments) {
     if (elapsed < segment.durationSeconds) return { phase: segment.phase, remaining: segment.durationSeconds - elapsed, effort: segment.effort };
