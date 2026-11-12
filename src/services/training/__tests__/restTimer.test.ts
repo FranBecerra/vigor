@@ -22,32 +22,29 @@ import {
 const T0 = 1_700_000_000_000;
 
 describe('restDurationFor', () => {
-  it('gives three distinct tiers, one per profile (PRD §3.4)', () => {
-    // Lumping both compound profiles together at a strength-training rest made the
-    // whole planning model too conservative.
+  it('uses the approved hypertrophy starting rests (PRD §3.4)', () => {
     expect(restDurationFor(ExerciseProfile.COMPOUND_PRIMARY)).toBe(150);
     expect(restDurationFor(ExerciseProfile.COMPOUND_SECONDARY)).toBe(120);
-    expect(restDurationFor(ExerciseProfile.ISOLATION)).toBe(90);
+    expect(restDurationFor(ExerciseProfile.ISOLATION)).toBe(120);
   });
 
   it('rests longer the more demanding the profile', () => {
     expect(restDurationFor(ExerciseProfile.COMPOUND_PRIMARY)).toBeGreaterThan(
       restDurationFor(ExerciseProfile.COMPOUND_SECONDARY),
     );
-    expect(restDurationFor(ExerciseProfile.COMPOUND_SECONDARY)).toBeGreaterThan(
+    expect(restDurationFor(ExerciseProfile.COMPOUND_SECONDARY)).toBeGreaterThanOrEqual(
       restDurationFor(ExerciseProfile.ISOLATION),
     );
   });
 
-  it('matches the benchmark of 18 sets in a 60-minute session', () => {
-    // Six exercises of three sets, two per profile, plus warm-up and setup, comes
-    // to exactly one hour. This is the number the rest tiers were derived from.
+  it('accounts honestly for the extra isolation rest instead of forcing a one-hour benchmark', () => {
+    // Six exercises of three sets, two per profile, with warm-up and setup.
     const work = 18 * 40;
     const rest =
       6 * restDurationFor(ExerciseProfile.COMPOUND_PRIMARY) +
       6 * restDurationFor(ExerciseProfile.COMPOUND_SECONDARY) +
       6 * restDurationFor(ExerciseProfile.ISOLATION);
-    expect(6 * 60 + 6 * 60 + work + rest).toBe(60 * 60);
+    expect(6 * 60 + 6 * 60 + work + rest).toBe(63 * 60);
   });
 });
 

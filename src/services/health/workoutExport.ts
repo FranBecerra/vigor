@@ -106,7 +106,7 @@ export class WorkoutHealthExport {
         const current = this.ownerData(owner) ?? { enabled: false, entries: {} };
         // Turning off stops pending saves too; it never deletes previously exported workouts.
         const entries = Object.fromEntries(Object.entries(current.entries).map(([key, value]) => [key,
-          !enabled && value.action === 'save' && value.status === 'queued' ? { ...value, status: 'kept' as const } : value]));
+          !enabled && value.action === 'save' && ['queued', 'denied', 'failed'].includes(value.status) ? { ...value, status: 'kept' as const } : value]));
         await this.persist(owner, { enabled, entries }); this.publish({ error: false }); return true;
       } catch { this.publish({ error: true }); return false; }
     });
@@ -148,7 +148,8 @@ export class WorkoutHealthExport {
   private async drain(owner: string) {
     for (const entry of Object.values(this.ownerData(owner)?.entries ?? {})) {
       if (this.owner !== owner) return;
-      if (entry.status === 'queued' && (entry.action === 'delete' || this.ownerData(owner)?.enabled)) await this.perform(owner, entry);
+      if (entry.action === 'delete' ? entry.status === 'queued'
+        : this.ownerData(owner)?.enabled && ['queued', 'failed', 'denied'].includes(entry.status)) await this.perform(owner, entry);
     }
   }
   private async perform(owner: string, entry: HealthEntry): Promise<boolean> {

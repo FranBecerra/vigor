@@ -251,3 +251,18 @@ describe('journal validation', () => {
     }
   });
 });
+
+it.each(['denied', 'notDetermined', 'nativeError'] as const)('retries an opted-in export after %s without prompting again or writing twice', async (failure) => {
+  const h = setup();
+  await h.enable();
+  if (failure === 'nativeError') h.bridge.saveWorkout.mockRejectedValueOnce(Error('builder failure'));
+  else h.bridge.authorization.mockResolvedValueOnce(failure);
+  expect(await h.service.export(session())).toBe(false);
+  expect(h.entries()[0].status).toBe(failure === 'nativeError' ? 'failed' : 'denied');
+  await h.service.retryPending('owner');
+  expect(h.entries()[0].status).toBe('saved');
+  const writes = h.bridge.saveWorkout.mock.calls.length;
+  await h.service.retryPending('owner');
+  expect(h.bridge.saveWorkout).toHaveBeenCalledTimes(writes);
+  expect(h.bridge.authorize).toHaveBeenCalledTimes(1);
+});

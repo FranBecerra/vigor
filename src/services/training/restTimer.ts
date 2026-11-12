@@ -41,21 +41,16 @@ export function restFeedbackDeadline(previous: RestTimerState | null, next: Rest
 /**
  * Recommended rest by exercise profile (PRD §3.4).
  *
- * Three tiers, not two. The previous model lumped COMPOUND_PRIMARY and
- * COMPOUND_SECONDARY together at 180 s, which is a strength-training rest rather
- * than a hypertrophy one, and it made the whole time model too conservative: the
- * planner concluded that one hour fits 15-16 sets when 18 is unremarkable.
- *
- * These are timer defaults, not a promise of session duration. The capacity
- * planner adds a conservative floor for transitions and other gym delays.
- *
- * The athlete can always extend a rest from the timer; what matters here is that
- * the planning assumption matches what actually happens in the gym.
+ * Hypertrophy starting preferences, not physiological minimums: primary
+ * compounds 150 s, secondary compounds and isolations 120 s. Role-specific
+ * strength rests and explicit saved/user values take precedence. The capacity
+ * planner uses these same defaults, plus transitions and ordinary gym delays;
+ * it must never shorten rest merely to make a target fit.
  */
 export function restDurationFor(profile: ExerciseProfile): number {
   if (profile === ExerciseProfile.COMPOUND_PRIMARY) return 150;
   if (profile === ExerciseProfile.COMPOUND_SECONDARY) return 120;
-  return 90;
+  return 120;
 }
 
 /**

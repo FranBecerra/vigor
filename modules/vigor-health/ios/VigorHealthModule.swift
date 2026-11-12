@@ -153,8 +153,22 @@ public class VigorHealthModule: Module {
         "manuallyEntered": workout.metadata?[HKMetadataKeyWasUserEntered] as? Bool ?? false,
         "ownExport": source.bundleIdentifier == Bundle.main.bundleIdentifier,
         "mixedActivities": mixed]
-      // Workout summaries only: no route, pulse, energy or extra quantity queries/permissions.
+      // Only statistics associated with this workout, never unrelated samples in the same time window.
       if let distance = workout.totalDistance { observation["distanceMetres"] = distance.doubleValue(for: .meter()) }
+      if let type = HKQuantityType.quantityType(forIdentifier: .heartRate) {
+        if let average = workout.statistics(for: type)?.averageQuantity() {
+          observation["averageHeartRateBpm"] = average.doubleValue(for: HKUnit.count().unitDivided(by: .minute()))
+        }
+        if #available(iOS 27.0, *), let group = workout.zoneGroup(for: type),
+          group.configuration.source != .app, group.configuration.zones.count == 5 {
+          var seconds = Array(repeating: 0.0, count: 5)
+          let indices = group.configuration.zones.map(\.index)
+          for entry in group.zoneDurations {
+            if let index = indices.firstIndex(of: entry.zone.index) { seconds[index] += entry.duration }
+          }
+          if seconds.contains(where: { $0 > 0 }) { observation["heartRateZoneSeconds"] = seconds }
+        }
+      }
       if let external = workout.metadata?[HKMetadataKeyExternalUUID] as? String, !external.isEmpty, external.utf8.count <= 4096 {
         observation["externalId"] = SHA256.hash(data: Data(external.utf8)).map { String(format: "%02x", $0) }.joined()
       }
@@ -183,7 +197,9 @@ public class VigorHealthModule: Module {
       guard HKHealthStore.isHealthDataAvailable() else {
         throw NSError(domain: "VigorHealth", code: 4, userInfo: [NSLocalizedDescriptionKey: "Health data unavailable"])
       }
-      try await self.store.requestAuthorization(toShare: [], read: [HKObjectType.workoutType()])
+      var types: Set<HKObjectType> = [HKObjectType.workoutType()]
+      if let pulse = HKQuantityType.quantityType(forIdentifier: .heartRate) { types.insert(pulse) }
+      try await self.store.requestAuthorization(toShare: [], read: types)
     }
     AsyncFunction("readCardioHistory") { (startMs: Double, endMs: Double) async throws -> [String: Any] in
       try await self.readCardioHistory(startMs: startMs, endMs: endMs)
@@ -349,7 +365,9 @@ public class VigorHealthModule: Module {
         try await builder.addMetadata([HKMetadataKeySyncIdentifier: identifier, HKMetadataKeySyncVersion: 1])
         try await builder.endCollection(at: Date(timeIntervalSince1970: input.endMs / 1000))
         // No data source or quantity samples: never fabricate calories or HR.
-        _ = try await builder.finishWorkout()
+        guard try await builder.finishWorkout() != nil else {
+          throw NSError(domain: "VigorHealth", code: 7, userInfo: [NSLocalizedDescriptionKey: "HealthKit did not return a saved workout"])
+        }
       } catch {
         builder.discardWorkout()
         throw error

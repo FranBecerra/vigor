@@ -1,4 +1,5 @@
 let mockOS = 'ios'; let mockNative: any = null; let mockText: string | null = null;
+let mockPending: string | null = null;
 const mockRead = jest.fn(); const mockMove = jest.fn(); const mockCreate = jest.fn(); const mockWrite = jest.fn();
 jest.mock('react-native', () => ({ Platform: { get OS() { return mockOS; } } }));
 jest.mock('expo', () => ({ requireOptionalNativeModule: () => mockNative }));
@@ -6,12 +7,14 @@ jest.mock('expo', () => ({ requireOptionalNativeModule: () => mockNative }));
 // initializing unrelated native modules during Jest's global cleanup.
 jest.mock('expo/src/winter/fetch', () => ({ fetch: jest.fn() }));
 jest.mock('expo-file-system', () => ({ Paths: { document: 'fixture' }, File: class {
-  constructor(..._paths: unknown[]) { mockRead(); }
-  get exists() { return mockText !== null; } textSync() { return mockText; }
-  create(value: unknown) { mockCreate(value); } write(value: string) { mockText = value; mockWrite(value); }
-  move(...args: unknown[]) { mockMove(...args); }
+  private pending: boolean;
+  constructor(...paths: unknown[]) { this.pending = paths.at(-1) === 'vigor-health-exports.pending'; mockRead(); }
+  get exists() { return this.textSync() !== null; } textSync() { return this.pending ? mockPending : mockText; }
+  create(value: unknown) { mockCreate(value); }
+  write(value: string) { if (this.pending) mockPending = value; else mockText = value; mockWrite(value); }
+  move(...args: unknown[]) { mockMove(...args); if (this.pending) { mockText = mockPending; mockPending = null; } }
 } }));
-beforeEach(() => { jest.clearAllMocks(); mockOS = 'ios'; mockNative = null; mockText = null; });
+beforeEach(() => { jest.clearAllMocks(); mockOS = 'ios'; mockNative = null; mockText = null; mockPending = null; });
 function loadClient() { let client: any; jest.isolateModules(() => { client = require('../healthClient'); }); return client; }
 it('fails safely on an older native binary without losing ordinary history deletion', async () => {
   const { workoutHealth } = loadClient(); await workoutHealth.activate('owner');
@@ -19,7 +22,7 @@ it('fails safely on an older native binary without losing ordinary history delet
   const remove = jest.fn(); expect(await workoutHealth.remove({ userId: 'owner', id: 'draft', exercises: [] }, false, remove)).toBe(true);
   expect(remove).toHaveBeenCalled(); expect(await workoutHealth.setEnabled('owner', true)).toBe(false);
 });
-it('writes the journal through a temporary file and atomic replacement', async () => {
+it('writes the journal through a temporary file and replacement', async () => {
   mockNative = { authorization: async () => 'authorized', authorize: async () => 'authorized' };
   const { workoutHealth } = loadClient(); await workoutHealth.activate('owner');
   expect(await workoutHealth.setEnabled('owner', true)).toBe(true); expect(mockCreate).toHaveBeenCalledWith({ overwrite: true });
@@ -29,4 +32,14 @@ it('writes the journal through a temporary file and atomic replacement', async (
 it('keeps unsupported web rendering independent of the native filesystem', async () => {
   mockOS = 'web'; const { workoutHealth } = loadClient(); await workoutHealth.activate('owner');
   expect(workoutHealth.getSnapshot()).toMatchObject({ ready: true, available: false }); expect(mockRead).not.toHaveBeenCalled();
+});
+
+it('recovers an interrupted replacement only when the committed journal is missing', async () => {
+  mockNative = { authorization: async () => 'authorized' };
+  mockPending = JSON.stringify({ version: 1, owners: { owner: { enabled: true, entries: {} } } });
+  let { workoutHealth } = loadClient(); await workoutHealth.activate('owner');
+  expect(workoutHealth.getSnapshot().enabled).toBe(true);
+  mockText = JSON.stringify({ version: 1, owners: { owner: { enabled: false, entries: {} } } });
+  ({ workoutHealth } = loadClient()); await workoutHealth.activate('owner');
+  expect(workoutHealth.getSnapshot().enabled).toBe(false);
 });
