@@ -1,3 +1,4 @@
+import { EditorBackButton, EditorEditButton } from '@/components/train/EditorActions';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -23,6 +24,7 @@ import { formatWorkoutTime } from '@/services/training/workoutRuntime';
 import { historyProgressionProposal, historyProgressionPatch } from '@/services/training/historyProgression';
 import { progressionFingerprint, type ProgressionStep } from '@/services/training/rirReplanning';
 import { RIRProgressionPreview } from '@/components/train/RIRProgressionPreview';
+import { progressionBaseline } from '@/services/training/progressionChanges';
 
 export default function HistoryScreen() {
   const { id, edit } = useLocalSearchParams<{ id: string; edit?: string }>();
@@ -84,11 +86,14 @@ export default function HistoryScreen() {
   const timestamp = (session: WorkoutSession) => typeof session.performedAt === 'number' ? session.performedAt : session.performedAt.seconds * 1000;
   return <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }}>
     <ScrollView contentContainerStyle={{ padding: spacing.lg, paddingBottom: insets.bottom + 110 }}>
-      <Pressable accessibilityRole="button" onPress={back} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={[typography.body, { color: colors.accentText }]}>{t('generate.back')}</Text></Pressable>
+      <EditorBackButton label={t('generate.back')} onPress={back} disabled={busy} />
       <Text style={[typography.emphasis, { color: colors.textPrimary, marginBottom: 20 }]}>{t('workout.history')}</Text>
       {loading && <ActivityIndicator color={sectionAccent.train} />}
       {error && <Text accessibilityRole="alert" style={{ color: colors.textPrimary }}>{t('workout.historyError')}</Text>}
       {!loading && !history.some((item) => item.id === id && item.userId === uid) && <Text style={{ color: colors.textMuted }}>{t('workout.historyEmpty')}</Text>}
+      {!loading && history.filter(item => item.id === id && item.userId === uid && item.completedAt !== undefined && item.discardedAt === undefined).map(session =>
+        <View key={`edit:${session.id}`} style={{ marginBottom: spacing.lg }}><EditorEditButton label={t('historyEdit.title')}
+          disabled={busy} onPress={() => { void openEditor(session); }} /></View>)}
       {history.filter((item) => item.id === id && item.userId === uid).map((session) => {
         const exercises = [...session.exercises].sort((a, b) => a.order - b.order).map((entry) => entry.exerciseSnapshot ?? exercisesById.get(entry.exerciseId)).filter((ex): ex is Exercise => !!ex);
         const summary = workoutReview(exercises, toSessionSetsByExercise(session), history.filter((other) => timestamp(other) < timestamp(session)), session.id);
@@ -106,7 +111,7 @@ export default function HistoryScreen() {
             {!session.completedAt && <Text style={{ color: colors.accentText }}>{t('workout.inProgress')}</Text>}
           </View>
           <WorkoutHistoryDetails details={details} recordSetIds={summary.recordSetIds} /><BodyMap height={180} paint={heatPaint(summary.volumes, sectionAccent.train)} /><WorkoutHealthExport session={session} />
-          {!!session.completedAt && <Pressable accessibilityRole="button" disabled={busy} onPress={() => void openEditor(session)} style={{ minHeight: 48, justifyContent: 'center', marginTop: 10 }}><Text style={{ color: colors.accentText, fontWeight: '700' }}>{t('historyEdit.title')}</Text></Pressable>}
+
           <Pressable accessibilityRole="button" disabled={busy} onPress={() => setDeleting(session)} style={{ paddingVertical: 14, marginTop: 10 }}><Text style={{ color: semantic.danger, fontWeight: '700' }}>{t('workout.discard')}</Text></Pressable>
         </View>;
       })}
@@ -126,6 +131,7 @@ export default function HistoryScreen() {
       }
     }} />}
     <RIRProgressionPreview steps={progression?.owner === uid ? progression.steps : null} catalogue={exercisesById} busy={busy}
+      baseline={progression?.owner === uid ? progressionBaseline(progression.mesocycle, progression.goal, progression.steps) : []}
       onClose={() => setProgression(null)} onApply={async () => {
         if (!progression || busy || !uid || progression.owner !== uid || !isCurrent()) return;
         setBusy(true);

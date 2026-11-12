@@ -1,3 +1,4 @@
+import { EditorActions, EditorBackButton, EditorEditButton } from '@/components/train/EditorActions';
 /** Saved routine overview and future-plan editor. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, BackHandler, Modal, Pressable, ScrollView, Text, View } from 'react-native';
@@ -19,6 +20,7 @@ import { ExerciseSwapSheet } from '@/components/train/generate/ExerciseSwapSheet
 import { ActionMenuSheet, type ActionMenuItem } from '@/components/train/ActionMenuSheet';
 import { PrescriptionEditor } from '@/components/train/PrescriptionEditor';
 import { RIRProgressionPreview } from '@/components/train/RIRProgressionPreview';
+import { progressionBaseline } from '@/services/training/progressionChanges';
 import { hasSessionRIRChanges, progressionFingerprint, type ProgressionStep } from '@/services/training/rirReplanning';
 import { countWorkingSets } from '@/services/training/sessionSummary';
 import { setTypeLabel } from '@/components/train/setTypeLabel';
@@ -332,10 +334,7 @@ export default function RoutineDetailScreen() {
   return <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg }}>
     <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg,
       paddingBottom: insets.bottom + spacing.xl }}>
-      <Pressable onPress={back} accessibilityRole="button">
-        <Text style={[typography.body, { color: colors.textSecondary }]}>‹ {selectedSessionIndex === null
-          ? t('tabs.train') : routine.name}</Text>
-      </Pressable>
+      <EditorBackButton disabled={editorBusy} onPress={back} label={selectedSessionIndex === null ? t('tabs.train') : routine.name} />
       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: spacing.md }}>
         <Text style={[typography.h1, { color: colors.textPrimary, flex: 1 }]}>
           {selectedSessionIndex === null ? routine.name : selectedView?.name ??
@@ -353,42 +352,22 @@ export default function RoutineDetailScreen() {
         {routine.objective} · {t('home.microcycle')} {Math.min(previewIndex + 1, routine.microcycles.length)}
       </Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm,
-        marginBottom: spacing.lg }}>
-        {selectedSessionIndex === null && <Pressable
-          onPress={() => router.push({ pathname: '/mesocycle', params: { mesocycleId } })}
-          accessibilityRole="button" style={{ paddingVertical: spacing.sm,
-            paddingHorizontal: spacing.md, borderRadius: 12, ...surfaces.card, backgroundColor: colors.bgElevated,
-            borderWidth: 1, borderColor: colors.surfaceBorder }}>
-          <Text style={[typography.body, { color: colors.textPrimary }]}>{t('home.viewMesocycle')} ↗</Text>
-        </Pressable>}
+        marginBottom: editing ? 0 : spacing.lg }}>
+        {selectedSessionIndex === null && <EditorEditButton label={`${t('home.viewMesocycle')} ↗`}
+          onPress={() => router.push({ pathname: '/mesocycle', params: { mesocycleId } })} />}
         {!editing && (selectedSessionIndex === null
           ? hasPendingPlan || routine.microcycles.some(micro => micro.sessions.some(session => session.completedWorkoutId)) : pendingSelection || !!completedWorkoutId) &&
-          <Pressable onPress={beginEditing} accessibilityRole="button"
-            style={{ paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: 12,
-              ...surfaces.card, backgroundColor: colors.bgElevated, borderWidth: 1, borderColor: colors.surfaceBorder }}>
-            <Text style={[typography.body, { color: colors.textPrimary }]}>
-              {selectedSessionIndex === null ? t('routine.edit') : t('routine.editSession')}
-            </Text>
-          </Pressable>}
-        {editing && !completedWorkoutId && <>
-          <Pressable onPress={() => confirmDiscard(resetDraft)} accessibilityRole="button"
-            style={{ paddingVertical: spacing.sm, paddingHorizontal: spacing.md }}>
-            <Text style={[typography.body, { color: colors.textSecondary }]}>{t('generate.cancel')}</Text>
-          </Pressable>
-          <Pressable onPress={confirmSessionScope}
-            disabled={saving || !pendingSelection} accessibilityRole="button"
-            style={{ paddingVertical: spacing.sm, paddingHorizontal: spacing.md, borderRadius: 12,
-              backgroundColor: sectionAccent.train }}>
-            <Text style={[typography.body, { color: '#16191C', fontWeight: '700' }]}>
-              {t('routine.saveChanges')}
-            </Text>
-          </Pressable>
-        </>}
+          <EditorEditButton onPress={beginEditing} label={selectedSessionIndex === null ? t('routine.edit') : completedWorkoutId ? t('historyEdit.title') : t('routine.editSession')} />}
       </View>
-      {editing && selectedSessionIndex !== null && <RoutineSessionSelector cycle={previewIndex} cycles={routine.microcycles.length}
+      {editing && !completedWorkoutId && <EditorActions onCancel={() => confirmDiscard(resetDraft)} onSave={confirmSessionScope}
+        busy={saving} saveDisabled={!pendingSelection} />}
+
+      {editing && !completedWorkoutId && selectedSessionIndex !== null && <RoutineSessionSelector cycle={previewIndex} cycles={routine.microcycles.length}
         sessions={routine.microcycles[previewIndex]?.sessions ?? []} selected={selectedSessionIndex} disabled={editorBusy} onSelect={switchSelection} />}
       {completedWorkoutId && selectedSessionIndex !== null && <RecordedSessionEditor key={`${mesocycleId}:${completedWorkoutId}`}
         workoutId={completedWorkoutId} mesocycleId={routine.mesocycleId} cycle={previewIndex} sessionIndex={selectedSessionIndex}
+        selector={<RoutineSessionSelector cycle={previewIndex} cycles={routine.microcycles.length}
+          sessions={routine.microcycles[previewIndex]?.sessions ?? []} selected={selectedSessionIndex} disabled={editorBusy} onSelect={switchSelection} />}
         editing={editing} onClose={saved => saved ? resetDraft() : confirmDiscard(resetDraft)} onSaved={() => { setRevision(value => value + 1); reload(); }} onDirtyChange={setActualDirty} onBusyChange={setActualBusy} />}
       {!editing && selectedSessionIndex === null && <Text
         style={[typography.caption, { color: colors.textMuted, marginBottom: spacing.md }]}>
@@ -518,7 +497,8 @@ export default function RoutineDetailScreen() {
       subtitle={menu === 'skip' ? t('routine.skipConfirm')
         : menu === 'scope' ? t('routine.saveScopeMessage') : undefined}
       actions={menuActions} onClose={() => setMenu(null)} />
-    <RIRProgressionPreview steps={progression} catalogue={CATALOGUE} busy={saving} onApply={() => void save('recalculate-progression')} onClose={() => setProgression(null)} />
+    <RIRProgressionPreview steps={progression} baseline={progression && mesocycle ? progressionBaseline(mesocycle, goal, progression) : []}
+      catalogue={CATALOGUE} busy={saving} onApply={() => void save('recalculate-progression')} onClose={() => setProgression(null)} />
     <Modal visible={draftExercise !== null} transparent animationType="slide"
       onRequestClose={() => setDraftExercise(null)}>
       <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.58)' }}

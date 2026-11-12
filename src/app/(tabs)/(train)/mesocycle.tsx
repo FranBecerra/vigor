@@ -1,3 +1,4 @@
+import { EditorBackButton, EditorEditButton } from '@/components/train/EditorActions';
 /**
  * Vista del mesociclo (PRD §8.7).
  *
@@ -78,9 +79,7 @@ export default function MesocycleScreen() {
   if (routine === null || selectedMicrocycle === null || selectedSession === null) {
     return (
       <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top, paddingHorizontal: spacing.lg }]}>
-        <Pressable onPress={() => backToTraining(router)} accessibilityRole="button" style={styles.backRow}>
-          <Text style={[styles.back, { color: colors.textSecondary }]}>‹ {t('tabs.train')}</Text>
-        </Pressable>
+        <EditorBackButton label={t('tabs.train')} onPress={() => backToTraining(router)} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>
           {status === 'loading' ? t('train.loadingPlan') : t('train.sessionUnavailable')}
         </Text>
@@ -92,12 +91,21 @@ export default function MesocycleScreen() {
     <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }]}>
       <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 110 }}>
         <View style={{ paddingHorizontal: spacing.lg }}>
-          <Pressable onPress={() => backToTraining(router)} accessibilityRole="button" style={styles.backRow}>
-            <Text style={[styles.back, { color: colors.textSecondary }]}>‹ {t('tabs.train')}</Text>
-          </Pressable>
+          <EditorBackButton label={t('tabs.train')} onPress={() => backToTraining(router)} />
           <Text style={[styles.title, { color: colors.textPrimary }]}>{routine.objective}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>{routine.name}</Text>
+          <View style={{ marginBottom: spacing.md }}><EditorEditButton
+            label={t(selectedSession.completedWorkoutId ? 'historyEdit.title' : 'routine.editSession')} onPress={openSelectedSession} /></View>
           <SharedNoteButton scope="MESOCYCLE" targetId={routine.mesocycleId} title={routine.name} />
+          {routine.isActive && !routine.hybrid && routine.mesocycleSnapshot?.routineId === routine.id
+            && ['ACTIVE', 'DELOAD'].includes(routine.mesocycleSnapshot.status) && <Pressable
+            accessibilityRole="button" onPress={() => router.push({ pathname: '/mesocycle-continuity', params: {
+              routineId: routine.id, sourceId: routine.mesocycleId,
+            } })}
+            style={{ minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' }}>
+            <Text style={{ color: colors.accentText, fontWeight: '600' }}>{t('continuity.open')} ›</Text>
+          </Pressable>}
+
 
           <View style={[styles.statRow, { marginTop: spacing.md }]}>
             <View style={[styles.stat, { ...surfaces.card, backgroundColor: colors.bgElevated, borderRadius: radius.md }]}>
@@ -240,10 +248,7 @@ export default function MesocycleScreen() {
                 : `${t('home.microcycle')} ${selectedMicrocycle.number}`}
             </Text>
           </Pressable>
-          {selectedSession.completedWorkoutId && <Pressable onPress={openSelectedSession} accessibilityRole="button"
-            style={{ minHeight: 44, justifyContent: 'center', marginBottom: spacing.md }}>
-            <Text style={{ color: colors.accentText }}>{t('meso.recordedSession')} · {t('historyEdit.title')} ›</Text>
-          </Pressable>}
+          {selectedSession.completedWorkoutId && <Text style={{ color: colors.textMuted, marginBottom: spacing.md }}>{t('meso.recordedSession')}</Text>}
 
           {(selectedSession.performedExercises ?? selectedSession.exercises).map((exercise, exerciseIndex) => {
             const workingSets = countWorkingSets(exercise.sets);

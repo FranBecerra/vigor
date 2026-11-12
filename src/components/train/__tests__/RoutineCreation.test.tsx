@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput, Pressable, Modal } from 'react-native';
+import { Text, TextInput, Pressable, Modal, ScrollView } from 'react-native';
 import ManualRoutineScreen from '@/app/(tabs)/(train)/manual-routine';
 import CreateRoutineScreen from '@/app/(tabs)/(train)/create-routine';
 import { PlanPreview } from '../generate/PlanPreview';
@@ -40,14 +40,49 @@ const button = (root: any, label: string) => root.findAll((node: any) => typeof 
 const leafMatches = (root: any, predicate: (node: any) => boolean) => root.findAll(predicate)
   .filter((node: any) => node.findAll(predicate).length === 1);
 beforeEach(() => { jest.clearAllMocks(); mockList.mockResolvedValue([]); mockRoutine.mockResolvedValue(undefined); mockMesocycle.mockResolvedValue(undefined); });
-it('offers both modes before opening a builder', async () => {
+it('keeps the full generated muscle summary in a horizontal scroll surface without text truncation', async () => {
+  const selected = ['press-banca', 'jalon-al-pecho', 'sentadilla-libre', 'curl-barra', 'elevacion-lateral-mancuernas'].map(id => EXERCISE_CATALOGUE.find(ex => ex.id === id)!);
+  let tree: any; await act(async () => { tree = create(<PlanPreview showCycle={false} sessions={[{ index: 0, focus: 'FULL_BODY', estimatedWorkMinutes: 30,
+    exercises: selected.map((ex, order) => ({ exerciseId: ex.id, order, isEdited: false, sets: [{ setType: SetType.NORMAL, targetReps: 10, targetRIR: 2 }] })) }]}
+    performedSets={5} exercisesById={new Map(selected.map(ex => [ex.id, ex]))} />); });
+  const summary = tree.root.findAllByType(ScrollView).find((node: any) => node.props.horizontal && node.findAllByType(Text).some((text: any) => typeof text.props.children === 'string' && text.props.children.startsWith('region.')));
+  expect(summary).toBeDefined();
+  const text = summary.findAllByType(Text).find((node: any) => typeof node.props.children === 'string' && node.props.children.startsWith('region.'));
+  expect(text.props.children.split(' · ').length).toBeGreaterThan(2); expect(text.props.numberOfLines).toBeUndefined();
+  await act(async () => tree.unmount());
+});
+it('shows the approved convergence symbol for hybrid creation', async () => {
+  const { ConvergenceIcon } = require('@/components/icons/ActionIcons'); let tree: any;
+  await act(async()=>{tree=create(<CreateRoutineScreen />)});
+  expect(button(tree.root,'routineCreation.HYBRID').findAllByType(ConvergenceIcon)).toHaveLength(1);
+  await act(async()=>tree.unmount());
+});
+it('selects a discipline and method before opening the matching builder', async () => {
   let tree: any;
   await act(async () => { tree = create(<CreateRoutineScreen />); });
-  await act(async () => button(tree.root, 'routineCreation.MANUAL').props.onPress());
-  expect(mockRouter.push).toHaveBeenCalledWith('/manual-routine');
-  await act(async () => button(tree.root, 'routineCreation.AUTOMATIC').props.onPress());
-  expect(mockRouter.push).toHaveBeenCalledWith('/generate');
-  await act(async () => button(tree.root, 'cardioPlan.create').props.onPress());
+  const press = (choice: string) => act(async () => button(tree.root, `routineCreation.${choice}`).props.onPress());
+  const manual = () => button(tree.root, 'routineCreation.MANUAL');
+  expect(manual().props.accessibilityState.disabled).toBe(false);
+  await press('continue');
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/hybrid-plan');
+  await press('STRENGTH');
+  expect(manual().props.accessibilityState.disabled).toBe(false);
+  await press('continue');
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/generate');
+  await press('MANUAL');
+  expect(mockRouter.push).toHaveBeenCalledTimes(2);
+  await press('continue');
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/manual-routine');
+  await press('CARDIO');
+  expect(manual().props.accessibilityState).toEqual({ checked: true, disabled: false });
+  await press('continue');
+  expect(mockRouter.push).toHaveBeenLastCalledWith({ pathname: '/cardio-plan', params: { mode: 'manual' } });
+  await press('HYBRID');
+  await press('continue');
+  expect(mockRouter.push).toHaveBeenLastCalledWith({ pathname: '/hybrid-plan', params: { mode: 'manual' } });
+  await press('AUTOMATIC');
+  await press('CARDIO');
+  await press('continue');
   expect(mockRouter.push).toHaveBeenLastCalledWith('/cardio-plan');
   await act(async () => tree.unmount());
 });

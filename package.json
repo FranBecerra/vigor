@@ -98,6 +98,7 @@
       "src/services/cardio/cardioPlanRepository.ts",
       "src/hooks/useCardioPlans.ts",
       "src/services/cardio/cardioBlock.ts",
+      "src/services/cardio/cardioHome.ts",
       "src/services/cardio/cardioProgression.ts",
       "src/services/cardio/cardioProgressionPolicy.ts",
       "src/services/cardio/cardioWorkout.ts",

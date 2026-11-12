@@ -73,9 +73,12 @@ it('exposes visible set deletion and one shared editor from all three value cell
 it('removes drag-grip dots while keeping exercise selection and addition accessible', async () => {
   const select = jest.fn(); const add = jest.fn(); const menu = jest.fn(); let tree: any;
   const exercises = EXERCISE_CATALOGUE.slice(0, 4);
-  await act(async () => { tree = create(<WorkoutExerciseStrip exercises={exercises} activeId={exercises[0].id} onSelect={select} onAdd={add} onReorder={jest.fn()} onExerciseMenu={menu} />); });
+  await act(async () => { tree = create(<WorkoutExerciseStrip exercises={exercises} completedIds={[exercises[0].id]} activeId={exercises[0].id} onSelect={select} onAdd={add} onReorder={jest.fn()} onExerciseMenu={menu} />); });
   const button = (label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
   expect(JSON.stringify(tree.toJSON())).not.toContain('⠿');
+  expect(button(exercises[0].name).props.style.backgroundColor).not.toBe(button(exercises[1].name).props.style.backgroundColor);
+  expect(button(exercises[0].name).props.accessibilityHint).toContain('executionPolish.completedExercise');
+  expect(button(exercises[0].name).findAllByType(require('@/components/icons/ActionIcons').CheckIcon)).toHaveLength(0);
   await act(async () => button(exercises[3].name).props.onPress()); expect(select).toHaveBeenCalledWith(3);
   await act(async () => button('train.addExercise').props.onPress()); expect(add).toHaveBeenCalled();
   await act(async () => button(exercises[0].name).props.onAccessibilityAction({ nativeEvent: { actionName: 'showMenu' } }));

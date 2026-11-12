@@ -1,6 +1,6 @@
 import React from 'react';
 import * as RN from 'react-native';
-import GenerateScreen from '@/app/(tabs)/(train)/generate';
+import GenerateScreen, { StrengthPlanBuilder } from '@/app/(tabs)/(train)/generate';
 import { GenerationChoice, PriorityBudget } from '../generate/GenerationChoice';
 import { Stepper } from '../generate/GenerateControls';
 import { EquipmentIllustration } from '../generate/EquipmentIllustration';
@@ -15,6 +15,7 @@ const mockReplace = jest.fn();
 const mockDismissTo = jest.fn();
 let mockCanGoBack = false;
 let mockUser: any = null, mockCatalogue: any[] = [];
+const mockVetoes = new Set<string>();
 const mockCreateRoutine = jest.fn(), mockCreateMeso = jest.fn(), mockListRoutines = jest.fn();
 let mockDimensions = { width: 390, height: 844, scale: 3, fontScale: 1 };
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions', () => ({ __esModule: true, default: () => mockDimensions }));
@@ -29,11 +30,28 @@ jest.mock('react-native-screens/experimental', () => ({ SafeAreaView: require('r
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }) }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: mockUser }) }));
-jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: mockCatalogue, exercisesById: new Map(mockCatalogue.map(ex => [ex.id, ex])), notRecommendedExerciseIds: new Set(), preferencesReady: true }), useOptionalExerciseCatalogue: () => null }));
+jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: mockCatalogue, exercisesById: new Map(mockCatalogue.map(ex => [ex.id, ex])), notRecommendedExerciseIds: mockVetoes, preferencesReady: true }), useOptionalExerciseCatalogue: () => null }));
 jest.mock('@/services/repositories', () => ({ mesocycleRepository: { create: (...args: any[]) => mockCreateMeso(...args) }, routineRepository: { create: (...args: any[]) => mockCreateRoutine(...args), listByUser: (...args: any[]) => mockListRoutines(...args), update: async () => undefined }, workoutSessionRepository: { listByUser: async () => [] } }));
 const press = (tree: any, key: string) => tree.root.findAll((node: any) => typeof node.props.onPress === 'function' &&
   node.findAllByType(RN.Text).some((text: any) => text.props.children === key))[0].props.onPress();
 beforeEach(() => { mockDimensions = { width: 390, height: 844, scale: 3, fontScale: 1 }; mockCanGoBack = false; mockUser = null; mockCatalogue = []; jest.clearAllMocks(); mockListRoutines.mockResolvedValue([]); mockCreateRoutine.mockResolvedValue(undefined); mockCreateMeso.mockResolvedValue(undefined); });
+
+it('reuses shared hybrid availability instead of asking for minutes again or letting the capacity advisor replace them', async () => {
+  let tree: any;
+  const render = (minutesPerSession: number, trainingDays: number) => <StrengthPlanBuilder onPrepared={jest.fn()} onExit={jest.fn()} sharedAvailability={{ minutesPerSession, trainingDays, cycleDays: 7, allowDoubles: false }} />;
+  await act(async () => { tree = create(render(60, 4)); });
+  for (let step = 0; step < 4; step++) await act(async () => press(tree, 'exerciseWizard.next'));
+  const steppers = () => tree.root.findAllByType(Stepper);
+  expect(steppers().some((n: any) => n.props.label === 'generate.minutes')).toBe(false);
+  const count = () => steppers().find((n: any) => n.props.label === 'sharedAvailability.strengthSessions');
+  expect(count().props.value).toBe(2); expect(count().props.max).toBe(4);
+  expect(JSON.stringify(tree.toJSON())).toContain('generate.capacityAuto');
+  await act(async () => count().props.onChange(4));
+  await act(async () => tree.update(render(90, 3)));
+  expect(count().props.value).toBe(3); expect(count().props.max).toBe(3);
+  expect(JSON.stringify(tree.toJSON())).toContain('sharedAvailability.strengthAllocation');
+  await act(async () => tree.unmount());
+});
 
 it('waits for intake then seeds strength values once without replacing later manual changes', async () => {
   const intake = { version: 1 as const, status: 'COMPLETED' as const, updatedAt: 1000, goal: 'STRENGTH' as const,
@@ -55,12 +73,28 @@ it('persists the last selected icon and current app accent, ignoring obsolete in
   let tree: any; await act(async () => { tree = create(<GenerateScreen />); });
   for (let step = 0; step < 5; step++) await act(async () => press(tree, 'exerciseWizard.next'));
   await act(async () => press(tree, 'generate.generate'));
+  expect(tree.root.findAllByType(RN.TextInput).find((node: any) => node.props.accessibilityLabel === 'generate.name').props.value).toMatch(/^generate\.(split|focus)/);
   await act(async () => tree.root.findAllByType(RN.TextInput).find((node: any) => node.props.accessibilityLabel === 'generate.name').props.onChangeText('Distinct plan'));
   await act(async () => tree.root.findByType(RoutineIdentityPicker).props.onChange({ icon: 'bike', color: '#83B0AC' }));
   await act(async () => press(tree, 'generate.save'));
   expect(mockCreateRoutine).toHaveBeenCalledWith(expect.objectContaining({ name: 'Distinct plan', icon: 'bike', accentColor: '#9BE317' }));
   expect(mockCreateMeso).toHaveBeenCalled();
   expect(mockDismissTo).toHaveBeenCalledWith('/(tabs)/(train)');
+  await act(async () => tree.unmount());
+}, 20000);
+
+it('hands the accepted strength prescription to hybrid authoring without any independent save or activation', async () => {
+  mockUser = { uid: 'owner' }; mockCatalogue = require('@/services/training/exerciseCatalogue').EXERCISE_CATALOGUE;
+  const accept = jest.fn(), exit = jest.fn(); let tree: any;
+  await act(async () => { tree = create(<StrengthPlanBuilder onPrepared={accept} onExit={exit} />); });
+  for (let step = 0; step < 5; step++) await act(async () => press(tree, 'exerciseWizard.next'));
+  await act(async () => press(tree, 'generate.generate')); await act(async () => press(tree, 'hybridPlan.useStrength'));
+  expect(accept).toHaveBeenCalledTimes(1); const draft = accept.mock.calls[0][0];
+  expect(draft.routine.isActive).toBe(false); expect(draft.routine.activeMesocycleId).toBe(draft.mesocycle.id);
+  expect(draft.mesocycle.plannedSessions.length).toBeGreaterThan(0);
+  expect(mockCreateRoutine).not.toHaveBeenCalled(); expect(mockCreateMeso).not.toHaveBeenCalled(); expect(mockDismissTo).not.toHaveBeenCalled();
+  await act(async () => press(tree, 'hybridPlan.useStrength'));
+  expect(accept.mock.calls[1][0]).toBe(draft);
   await act(async () => tree.unmount());
 }, 20000);
 
@@ -94,7 +128,7 @@ it('keeps emphasis state across steps, aligns help inline and illustrates every 
   expect(tree.root.findByType(PriorityBudget).props.hint).toBe('generate.budgetHint');
   const chips = () => tree.root.findAll((node: any) => node.props.cornerBadge && node.props.label && typeof node.props.onPress === 'function');
   expect(chips().length).toBeGreaterThan(10);
-  expect(chips()[0].props.style.width).toBe('48%'); expect(chips()[0].props.style.minHeight).toBe(106);
+  expect(chips()[0].props.style.width).toBe('48%'); expect(chips()[0].props.style.minHeight).toBe(86);
   await act(async () => chips()[0].props.onPress());
   expect(tree.root.findByType(PriorityBudget).props.used).toBeGreaterThan(0);
   await act(async () => press(tree, 'exerciseWizard.next'));
@@ -121,7 +155,7 @@ it('falls back to a readable single column with large accessibility text', async
   await act(async () => { tree = create(<GenerateScreen />); });
   for (let index = 0; index < 2; index++) await act(async () => press(tree, 'exerciseWizard.next'));
   const chip = tree.root.findAll((node: any) => node.props.cornerBadge && node.props.label && typeof node.props.onPress === 'function')[0];
-  expect(chip.props.style.width).toBe('100%'); expect(chip.props.style.minHeight).toBe(82);
+  expect(chip.props.style.width).toBe('100%'); expect(chip.props.style.minHeight).toBe(76);
   await act(async () => tree.unmount());
 });
 it.each([false, true])('cancels the complete creation stack, not just its last screen (history: %s)', async (hasHistory) => {
@@ -135,4 +169,75 @@ it.each([false, true])('cancels the complete creation stack, not just its last s
   expect(mockDismissTo).toHaveBeenCalledWith('/(tabs)/(train)');
   expect(mockReplace).not.toHaveBeenCalled();
   await act(async () => tree.unmount()); confirm.mockRestore();
+});
+
+it('keeps configuration and preview identity coherent through swap, resize and return', async () => {
+  mockCatalogue = require('@/services/training/exerciseCatalogue').EXERCISE_CATALOGUE;
+  let tree: any; await act(async () => { tree = create(<GenerateScreen />); });
+  const page = (id: string) => tree.root.findAll((n: any) => n.props.testID === id)[0];
+  expect(page('generation-configure-page').props.style.display).toBe('flex');
+  for (let i=0;i<5;i++) await act(async () => press(tree,'exerciseWizard.next'));
+  await act(async () => press(tree,'generate.generate'));
+  expect(page('generation-preview-page').props.style.display).toBe('flex');
+  expect(page('generation-configure-page').props.style.display).toBe('none');
+  const sheet = tree.root.findAllByType(require('../generate/ExerciseSwapSheet').ExerciseSwapSheet)[0];
+  await act(async () => sheet.props.onClose());
+  mockDimensions = { ...mockDimensions,width:430 };
+  await act(async () => tree.update(<GenerateScreen />));
+  expect(page('generation-preview-page').props.style.display).toBe('flex');
+  await act(async () => press(tree,'generate.back'));
+  expect(page('generation-configure-page').props.style.display).toBe('flex');
+  expect(page('generation-preview-page').props.style.display).toBe('none');
+  await act(async () => tree.unmount());
+});
+
+it('cancels an unfinished combination on Back and ignores its late result', async () => {
+  mockCatalogue = require('@/services/training/exerciseCatalogue').EXERCISE_CATALOGUE;
+  const engine = require('@/services/training/mesocyclePlanner');
+  let resolve!: (value:any)=>void;
+  const vary = jest.spyOn(engine,'rerollMesocycleAsync').mockImplementation(()=>new Promise(done=>{resolve=done}));
+  let tree:any;
+  try {
+    await act(async()=>{tree=create(<GenerateScreen />)});
+    for(let i=0;i<5;i++) await act(async()=>press(tree,'exerciseWizard.next'));
+    await act(async()=>press(tree,'generate.generate'));
+    await act(async()=>{press(tree,'generate.reroll')});
+    expect(vary).toHaveBeenCalledTimes(1);
+    await act(async()=>press(tree,'generate.back'));
+    const page=()=>tree.root.findAll((n:any)=>n.props.testID==='generation-configure-page')[0];
+    expect(page().props.style.display).toBe('flex');
+    await act(async()=>resolve(vary.mock.calls[0][1]));
+    expect(page().props.style.display).toBe('flex');
+  } finally {if(tree) await act(async()=>tree.unmount());vary.mockRestore()}
+});
+
+it('opens the reviewed strength sessions directly and applies edits in memory with the same IDs', async () => {
+  const { draft, exercises } = require('@/test-support/hybridFixture').hybridFixture();
+  const { PlanPreview } = require('../generate/PlanPreview');
+  mockUser = { uid: 'owner' }; mockCatalogue = [...exercises.values()];
+  const accept = jest.fn(), close = jest.fn();
+  let tree: any;
+  await act(async () => { tree = create(<StrengthPlanBuilder revision={draft} onPrepared={accept} onExit={close} />); });
+  const preview = () => tree.root.findByType(PlanPreview);
+  expect(preview().props.sessions).toBe(draft.mesocycle.plannedSessions);
+  const { toRoutineView } = require('@/services/training/routineView');
+  const { strengthPlacements } = require('@/services/cardio/cardioPreview');
+  const view = toRoutineView(draft.routine, draft.mesocycle, exercises,
+    { focus: (focus: string) => `generate.focus${focus}`, goal: (goal: string) => `goal.${goal}` });
+  const reviewed = strengthPlacements(view, true).sessions[0];
+  expect(preview().props.sessionPresentation.get(0)).toEqual({ name: reviewed.name, minutes: reviewed.estimatedMinutes });
+  await act(async () => preview().props.onChangeSet(0, 0, 0, { targetRIR: 3 }));
+  expect(preview().props.sessions[0].exercises[0].sets[0].targetRIR).toBe(3);
+  await act(async () => press(tree, 'hybridPlan.useStrength'));
+  expect(accept).toHaveBeenCalledTimes(1);
+  const revised = accept.mock.calls[0][0];
+  expect(revised.routine.id).toBe(draft.routine.id);
+  expect(revised.mesocycle.id).toBe(draft.mesocycle.id);
+  expect(revised.mesocycle.plannedSessions[0].exercises[0].sets[0].targetRIR).toBe(3);
+  expect(draft.mesocycle.plannedSessions[0].exercises[0].sets[0].targetRIR).toBe(2);
+  expect(mockCreateRoutine).not.toHaveBeenCalled();
+  expect(mockCreateMeso).not.toHaveBeenCalled();
+  await act(async () => press(tree, 'hybridProgress.backToReview'));
+  expect(close).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount());
 });

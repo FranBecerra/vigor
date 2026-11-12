@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,11 +12,12 @@ import type { Mesocycle, WorkoutSession } from '@/models';
 import { WorkoutHistoryEditor } from './WorkoutHistoryEditor';
 import { WorkoutHistoryDetails } from './WorkoutHistoryDetails';
 import { RIRProgressionPreview } from './RIRProgressionPreview';
+import { progressionBaseline } from '@/services/training/progressionChanges';
 
 /** Edit the exact recorded execution inside the routine, without changing the navigation stack. */
 export function RecordedSessionEditor({ workoutId, mesocycleId, cycle, sessionIndex, editing,
-  onClose, onSaved, onDirtyChange, onBusyChange }: {
-  workoutId: string; mesocycleId: string; cycle: number; sessionIndex: number; editing: boolean;
+  onClose, onSaved, onDirtyChange, onBusyChange, selector }: {
+  selector?: ReactNode; workoutId: string; mesocycleId: string; cycle: number; sessionIndex: number; editing: boolean;
   onClose: (saved?: boolean) => void; onSaved: () => void; onDirtyChange: (dirty: boolean) => void; onBusyChange: (busy: boolean) => void;
 }) {
   const { uid } = useAuth(); const { t } = useTranslation(); const { colors } = useTheme();
@@ -51,7 +52,7 @@ export function RecordedSessionEditor({ workoutId, mesocycleId, cycle, sessionIn
   if (!record || record.userId !== uid || record.id !== workoutId || record.mesocycleId !== mesocycleId
     || record.microcycleIndex !== cycle || record.plannedSessionIndex !== sessionIndex) return <ActivityIndicator color={colors.accentText} />;
   return <>
-    {editing ? <WorkoutHistoryEditor key={key} inline session={record}
+    {editing ? <WorkoutHistoryEditor key={key} inline session={record} afterActions={selector}
       onDirtyChange={onDirtyChange} onBusyChange={onBusyChange} onClose={() => onClose(false)} onSavedClose={() => onClose(true)} onSave={async (draft, review) => {
         if (!uid || !isCurrent()) throw Error('Invalid editor owner');
         const saved = await workoutSessionRepository.editCompletedLocally(record, uid, draft, isCurrent);
@@ -71,6 +72,7 @@ export function RecordedSessionEditor({ workoutId, mesocycleId, cycle, sessionIn
         }
       }} /> : <WorkoutHistoryDetails details={workoutHistoryDetails(record, exercisesById)} />}
     <RIRProgressionPreview steps={progression?.steps ?? null} catalogue={exercisesById} busy={busy}
+      baseline={progression ? progressionBaseline(progression.mesocycle, progression.goal, progression.steps) : []}
       onClose={() => setProgression(null)} onApply={async () => {
         if (!uid || !progression || busy || !isCurrent()) return;
         setBusy(true);

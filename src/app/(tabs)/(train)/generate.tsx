@@ -1,3 +1,9 @@
+import { WandIcon } from '@/components/icons/ActionIcons';
+import { strengthHybridTarget, suggestHybridFrequency, type HybridAvailability } from '@/services/cardio/hybridAvailability';
+import type { HybridPriority } from '@/services/cardio/hybridAuthoring';
+import type { ReactNode } from 'react';
+import { toRoutineView } from '@/services/training/routineView';
+import { estimateSessionMinutes } from '@/services/training/sessionSummary';
 /**
  * Mesocycle generation screen (PRD §8.8).
  *
@@ -30,14 +36,13 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Stack, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { RoutineIdentityPicker, type RoutineIdentity } from '@/components/train/RoutineIdentityPicker';
-import { Equipment, ExperienceLevel, SplitStructure, type Exercise, type PlannedSession } from '@/models';
+import { Equipment, ExperienceLevel, SplitStructure, type Exercise, type PlannedSession, type Routine, type Mesocycle } from '@/models';
 import { useAuth } from '@/hooks/useAuth';
 import { useAthleteIntakeDefaults, useAthleteIntakeReady } from '@/hooks/AthleteIntakeContext';
 import { strengthIntakeDefaults } from '@/services/settings/athleteIntake';
@@ -51,6 +56,8 @@ import { PlanPreview } from '@/components/train/generate/PlanPreview';
 import { mergePrescriptionEdit } from '@/services/training/prescriptionEntry';
 import { countWorkingSets } from '@/services/training/sessionSummary';
 import { splitAdherence } from '@/services/training/splitAdherence';
+import { generatedStructureName } from '@/services/training/generatedStructureName';
+import { plannedPresentationFocus } from '@/services/training/sessionCoherence';
 import { GenerationChoice, PriorityBudget } from '@/components/train/generate/GenerationChoice';
 import { ExperienceLevelGuide } from '@/components/train/generate/ExperienceLevelGuide';
 import { SplitDiagram, SplitLegend } from '@/components/train/generate/SplitDiagram';
@@ -65,6 +72,7 @@ import {
 } from '@/services/training/exerciseCatalogue';
 import { planDoseFirstMesocycle, rerollMesocycleAsync, type MesocyclePlan } from '@/services/training/mesocyclePlanner';
 import { RerollFeedback, type RerollNotice } from '@/components/train/generate/RerollFeedback';
+import { hybridTemplates, type HybridTemplate } from '@/services/cardio/hybridTemplates';
 import { reviewScheduleSuitability } from '@/services/training/alternativeSchedule';
 import { MIN_HYPERTROPHY_SESSION_SETS } from '@/services/training/sessionDistribution';
 import {
@@ -99,6 +107,7 @@ import {
   MAX_ROUTINE_NAME_LENGTH,
   normalizeRoutineName,
   routineNameProblem,
+  suggestedRoutineName,
   type RoutineNameProblem,
   shouldActivateNewRoutine,
   toMesocycleDraft,
@@ -187,7 +196,6 @@ const PRIMARY_LABEL: Record<PrimaryAction, string> = {
 };
 
 /** Page transition, matched to the stack's own push so the flow feels continuous. */
-const PHASE_SLIDE_MS = 260;
 
 /**
  * The reason a save failed, as something readable.
@@ -249,7 +257,25 @@ export default function GenerateScreen() {
     : <AthleteDefaultsLoading onCancel={() => backToTraining(router)} />;
 }
 
-function OwnedGenerateScreen() {
+export interface PreparedStrengthPlan { routine: Routine; mesocycle: Mesocycle; templates?: readonly HybridTemplate[] }
+type SharedStrengthAvailability = HybridAvailability;
+type EmbeddedStrengthProps = {
+  onPrepared: (draft: PreparedStrengthPlan) => void;
+  onExit: () => void;
+  newRoutineId?: () => string;
+  recommendedSessions?: number;
+  hybridPriority?: HybridPriority;
+  sharedAvailability?: SharedStrengthAvailability;
+  progress?: ReactNode;
+  revision?: PreparedStrengthPlan;
+};
+/** Embedded authoring accepts a prescription in memory, never saves it independently. */
+export function StrengthPlanBuilder(props: EmbeddedStrengthProps) {
+  const ready = useAthleteIntakeReady();
+  return ready ? <OwnedGenerateScreen {...props} /> : <AthleteDefaultsLoading onCancel={props.onExit} />;
+}
+
+function OwnedGenerateScreen({ onPrepared, onExit, newRoutineId, recommendedSessions, sharedAvailability, hybridPriority, progress, revision }: Partial<EmbeddedStrengthProps> = {}) {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -258,18 +284,32 @@ function OwnedGenerateScreen() {
   const { user } = useAuth();
   const defaults = strengthIntakeDefaults(useAthleteIntakeDefaults());
 
-  const [name, setName] = useState('');
-  const [routineIdentity, setRoutineIdentity] = useState<RoutineIdentity>(() => ({ icon: 'planet', color: sectionAccent.train }));
-  const [goal, setGoal] = useState<TrainingGoal>(defaults.goal as TrainingGoal | undefined ?? DEFAULT_GENERATOR_GOAL);
-  const [level, setLevel] = useState<ExperienceLevel>(defaults.level ?? DEFAULT_GENERATOR_LEVEL);
+  const generation = revision?.routine.generation;
+  const [name, setName] = useState(revision?.routine.name ?? '');
+  const nameEdited = useRef(!!revision);
+  const [routineIdentity, setRoutineIdentity] = useState<RoutineIdentity>(() => ({ icon: revision?.routine.icon ?? 'planet', color: sectionAccent.train }));
+  const [goal, setGoal] = useState<TrainingGoal>((generation?.goal ?? defaults.goal) as TrainingGoal | undefined ?? DEFAULT_GENERATOR_GOAL);
+  const [level, setLevel] = useState<ExperienceLevel>((generation?.experienceLevel as ExperienceLevel | undefined) ?? defaults.level ?? DEFAULT_GENERATOR_LEVEL);
   const [levelGuideOpen, setLevelGuideOpen] = useState(false);
-  const [sessions, setSessions] = useState(defaults.sessions ?? DEFAULT_GENERATOR_SESSIONS);
-  const [minutes, setMinutes] = useState(defaults.minutes ?? DEFAULT_GENERATOR_MINUTES);
-  const [split, setSplit] = useState<SplitStructure>(DEFAULT_GENERATOR_SPLIT);
-  const [equipment, setEquipment] = useState<Equipment[]>([...DEFAULT_GENERATOR_EQUIPMENT]);
-  const [emphasis, setEmphasis] = useState<EmphasisSelection>(EMPTY_EMPHASIS);
+  const [sessions, setSessions] = useState(generation?.sessionsPerMicrocycle ?? recommendedSessions ?? (sharedAvailability ? Math.min(4, Math.max(2, sharedAvailability.trainingDays - 2)) : defaults.sessions ?? DEFAULT_GENERATOR_SESSIONS));
+  const frequencyEdited = useRef(!!revision);
+  const [minutes, setMinutes] = useState(sharedAvailability?.minutesPerSession ?? defaults.minutes ?? DEFAULT_GENERATOR_MINUTES);
+  useEffect(() => {
+    if (!sharedAvailability) return;
+    setMinutes(sharedAvailability.minutesPerSession);
+    const suggested = hybridPriority
+      ? suggestHybridFrequency(sharedAvailability, hybridPriority, strengthHybridTarget(level)).strength
+      : recommendedSessions;
+    setSessions(old => Math.min(!frequencyEdited.current && suggested ? suggested : old, sharedAvailability.trainingDays));
+  }, [sharedAvailability, recommendedSessions, hybridPriority, level]);
+  const [split, setSplit] = useState<SplitStructure>((generation?.split as SplitStructure | undefined) ?? DEFAULT_GENERATOR_SPLIT);
+  const [equipment, setEquipment] = useState<Equipment[]>([...(generation?.availableEquipment ?? DEFAULT_GENERATOR_EQUIPMENT)]);
+  const [emphasis, setEmphasis] = useState<EmphasisSelection>(() => generation ? {
+    priority: generation.priorityRegions as VolumeRegion[],
+    deprioritized: generation.deprioritizedRegions as VolumeRegion[],
+  } : EMPTY_EMPHASIS);
   const [seed, setSeed] = useState(() => Math.floor(Math.random() * 1_000_000));
-  const [phase, setPhase] = useState<GenerationPhase>('configure');
+  const [phase, setPhase] = useState<GenerationPhase>(revision ? 'preview' : 'configure');
   const [step, setStep] = useState(0);
   const configureScrollRef = useRef<ScrollView>(null);
   const goToStep = (next: number) => { uiPerformance.begin('wizard.commit'); setStep(Math.max(0, Math.min(5, next))); configureScrollRef.current?.scrollTo({ y: 0, animated: false }); };
@@ -287,6 +327,7 @@ function OwnedGenerateScreen() {
   const [swapTarget, setSwapTarget] = useState<{ sessionIndex: number; order: number } | null>(null);
   const [addTarget, setAddTarget] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const acceptedDraft = useRef<{ signature: string; draft: PreparedStrengthPlan } | null>(null);
   /** Shown only after a save attempt, so an untouched field is not an error yet. */
   const [nameProblem, setNameProblem] = useState<RoutineNameProblem | null>(null);
   const previewScrollRef = useRef<ScrollView>(null);
@@ -340,7 +381,7 @@ function OwnedGenerateScreen() {
     [goal, level, split, sessions, minutes, equipment, emphasis, notRecommendedExerciseIds],
   );
   const stale = isPlanStale(planSignature, settings);
-  const primary = primaryActionFor({ phase, hasPlan: plan !== null, stale });
+  const primary = primaryActionFor({ phase, hasPlan: plan !== null || !!revision, stale });
   useEffect(() => {
     const cancel = () => {
       if (recommendationTask.current) recommendationTask.current.cancelled = true;
@@ -352,15 +393,13 @@ function OwnedGenerateScreen() {
     return cancel;
   }, [settings, phase]);
 
-  // The pages slide instead of swapping, so the tap that generates is visibly a step
-  // forward rather than a silent content change further down a scroll.
-  const slide = useSharedValue(0);
-  useEffect(() => {
-    slide.value = withTiming(phase === 'preview' ? 1 : 0, { duration: PHASE_SLIDE_MS });
-  }, [phase, slide]);
-  const pagesStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: -slide.value * width }],
-  }));
+  // Page identity belongs to React state. A native sheet/resize must never reveal
+  // the configuration page beneath preview actions through a reset animation.
+  const cancelVariation = () => {
+    if (variationTask.current) variationTask.current.cancelled = true;
+    variationTask.current = null;
+    setRerolling(false);
+  };
 
   // Live capacity readout, recomputed as the two controls move, which is the point of
   // keeping them on one screen. BOTH figures are shown because each control moves a
@@ -400,6 +439,11 @@ function OwnedGenerateScreen() {
   /** Yield between plans, and discard results when settings change or the route exits. */
   const onRecommendCapacity = useCallback(async () => {
     if (recommendationTask.current) return;
+    if (sharedAvailability) {
+      frequencyEdited.current = true;
+      setSessions(suggestHybridFrequency(sharedAvailability, hybridPriority ?? 'BALANCED', strengthHybridTarget(level)).strength);
+      return;
+    }
     const task = { cancelled: false };
     recommendationTask.current = task;
     setRecommending(true);
@@ -430,7 +474,7 @@ function OwnedGenerateScreen() {
         setRecommending(false);
       }
     }
-  }, [planningCatalogue, emphasis, goal, level, split, settings]);
+  }, [planningCatalogue, emphasis, goal, level, split, settings, sharedAvailability, hybridPriority]);
 
   const generate = useCallback(
     (withSeed: number) => {
@@ -463,6 +507,10 @@ function OwnedGenerateScreen() {
   useEffect(() => { if (variationTask.current) variationTask.current.cancelled = true; setReviewRequested(false); }, [settings, availableCatalogue]);
   const onReroll = useCallback(async () => {
     if (variationTask.current) return;
+    if (revision && (Object.keys(previewEdits).length || previewAdditions.length)) {
+      setRerollNotice('edited');
+      return;
+    }
     const next = Math.floor(Math.random() * 1_000_000);
     const action = rerollActionFor({ hasPlan: plan !== null, stale,
       hasPreviewEdits: Object.keys(previewEdits).length > 0 || previewAdditions.length > 0 });
@@ -476,7 +524,7 @@ function OwnedGenerateScreen() {
         const candidate = await rerollMesocycleAsync({ level, goal, catalogue: planningCatalogue, seed: next, split,
           priorityRegions: emphasis.priority, deprioritizedRegions: emphasis.deprioritized,
           capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes } }, plan, { isCancelled: () => task.cancelled });
-        if (task.cancelled) return;
+        if (task.cancelled || variationTask.current !== task) return;
         setRerollNotice(candidate === plan ? 'unchanged' : 'updated');
         if (candidate !== plan) { setSeed(next); setPlan(candidate); }
         setSwapTarget(null); setAddTarget(null); setPhase('preview');
@@ -489,11 +537,12 @@ function OwnedGenerateScreen() {
     }
     setSeed(next);
     generate(next);
-  }, [generate, plan, stale, previewEdits, previewAdditions, level, goal, planningCatalogue, split, emphasis, sessions, minutes]);
+  }, [generate, plan, revision, stale, previewEdits, previewAdditions, level, goal, planningCatalogue, split, emphasis, sessions, minutes]);
 
   const plannedSessions = useMemo<PlannedSession[]>(() => {
-    if (plan === null) return [];
-    const base = toPlannedSessions(plan, false, { e1rmByExerciseId, preserveFocus: split !== SplitStructure.AUTO });
+    const base = plan ? toPlannedSessions(plan, false, { e1rmByExerciseId, preserveFocus: split !== SplitStructure.AUTO })
+      : revision?.mesocycle.plannedSessions ?? [];
+    if (!plan && revision && !Object.keys(previewEdits).length && !previewAdditions.length) return base;
     return applyPreviewEdits(
       appendPreviewExercises(base, previewAdditions, exercisesById, goal), previewEdits,
       exercisesById,
@@ -506,7 +555,30 @@ function OwnedGenerateScreen() {
           : total + exerciseMinutes(catalogueExercise, exercise.sets.length, exercise.restSeconds);
       }, 0),
     }));
-  }, [e1rmByExerciseId, exercisesById, goal, plan, previewAdditions, previewEdits, split]);
+  }, [e1rmByExerciseId, exercisesById, goal, plan, previewAdditions, previewEdits, revision, split]);
+  const revisionPresentation = useMemo(() => {
+    if (!revision || plan) return undefined;
+    const view = toRoutineView(revision.routine, { ...revision.mesocycle, plannedSessions }, exercisesById, {
+      focus: focus => t(`generate.focus${focus}`),
+      goal: goal => t(`goal.${goal}`),
+    });
+    return new Map(view?.microcycles[0]?.sessions.map(session => [session.plannedSessionIndex, {
+      name: session.name,
+      minutes: estimateSessionMinutes(session.exercises),
+    }]));
+  }, [revision, plan, plannedSessions, exercisesById, t]);
+  const structureName = plan ? generatedStructureName(plannedSessions.map(session => plannedPresentationFocus(session, exercisesById, split !== SplitStructure.AUTO)), {
+    focus: focus => t(`generate.focus${focus}`), split: structure => t(`generate.split${structure}`), mixed: t('generate.mixedStructure'),
+  }) : '';
+  useEffect(() => {
+    if (!plan || !user || nameEdited.current) return;
+    let current = true;
+    setName(suggestedRoutineName(structureName, []));
+    void routineRepository.listByUser(user.uid).then(routines => {
+      if (current && !nameEdited.current) setName(suggestedRoutineName(structureName, routines.map(routine => routine.name)));
+    }).catch(() => { /* Recheck uniqueness at explicit save; keep the actual structure usable offline. */ });
+    return () => { current = false; };
+  }, [!!plan, structureName, user?.uid]);
   const plannedSetCount = useMemo(
     () => plannedSessions.reduce(
       (total, session) => total + session.exercises.reduce((sum, exercise) => sum + countWorkingSets(exercise.sets), 0),
@@ -629,9 +701,10 @@ function OwnedGenerateScreen() {
   );
 
   const onSave = useCallback(async () => {
-    if (plan === null || user === null || plannedSessions.every((session) => session.exercises.length === 0)) return;
+    if ((!plan && !revision) || !user || plannedSessions.every(session => !session.exercises.length)) return;
+    if (revision && plannedSessions.some(session => !session.exercises.length)) return;
     if (hasInvalidRepRanges(plannedSessions)) { setSaveError(t('exerciseEditor.invalidRange')); return; }
-    const chosenName = normalizeRoutineName(name);
+    let chosenName = normalizeRoutineName(name);
     if (chosenName === null) {
       reportNameProblem('empty');
       return;
@@ -640,14 +713,27 @@ function OwnedGenerateScreen() {
     setSaveError(null);
     try {
       const now = Date.now();
-      const routineId = `${user.uid}-${now}`;
+      const routineId = revision?.routine.id ?? newRoutineId?.() ?? `${user.uid}-${now}`;
       const existing = await routineRepository.listByUser(user.uid);
+      if (!nameEdited.current) { chosenName = suggestedRoutineName(structureName, existing.map(routine => routine.name)); setName(chosenName); }
       const problem = routineNameProblem(chosenName, existing.map((routine) => routine.name));
       if (problem !== null) {
         reportNameProblem(problem);
         return;
       }
-      await routineRepository.create({
+      if (revision && !plan && onPrepared) {
+        if (!hasPreviewEdits && chosenName === revision.routine.name && routineIdentity.icon === revision.routine.icon) {
+          onPrepared(revision);
+        } else {
+          onPrepared({
+            routine: { ...revision.routine, name: chosenName, icon: routineIdentity.icon },
+            mesocycle: { ...revision.mesocycle, plannedSessions },
+          });
+        }
+        return;
+      }
+      if (!plan) return;
+      const routine: Routine = {
         id: routineId,
         ...toRoutineDraft({
           userId: user.uid,
@@ -669,9 +755,9 @@ function OwnedGenerateScreen() {
           },
           now,
         }),
-      });
+      };
       const mesocycleId = `${routineId}-m0`;
-      await mesocycleRepository.create({
+      const mesocycle: Mesocycle = {
         id: mesocycleId,
         ...toMesocycleDraft({
           userId: user.uid,
@@ -680,7 +766,29 @@ function OwnedGenerateScreen() {
           plannedSessions,
           now,
         }),
-      });
+      };
+      if (onPrepared) {
+        const signature = JSON.stringify([routine.name, routine.icon, routine.accentColor, routine.generation, mesocycle.plannedSessions, hasPreviewEdits, nameEdited.current]);
+        if (acceptedDraft.current?.signature !== signature) {
+          const templates = hasPreviewEdits ? [] : hybridTemplates({
+            level, goal, split, seed, catalogue: planningCatalogue, priorityRegions: emphasis.priority,
+            deprioritizedRegions: emphasis.deprioritized, capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes },
+          }, plan);
+          if (!nameEdited.current) for (const variant of templates) {
+            const title = generatedStructureName(variant.sessions.map(s => plannedPresentationFocus(s, exercisesById, true)), {
+              focus: f => t(`generate.focus${f}`), split: s => t(`generate.split${s}`), mixed: t('generate.mixedStructure'),
+            });
+            variant.routineName = suggestedRoutineName(title, existing.map(r => r.name));
+          }
+          acceptedDraft.current = { signature, draft: {
+            routine: { ...routine, isActive: false, activeMesocycleId: mesocycleId }, mesocycle, templates,
+          } };
+        }
+        onPrepared(acceptedDraft.current.draft);
+        return;
+      }
+      await routineRepository.create(routine);
+      await mesocycleRepository.create(mesocycle);
       await routineRepository.update(routineId, { activeMesocycleId: mesocycleId });
       router.dismissTo('/(tabs)/(train)');
     } catch (error) {
@@ -694,6 +802,7 @@ function OwnedGenerateScreen() {
     }
   }, [
     plan,
+    revision,
     user,
     name,
     t,
@@ -710,6 +819,12 @@ function OwnedGenerateScreen() {
     router,
     reportNameProblem,
     routineIdentity,
+    structureName,
+    onPrepared,
+    newRoutineId,
+    hasPreviewEdits,
+    planningCatalogue,
+    exercisesById,
   ]);
 
   const onCycleRegion = useCallback((region: VolumeRegion) => {
@@ -731,21 +846,23 @@ function OwnedGenerateScreen() {
   }, [generate, onSave, primary, seed]);
 
   const onLeftAction = useCallback(() => {
+    if (revision) { cancelVariation(); onExit?.(); return; }
     if (phase === 'preview') {
+      cancelVariation();
       setPhase('configure');
       return;
     }
-    backToTraining(router);
-  }, [phase, router]);
+    if (onExit) onExit(); else backToTraining(router);
+  }, [phase, revision, router, onExit]);
 
   const slots = usedSlots(emphasis);
   const adherence = plan && split !== SplitStructure.AUTO ? splitAdherence(plan.distribution) : null;
-  const cancelCreation = () => Alert.alert(t('generate.cancelCreation'), t('generate.cancelCreationHint'), [
+  const cancelCreation = () => revision ? onLeftAction() : Alert.alert(t('generate.cancelCreation'), t('generate.cancelCreationHint'), [
     { text: t('generate.keepCreating'), style: 'cancel' },
     { text: t('generate.cancelCreation'), style: 'destructive', onPress: () => {
       if (variationTask.current) variationTask.current.cancelled = true;
       if (recommendationTask.current) recommendationTask.current.cancelled = true;
-      router.dismissTo('/(tabs)/(train)');
+      if (onExit) onExit(); else router.dismissTo('/(tabs)/(train)');
     } },
   ]);
   const twoEmphasisColumns = width >= 340 && fontScale < 1.4;
@@ -764,14 +881,16 @@ function OwnedGenerateScreen() {
       {/* A swipe back from the preview would pop the whole screen and discard an
           unsaved plan with its edits, so while the preview is up the phase owns going
           back and the gesture is off. */}
-      <Stack.Screen options={{ gestureEnabled: phase === 'configure' && step === 0 }} />
+      {!onPrepared && <Stack.Screen options={{ gestureEnabled: phase === 'configure' && step === 0 }} />}
       <View style={{ paddingTop: insets.top, paddingHorizontal: spacing.lg, alignItems: 'flex-end' }}>
         <Pressable accessibilityRole="button" accessibilityLabel={t('generate.cancelCreation')} disabled={saving} onPress={cancelCreation}
           style={{ minHeight: 44, justifyContent: 'center' }}><Text style={{ color: colors.textSecondary, fontSize: 16 }}>{t('generate.cancel')}</Text></Pressable>
       </View>
-      <Animated.View style={[styles.pages, { width: width * 2 }, pagesStyle]}>
+      {progress && <View style={{ paddingHorizontal: spacing.lg }}>{progress}</View>}
+      <View style={styles.pages}>
         <View
-          style={{ width }}
+          style={{ flex: 1, display: phase === 'configure' ? 'flex' : 'none' }}
+          testID="generation-configure-page"
           pointerEvents={phase === 'configure' ? 'auto' : 'none'}
           accessibilityElementsHidden={phase !== 'configure'}
           importantForAccessibility={phase === 'configure' ? 'auto' : 'no-hide-descendants'}
@@ -785,8 +904,8 @@ function OwnedGenerateScreen() {
             }}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={[typography.caption, { color: colors.accentText, marginBottom: 8 }]}>{t('workout.step', { current: step + 1, total: 6 })}</Text>
-            <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{t(['generate.goal', 'generate.level', 'generate.emphasis', 'generate.equipment', 'generate.capacity', 'generate.split'][step])}</Text>
+            <Text style={[typography.caption, { color: colors.accentText, marginBottom: 8 }]}>{t(progress ? 'hybridProgress.strengthStep' : 'workout.step', { current: step + 1, total: 6 })}</Text>
+            <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{t(step === 4 && sharedAvailability ? 'sharedAvailability.strengthAllocation' : ['generate.goal', 'generate.level', 'generate.emphasis', 'generate.equipment', 'generate.capacity', 'generate.split'][step])}</Text>
             <View style={{ flexDirection: 'row', gap: 6, marginVertical: 20 }}>
               {Array.from({ length: 6 }, (_, index) => <View key={index} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: index <= step ? sectionAccent.train : colors.surface }} />)}
             </View>
@@ -856,16 +975,16 @@ function OwnedGenerateScreen() {
             >
               <View style={{ gap: spacing.md }}>
                 <Stepper
-                  label={t('generate.sessions')}
+                  label={t(sharedAvailability ? 'sharedAvailability.strengthSessions' : 'generate.sessions')}
                   value={sessions}
                   min={MIN_SESSIONS}
-                  max={MAX_SESSIONS}
-                  onChange={setSessions}
+                  max={Math.min(MAX_SESSIONS, sharedAvailability?.trainingDays ?? MAX_SESSIONS)}
+                  onChange={value => { frequencyEdited.current = true; setSessions(value); }}
                 />
                 <Text style={[typography.caption, { color: colors.textMuted }]}>
                   {t('generate.sessionsHint')}
                 </Text>
-                <Stepper
+                {!sharedAvailability && <><Stepper
                   label={t('generate.minutes')}
                   value={minutes}
                   min={MIN_MINUTES}
@@ -875,7 +994,7 @@ function OwnedGenerateScreen() {
                 />
                 <Text style={[typography.caption, { color: colors.textMuted }]}>
                   {t('generate.minutesHint')}
-                </Text>
+                </Text></>}
 
                 {/* The anti-"more is better" control. A beginner who sets six sessions
                     is not training more, only spreading the same recoverable volume
@@ -898,12 +1017,13 @@ function OwnedGenerateScreen() {
                   {recommending ? (
                     <ActivityIndicator color={sectionAccent.train} />
                   ) : (
-                    <Text style={[typography.body, { color: colors.accentText }]}>
-                      {t('generate.capacityAuto')}
-                    </Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <WandIcon size={18} color={colors.accentText} />
+                      <Text style={[typography.body, { color: colors.accentText }]}>{t('generate.capacityAuto')}</Text>
+                    </View>
                   )}
                 </Pressable>
-                <Text style={[typography.caption, { color: colors.textMuted }]}>
+                {!sharedAvailability && <><Text style={[typography.caption, { color: colors.textMuted }]}>
                   {t('generate.capacityAutoHint')}
                 </Text>
                 {recommendationFailed && (
@@ -933,7 +1053,7 @@ function OwnedGenerateScreen() {
                       },
                     )}
                   </Text>
-                )}
+                )}</>}
               </View>
             </Section>}
 
@@ -979,7 +1099,7 @@ function OwnedGenerateScreen() {
                   <Text style={[styles.emphasisBlockLabel, { color: colors.textMuted }]}>
                     {t(`generate.focus${group.half}`).toUpperCase()}
                   </Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10 }}>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 8 }}>
                     {group.regions.map((region) => {
                       const choice = choiceOf(emphasis, region);
                       const blocked = prioritizeBlockedReason(emphasis, region);
@@ -994,11 +1114,11 @@ function OwnedGenerateScreen() {
                               ? 'generate.emphasisDeprioritizeVerb'
                               : 'generate.emphasisBase')}
                           style={{ width: twoEmphasisColumns ? '48%' : '100%', borderRadius: radius.lg,
-                            minHeight: twoEmphasisColumns ? 106 : 82, paddingBottom: twoEmphasisColumns ? 26 : 12 }}
+                            minHeight: twoEmphasisColumns ? 86 : 76, paddingVertical: 8, paddingHorizontal: 10, paddingBottom: twoEmphasisColumns ? 22 : 10 }}
                           leading={thumbnail && (
                             <BodyMapThumbnail
                               thumbnail={thumbnail}
-                              size={twoEmphasisColumns ? 40 : 58}
+                              size={twoEmphasisColumns ? 32 : 46}
                               paint={regionPaint(region, choice === 'PRIORITY'
                                 ? sectionAccent.train
                                 : choice === 'DEPRIORITIZED'
@@ -1056,12 +1176,13 @@ function OwnedGenerateScreen() {
             afterwards so a trip back to the form costs neither the athlete's place in
             it nor their edits here. */}
         <View
-          style={{ width }}
+          style={{ flex: 1, display: phase === 'preview' ? 'flex' : 'none' }}
+          testID="generation-preview-page"
           pointerEvents={phase === 'preview' ? 'auto' : 'none'}
           accessibilityElementsHidden={phase !== 'preview'}
           importantForAccessibility={phase === 'preview' ? 'auto' : 'no-hide-descendants'}
         >
-          {plan !== null && (
+          {(plan !== null || revision) && (
             <ScrollView
               ref={previewScrollRef}
               contentContainerStyle={{
@@ -1087,6 +1208,7 @@ function OwnedGenerateScreen() {
                 <TextInput
                   value={name}
                   onChangeText={(value) => {
+                    nameEdited.current = true;
                     setName(value);
                     setNameProblem(null);
                   }}
@@ -1116,7 +1238,7 @@ function OwnedGenerateScreen() {
                 )}
               </Section>
               <RoutineIdentityPicker value={routineIdentity} onChange={setRoutineIdentity} disabled={saving || rerolling} />
-              {plan.strength?.missingBarbell === true && (
+              {plan?.strength?.missingBarbell === true && (
                 <Text
                   style={[
                     typography.caption,
@@ -1126,7 +1248,7 @@ function OwnedGenerateScreen() {
                   {t('generate.strengthNoBarbell')}
                 </Text>
               )}
-              {!reviewRequested && !hasPreviewEdits && <Pressable accessibilityRole="button" disabled={rerolling}
+              {plan && !reviewRequested && !hasPreviewEdits && <Pressable accessibilityRole="button" disabled={rerolling}
                 onPress={() => setReviewRequested(true)} style={{ minHeight: 44, justifyContent: 'center', marginBottom: spacing.md }}>
                 <Text style={{ color: colors.accentText }}>{t('generate.reviewDistribution')}</Text>
               </Pressable>}
@@ -1155,8 +1277,9 @@ function OwnedGenerateScreen() {
               )}
               <PlanPreview
                 sessionTabs
+                sessionPresentation={revisionPresentation}
                 sessions={plannedSessions}
-                limitedBy={plan.limitedBy}
+                limitedBy={plan?.limitedBy}
                 performedSets={plannedSetCount}
                 exercisesById={exercisesById}
                 onSwap={(sessionIndex, order) => { uiPerformance.begin('picker.ready'); setSwapTarget({ sessionIndex, order }); }}
@@ -1216,7 +1339,7 @@ function OwnedGenerateScreen() {
             </ScrollView>
           )}
         </View>
-      </Animated.View>
+      </View>
 
       <ExerciseSwapSheet
         current={swapCurrent}
@@ -1254,7 +1377,7 @@ function OwnedGenerateScreen() {
           style={{ height: 52, justifyContent: 'center', paddingRight: spacing.lg }}
         >
           <Text style={[typography.body, { color: colors.textSecondary }]}>
-            {t(phase === 'preview' || step > 0 ? 'generate.back' : 'generate.cancel')}
+            {t(revision ? 'hybridProgress.backToReview' : phase === 'preview' || step > 0 ? 'generate.back' : 'generate.cancel')}
           </Text>
         </Pressable>
         <Pressable
@@ -1275,7 +1398,7 @@ function OwnedGenerateScreen() {
             <ActivityIndicator color={colors.bg} />
           ) : (
             <Text style={[typography.title, { color: '#16191C' }]}>
-              {t(phase === 'configure' && step < 5 ? 'exerciseWizard.next' : PRIMARY_LABEL[primary])}
+              {t(phase === 'configure' && step < 5 ? 'exerciseWizard.next' : onPrepared && primary === 'save' ? 'hybridPlan.useStrength' : PRIMARY_LABEL[primary])}
             </Text>
           )}
         </Pressable>
@@ -1286,7 +1409,7 @@ function OwnedGenerateScreen() {
 }
 
 const styles = StyleSheet.create({
-  pages: { flex: 1, flexDirection: 'row' },
+  pages: { flex: 1 },
   emphasisChip: { width: '47%', minWidth: 0 },
   emphasisBlockLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.9, marginBottom: 8 },
   rerollButton: {

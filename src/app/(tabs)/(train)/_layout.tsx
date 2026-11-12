@@ -24,7 +24,9 @@ export default function TrainStackLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="session" />
       <Stack.Screen name="mesocycle" />
+      <Stack.Screen name="mesocycle-continuity" options={{ gestureEnabled: false }} />
       <Stack.Screen name="generate" />
+      <Stack.Screen name="hybrid-plan" options={{ gestureEnabled: false }} />
       <Stack.Screen name="cardio-plan" options={{ gestureEnabled: false }} />
       <Stack.Screen name="cardio-cycle" options={{ gestureEnabled: false }} />
       <Stack.Screen name="cardio-block" />

@@ -50,3 +50,15 @@ it('translates the complete cardio execution and dated coordination flow', () =>
     }
   }
 });
+
+it('translates shared hybrid capacity without dropping interpolation values', () => {
+  const keys = Object.keys(en.hybridCapacity).sort();
+  for (const locale of [en, es, fr, ja]) {
+    expect(Object.keys(locale.hybridCapacity).sort()).toEqual(keys);
+    for (const key of keys) {
+      const value = (locale.hybridCapacity as Record<string, string>)[key];
+      expect(value.trim()).not.toBe('');
+      expect((value.match(/{{\w+}}/g) ?? []).sort()).toEqual(((en.hybridCapacity as Record<string, string>)[key].match(/{{\w+}}/g) ?? []).sort());
+    }
+  }
+});

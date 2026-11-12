@@ -47,16 +47,18 @@ import { useHealthExport } from '@/hooks/useHealthExport';
 import { WorkoutHealthExport } from '@/components/train/WorkoutHealthExport';
 import { isNewSetCompletion, restAfterCompletion, nextExerciseAfterCompletion, replacementWorkoutSets, updateWorkoutSet } from '@/services/training/workoutExecution';
 import { cleanSupersets, linkSuperset, unlinkSuperset, removeWorkoutExercise, supersetTransition } from '@/services/training/workoutStructure';
-import { SetType, type Exercise, type PlannedSession, type SetExtension, type WorkoutSession } from '@/models';
+import { SetType, type Exercise, type Mesocycle, type PlannedSession, type SetExtension, type WorkoutSession } from '@/models';
 import {
   type MockSetRow,
 } from '@/mocks/session';
 import { mesocycleRepository, workoutSessionRepository } from '@/services/repositories';
 import { ExerciseSwapSheet } from '@/components/train/generate/ExerciseSwapSheet';
 import { WorkoutExerciseStrip } from '@/components/train/WorkoutExerciseStrip';
+import { completedWorkoutExerciseIds } from '@/services/training/workoutExecution';
 import { WorkoutClock } from '@/components/train/WorkoutClock';
 import { timestampMillis } from '@/services/training/workoutRuntime';
 import { uiPerformance } from '@/services/performance/uiPerformance';
+import { exerciseHistory } from '@/services/training/exerciseHistory';
 import { ExerciseDetailSheet } from '@/components/train/ExerciseDetailSheet';
 import { WorkoutFinishSheet } from '@/components/train/WorkoutFinishSheet';
 import { reviseSessionFeedback, sessionEffortValue } from '@/services/training/sessionFeedback';
@@ -68,6 +70,7 @@ import type { ExerciseMenuAnchor } from '@/services/training/exerciseMenuLayout'
 import { appendPreviewExercises } from '@/services/training/previewEditing';
 import { TrainingGoal } from '@/services/training/volumePlan';
 import { workoutPlanChanges, prescriptionFromWorkout, workoutReview } from '@/services/training/workoutReview';
+import { completedBlockAfterWorkout } from '@/services/training/mesocycleContinuity';
 import { changesForSessionEdit } from '@/services/training/mesocycleEditing';
 import {
   addedSetTargetRIR,
@@ -152,6 +155,7 @@ export default function EntrenamientoScreen() {
   const [discardError, setDiscardError] = useState(false);
   const [restoreNotice, setRestoreNotice] = useState(false);
   const [routineId, setRoutineId] = useState<string | undefined>();
+  const continuity = useRef<{ source: Mesocycle; workout?: WorkoutSession } | null>(null);
   const [restOverrides, setRestOverrides] = useState<Record<string, number>>({});
 
   // Espeja el estado para poder leerlo dentro de callbacks ESTABLES sin meterlo
@@ -190,7 +194,7 @@ export default function EntrenamientoScreen() {
     setLoadError(false);
     mesocycleRepository.get(mesocycleId).then((mesocycle) => {
       if (cancelled) return;
-      const prescribed = mesocycle?.plannedSessions === undefined
+      const prescribed = mesocycle?.continuation || mesocycle?.plannedSessions === undefined
         ? []
         : sessionsForMicrocycle(mesocycle, goal, microcycleIndex);
       // The goal is stored on the routine, not the mesocycle. For strength the
@@ -210,6 +214,7 @@ export default function EntrenamientoScreen() {
       setPlannedSession(session);
       setRestOverrides(mesocycle?.exerciseRestOverrides ?? {});
       setRoutineId(mesocycle?.routineId);
+      continuity.current = mesocycle ? { source: mesocycle } : null;
       loadedIdentity.current = identity;
       protectedLoads.current.clear();
       setPerformedAt(Date.now()); setCompletedAt(undefined); setFinished(false); setFinishing(false);
@@ -420,6 +425,9 @@ export default function EntrenamientoScreen() {
     [typePickerFor, updateSet],
   );
 
+  const detailHistory = useMemo(() => detail?.mode === 'info'
+    ? exerciseHistory(uid ?? '', detail.id, history, exerciseById, Date.now(), sessionContext?.sessionId) : [],
+  [uid, detail, history, exerciseById, sessionContext?.sessionId]);
   const summary = useMemo(() => workoutReview(exercises, setsByExercise, history, sessionContext?.sessionId ?? ''), [exercises, setsByExercise, history, sessionContext]);
   const completedSession = useMemo(() => completedAt !== undefined && sessionContext
     ? toWorkoutSession({ ...sessionContext, completedAt }, exerciseOrder, setsByExercise) : null,
@@ -458,19 +466,34 @@ export default function EntrenamientoScreen() {
     try {
       const ended = Date.now();
       const feedback = reviseSessionFeedback(sessionFeedback, sessionEffort, ended, 'AT_FINISH');
-      if (!await flush(ended, feedback ? { sessionFeedback: feedback } : undefined)) throw new Error('Save failed');
+      if (!await flush(ended, feedback ? { sessionFeedback: feedback } : undefined, workout => {
+        if (activeRoute.current === route && continuity.current) continuity.current.workout = workout;
+        void health.service.export(workout).catch(() => undefined);
+      })) throw new Error('Save failed');
       if (activeRoute.current !== route) return;
       setSessionFeedback(feedback);
       setCompletedAt(ended); setRestTimer(cancelRest()); setFinished(true);
       void clearWorkoutRestAlerts().catch(() => undefined);
-      // Health failures never roll back or block the athlete's primary save.
-      void Promise.resolve().then(() => health.service.export(toWorkoutSession({ ...sessionContext, completedAt: ended }, exerciseOrder, setsRef.current))).catch(() => undefined);
       if (prescription) {
         pendingPlanUpdate.current = { route, prescription };
         try { await applyPendingPlanUpdate(); } catch { if (activeRoute.current === route) setPlanUpdateError(true); }
       }
     } catch { if (activeRoute.current === route) setFinishError(true); }
     finally { finishLock.current = false; if (activeRoute.current === route) setBusy(false); }
+  };
+  const closeWorkoutSummary = () => {
+    if (!finished) { setFinishing(false); return; }
+    const saved = continuity.current;
+    const source = saved?.source, workout = saved?.workout;
+    if (loadedIdentity.current === routeIdentity && source?.routineId && workout
+      && completedBlockAfterWorkout(source, goal, history, workout, Date.now())) {
+      // The existing review revalidates against the server before showing a balance.
+      router.replace({ pathname: '/mesocycle-continuity', params: {
+        routineId: source.routineId, sourceId: source.id, afterWorkout: workout.id,
+      } });
+      return;
+    }
+    finishToTraining(router);
   };
   const chooseExercises = (chosen: Exercise[]) => {
     if (!plannedSession || !chosen.length) return;
@@ -585,6 +608,7 @@ export default function EntrenamientoScreen() {
       </View>
 
       <WorkoutExerciseStrip exercises={exercises} activeId={exercises[pageIndex]?.id} onSelect={goToExercise} onAdd={() => { uiPerformance.begin('picker.ready'); setPicker('ADD'); }}
+        completedIds={completedWorkoutExerciseIds(exerciseOrder, setsByExercise)}
         supersets={supersets} onExerciseMenu={(id, anchor) => setExerciseMenu({ id, anchor })}
         onReorder={(next) => { const active = exercises[pageIndex]?.id; setExercises(next);
           const index = Math.max(0, next.findIndex((ex) => ex.id === active)); setPageIndex(index);
@@ -669,6 +693,8 @@ export default function EntrenamientoScreen() {
         candidates={catalogue.filter((ex) => !ex.archivedAt && !exercises.some((item) => item.id === ex.id))}
         onSelect={(exercise) => chooseExercises([exercise])} onSelectMany={chooseExercises} onClose={() => setPicker(null)} />
       <ExerciseDetailSheet exercise={detail?.mode === 'info' ? exercises.find((ex) => ex.id === detail.id) ?? null : null} mode="info" note=""
+        history={detailHistory}
+        historyReady={historyReady}
         notRecommended={detail?.mode === 'info' ? notRecommendedExerciseIds.has(detail.id) : false}
         onToggleRecommendation={(exercise, value) => { void setExerciseNotRecommended(exercise.id, value).catch(() => Alert.alert(t('exercisePreference.saveFailed'))); }}
         onNote={() => {}} onClose={() => setDetail(null)} />
@@ -687,8 +713,8 @@ export default function EntrenamientoScreen() {
       <WorkoutFinishSheet open={finishing} saved={finished} busy={busy} error={finishError} summary={summary} exercises={exercises} changed={changed} changes={changes} historyReady={historyReady} startedAt={performedAt} completedAt={completedAt}
         planUpdateError={planUpdateError} onRetryPlan={() => { void retryPlanUpdate(); }}
         effortValue={sessionEffort} onChangeEffort={setSessionEffort}
-        healthContent={completedSession ? <WorkoutHealthExport session={completedSession} /> : undefined}
-        onFinish={(savePlan) => { void finishWorkout(savePlan); }} onClose={() => { if (finished) finishToTraining(router); else setFinishing(false); }} />
+        healthContent={completedSession ? <WorkoutHealthExport session={completedSession} statusOnly /> : undefined}
+        onFinish={(savePlan) => { void finishWorkout(savePlan); }} onClose={closeWorkoutSummary} />
       <ExerciseQuickMenu exercise={exerciseMenu && exercises.some((exercise) => exercise.id === exerciseMenu.id)
         ? { id: exerciseMenu.id, name: exerciseName(exercises.find((exercise) => exercise.id === exerciseMenu.id)!) } : null}
         anchor={exerciseMenu?.anchor} grouped={!!(exerciseMenu && supersets[exerciseMenu.id])}

@@ -9,6 +9,7 @@ import { prescriptionForMicrocycle } from '@/services/training/microcyclePrescri
 import { AppState, Modal, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { SetType, type WorkoutSession, type PlannedExercise, type PlannedSession } from '@/models';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
@@ -17,6 +18,7 @@ import { sessionProgress, toSessionSetsByExercise, toWorkoutSession, type Sessio
 import { workoutReview } from '@/services/training/workoutReview';
 import { ExercisePage } from '@/components/train/ExercisePage';
 import { WorkoutExerciseStrip } from '@/components/train/WorkoutExerciseStrip';
+import { completedWorkoutExerciseIds } from '@/services/training/workoutExecution';
 import { RestTimer } from '@/components/train/RestTimer';
 import { adjustRest, flattenSessionSets, IDLE_REST_TIMER, restartRest, setRestDuration, shouldRestartRest, startRest } from '@/services/training/restTimer';
 import { useWorkoutActivity } from '@/hooks/useWorkoutActivity';
@@ -35,6 +37,10 @@ import { SmartWarmupSheet } from '@/components/train/SmartWarmupSheet';
 import { ActionMenuSheet } from '@/components/train/ActionMenuSheet';
 import { restAfterCompletion } from '@/services/training/workoutExecution';
 import { WorkoutFinishSheet } from '@/components/train/WorkoutFinishSheet';
+import { exerciseHistory } from '@/services/training/exerciseHistory';
+import { ExerciseDetailSheet } from '@/components/train/ExerciseDetailSheet';
+import { TodayCard } from '@/components/home/TodayCard';
+import { mockActiveRoutine } from '@/mocks/home';
 import { linkSuperset, unlinkSuperset, removeWorkoutExercise, supersetTransition } from '@/services/training/workoutStructure';
 
 const INITIAL = EXERCISE_CATALOGUE.slice(0, 7);
@@ -49,7 +55,14 @@ const makeSets = () => Object.fromEntries(INITIAL.map((exercise) => [exercise.id
 const baseline = toWorkoutSession({ ...context, sessionId: 'fixture-baseline', completedAt: 2 }, INITIAL.map((exercise) => exercise.id),
   Object.fromEntries(Object.entries(makeSets()).map(([id, rows]) => [id, rows.map((row) => ({ ...row, isCompleted: true, actualWeight: 20, actualReps: 8 }))])));
 
+const INFO_HISTORY: WorkoutSession[] = [7, 3].map((day, index) => ({ ...baseline,
+  id: `info-history-${day}`, performedAt: new Date(2026, 10, day, 10).getTime(), completedAt: new Date(2026, 10, day, 11).getTime(),
+  sessionName: index ? 'Push' : 'Upper', exercises: baseline.exercises.map(entry => ({ ...entry,
+    sets: entry.sets.map((set, row) => ({ ...set, actualWeight: 75 - index * 2.5, actualReps: 11 - row, actualRIR: 2 })) })),
+}));
+
 export default function WorkoutCheckScreen() {
+  const { t } = useTranslation();
   const { surfaces, colors, typography, sectionAccent } = useTheme(); const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions(); const router = useRouter();
   const [exercises, setExercises] = useState(INITIAL); const [sets, setSets] = useState<SessionSetsByExercise>(makeSets);
@@ -65,6 +78,8 @@ export default function WorkoutCheckScreen() {
   const pagerGesture = useMemo(() => Gesture.Native(), []);
   const [activityEnabled, setActivityEnabled] = useState(false); const [activityEnded, setActivityEnded] = useState(false);
   const [notesOpen, setNotesOpen] = useState(false); const [historyOpen, setHistoryOpen] = useState(false); const [historyDetail, setHistoryDetail] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const [resumeCardOpen, setResumeCardOpen] = useState(false), [resumed, setResumed] = useState(false);
   const [notes, setNotes] = useState({ SESSION: '', EXERCISE: '', MESOCYCLE: '' });
   const [historyEditing, setHistoryEditing] = useState(false); const [editedSample, setEditedSample] = useState<WorkoutSession | null>(null);
   const [feedbackStatus, setFeedbackStatus] = useState('Not sampled');
@@ -97,12 +112,12 @@ export default function WorkoutCheckScreen() {
       <RestTimer state={timer} prescribedSeconds={fixtureRest} exerciseName="Fixture exercise · no account writes" onSetPrescription={async (seconds) => { setFixtureRest(seconds); setTimer((old) => setRestDuration(old, seconds)); }}
         onAdjust={(delta) => setTimer((old) => adjustRest(old, delta))} onRestart={() => setTimer((old) => restartRest(old, Date.now()))} onCancel={() => setTimer(IDLE_REST_TIMER)} onSetDuration={(seconds) => setTimer((old) => setRestDuration(old, seconds))} />
     </View>
-    <WorkoutExerciseStrip exercises={exercises} activeId={exercises[page]?.id} supersets={supersets} onExerciseMenu={setExerciseMenu} onSelect={go} onAdd={() => {}} onReorder={(next) => {
+    <WorkoutExerciseStrip exercises={exercises} completedIds={completedWorkoutExerciseIds(exercises.map(e => e.id), sets)} activeId={exercises[page]?.id} supersets={supersets} onExerciseMenu={setExerciseMenu} onSelect={go} onAdd={() => {}} onReorder={(next) => {
       const id = exercises[page]?.id; setExercises(next); go(Math.max(0, next.findIndex((ex) => ex.id === id)));
     }} />
     <WorkoutPagerGestureContext.Provider value={pagerGesture}><GestureDetector gesture={pagerGesture}><ScrollView horizontal pagingEnabled ref={pager} onMomentumScrollEnd={(event) => setPage(Math.round(event.nativeEvent.contentOffset.x / width))}>
       {exercises.map((exercise, exerciseIndex) => <ExercisePage key={exercise.id} active={exerciseIndex === page} exercise={exercise} sets={sets[exercise.id] ?? []} recordSetIds={review.recordSetIds} scale="RIR" width={width} bottomInset={0}
-        scopedNotes={visibleWorkoutNotes(notes.SESSION, notes.EXERCISE, notes.MESOCYCLE)} onAction={(_id, action) => { if (action === 'note') setNotesOpen(true); }}
+        scopedNotes={visibleWorkoutNotes(notes.SESSION, notes.EXERCISE, notes.MESOCYCLE)} onAction={(_id, action) => { if (action === 'note') setNotesOpen(true); if (action === 'info') setInfoOpen(true); }}
         onPressSetType={() => {}} onAddSet={() => {}} onRemoveSet={(id, setId) => setSets((old) => ({ ...old, [id]: old[id].filter((row) => row.id !== setId) }))}
         onUpdateSet={(id, setId, patch) => {
           const next = { ...sets, [id]: sets[id].map((row) => row.id === setId ? updateWorkoutSet(row, patch) : row) };
@@ -126,6 +141,12 @@ export default function WorkoutCheckScreen() {
       </ScrollView>
     </Modal>
     <Text style={{ color: colors.textPrimary, padding: 12 }}>Review: {review.completed} work sets · {review.pending} pending · {review.tonnage} kg × reps</Text>
+    {button('Preview resume card (memory only)', () => setResumeCardOpen(!resumeCardOpen))}
+    {resumeCardOpen && <TodayCard session={mockActiveRoutine.microcycles[0].sessions[0]} routineName={mockActiveRoutine.name}
+      routineIcon={mockActiveRoutine.icon} routineColor={mockActiveRoutine.color} muscleLabel={muscle => muscle}
+      labels={{ start: t('workout.resume'), preview: t('home.previewWorkout'), exercises: t('home.exercises'), sets: t('home.sets') }}
+      onPressPreview={() => setResumed(true)} onPressStart={() => setResumed(true)} />}
+    {resumed && <Text style={{ color: colors.textPrimary }}>Resume requested for synthetic session</Text>}
     {button('Test fresh custom swap (fixture)', () => {
       const original = exercises[page]; if (!original || original.isCustom) return;
       const custom = { ...original, id: 'custom:fixture:bulgarian', name: 'Custom Bulgarian split squat', isCustom: true,
@@ -159,6 +180,7 @@ export default function WorkoutCheckScreen() {
     })}
     {notesOpen && <WorkoutNotesSheet open exerciseName={exercises[page]?.name ?? 'Fixture'} values={notes}
       onSave={async (scope, text) => setNotes((old) => ({ ...old, [scope]: text }))} onClose={() => setNotesOpen(false)} />}
+    <ExerciseDetailSheet exercise={infoOpen ? exercises[page] ?? null : null} mode="info" note="" historyReady history={exerciseHistory('fixture', exercises[page]?.id ?? '', INFO_HISTORY, new Map(INITIAL.map(exercise => [exercise.id, exercise])), Date.now())} onNote={() => {}} onClose={() => setInfoOpen(false)} />
     <Modal visible={prescriptionOpen} onRequestClose={() => setPrescriptionOpen(false)}>
       <View style={{ flex: 1, padding: 20, paddingTop: insets.top + 20, ...surfaces.screen, backgroundColor: colors.bg }}>
         <Text style={[typography.title, { color: colors.textPrimary }]}>Prescription fixture · no account writes</Text>
@@ -167,7 +189,9 @@ export default function WorkoutCheckScreen() {
           onChangeSet={(index, patch) => setPrescription((previous) => ({ ...previous, sets: previous.sets.map((set, position) => position === index ? { ...set, ...patch } : set) }))} />
         {button('Close prescription fixture', () => setPrescriptionOpen(false))}
         {button('Preview RIR progression (fixture)', () => setProgressionOpen(true))}
-        <RIRProgressionPreview steps={progressionOpen ? replanSessionRIR(Array.from({ length: 6 }, (_, index) => ({ index,
+        <RIRProgressionPreview baseline={Array.from({ length: 6 }, (_, index) => ({ index,
+          session: prescriptionForMicrocycle([PRESCRIPTION_SESSION], 'HYPERTROPHY', index, 6)[0] }))}
+          steps={progressionOpen ? replanSessionRIR(Array.from({ length: 6 }, (_, index) => ({ index,
           session: prescriptionForMicrocycle([PRESCRIPTION_SESSION], 'HYPERTROPHY', index, 6)[0] })), { ...PRESCRIPTION_SESSION, exercises: [prescription] }, 0, 6) : null}
           catalogue={new Map(INITIAL.map((exercise) => [exercise.id, exercise]))} busy={false} onApply={() => setProgressionOpen(false)} onClose={() => setProgressionOpen(false)} />
       </View>

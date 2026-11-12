@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, TextInput } from 'react-native';
+import { Alert, Modal, Text, TextInput } from 'react-native';
 import { WorkoutHistoryEditor } from '../WorkoutHistoryEditor';
 import { NumericField } from '../NumericField';
 import { SetType, type WorkoutSession } from '@/models';
@@ -12,6 +12,26 @@ const session: WorkoutSession = { id: 'history', userId: 'owner', performedAt: 1
   sessionName: 'Upper', exercises: [{ id: 'entry', exerciseId: 'ex', order: 0, isSwap: false,
     sets: [{ id: 'set', setType: SetType.NORMAL, targetWeight: 20, targetReps: 10, targetRIR: 2, actualWeight: 20, actualReps: 10, isAutoFilled: false }] }] };
 const button = (tree: any, label: string) => tree.root.findAll((node: any) => node.props.accessibilityLabel === label && typeof node.props.onPress === 'function')[0];
+it('shares a single upper action row and places recorded session selection before editable content', async () => {
+  let tree: any; await act(async () => { tree = create(<WorkoutHistoryEditor inline session={session} onSave={jest.fn()}
+    onClose={jest.fn()} afterActions={<Text>Cycle and session selector</Text>} />); });
+  expect(tree.root.findAll((node: any) => node.props.accessibilityLabel === 'routine.saveChanges' && typeof node.props.onPress === 'function')).toHaveLength(1);
+  const text = tree.root.findAllByType(Text).map((node: any) => node.props.children).flat(Infinity).join(' ');
+  expect(text.indexOf('routine.saveChanges')).toBeLessThan(text.indexOf('Cycle and session selector'));
+  expect(text.indexOf('Cycle and session selector')).toBeLessThan(text.indexOf('editorFlow.actuals'));
+  await act(async () => tree.unmount());
+});
+it('confirms cancellation of an unsaved standalone history edit before closing', async () => {
+  const close = jest.fn(), alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {}); let tree: any;
+  await act(async () => { tree = create(<WorkoutHistoryEditor session={session} onSave={jest.fn()} onClose={close} />); });
+  await act(async () => tree.root.findAllByType(TextInput)[0].props.onChangeText('Correction'));
+  await act(async () => button(tree, 'generate.cancel').props.onPress());
+  expect(close).not.toHaveBeenCalled();
+  expect(alert).toHaveBeenCalled();
+  await act(async () => alert.mock.calls.at(-1)![2]![1].onPress!());
+  expect(close).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount()); alert.mockRestore();
+});
 it('offers inline Save/Cancel at the top, reports unsaved actuals and closes after saving without a navigation modal', async () => {
   const dirty = jest.fn(), close = jest.fn(), savedClose = jest.fn(), save = jest.fn().mockResolvedValue(undefined); let tree: any;
   await act(async () => { tree = create(<WorkoutHistoryEditor inline session={session} onSave={save} onClose={close} onSavedClose={savedClose} onDirtyChange={dirty} />); });
@@ -23,7 +43,7 @@ it('offers inline Save/Cancel at the top, reports unsaved actuals and closes aft
   expect(dirty).toHaveBeenLastCalledWith(false);
   await act(async () => tree.root.findAllByType(NumericField)[0].props.onChangeValue(22.5));
   expect(dirty).toHaveBeenLastCalledWith(true); expect(session.exercises[0].sets[0].actualWeight).toBe(20);
-  await act(async () => button(tree, 'custom.save').props.onPress());
+  await act(async () => button(tree, 'routine.saveChanges').props.onPress());
   expect(savedClose).toHaveBeenCalledTimes(1); expect(close).not.toHaveBeenCalled(); await act(async () => tree.unmount());
 });
 it('restores, corrects and clears session effort without mutating the original or set intensity', async () => {
@@ -33,10 +53,10 @@ it('restores, corrects and clears session effort without mutating the original o
   expect(tree.root.findByType(SessionEffortInput).props.value).toBe(8);
   await act(async () => tree.root.findByType(SessionEffortInput).props.onChange(6));
   expect(save).not.toHaveBeenCalled(); expect(original.sessionFeedback.effort).toBe(8);
-  await act(async () => button(tree, 'custom.save').props.onPress());
+  await act(async () => button(tree, 'routine.saveChanges').props.onPress());
   expect(save.mock.calls[0][0].sessionEffort).toBe(6);
   await act(async () => tree.root.findByType(SessionEffortInput).props.onChange(null));
-  await act(async () => button(tree, 'custom.save').props.onPress());
+  await act(async () => button(tree, 'routine.saveChanges').props.onPress());
   expect(save.mock.calls[1][0].sessionEffort).toBeNull();
   await act(async () => tree.unmount());
 });
@@ -46,9 +66,9 @@ it('keeps edits private until Save, retains a failed draft and closes only after
   await act(async () => tree.root.findAllByType(TextInput)[0].props.onChangeText('Corrected'));
   await act(async () => tree.root.findAllByType(NumericField)[0].props.onChangeValue(35));
   expect(session.exercises[0].sets[0].actualWeight).toBe(20); expect(save).not.toHaveBeenCalled();
-  await act(async () => button(tree, 'custom.save').props.onPress()); expect(close).not.toHaveBeenCalled();
+  await act(async () => button(tree, 'routine.saveChanges').props.onPress()); expect(close).not.toHaveBeenCalled();
   expect(JSON.stringify(tree.toJSON())).toContain('historyEdit.failed');
-  await act(async () => button(tree, 'custom.save').props.onPress()); expect(close).toHaveBeenCalledTimes(1);
+  await act(async () => button(tree, 'routine.saveChanges').props.onPress()); expect(close).toHaveBeenCalledTimes(1);
   expect(save.mock.calls[1][0]).toMatchObject({ sessionName: 'Corrected', exercises: [{ sets: [{ actualWeight: 35 }] }] });
   await act(async () => tree.unmount());
 });
@@ -76,13 +96,13 @@ it('edits failure and advanced segments explicitly and labels partials without c
   await act(async () => button(tree, 'prescription.setType').props.onPress());
   await act(async () => tree.root.findByType(ActionMenuSheet).props.actions.find((item: any) => item.label === 'setType.FAILURE').onPress());
   expect(tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === 'RIR').props).toMatchObject({ value: 0, editable: false });
-  await act(async () => button(tree, 'custom.save').props.onPress());
+  await act(async () => button(tree, 'routine.saveChanges').props.onPress());
   expect(save.mock.calls[0][0].exercises[0].sets[0]).toMatchObject({ setType: SetType.FAILURE, actualRIR: 0 });
   await act(async () => button(tree, 'prescription.setType').props.onPress());
   await act(async () => tree.root.findByType(ActionMenuSheet).props.actions.find((item: any) => item.label === 'setType.DROP_SET').onPress());
   await act(async () => tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === 'train.extension 1').props.onChangeValue(4));
   await act(async () => tree.root.findAllByType(NumericField).find((node: any) => node.props.accessibilityLabel === 'KG 1').props.onChangeValue(15));
-  await act(async () => button(tree, 'custom.save').props.onPress());
+  await act(async () => button(tree, 'routine.saveChanges').props.onPress());
   expect(save.mock.calls[1][0].exercises[0].sets[0]).toMatchObject({ setType: SetType.DROP_SET, extensions: [{ weight: 15, reps: 4 }] });
   await act(async () => tree.unmount());
 });

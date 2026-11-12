@@ -30,9 +30,10 @@ function DraggableDay({ index, disabled, onDrag, onDrop, onCancel, onHold, child
 }
 
 /** Reorder in place: adjacent days slide aside while stable workout/rest IDs move. */
-export function RoutineDayList<T extends { id: string; kind: string }>({ items, renderItem, onReorder, onHold, disabled = false, edgeScroll }: {
+export function RoutineDayList<T extends { id: string; kind: string }>({ items, renderItem, onReorder, onHold, disabled = false, edgeScroll, canDrag }: {
   items: readonly T[]; renderItem: (item: T) => ReactNode; onReorder: (from: number, to: number) => void;
   onHold?: (item: T) => void; disabled?: boolean; edgeScroll?: DayListScroll;
+  canDrag?: (item: T) => boolean;
 }) {
   const [drag, setDrag] = useState<{ from: number; delta: number } | null>(null);
   const current = useRef(drag); const latest = useRef({ items, onReorder }); latest.current = { items, onReorder };
@@ -69,7 +70,7 @@ export function RoutineDayList<T extends { id: string; kind: string }>({ items, 
   return <Animated.View layout={LinearTransition.duration(220)} style={{ height: items.length * HEIGHT }}>
     {items.map((item, index) => <Position key={`${item.kind}:${item.id}`} active={drag?.from === index}
       y={drag?.from === index ? index * HEIGHT + drag.delta : positions.indexOf(index) * HEIGHT}>
-      <DraggableDay index={index} disabled={disabled} onDrag={handlers.update} onDrop={handlers.end} onCancel={handlers.cancel}
+      <DraggableDay index={index} disabled={disabled || canDrag?.(item) === false} onDrag={handlers.update} onDrop={handlers.end} onCancel={handlers.cancel}
         onHold={onHold ? () => onHold(item) : undefined}>{renderItem(item)}</DraggableDay>
     </Position>)}
   </Animated.View>;

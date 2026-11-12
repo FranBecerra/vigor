@@ -23,6 +23,7 @@ import { BioSessionContextCard } from '@/components/bio/BioSessionContextCard';
 import { buildBioSessionContext } from '@/services/bio/sessionContext';
 import { sessionContextFixture, contextWorkout } from '@/test-support/sessionContextFixture';
 import { metricMonitorFixture } from '@/test-support/metricMonitorFixture';
+import { MicrocycleReviewLoadingCheck } from '@/test-support/MicrocycleReviewLoadingCheck';
 
 export default function BioInteractionCheck() {
   const { t } = useTranslation(), { surfaces, colors, typography, radius } = useTheme(), insets = useSafeAreaInsets();
@@ -67,6 +68,7 @@ export default function BioInteractionCheck() {
   return <><ScrollView style={{ ...surfaces.screen, backgroundColor: colors.bg }} contentContainerStyle={{ padding: 20, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 110 }}>
     <Text style={[typography.emphasis, { color: colors.textPrimary }]}>Bio · interaction check</Text>
     <Text style={[typography.body, { color: colors.textSecondary, marginVertical: 20 }]}>{status}</Text>
+    <MicrocycleReviewLoadingCheck />
     <Pressable accessibilityRole="button" accessibilityLabel="Preview synthetic session context" onPress={() => setPreviewSession(!previewSession)}
       style={{ minHeight: 52, justifyContent: 'center', padding: 16, borderRadius: radius.lg, backgroundColor: colors.bgElevated, marginBottom: 12 }}>
       <Text style={[typography.title, { color: colors.bioText }]}>Preview synthetic session context</Text>

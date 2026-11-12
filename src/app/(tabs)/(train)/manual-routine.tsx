@@ -1,9 +1,10 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import type { HybridStrengthDraft } from '@/services/cardio/hybridAuthoring';
 import type { Exercise } from '@/models';
 import { useAuth } from '@/hooks/useAuth';
 import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
@@ -22,12 +23,26 @@ import { countWorkingSets } from '@/services/training/sessionSummary';
 import { RoutineIdentityPicker, type RoutineIdentity } from '@/components/train/RoutineIdentityPicker';
 
 export default function ManualRoutineScreen() {
+  return <ManualStrengthEditor />;
+}
+
+type EmbeddedManual = {
+  recommendedSessions?: number;
+  maxSessions: number;
+  revision?: HybridStrengthDraft;
+  progress?: ReactNode;
+  newRoutineId: () => string;
+  onPrepared: (draft: HybridStrengthDraft) => void;
+  onExit: () => void;
+};
+
+export function ManualStrengthEditor({ embedded }: { embedded?: EmbeddedManual }) {
   const { t } = useTranslation(); const router = useRouter(); const insets = useSafeAreaInsets(); const { uid } = useAuth();
   const { catalogue, exercisesById } = useExerciseCatalogue(); const { surfaces, colors, spacing, radius, sectionAccent } = useTheme();
-  const [name, setName] = useState(''); const goal = TrainingGoal.HYPERTROPHY;
-  const [routineIdentity, setRoutineIdentity] = useState<RoutineIdentity>(() => ({ icon: 'planet', color: sectionAccent.train }));
-  const [microcycles, setMicrocycles] = useState(6);
-  const [sessions, setSessions] = useState(() => resizeManualSessions([], 3));
+  const [name, setName] = useState(embedded?.revision?.routine.name ?? ''); const goal = TrainingGoal.HYPERTROPHY;
+  const [routineIdentity, setRoutineIdentity] = useState<RoutineIdentity>(() => ({ icon: embedded?.revision?.routine.icon ?? 'planet', color: sectionAccent.train }));
+  const [microcycles, setMicrocycles] = useState(embedded?.revision?.mesocycle.projectedMicrocycles ?? 6);
+  const [sessions, setSessions] = useState(() => embedded?.revision?.mesocycle.plannedSessions ?? resizeManualSessions([], Math.min(embedded?.maxSessions ?? 7, embedded?.recommendedSessions ?? 3)));
   const [picker, setPicker] = useState<{ sessionIndex: number; order?: number } | null>(null);
   const [busy, setBusy] = useState(false); const [error, setError] = useState('');
   const saveIdentity = useRef<{ id: string; time: number } | null>(null);
@@ -48,15 +63,17 @@ export default function ManualRoutineScreen() {
   };
   const save = async () => {
     if (!uid || busy) return;
+    if (embedded && planned.length > embedded.maxSessions) { setError('invalidSessions'); return; }
     setBusy(true); setError('');
     try {
-      const existing = (await routineRepository.listByUser(uid)).filter((routine) => routine.id !== saveIdentity.current?.id);
+      const existing = (embedded ? [] : await routineRepository.listByUser(uid)).filter((routine) => routine.id !== saveIdentity.current?.id);
       const problem = routineNameProblem(name, existing.map((routine) => routine.name));
       if (problem) throw new Error(problem === 'empty' ? 'invalidName' : 'duplicateName');
-      const identity = saveIdentity.current ?? { id: `${uid}-manual-${Date.now()}-${Math.random().toString(36).slice(2)}`, time: Date.now() };
+      const identity = saveIdentity.current ?? (embedded ? { id: embedded.revision?.routine.id ?? embedded.newRoutineId(), time: Date.now() } : { id: `${uid}-manual-${Date.now()}-${Math.random().toString(36).slice(2)}`, time: Date.now() });
       saveIdentity.current = identity;
       const documents = manualRoutineDocuments({ userId: uid, routineId: identity.id, now: identity.time, name, goal, microcycles,
-        sessions: planned, catalogue: exercisesById, icon: routineIdentity.icon, accentColor: sectionAccent.train, active: shouldActivateNewRoutine(existing) });
+        sessions: planned, catalogue: exercisesById, icon: routineIdentity.icon, accentColor: sectionAccent.train, active: !embedded && shouldActivateNewRoutine(existing) });
+      if (embedded) { embedded.onPrepared(documents); return; }
       // Persist the prescription before exposing a routine pointing to it. Retry uses the same identity.
       await mesocycleRepository.create(documents.mesocycle);
       await routineRepository.create(documents.routine);
@@ -67,13 +84,14 @@ export default function ManualRoutineScreen() {
   const field = { color: colors.textPrimary, backgroundColor: colors.bgElevated, padding: spacing.md, borderRadius: radius.md, marginVertical: spacing.md };
   return <SafeAreaView edges={{ bottom: true }} style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg }}>
     <ScrollView pointerEvents={busy ? 'none' : 'auto'} keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: spacing.lg, paddingTop: insets.top + spacing.lg }}>
+      {embedded?.progress}
       <Text style={{ color: colors.textPrimary, fontSize: 27, fontWeight: '700' }}>{t('routineCreation.manualTitle')}</Text>
       <Text style={{ color: colors.textMuted, marginVertical: spacing.md }}>{t('routineCreation.manualHint')}</Text>
       <TextInput value={name} onChangeText={setName} maxLength={MAX_ROUTINE_NAME_LENGTH} style={field}
         accessibilityLabel={t('generate.name')} placeholder={t('generate.namePlaceholder')} placeholderTextColor={colors.textMuted} />
       <RoutineIdentityPicker value={routineIdentity} onChange={setRoutineIdentity} disabled={busy} />
       <View style={{ gap: spacing.md, marginVertical: spacing.lg }}>
-        <Stepper label={t('generate.sessions')} value={sessions.length} min={1} max={7} onChange={(count) => {
+        <Stepper label={t('generate.sessions')} value={sessions.length} min={1} max={embedded?.maxSessions ?? 7} onChange={(count) => {
           const apply = () => setSessions((old) => resizeManualSessions(old, count));
           if (sessions.slice(count).some((session) => session.exercises.length > 0)) {
             Alert.alert(t('routineCreation.removeSessions'), t('routineCreation.removeSessionsHint'), [
@@ -108,9 +126,9 @@ export default function ManualRoutineScreen() {
       {!!error && <Text accessibilityRole="alert" style={{ color: colors.textPrimary, marginVertical: spacing.md }}>{t(`routineCreation.${error}`, { defaultValue: t('routineCreation.saveFailed') })}</Text>}
     </ScrollView>
     <View style={{ flexDirection: 'row', gap: spacing.md, padding: spacing.lg }}>
-      <Pressable disabled={busy} onPress={() => backToTraining(router)} style={{ padding: 16 }}><Text style={{ color: colors.textSecondary }}>{t('generate.cancel')}</Text></Pressable>
+      <Pressable disabled={busy} onPress={embedded?.onExit ?? (() => backToTraining(router))} style={{ padding: 16 }}><Text style={{ color: colors.textSecondary }}>{t('generate.cancel')}</Text></Pressable>
       <Pressable disabled={busy} onPress={() => { void save(); }} style={{ flex: 1, padding: 16, borderRadius: radius.md, ...surfaces.primary, backgroundColor: sectionAccent.train }}>
-        <Text style={{ textAlign: 'center', color: colors.onAccent, fontWeight: '700' }}>{t(busy ? 'generate.saving' : 'generate.save')}</Text>
+        <Text style={{ textAlign: 'center', color: colors.onAccent, fontWeight: '700' }}>{t(busy ? 'generate.saving' : embedded ? 'sharedAvailability.continue' : 'generate.save')}</Text>
       </Pressable>
     </View>
     <ExerciseSwapSheet open={picker !== null} current={current} mode={picker?.order === undefined ? 'add' : 'swap'} candidates={candidates} onSelect={choose}

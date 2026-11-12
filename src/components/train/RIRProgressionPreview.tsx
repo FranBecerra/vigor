@@ -6,29 +6,42 @@ import { useExerciseName } from '@/hooks/useExerciseName';
 import type { Exercise } from '@/models';
 import { SetType } from '@/models';
 import type { ProgressionStep } from '@/services/training/rirReplanning';
+import { progressionChanges } from '@/services/training/progressionChanges';
+import { useTrainingUnits } from '@/hooks/useTrainingUnits';
 import { setTypeLabel } from './setTypeLabel';
 
-export function RIRProgressionPreview({ steps, catalogue, busy, onApply, onClose }: {
-  steps: readonly ProgressionStep[] | null; catalogue: ReadonlyMap<string, Exercise>; busy: boolean; onApply: () => void; onClose: () => void;
+export function RIRProgressionPreview({ steps, baseline, catalogue, busy, onApply, onClose }: {
+  steps: readonly ProgressionStep[] | null; baseline: readonly ProgressionStep[]; catalogue: ReadonlyMap<string, Exercise>; busy: boolean; onApply: () => void; onClose: () => void;
 }) {
   const { t } = useTranslation(); const { surfaces, colors, radius, sectionAccent } = useTheme(); const insets = useSafeAreaInsets(); const name = useExerciseName();
+  const units = useTrainingUnits();
+  const changes = progressionChanges(steps ?? [], baseline);
+  const display = (field: string, value: string | number | undefined) => value === undefined ? '—'
+    : field === 'setType' ? setTypeLabel(value as SetType) || t('progression.diff.normal')
+      : field === 'targetWeightKg' ? `${units.display(Number(value))?.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${units.unit}` : String(value);
   return <Modal visible={steps !== null} animationType="slide" onRequestClose={() => { if (!busy) onClose(); }}>
     <View style={{ flex: 1, paddingTop: insets.top + 12, paddingBottom: insets.bottom + 12, ...surfaces.screen, backgroundColor: colors.bg }}>
       <Text style={{ color: colors.textPrimary, fontSize: 26, fontWeight: '700', paddingHorizontal: 20 }}>{t('progression.title')}</Text>
       <Text style={{ color: colors.textSecondary, fontSize: 15, padding: 20 }}>{t('progression.hint')}</Text>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}>
-        {steps?.map((step) => <View key={step.index} style={{ backgroundColor: colors.surface, borderRadius: radius.md, padding: 14 }}>
+        {changes.length === 0 && <Text style={{ color: colors.textSecondary }}>{t('historyProgression.noChanges')}</Text>}
+        {changes.map((step) => <View key={step.index} style={{ backgroundColor: colors.surface, borderRadius: radius.md, padding: 14 }}>
           <Text style={{ color: colors.accentText, fontSize: 18, fontWeight: '700', marginBottom: 8 }}>{t('home.microcycle')} {step.index + 1}{step.isDeload ? ` · ${t('meso.deloadShort')}` : ''}</Text>
-          {step.session.exercises.map((exercise) => <View key={exercise.order} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 }}>
-            <Text style={{ color: colors.textPrimary, flex: 1, fontSize: 15 }}>{name(exercise.exerciseSnapshot ?? catalogue.get(exercise.exerciseId)) || exercise.exerciseId}</Text>
-            <Text style={{ color: colors.textSecondary, fontSize: 15, fontVariant: ['tabular-nums'] }}>RIR {exercise.sets.filter((set) => set.setType !== SetType.WARMUP && set.setType !== SetType.TOP_SINGLE).map((set) => `${setTypeLabel(set.setType) ? `${setTypeLabel(set.setType)} ` : ''}${set.targetRIR}`).join(' · ')}</Text>
+          {step.exercises.map((exercise) => <View key={exercise.exerciseId} style={{ gap: 6, paddingVertical: 6 }}>
+            <Text style={{ color: colors.textPrimary, fontSize: 15, fontWeight: '600' }}>{name(exercise.snapshot ?? catalogue.get(exercise.exerciseId)) || exercise.exerciseId}</Text>
+            {exercise.kind !== 'updated' && <Text style={{ color: colors.textSecondary }}>{t(`progression.diff.${exercise.kind}`)}</Text>}
+            {exercise.details.map(change => <Text key={change.field} style={{ color: colors.textSecondary }}>{t(`progression.diff.${change.field}`)} {display(change.field, change.from)} → {display(change.field, change.to)}</Text>)}
+            {exercise.sets.map(set => <Text key={set.index} style={{ color: colors.textSecondary, fontSize: 15, fontVariant: ['tabular-nums'] }}>
+              {t('historyDetails.set')} {set.index + 1}{set.kind !== 'updated' ? ` · ${t(`progression.diff.${set.kind}`)}` : ''}{' · '}
+              {set.fields.map(change => `${t(`progression.diff.${change.field}`)} ${display(change.field, change.from)} → ${display(change.field, change.to)}`).join(' · ')}
+            </Text>)}
           </View>)}
         </View>)}
       </ScrollView>
       <View style={{ flexDirection: 'row', gap: 12, padding: 16 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={t('generate.cancel')} disabled={busy} onPress={onClose} style={{ minHeight: 48, padding: 14 }}><Text style={{ color: colors.textSecondary }}>{t('generate.cancel')}</Text></Pressable>
-        <Pressable accessibilityRole="button" accessibilityLabel={t('progression.apply')} disabled={busy} onPress={onApply}
-          style={{ minHeight: 48, flex: 1, borderRadius: radius.md, ...surfaces.primary, backgroundColor: sectionAccent.train, justifyContent: 'center', alignItems: 'center', opacity: busy ? 0.5 : 1 }}><Text style={{ color: colors.onAccent, fontWeight: '700', fontSize: 17 }}>{t('progression.apply')}</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel={t('progression.apply')} disabled={busy || changes.length === 0} onPress={onApply}
+          style={{ minHeight: 48, flex: 1, borderRadius: radius.md, ...surfaces.primary, backgroundColor: sectionAccent.train, justifyContent: 'center', alignItems: 'center', opacity: busy || changes.length === 0 ? 0.5 : 1 }}><Text style={{ color: colors.onAccent, fontWeight: '700', fontSize: 17 }}>{t('progression.apply')}</Text></Pressable>
       </View>
     </View>
   </Modal>;

@@ -8,9 +8,8 @@ import { useTrainingUnits } from '@/hooks/useTrainingUnits';
 import { TrophyIcon } from '@/components/icons/ActionIcons';
 
 export function WorkoutHistoryDetails({ details, recordSetIds = [] }: { details: ReturnType<typeof workoutHistoryDetails>; recordSetIds?: readonly string[] }) {
-  const { t } = useTranslation(); const { colors, typography, sectionAccent } = useTheme();
-  const name = useExerciseName(); const units = useTrainingUnits();
-  const value = (number: number | null) => number === null ? '—' : String(number);
+  const { t } = useTranslation(); const { colors, typography } = useTheme();
+  const name = useExerciseName();
   return <View>
     {details.sessionEffort != null && <Text style={[typography.body, { color: colors.textSecondary, marginTop: 16 }]}>{t('sessionEffort.summary', { value: details.sessionEffort })}</Text>}
     {(['sessionNote', 'mesocycleNote'] as const).map((key) => details[key] ? <View key={key} style={{ marginTop: 16 }}>
@@ -20,6 +19,21 @@ export function WorkoutHistoryDetails({ details, recordSetIds = [] }: { details:
     {details.exercises.map((exercise) => <View key={exercise.id} style={{ paddingTop: 20, marginTop: 12, borderTopWidth: 0.5, borderColor: colors.surfaceBorder }}>
       <Text style={[typography.title, { color: colors.textPrimary }]}>{exercise.name ? name({ id: exercise.exerciseId, name: exercise.name }) : t('historyDetails.unknownExercise')}</Text>
       <Text style={[typography.caption, { color: colors.textMuted, marginTop: 4 }]}>{t('historyDetails.exerciseSets', { count: exercise.completed })}</Text>
+      <WorkoutHistorySets exercise={exercise} recordSetIds={recordSetIds} />
+      {!!exercise.note && <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 10 }]}>{exercise.note}</Text>}
+      {!!exercise.exerciseNote && <View style={{ marginTop: 10 }}><Text style={[typography.caption, { color: colors.textMuted }]}>{t('notes.EXERCISE')}</Text>
+        <Text style={[typography.body, { color: colors.textSecondary, marginTop: 5 }]}>{exercise.exerciseNote}</Text></View>}
+    </View>)}
+  </View>;
+}
+
+/** Shared actual-set rows for full workout details and the in-workout exercise timeline. */
+export function WorkoutHistorySets({ exercise, recordSetIds = [] }: {
+  exercise: ReturnType<typeof workoutHistoryDetails>['exercises'][number]; recordSetIds?: readonly string[];
+}) {
+  const { t } = useTranslation(); const { colors, typography } = useTheme(); const units = useTrainingUnits();
+  const value = (number: number | null) => number === null ? '—' : String(number);
+  return <View>
       {exercise.sets[0] && exercise.sets[0].load !== 'TOTAL_KG' && <Text style={[typography.caption, { color: colors.textMuted, marginTop: 4 }]}>{t(`custom.${exercise.sets[0].load}`).replace(/\bkg\b/gi, units.unit)}</Text>}
       <View style={{ flexDirection: 'row', paddingVertical: 12, gap: 8 }}>
         <Text style={{ color: colors.textMuted, width: 36 }}>{t('historyDetails.set')}</Text>
@@ -44,9 +58,5 @@ export function WorkoutHistoryDetails({ details, recordSetIds = [] }: { details:
           + {extension.weight === null ? '' : `${units.display(extension.weight)?.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${units.unit} × `}{value(extension.reps)} {t('train.reps').toLowerCase()}
         </Text>)}
       </View>)}
-      {!!exercise.note && <Text style={[typography.caption, { color: colors.textSecondary, marginTop: 10 }]}>{exercise.note}</Text>}
-      {!!exercise.exerciseNote && <View style={{ marginTop: 10 }}><Text style={[typography.caption, { color: colors.textMuted }]}>{t('notes.EXERCISE')}</Text>
-        <Text style={[typography.body, { color: colors.textSecondary, marginTop: 5 }]}>{exercise.exerciseNote}</Text></View>}
-    </View>)}
   </View>;
 }

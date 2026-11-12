@@ -7,10 +7,20 @@ jest.mock('react-native-gesture-handler', () => {
   const chain = (kind: string) => {
     const gesture: any = { kind, callbacks: {} };
     for (const method of ['enabled', 'activateAfterLongPress', 'runOnJS', 'minDuration', 'maxDistance']) gesture[method] = () => gesture;
+    gesture.enabled = (value: boolean) => { gesture.isEnabled = value; return gesture; };
     for (const method of ['onStart', 'onUpdate', 'onEnd', 'onFinalize']) gesture[method] = (callback: unknown) => { gesture.callbacks[method] = callback; return gesture; };
     mockGestures.push(gesture); return gesture;
   };
   return { GestureDetector: ({ children }: any) => children, Gesture: { Pan: () => chain('pan'), LongPress: () => chain('hold'), Simultaneous: (...items: unknown[]) => items } };
+});
+
+it('keeps supplemental cardio rows tappable while reserving drag and hold gestures for strength/rest days', async () => {
+  let tree: any; mockGestures.length = 0;
+  await act(async () => { tree = create(<RoutineDayList items={[{ id: 'strength', kind: 'workout' }, { id: 'run', kind: 'cardio' }]}
+    canDrag={item => item.kind !== 'cardio'} onHold={() => {}} onReorder={() => {}} renderItem={item => <Text>{item.id}</Text>} />); });
+  expect(mockGestures.filter(g => g.kind === 'pan').map(g => g.isEnabled)).toEqual([true, false]);
+  expect(mockGestures.filter(g => g.kind === 'hold').map(g => g.isEnabled)).toEqual([true, false]);
+  await act(async () => tree.unmount());
 });
 it('keeps a live drag gesture stable as siblings move and opens hold actions without reordering', async () => {
   const reorder = jest.fn(), hold = jest.fn(); let tree: any;

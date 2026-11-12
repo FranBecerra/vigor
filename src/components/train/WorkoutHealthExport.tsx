@@ -26,14 +26,14 @@ export function HealthExportSettings() {
   </View>;
 }
 
-export function WorkoutHealthExport({ session }: { session: WorkoutSession }) {
+export function WorkoutHealthExport({ session, statusOnly = false }: { session: WorkoutSession; statusOnly?: boolean }) {
   const health = useHealthExport(); const { t } = useTranslation(); const { surfaces, colors, radius, sectionAccent, typography } = useTheme();
   const [busy, setBusy] = useState(false); const [failed, setFailed] = useState(false);
   if (!health.owner || !health.ready || !health.available) return null;
   const workout = healthWorkout(session, health.owner);
   if (!workout) return null;
   const entry = health.entries[workout.identity];
-  const status = entry?.status ?? 'idle';
+  const status = entry?.status ?? (statusOnly && health.enabled ? 'queued' : 'idle');
   return <View style={{ ...surfaces.card, padding: 20, borderRadius: radius.md, marginTop: 14 }}>
     <Text style={[typography.title, { color: colors.textPrimary }]}>{t('health.title')}</Text>
     <Text accessibilityRole={failed || status === 'failed' || status === 'denied' ? 'alert' : undefined}
@@ -41,7 +41,7 @@ export function WorkoutHealthExport({ session }: { session: WorkoutSession }) {
       {t(health.error || (failed && status !== 'denied') ? 'health.failed' : `health.${status}`)}
     </Text>
     {!health.enabled && <Text style={[typography.caption, { color: colors.textMuted, marginTop: 6 }]}>{t('health.enableInProfile')}</Text>}
-    {health.enabled && status !== 'saved' && entry?.action !== 'delete' && <Pressable accessibilityRole="button"
+    {!statusOnly && health.enabled && status !== 'saved' && entry?.action !== 'delete' && <Pressable accessibilityRole="button"
       disabled={busy || status === 'queued'} onPress={() => {
         if (busy) return;
         setBusy(true); setFailed(false);

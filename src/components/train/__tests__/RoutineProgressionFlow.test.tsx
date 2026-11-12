@@ -27,7 +27,7 @@ jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({
 jest.mock('react-native-screens/experimental', () => ({ SafeAreaView: require('react-native').View }));
 jest.mock('@/hooks/useRoutines', () => ({ useRoutines: () => ({ routines: mockViews, reload: mockReload }) }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: 'u' }) }));
-jest.mock('../RecordedSessionEditor', () => ({ RecordedSessionEditor: () => null }));
+jest.mock('../RecordedSessionEditor', () => ({ RecordedSessionEditor: ({ selector, editing }: any) => editing ? selector : null }));
 jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ catalogue: [...mockCatalogue.values()], exercisesById: mockCatalogue }) }));
 jest.mock('@/services/repositories', () => ({ routineRepository: { get: (...args: unknown[]) => mockTemplate(...args) },
   workoutSessionRepository: { listByUser: (...args: unknown[]) => mockActuals(...args) },

@@ -5,15 +5,17 @@ import { RoutineDayList } from '../RoutineDayList';
 import { SwipeableSet } from '../SwipeableSet';
 import { RoutineDayIndicator } from '@/components/home/RoutineDayIndicator';
 import type { Mesocycle } from '@/models';
+import { cardioFixture } from '@/test-support/cardioFixture';
+import { CardioSessionRow } from '@/components/cardio/CardioRoutineCard';
 const { create, act } = require('react-test-renderer');
 const mockGet = jest.fn(), mockUpdate = jest.fn(); let mockUid: string | null = 'owner';
 const mockCatalogue = new Map();
 const mockSessions = [{ index: 0, name: 'Upper', exercises: [] }, { index: 1, name: 'Lower', exercises: [] }];
-jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
+jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 jest.mock('expo-router', () => ({ useFocusEffect: (callback: any) => require('react').useEffect(callback, [callback]) }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: mockUid }) }));
 jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => ({ exercisesById: mockCatalogue }) }));
-jest.mock('@/services/training/mesocycleEditing', () => ({ sessionsForMicrocycle: () => mockSessions }));
+jest.mock('@/services/training/mesocycleEditing', () => ({ ...jest.requireActual('@/services/training/mesocycleEditing'), sessionsForMicrocycle: () => mockSessions }));
 jest.mock('@/services/repositories', () => ({ mesocycleRepository: { get: (...args: unknown[]) => mockGet(...args), updateLocally: (...args: unknown[]) => mockUpdate(...args) } }));
 const meso: Mesocycle = { id: 'm', userId: 'owner', status: 'ACTIVE', sessionsPerMicrocycle: 2,
   currentMicrocycleIndex: 0, startedAt: 1, updatedAt: 1, targetVolumePerGroup: {},
@@ -106,11 +108,31 @@ it('uses the already-loaded home snapshot on the first render and appends a new 
 it('saves a reordered workout/rest timeline by stable IDs and exposes a hold action for workouts', async () => {
   const hold = jest.fn(); let tree: any;
   await act(async () => { tree = create(<TrainingCalendarCard onSessionHold={hold} sessionRows={sessionRows} mesocycleId="m" microcycleIndex={0} goal="HYPERTROPHY" />); });
-  await act(async () => tree.root.findByType(RoutineDayList).props.onHold({ kind: 'workout', sessionIndex: 1 })); expect(hold).toHaveBeenCalledWith(1);
+  await act(async () => tree.root.findByType(RoutineDayList).props.onHold(tree.root.findByType(RoutineDayList).props.items.find((item: any) => item.day?.sessionIndex === 1))); expect(hold).toHaveBeenCalledWith(1);
   await act(async () => tree.root.findByType(RoutineDayList).props.onReorder(2, 0));
   expect(mockUpdate.mock.calls.at(-1)[1].sessionOrder).toEqual([1, 0]);
   expect(renderedOrder(tree)).toEqual(['session-1', 'session-0', 'rest-day-r']);
   await act(async () => button(tree, 'restDays.remove').props.onPress());
   expect(renderedOrder(tree)).toEqual(['session-1', 'session-0']);
+  await act(async () => tree.unmount());
+});
+
+it('inserts dated cardio alongside strength, previews without a write, and reorders only strength/rest IDs', async () => {
+  const block = cardioFixture();
+  const routine: any = { id: 'routine', isActive: true, currentMicrocycleIndex: 0, microcycles: [{ sessions: mockSessions.map((s, i) => ({
+    ...s, plannedSessionIndex: s.index, scheduledOn: i === 0 ? block.slots[0].date : undefined })) }] };
+  const open = jest.fn(); let tree: any;
+  await act(async () => { tree = create(<TrainingCalendarCard sessionRows={sessionRows} mesocycleId="m" microcycleIndex={0} goal="HYPERTROPHY"
+    cardio={{ routine, blocks: [block], workouts: [], onOpen: open }} />); });
+  const list = () => tree.root.findByType(RoutineDayList);
+  expect(tree.root.findAllByType(CardioSessionRow)).toHaveLength(1);
+  const extra = list().props.items.find((item: any) => item.kind === 'cardio');
+  expect(list().props.canDrag(extra)).toBe(false);
+  await act(async () => tree.root.findByType(CardioSessionRow).props.onOpen(extra.entry));
+  expect(open).toHaveBeenCalledTimes(1); expect(mockUpdate).not.toHaveBeenCalled();
+  await act(async () => list().props.onReorder(1, 0)); expect(mockUpdate).not.toHaveBeenCalled();
+  await act(async () => list().props.onReorder(3, 1));
+  expect(mockUpdate.mock.calls.at(-1)[1]).toMatchObject({ sessionOrder: [1, 0] });
+  expect(block.slots[0].date).toBe(extra.entry.slot.date);
   await act(async () => tree.unmount());
 });

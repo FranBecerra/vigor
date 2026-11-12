@@ -46,6 +46,17 @@ export function createSurfaceStyles(scheme: ColorScheme, platform = Platform.OS,
       boxShadow: `inset 0 1px 0 ${c.highlight}`,
     },
     selected: { backgroundColor: c.accentTint },
+    reviewDay: {
+      backgroundColor: c.bgElevated,
+      borderCurve: 'continuous',
+      boxShadow: `0 3px 10px ${c.shadow}`,
+    },
+    reviewDayExpanded: {
+      backgroundColor: c.bgElevated,
+      borderCurve: 'continuous',
+      boxShadow: `0 3px 10px ${c.shadow}`,
+      ...gradient(`linear-gradient(130deg, ${c.ambient}, ${c.ambientClear} 85%)`, platform),
+    },
     primary: {
       backgroundColor: fill,
       borderCurve: 'continuous',

@@ -129,7 +129,7 @@ export function RoutineCard({
                 .join(' · ');
               const status = isCompleted ? formatSessionDate(session.completedOn!, locale)
                 : isSkipped ? labels.skipped : isSelected ? labels.today : '';
-              const subtitle = [status, isSkipped ? '' : muscles].filter(Boolean).join(' · ');
+              const subtitle = [isCompleted ? '' : status, isSkipped ? '' : muscles].filter(Boolean).join(' · ');
 
               return { index: session.plannedSessionIndex, content: (
                 <Pressable
@@ -138,7 +138,7 @@ export function RoutineCard({
                   onLongPress={onLongPressSession && !isCompleted && !isSkipped ? () => onLongPressSession(session.plannedSessionIndex) : undefined}
                   disabled={onSelectSession === undefined}
                   accessibilityRole="button"
-                  accessibilityLabel={[session.name, subtitle, `${workingSets} ${labels.sets}`].filter(Boolean).join(', ')}
+                  accessibilityLabel={[session.name, isCompleted ? status : '', subtitle, `${workingSets} ${labels.sets}`].filter(Boolean).join(', ')}
                   accessibilityState={{ selected: isSelected, disabled: onSelectSession === undefined }}
                   style={[
                     styles.sessionRow,
@@ -147,6 +147,7 @@ export function RoutineCard({
                   ]}>
                   <RoutineDayIndicator completed={isCompleted || isSkipped} />
                   <View style={styles.sessionText}>
+                    {isCompleted && <Text style={{ color: colors.textPrimary, fontSize: 12, fontWeight: '700', marginBottom: 3 }}>{status}</Text>}
                     <Text
                       numberOfLines={1}
                       style={[

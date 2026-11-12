@@ -80,6 +80,7 @@ it('puts statuses before names and working-set totals after them, preserving dat
   expect(rows[0].props.accessibilityLabel).toContain('Today');
   expect(rows[0].props.accessibilityLabel).toMatch(/, 3 sets$/);
   expect(rows[1].props.accessibilityLabel).toContain('25 OCT');
+  expect(rows[1].findAllByType(RN.Text).some((node: any) => node.props.children === '25 OCT')).toBe(true);
   expect(rows[1].props.accessibilityLabel).toMatch(/, 2 sets$/);
   expect(rows[2].props.accessibilityLabel).toContain('Skipped');
   expect(rows.map((row: any) => row.findByType(RoutineDayIndicator).props.completed)).toEqual([false, true, true]);

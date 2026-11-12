@@ -18,7 +18,7 @@ import { ExerciseDetailSheet } from './ExerciseDetailSheet';
 import { ExerciseSwapSheet } from './generate/ExerciseSwapSheet';
 import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import { rehabRows, patchRehabRow, reshapeRehab, rehabSupersets, linkRehabSuperset } from '@/services/training/rehabExecution';
-import { isNewSetCompletion } from '@/services/training/workoutExecution';
+import { completedWorkoutExerciseIds, isNewSetCompletion } from '@/services/training/workoutExecution';
 import { supersetTransition } from '@/services/training/workoutStructure';
 import { recordingOf } from '@/services/training/customExercises';
 import { supportsExtensions } from '@/services/training/advancedSets';
@@ -128,6 +128,7 @@ export function RehabRunner({ block, workoutKey, embedded = false, onClose }: { 
         }} />
     </View>
     <WorkoutExerciseStrip exercises={railExercises} activeId={active.id} supersets={grouped}
+      completedIds={completedWorkoutExerciseIds(items.map(item => item.id), Object.fromEntries(items.map(item => [item.id, rehabRows(log, item)])))}
       onSelect={(index) => commit({ ...latest.current, activeItemId: items[index].id })} onExerciseMenu={(id, anchor) => { setMenuAnchor(anchor); setMenu(id); }}
       onAdd={() => setPicker('ADD')} onReorder={(order) => reshape(order.map((entry) => { const { circuitWithPrevious: _, ...item } = items.find((item) => item.id === entry.id)!; return item; }))} />
     <View style={{ flexDirection: 'row', gap: 10, padding: spacing.lg }}><Text style={{ color: colors.textSecondary }}>{t('train.sets')}</Text>

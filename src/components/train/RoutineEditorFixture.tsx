@@ -29,9 +29,11 @@ export function RoutineEditorFixture({ onClose }: { onClose: () => void }) {
   return <ScrollView style={{ ...surfaces.screen, flex: 1 }} contentContainerStyle={{ padding: 20, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 30 }}>
     <Pressable accessibilityRole="button" onPress={() => confirm(onClose)} style={{ minHeight: 48, justifyContent: 'center' }}><Text style={{ color: colors.accentText }}>Close shared editor fixture</Text></Pressable>
     <Text style={{ color: colors.textPrimary, fontSize: 24, fontWeight: '700', marginBottom: 20 }}>Shared editor · memory only</Text>
-    <RoutineSessionSelector cycle={cycle} cycles={3} sessions={[{ plannedSessionIndex: 0, name: 'Upper fixture' }, { plannedSessionIndex: 1, name: 'Lower fixture' }]}
-      selected={session} disabled={busy} onSelect={(next, index) => confirm(() => { setCycle(next); setSession(index); setDirty(false); })} />
-    {cycle === 0 && session === 0 ? <WorkoutHistoryEditor key={record.editedAt ?? 0} inline session={record}
+    {!(cycle === 0 && session === 0) && <RoutineSessionSelector cycle={cycle} cycles={3} sessions={[{ plannedSessionIndex: 0, name: 'Upper fixture' }, { plannedSessionIndex: 1, name: 'Lower fixture' }]}
+      selected={session} disabled={busy} onSelect={(next, index) => confirm(() => { setCycle(next); setSession(index); setDirty(false); })} />}
+
+    {cycle === 0 && session === 0 ? <WorkoutHistoryEditor key={record.editedAt ?? 0} inline session={record} afterActions={<RoutineSessionSelector cycle={cycle} cycles={3} sessions={[{ plannedSessionIndex: 0, name: 'Upper fixture' }, { plannedSessionIndex: 1, name: 'Lower fixture' }]}
+      selected={session} disabled={busy} onSelect={(next, index) => confirm(() => { setCycle(next); setSession(index); setDirty(false); })} />}
       onDirtyChange={setDirty} onBusyChange={setBusy} onClose={() => confirm(onClose)} onSavedClose={() => setDirty(false)}
       onSave={async draft => { setRecord(editWorkoutHistory(record, 'fixture', draft, Date.now())); setSaved(true); }} />
       : <PrescriptionEditor exercise={planned} restSeconds={planned.restSeconds}

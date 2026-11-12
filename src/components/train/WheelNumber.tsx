@@ -1,7 +1,7 @@
 import { useLayoutEffect, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { FlatList, Modal, Pressable, Text, View, useWindowDimensions, type ViewStyle, type GestureResponderEvent } from 'react-native';
 import { useTheme } from '@/theme/useTheme';
-import { wheelValues } from '@/services/training/numericWheel';
+import { wheelPosition, wheelValues } from '@/services/training/numericWheel';
 import { useTranslation } from 'react-i18next';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useWheelOverlay } from './WheelOverlay';
@@ -23,14 +23,29 @@ export function WheelNumber({ value, step, maximum, label, onChange, onPress, ch
   const latest = useRef({ value, onChange }); latest.current = { value, onChange };
   const drag = useRef({ options: [] as number[], index: 0, selected: NaN });
   const interaction = useRef<'TAP' | 'HOLD' | 'SCROLL'>('SCROLL');
-  const choose = (item: number, index: number) => {
-    setSelected(item); latest.current.onChange(item); list.current?.scrollToOffset({ offset: index * 44, animated: false });
+  const panActive = useRef(false), selectedRef = useRef(value);
+  const [holding, setHolding] = useState(false);
+  const commit = (item: number) => {
+    if (selectedRef.current === item) return;
+    selectedRef.current = item; setSelected(item); latest.current.onChange(item);
   };
-  const close = () => { anchorRef.current = null; setAnchor(null); host?.clear(owner); };
+  const choose = (item: number, index: number) => {
+    commit(item); list.current?.scrollToOffset({ offset: index * 44, animated: true });
+  };
+  const finishHold = () => {
+    if (interaction.current !== 'HOLD') return;
+    const index = drag.current.options.indexOf(drag.current.selected);
+    if (index >= 0) list.current?.scrollToOffset({ offset: index * 44, animated: true });
+    setHolding(false); interaction.current = 'TAP';
+  };
+  const close = () => { anchorRef.current = null; setAnchor(null); setHolding(false); host?.clear(owner); };
   const show = (event?: GestureResponderEvent) => {
     if (anchorRef.current) return;
     setOrigin(value);
-    setSelected(value);
+    setSelected(value); selectedRef.current = value;
+    interaction.current = event ? 'HOLD' : 'SCROLL'; setHolding(!!event);
+    const values = wheelValues(value, step, maximum);
+    drag.current = { options: values, index: Math.max(0, values.indexOf(value ?? 0)), selected: value ?? 0 };
     const position = { x: event?.nativeEvent.pageX ?? width / 2, y: event?.nativeEvent.pageY ?? height / 2 };
     anchorRef.current = position; setAnchor(position);
     target.current?.measureInWindow((x, y) => { if (anchorRef.current) setAnchor({ x, y }); });
@@ -38,26 +53,25 @@ export function WheelNumber({ value, step, maximum, label, onChange, onPress, ch
   const pan = useMemo(() => {
     const gesture = Gesture.Pan().activateAfterLongPress(300).runOnJS(true)
       .onStart(event => {
-        interaction.current = 'HOLD';
+        panActive.current = true; interaction.current = 'HOLD'; setHolding(true);
         const value = latest.current.value;
         const values = wheelValues(value, step, maximum);
         drag.current = { options: values, index: Math.max(0, values.indexOf(value ?? 0)), selected: value ?? 0 };
         if (!anchorRef.current) {
           const position = { x: event.absoluteX, y: event.absoluteY };
-          anchorRef.current = position; setAnchor(position); setOrigin(value); setSelected(value);
+          anchorRef.current = position; setAnchor(position); setOrigin(value); setSelected(value); selectedRef.current = value;
         }
       }).onUpdate(event => {
         if (!host || !anchorRef.current) return;
-        const index = Math.max(0, Math.min(drag.current.options.length - 1, drag.current.index - Math.round(event.translationY / 12)));
+        const { index, offset } = wheelPosition(drag.current.options.length, drag.current.index, event.translationY);
         const item = drag.current.options[index];
-        if (item === drag.current.selected) return;
-        drag.current.selected = item; setSelected(item); latest.current.onChange(item);
-        list.current?.scrollToOffset({ offset: index * 44, animated: false });
-      });
+        if (item !== drag.current.selected) { drag.current.selected = item; commit(item); }
+        list.current?.scrollToOffset({ offset, animated: false });
+      }).onFinalize(() => { panActive.current = false; finishHold(); });
     if (pager) gesture.blocksExternalGesture(pager);
     return gesture;
   }, [host, pager, step, maximum]);
-  const pane = anchor && <>
+  const pane = anchor && <View pointerEvents={holding ? 'none' : 'box-none'} style={{ position: 'absolute', inset: 0 }}>
     <Pressable accessibilityLabel={t('workout.done')} onPress={close} style={{ position: 'absolute', inset: 0, backgroundColor: '#0005' }} />
     <View accessibilityViewIsModal style={{ position: 'absolute', left: Math.max(12, Math.min(width - 160, anchor.x - 40)), top: Math.max(60, Math.min(height - 270, anchor.y - 90)), width: 148,
       ...surfaces.field, backgroundColor: colors.bgElevated, borderRadius: radius.lg, borderColor: colors.surfaceBorder, borderWidth: 1, padding: 10 }}>
@@ -66,16 +80,22 @@ export function WheelNumber({ value, step, maximum, label, onChange, onPress, ch
       <FlatList ref={list} keyboardShouldPersistTaps="always" style={{ height: 132 }} data={options} keyExtractor={item => String(item)} initialScrollIndex={start}
         getItemLayout={(_, index) => ({ length: 44, offset: 44 * index, index })} snapToInterval={44} decelerationRate="fast"
         contentContainerStyle={{ paddingVertical: 44 }} showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
         onScrollBeginDrag={() => { interaction.current = 'SCROLL'; }}
+        onScroll={event => {
+          if (interaction.current !== 'SCROLL') return;
+          const index = wheelPosition(options.length, 0, -event.nativeEvent.contentOffset.y).index;
+          commit(options[index]);
+        }}
         onScrollEndDrag={event => {
           if (interaction.current !== 'SCROLL') return;
-          const index = Math.max(0, Math.min(options.length - 1, Math.round(event.nativeEvent.contentOffset.y / 44)));
-          choose(options[index], index);
+          const offset = event.nativeEvent.targetContentOffset?.y ?? event.nativeEvent.contentOffset.y;
+          commit(options[wheelPosition(options.length, 0, -offset).index]);
         }}
         onMomentumScrollEnd={event => {
           if (interaction.current !== 'SCROLL') return;
           const index = Math.max(0, Math.min(options.length - 1, Math.round(event.nativeEvent.contentOffset.y / 44)));
-          choose(options[index], index);
+          commit(options[index]);
         }}
         renderItem={({ item, index }) => <Pressable accessibilityRole="button" accessibilityLabel={`${label} ${item}`} accessibilityState={{ selected: selected === item }}
           onPress={() => { interaction.current = 'TAP'; choose(item, index); }} style={{ height: 44, alignItems: 'center', justifyContent: 'center' }}>
@@ -84,15 +104,16 @@ export function WheelNumber({ value, step, maximum, label, onChange, onPress, ch
       <Text style={{ color: colors.textMuted, textAlign: 'center', marginVertical: 8 }}>± {step}</Text>
       <Pressable accessibilityRole="button" onPress={close} style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.accentText }}>{t('workout.done')}</Text></Pressable>
     </View>
-  </>;
+  </View>;
   useLayoutEffect(() => {
     if (anchor && host) host.show({ owner, content: pane, dismiss: close });
     else host?.clear(owner);
-  }, [anchor, host, owner, origin, selected, step, maximum, width, height, label, colors, surfaces]);
+  }, [anchor, host, owner, origin, selected, holding, step, maximum, width, height, label, colors, surfaces]);
   useEffect(() => () => host?.clear(owner), [host, owner]);
   return <>
     <GestureDetector gesture={pan}>
     <Pressable ref={target} accessibilityRole="button" accessibilityLabel={label} onPress={onPress} onLongPress={show} delayLongPress={300} style={style}
+      onPressOut={() => { if (!panActive.current) finishHold(); }}
       accessibilityActions={[{ name: 'showMenu', label }]}
       onAccessibilityAction={({ nativeEvent }) => { if (nativeEvent.actionName === 'showMenu') show(); }}>
       {children}

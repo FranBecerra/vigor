@@ -6,6 +6,7 @@ import { WorkoutExerciseStrip } from '../WorkoutExerciseStrip';
 import { ExerciseSwapSheet } from '../generate/ExerciseSwapSheet';
 import { RestTimer } from '../RestTimer';
 import { WorkoutFinishSheet } from '../WorkoutFinishSheet';
+import { ExerciseDetailSheet } from '../ExerciseDetailSheet';
 import { EXERCISE_CATALOGUE } from '@/services/training/exerciseCatalogue';
 import { SetType } from '@/models';
 import { Gesture } from 'react-native-gesture-handler';
@@ -16,12 +17,14 @@ const mockNotes = { ready: true, error: false, get: () => '', save: jest.fn() };
 let mockHistory: any[]; let mockReady = true;
 const mockFlush = jest.fn().mockResolvedValue(true);
 const mockUpdatePlan = jest.fn().mockResolvedValue(undefined);
+const mockReplace = jest.fn(), mockDismissTo = jest.fn();
+let mockPlanOverrides: object = {};
 let mockParams = { mesocycleId: 'm', goal: 'HYPERTROPHY', microcycleIndex: '1', plannedSessionIndex: '0' };
 const mockTranslate = (key: string) => key;
 const mockPlan = { id: 'm', userId: 'owner', prescriptionMode: 'MANUAL', plannedSessions: [{ index: 0, focus: 'UPPER', estimatedWorkMinutes: 20,
   exercises: mockExercises.map((exercise, order) => ({ exerciseId: exercise.id, exerciseSnapshot: exercise, order, isEdited: false,
     sets: [0, 1].map(() => ({ setType: SetType.NORMAL, targetReps: 10, targetRIR: 2 })) })) }] };
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn(), replace: jest.fn() }), useLocalSearchParams: () => mockParams }));
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn(), replace: mockReplace, dismissTo: mockDismissTo }), useLocalSearchParams: () => mockParams }));
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: mockTranslate }) }));
 jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
 jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ uid: 'owner' }) }));
@@ -29,10 +32,10 @@ jest.mock('@/hooks/useExerciseCatalogue', () => ({ useExerciseCatalogue: () => m
 jest.mock('@/hooks/useWorkoutRecordHistory', () => ({ useWorkoutRecordHistory: () => ({ history: mockHistory, ready: mockReady }) }));
 jest.mock('@/hooks/useSessionPersistence', () => ({ useSessionPersistence: () => ({ status: 'saved', hasRestored: true, flush: mockFlush, discard: jest.fn(), restoreError: false, retryRestore: jest.fn() }) }));
 jest.mock('@/hooks/useTrainingNotes', () => ({ useTrainingNotes: () => mockNotes }));
-jest.mock('@/hooks/useHealthExport', () => ({ useHealthExport: () => ({ service: { export: jest.fn() } }) }));
+jest.mock('@/hooks/useHealthExport', () => ({ useHealthExport: () => ({ service: { export: jest.fn().mockResolvedValue(undefined) } }) }));
 jest.mock('@/hooks/useWorkoutActivity', () => ({ useWorkoutActivity: () => false, endWorkoutActivity: jest.fn() }));
 jest.mock('@/hooks/useRestAlert', () => ({ clearWorkoutRestAlerts: jest.fn().mockResolvedValue(undefined) }));
-jest.mock('@/services/repositories', () => ({ mesocycleRepository: { get: async () => mockPlan, update: (...args: any[]) => mockUpdatePlan(...args) }, workoutSessionRepository: {} }));
+jest.mock('@/services/repositories', () => ({ mesocycleRepository: { get: async () => ({ ...mockPlan, ...mockPlanOverrides }), update: (...args: any[]) => mockUpdatePlan(...args) }, workoutSessionRepository: {} }));
 jest.mock('../ExercisePage', () => ({ ExercisePage: () => null }));
 jest.mock('../IntensityCell', () => ({ IntensityPickerProvider: ({ children }: any) => children }));
 jest.mock('../ExerciseQuickMenu', () => ({ ExerciseQuickMenu: () => null }));
@@ -46,10 +49,30 @@ beforeEach(() => {
   mockFlush.mockReset().mockResolvedValue(true); mockUpdatePlan.mockReset().mockResolvedValue(undefined);
   mockParams = { mesocycleId: 'm', goal: 'HYPERTROPHY', microcycleIndex: '1', plannedSessionIndex: '0' };
   Gesture.Native = jest.fn(() => ({})) as any;
-  mockReady = true;
+  mockReady = true; mockPlanOverrides = {}; mockReplace.mockClear(); mockDismissTo.mockClear();
   mockHistory = [{ id: 'last-upper', userId: 'owner', mesocycleId: 'm', microcycleId: 'm0', microcycleIndex: 0, plannedSessionIndex: 0, performedAt: 1, completedAt: 2,
     exercises: mockExercises.map((exercise) => ({ exerciseId: exercise.id, order: 0, isSwap: false, sets: [70, 67.5].map((weight, index) => ({ id: String(index),
       setType: SetType.NORMAL, targetWeight: 0, targetReps: 10, targetRIR: 2, actualWeight: weight, actualReps: 8, actualRIR: 1, completionState: 'DONE' })) })) }];
+});
+it('opens the selected exercise history inside the workout and closes without navigating away', async () => {
+  mockHistory[0].sessionName = 'Previous upper';
+  mockHistory[0].exercises.forEach((entry: any, index: number) => { entry.id = `entry-${index}`;
+    entry.sets.forEach((set: any) => { set.actualWeight = index ? 15 : 70; }); });
+  let tree: any; await act(async () => { tree = create(<Screen />); });
+  const pages = () => tree.root.findAllByType(ExercisePage);
+  const info = () => tree.root.findByType(ExerciseDetailSheet);
+  await act(async () => pages()[0].props.onAction(mockExercises[0].id, 'info'));
+  expect(info().props.exercise.id).toBe(mockExercises[0].id);
+  expect(info().props.historyReady).toBe(true);
+  expect(info().props.history[0]).toMatchObject({ sessionName: 'Previous upper',
+    exercises: [{ exerciseId: mockExercises[0].id, sets: [{ weight: 70 }, { weight: 70 }] }] });
+  await act(async () => info().props.onClose());
+  expect(info().props.exercise).toBeNull(); expect(pages()).toHaveLength(2);
+  await act(async () => pages()[1].props.onAction(mockExercises[1].id, 'info'));
+  expect(info().props.exercise.id).toBe(mockExercises[1].id);
+  expect(info().props.history[0].exercises[0].sets[0].weight).toBe(15);
+  expect(mockReplace).not.toHaveBeenCalled(); expect(mockDismissTo).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
 });
 it('saves actual work first and retries only the failed plan update without replacing the completed record', async () => {
   mockUpdatePlan.mockRejectedValueOnce(Error('invalid optional plan field')).mockResolvedValue(undefined);
@@ -83,7 +106,7 @@ it('does not propagate plan changes while performed-history context is still unk
   await act(async () => tree.root.findByType(WorkoutFinishSheet).props.onFinish(true));
   expect(mockUpdatePlan).not.toHaveBeenCalled();
   expect(tree.root.findByType(WorkoutFinishSheet).props).toMatchObject({ saved: true, planUpdateError: true, error: false });
-  mockReady = true; await act(async () => tree.update(<Screen />));
+  mockReady = true; mockPlanOverrides = {}; mockReplace.mockClear(); mockDismissTo.mockClear(); await act(async () => tree.update(<Screen />));
   await act(async () => tree.root.findByType(WorkoutFinishSheet).props.onRetryPlan());
   expect(mockUpdatePlan).toHaveBeenCalledTimes(1);
   await act(async () => tree.unmount());
@@ -104,7 +127,7 @@ it('saves the chosen whole-session effort in the same accepted finish write, ind
   await act(async () => page().props.onUpdateSet(mockExercises[0].id, row.id, { actualWeight: 70, actualReps: 10, isCompleted: true }));
   await act(async () => tree.root.findByType(WorkoutFinishSheet).props.onChangeEffort(8));
   await act(async () => tree.root.findByType(WorkoutFinishSheet).props.onFinish(false));
-  expect(mockFlush).toHaveBeenCalledWith(expect.any(Number), { sessionFeedback: { scale: 'VIGOR_SESSION_EFFORT_1_10_V1', effort: 8, recordedAt: expect.any(Number), timing: 'AT_FINISH' } });
+  expect(mockFlush).toHaveBeenCalledWith(expect.any(Number), { sessionFeedback: { scale: 'VIGOR_SESSION_EFFORT_1_10_V1', effort: 8, recordedAt: expect.any(Number), timing: 'AT_FINISH' } }, expect.any(Function));
   expect(tree.root.findByType(WorkoutFinishSheet).props.saved).toBe(true);
   expect(page().props.sets[0].actualRIR).not.toBe(8);
   await act(async () => tree.unmount());
@@ -130,8 +153,36 @@ it('does not overwrite an edited or cleared load when history arrives late', asy
   const page = () => tree.root.findAllByType(ExercisePage)[0]; const row = page().props.sets[0];
   await act(async () => page().props.onUpdateSet(mockExercises[0].id, row.id, { actualWeight: 35 }));
   await act(async () => page().props.onUpdateSet(mockExercises[0].id, row.id, { actualWeight: undefined }));
-  mockReady = true; await act(async () => tree.update(<Screen />));
+  mockReady = true; mockPlanOverrides = {}; mockReplace.mockClear(); mockDismissTo.mockClear(); await act(async () => tree.update(<Screen />));
   expect(page().props.sets[0]).toMatchObject({ targetWeight: 0, previous: { weight: 70 } });
   expect(page().props.sets[1].targetWeight).toBe(67.5);
+  await act(async () => tree.unmount());
+});
+
+
+it.each([2, 3])('routes the accepted workout to the correct destination for a %i-microcycle block', async projectedMicrocycles => {
+  mockPlanOverrides = { routineId: 'routine', status: 'ACTIVE', currentMicrocycleIndex: 1, projectedMicrocycles };
+  const accepted = { ...mockHistory[0], id: 'm:m1:s0', microcycleIndex: 1 };
+  mockHistory.push({ ...accepted, completedAt: undefined });
+  mockFlush.mockImplementationOnce(async (ended, _note, onAccepted) => {
+    onAccepted({ ...accepted, completedAt: ended });
+    return true;
+  });
+  let tree: any; await act(async () => { tree = create(<Screen />); });
+  const page = tree.root.findAllByType(ExercisePage)[0], row = page.props.sets[0];
+  await act(async () => page.props.onUpdateSet(mockExercises[0].id, row.id, { actualWeight: 70, actualReps: 10, isCompleted: true }));
+  const sheet = () => tree.root.findByType(WorkoutFinishSheet);
+  await act(async () => sheet().props.onFinish(false));
+  expect(sheet().props.saved).toBe(true);
+  expect(mockReplace).not.toHaveBeenCalled();
+  await act(async () => sheet().props.onClose());
+  if (projectedMicrocycles === 2) {
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/mesocycle-continuity',
+      params: { routineId: 'routine', sourceId: 'm', afterWorkout: accepted.id } });
+    expect(mockDismissTo).not.toHaveBeenCalled();
+  } else {
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockDismissTo).toHaveBeenCalledWith('/(tabs)/(train)');
+  }
   await act(async () => tree.unmount());
 });

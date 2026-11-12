@@ -31,6 +31,7 @@ import { useExerciseName } from '@/hooks/useExerciseName';
 
 interface PlanPreviewProps {
   sessionTabs?: boolean;
+  sessionPresentation?: ReadonlyMap<number, { name: string; minutes: number }>;
   onChangeSessionName?: (sessionIndex: number, name: string) => void;
   sessions: readonly PlannedSession[];
   limitedBy?: LimitingFactor;
@@ -67,6 +68,7 @@ const LIMIT_KEY: Record<LimitingFactor, string> = {
 
 export function PlanPreview({
   sessionTabs = false,
+  sessionPresentation,
   showCycle = true,
   scheduleTemplate,
   onChangeSessionName,
@@ -98,7 +100,7 @@ export function PlanPreview({
   const active = selected === null ? null : sessions.some((session) => session.index === selected) ? selected : sessions[0]?.index ?? null;
   const showOverview = !sessionTabs || active === null;
   const labels = sessionNames(sessions, (focus) => t(`generate.focus${focus}`));
-  const names = new Map(sessions.map((session, index) => [session.index, labels[index]]));
+  const names = new Map(sessions.map((session, index) => [session.index, sessionPresentation?.get(session.index)?.name ?? labels[index]]));
 
   // Insufficient time is the only case that is an error rather than information.
   const limitTone =
@@ -197,18 +199,17 @@ export function PlanPreview({
             <View style={styles.sessionHeader}>
               <View style={{ flex: 1 }}>
                 <Text style={[typography.title, { color: colors.textPrimary }]}>
-                  {session.name || t('generate.previewSession', { index: session.index + 1 })}
-                  {'  '}
-                  <Text style={{ color: colors.textMuted }}>
-                    {t(`generate.focus${session.focus}`)}
-                  </Text>
+                  {sessionPresentation?.get(session.index)?.name ?? (session.name || t('generate.previewSession', { index: session.index + 1 }))}
+                  {!sessionPresentation?.has(session.index) && <Text style={{ color: colors.textMuted }}>
+                    {'  '}{t(`generate.focus${session.focus}`)}
+                  </Text>}
                 </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginRight: 8 }}>
                 <Text
-                  numberOfLines={1}
                   style={[typography.caption, { color: colors.accentText, marginTop: 2 }]}
                 >
                   {regions.map((region) => t(`region.${region}`)).join(' · ')}
-                </Text>
+                </Text></ScrollView>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
                 <Text style={[typography.caption, {
@@ -220,7 +221,7 @@ export function PlanPreview({
                 </Text>
                 <Text style={[typography.caption, { color: colors.textMuted }]}>
                   {t('generate.previewMinutes', {
-                    minutes: Math.ceil(session.estimatedWorkMinutes + SESSION_OVERHEAD_MINUTES),
+                    minutes: Math.ceil(sessionPresentation?.get(session.index)?.minutes ?? (session.estimatedWorkMinutes + SESSION_OVERHEAD_MINUTES)),
                   })}
                 </Text>
               </View>

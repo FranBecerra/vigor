@@ -13,7 +13,7 @@ export default function TabsLayout() {
   const protectedDraft = useTrainingDraftGuard();
 
   return (
-    <NativeTabs tintColor={colors.accentText} hidden={segments.some((segment) => ['session', 'workout-check', 'cardio-workout', 'cardio-check'].includes(segment))}>
+    <NativeTabs tintColor={colors.accentText} hidden={segments.some((segment) => ['session', 'workout-check', 'cardio-workout', 'cardio-check', 'mesocycle-continuity'].includes(segment))}>
       <NativeTabs.Trigger name="(train)" disablePopToTop={protectedDraft || !canResetTrainingTab(segments)} disableScrollToTop disableAutomaticContentInsets contentStyle={{ backgroundColor: colors.bg }}>
         <NativeTabs.Trigger.Label>{t('tabs.train')}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'dumbbell', selected: 'dumbbell.fill' }} md="fitness_center" />

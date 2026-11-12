@@ -18,8 +18,8 @@ function ExercisePosition({ x, dragging, children }: { x: number; dragging: bool
   return <Animated.View style={[{ position: 'absolute', top: 5, left: 0, zIndex: dragging ? 10 : 0 }, animated]}>{children}</Animated.View>;
 }
 
-function DraggableExercise({ exercise, index, active, dragging, onDrag, onDrop, onCancel, onSelect, onMove, onMenu, grouped }:
-  { exercise: Exercise; index: number; active: boolean; dragging: boolean;
+function DraggableExercise({ exercise, index, active, completed, dragging, onDrag, onDrop, onCancel, onSelect, onMove, onMenu, grouped }:
+  { exercise: Exercise; index: number; active: boolean; completed: boolean; dragging: boolean;
     onDrag: (index: number, delta: number, x: number) => void; onDrop: () => void; onCancel: () => void;
     onSelect: () => void; onMove: (direction: number) => void; onMenu?: (anchor?: ExerciseMenuAnchor) => void; grouped?: boolean }) {
   const { colors, radius, sectionAccent } = useTheme(); const { t } = useTranslation(); const name = useExerciseName();
@@ -36,22 +36,22 @@ function DraggableExercise({ exercise, index, active, dragging, onDrag, onDrop, 
   return <GestureDetector gesture={Gesture.Simultaneous(pan, hold)}>
     <View>
       <Pressable ref={target} onPress={onSelect} accessibilityRole="button" accessibilityLabel={name(exercise)}
-        accessibilityHint={t('workout.dragHint')} accessibilityState={{ selected: active }}
+        accessibilityHint={completed ? `${t('executionPolish.completedExercise')}. ${t('workout.dragHint')}` : t('workout.dragHint')} accessibilityState={{ selected: active }}
         accessibilityActions={[{ name: 'decrement', label: t('rehab.moveUp') }, { name: 'increment', label: t('workout.moveDown') }, { name: 'showMenu', label: t('executionUpdates.actions') }]}
         onAccessibilityAction={({ nativeEvent }) => nativeEvent.actionName === 'showMenu' ? onMenu?.() : onMove(nativeEvent.actionName === 'decrement' ? -1 : 1)}
         style={{ width: 84, height: 72, borderRadius: radius.md, justifyContent: 'center', padding: 7, borderWidth: 1.5,
-          backgroundColor: colors.bgElevated, borderColor: active || dragging ? sectionAccent.train : colors.surfaceBorder,
+          backgroundColor: completed ? colors.accentTint : colors.bgElevated, borderColor: active || dragging || completed ? sectionAccent.train : colors.surfaceBorder,
           transform: [{ scale: dragging ? 1.06 : 1 }] }}>
-        {grouped && <Text style={{ color: colors.accentText, fontSize: 11, textAlign: 'center' }}>↔</Text>}<Text numberOfLines={3} style={{ color: active ? colors.accentText : colors.textSecondary, textAlign: 'center', fontSize: 11, lineHeight: 14, fontWeight: '600' }}>{name(exercise)}</Text>
+        {grouped && <Text style={{ color: colors.accentText, fontSize: 11, textAlign: 'center' }}>↔</Text>}<Text numberOfLines={3} style={{ color: active || completed ? colors.accentText : colors.textSecondary, textAlign: 'center', fontSize: 11, lineHeight: 14, fontWeight: '600' }}>{name(exercise)}</Text>
       </Pressable>
     </View>
   </GestureDetector>;
 }
 
 /** Long-press and drag directly in the existing exercise rail, with edge scrolling. */
-export function WorkoutExerciseStrip({ exercises, activeId, onSelect, onReorder, onAdd, onExerciseMenu, supersets = {} }:
+export function WorkoutExerciseStrip({ exercises, activeId, onSelect, onReorder, onAdd, onExerciseMenu, supersets = {}, completedIds = [] }:
   { exercises: Exercise[]; activeId?: string; onSelect: (index: number) => void; onReorder: (items: Exercise[]) => void; onAdd: () => void;
-    onExerciseMenu?: (id: string, anchor?: ExerciseMenuAnchor) => void; supersets?: Record<string, string> }) {
+    onExerciseMenu?: (id: string, anchor?: ExerciseMenuAnchor) => void; supersets?: Record<string, string>; completedIds?: readonly string[] }) {
   const { colors, sectionAccent, spacing, radius } = useTheme(); const { t } = useTranslation();
   const rail = useRef<ScrollView>(null); const viewport = useRef<View>(null);
   const offset = useRef(0); const bounds = useRef({ x: 0, width: 0 });
@@ -109,7 +109,7 @@ export function WorkoutExerciseStrip({ exercises, activeId, onSelect, onReorder,
           : drag.from > target && index < drag.from && index >= target ? PITCH : 0;
         return <ExercisePosition key={exercise.id} dragging={drag?.from === index}
           x={spacing.lg + index * PITCH + (drag?.from === index ? drag.delta : shift)}>
-          <DraggableExercise exercise={exercise} index={index} active={exercise.id === activeId} dragging={drag?.from === index}
+          <DraggableExercise exercise={exercise} index={index} active={exercise.id === activeId} completed={completedIds.includes(exercise.id)} dragging={drag?.from === index}
             grouped={!!supersets[exercise.id]} onMenu={onExerciseMenu ? (anchor) => onExerciseMenu(exercise.id, anchor) : undefined}
             onDrag={handlers.update} onDrop={handlers.end} onCancel={handlers.cancel} onSelect={() => onSelect(index)}
             onMove={(direction) => onReorder(moveWorkoutExercise(exercises, index, index + direction))} />

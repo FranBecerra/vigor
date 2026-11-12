@@ -42,6 +42,8 @@ it('opens a linked recorded session in the shared root-stack editor with its exa
   mockGetPlan.mockResolvedValue({ id: 'm', routineId: 'r', userId: 'owner', plannedSessions: [{ index: 4 }] });
   mockGetRoutine.mockResolvedValue({ id: 'r', userId: 'owner' });
   let tree: any; await act(async () => { tree = create(<HistoryScreen />); });
+  const output = JSON.stringify(tree.toJSON());
+  expect(output.indexOf('historyEdit.title')).toBeLessThan(output.indexOf('Upper'));
   const edit = tree.root.findAll((node: any) => typeof node.props.onPress === 'function' && node.findAll((child: any) => child.props.children === 'historyEdit.title').length)[0];
   await act(async () => edit.props.onPress());
   expect(mockPush).toHaveBeenCalledWith({ pathname: '/routine-editor', params: { mesocycleId: 'm', microcycleIndex: '2', plannedSessionIndex: '4', edit: '1' } });

@@ -27,6 +27,18 @@ it('keeps exercise cards non-navigating and opens the pending session from its h
   expect(mockPush).toHaveBeenCalledWith({ pathname: '/routine', params: { mesocycleId: 'm', microcycleIndex: '0', plannedSessionIndex: '4', edit: '1' } });
   await act(async () => tree.unmount());
 });
+it('offers an explicit upper edit action for a future microcycle and preserves its exact session identity', async () => {
+  let tree: any; await act(async () => { tree = create(<Screen />); });
+  const future = buttons(tree).find((node: any) => node.findAllByType(Text).some((text: any) => text.props.children === 'M2'));
+  await act(async () => future.props.onPress());
+  const edit = buttons(tree).find((node: any) => node.props.accessibilityLabel === 'routine.editSession');
+  expect(edit).toBeDefined();
+  await act(async () => edit.props.onPress());
+  expect(mockPush).toHaveBeenCalledWith({ pathname: '/routine', params: {
+    mesocycleId: 'm', microcycleIndex: '1', plannedSessionIndex: '4', edit: '1',
+  } });
+  await act(async () => tree.unmount());
+});
 it('shows recorded effort, opens its editor and preserves the selected past microcycle after refresh', async () => {
   mockRoutine.currentMicrocycleIndex = 1;
   Object.assign(mockRoutine.microcycles[0].sessions[0], { completedOn: '2026-10-20', completedWorkoutId: 'actual',
@@ -39,5 +51,20 @@ it('shows recorded effort, opens its editor and preserves the selected past micr
   expect(JSON.stringify(tree.toJSON())).toContain('—');
   await act(async () => header(tree).props.onPress());
   expect(mockPush).toHaveBeenCalledWith({ pathname: '/routine', params: { mesocycleId: 'm', microcycleIndex: '0', plannedSessionIndex: '4', edit: '1' } });
+  await act(async () => tree.unmount());
+});
+
+it('opens continuity only for an active standalone strength block', async () => {
+  mockRoutine.isActive = true;
+  mockRoutine.mesocycleSnapshot = { routineId: 'r', status: 'ACTIVE' };
+  let tree: any;
+  await act(async () => { tree = create(<Screen />); });
+  const button = () => buttons(tree).find((node: any) => node.findAllByType(Text).some((text: any) =>
+    Array.isArray(text.props.children) && text.props.children.includes('continuity.open')));
+  await act(async () => button().props.onPress());
+  expect(mockPush).toHaveBeenCalledWith({ pathname: '/mesocycle-continuity', params: { routineId: 'r', sourceId: 'm' } });
+  mockRoutine.hybrid = { cardioPlanId: 'cardio' };
+  await act(async () => tree.update(<Screen />));
+  expect(button()).toBeUndefined();
   await act(async () => tree.unmount());
 });

@@ -74,13 +74,14 @@ it('seeds cardio once after settings are ready and preserves manual edits across
   const planner = (ready: boolean, record = intake) => <AthleteIntakeContext.Provider value={{ ready, intake: record }}>
     <CardioPlanBuilder ready error={false} onRetry={() => undefined} onCancel={cancel} /></AthleteIntakeContext.Provider>;
   let tree: any; await act(async () => { tree = create(planner(false)); });
-  expect(out(tree)).toContain('cardioPlan.loading'); expect(button(tree, 'exerciseWizard.next')).toBeUndefined();
-  await act(async () => tree.update(planner(true))); expect(button(tree, 'exerciseWizard.next').props.disabled).toBe(false);
-  await press(tree, 'exerciseWizard.next');
+  expect(out(tree)).toContain('cardioPlan.loading'); expect(button(tree, 'cardioPlan.review')).toBeUndefined();
+  await act(async () => tree.update(planner(true))); expect(button(tree, 'cardioPlan.review').props.disabled).toBe(false);
+  expect(out(tree)).toContain('cardioSections.title');
   const duration = () => tree.root.findAllByType(NumericField).find((n: any) => n.props.accessibilityLabel === 'cardioPlan.durationFor:cardioPlan.RUNNING');
   expect(duration().props.value).toBe(40); await act(async () => duration().props.onChangeValue(35));
   await act(async () => tree.update(planner(true, { ...intake, updatedAt: 20 })));
   expect(duration().props.value).toBe(35);
-  await press(tree, 'exerciseWizard.next'); expect(tree.root.findAllByType(Stepper).length).toBeGreaterThan(0);
+  expect(tree.root.findAllByType(Stepper).length).toBeGreaterThan(0);
+  expect(button(tree, 'exerciseWizard.next')).toBeUndefined();
   await act(async () => tree.unmount());
 });

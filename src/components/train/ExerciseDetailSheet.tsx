@@ -7,20 +7,24 @@ import { useTheme } from '@/theme/useTheme';
 import { BodyMap } from './BodyMap';
 import { primaryMusclesOf } from '@/services/training/exerciseMuscles';
 import { cleanImportedExerciseNotes } from '@/services/training/exerciseEditing';
+import { ExerciseHistoryTimeline } from './ExerciseHistoryTimeline';
+import type { exerciseHistory } from '@/services/training/exerciseHistory';
 
-export function ExerciseDetailSheet({ exercise, mode, note, onNote, onClose, notRecommended = false, onToggleRecommendation }: {
+export function ExerciseDetailSheet({ exercise, mode, note, onNote, onClose, notRecommended = false, onToggleRecommendation, history, historyReady = false }: {
   exercise: Exercise | null; mode: 'info' | 'note'; note: string; onNote: (note: string) => void; onClose: () => void;
   notRecommended?: boolean; onToggleRecommendation?: (exercise: Exercise, notRecommended: boolean) => void;
+  history?: ReturnType<typeof exerciseHistory>; historyReady?: boolean;
 }) {
   const { surfaces, colors, typography, spacing, sectionAccent, radius } = useTheme(); const { t } = useTranslation(); const insets = useSafeAreaInsets();
   const name = useExerciseName();
   return <Modal visible={exercise !== null} animationType="slide" onRequestClose={onClose}>
     <View style={{ flex: 1, ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top + spacing.lg, paddingHorizontal: spacing.lg }}>
       <Text style={[typography.h2, { color: colors.textPrimary }]}>{name(exercise)}</Text>
-      <ScrollView keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+      <ScrollView key={exercise?.id} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         {mode === 'note' ? <TextInput multiline value={note} onChangeText={onNote} maxLength={2000} autoFocus
           accessibilityLabel={t('train.note')} placeholder={t('workout.noteHint')} placeholderTextColor={colors.textMuted}
           style={{ color: colors.textPrimary, backgroundColor: colors.surface, borderRadius: radius.md, padding: 16, minHeight: 180, marginVertical: 20, textAlignVertical: 'top' }} /> : exercise && <>
+          {history && <ExerciseHistoryTimeline entries={history} ready={historyReady} />}
           <BodyMap height={260} paint={(muscle) => primaryMusclesOf(exercise).includes(muscle)
             ? { color: colors.accentText, opacity: 1 } : exercise.secondaryMuscles.includes(muscle) ? { color: colors.accentText, opacity: 0.35 } : null} />
           <Text style={[typography.title, { color: colors.textPrimary, marginVertical: 12 }]}>{primaryMusclesOf(exercise).map((muscle) => t(`muscle.${muscle}`)).join(' · ')}</Text>
@@ -38,7 +42,7 @@ export function ExerciseDetailSheet({ exercise, mode, note, onNote, onClose, not
           {!!exercise.guidePage && <Text style={{ color: colors.textMuted, marginTop: 20 }}>{t('workout.guidePage', { page: exercise.guidePage })}</Text>}
         </>}
       </ScrollView>
-      <Pressable onPress={onClose} style={{ padding: 18, ...surfaces.primary, backgroundColor: sectionAccent.train, borderRadius: radius.md, marginBottom: insets.bottom + 12 }}>
+      <Pressable accessibilityRole="button" accessibilityLabel={t('workout.done')} onPress={onClose} style={{ padding: 18, ...surfaces.primary, backgroundColor: sectionAccent.train, borderRadius: radius.md, marginBottom: insets.bottom + 12 }}>
         <Text style={{ color: colors.onAccent, textAlign: 'center', fontWeight: '700' }}>{t('workout.done')}</Text>
       </Pressable>
     </View>

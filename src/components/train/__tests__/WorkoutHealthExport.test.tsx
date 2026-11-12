@@ -49,3 +49,16 @@ it('shows denied/failure states without offering export for unfinished/foreign s
   await act(async () => tree.update(<WorkoutHealthExport session={{ ...session, userId: 'other' }} />)); expect(tree.toJSON()).toBeNull();
   await act(async () => tree.unmount());
 });
+
+it('shows the automatic export status in the finish summary with no export action', async () => {
+  mockHealth.enabled = true;
+  let tree: any; await act(async () => { tree = create(<WorkoutHealthExport session={session} statusOnly />); });
+  expect(JSON.stringify(tree.toJSON())).toContain('health.queued');
+  expect(press(tree, 'health.export')).toBeUndefined();
+  mockHealth.entries['["owner","session",5000]'] = { status: 'failed', action: 'save' };
+  await act(async () => tree.update(<WorkoutHealthExport session={session} statusOnly />));
+  expect(JSON.stringify(tree.toJSON())).toContain('health.failed');
+  expect(press(tree, 'health.export')).toBeUndefined();
+  expect(mockExport).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});

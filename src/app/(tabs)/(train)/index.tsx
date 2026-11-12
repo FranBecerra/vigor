@@ -2,7 +2,7 @@
  * E1 — Inicio/Hoy de la pestaña Entrenamiento (PRD §8.5).
  *
  * Pantalla de inicio de la pestaña. Estructura (opción E acordada):
- *  1. Pastillas Fuerza / Cardio.
+ *  1. Shared strength and cardio active routines.
  *  2. Tarjeta de la sesión de hoy: cuerpo pulsable → previsualización;
  *     botón verde → inicia el entrenamiento.
  *  3. Acordeón de rutinas, con el raíl del mesociclo y las sesiones del
@@ -18,14 +18,18 @@ import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { SymbolView } from 'expo-symbols';
+import { LocalChecksEntry } from '@/test-support/LocalChecksEntry';
 
-import { DomainPills } from '@/components/home/HomeHeader';
 import { TodayCard } from '@/components/home/TodayCard';
 import { RoutineCard } from '@/components/home/RoutineCard';
 import { RenameRoutineSheet } from '@/components/home/RenameRoutineSheet';
 import { TrainingCalendarCard } from '@/components/train/TrainingCalendarCard';
 import { MicrocycleReviewPrompt } from '@/components/bio/MicrocycleReviewPrompt';
-import { SportActivitiesHome } from '@/components/cardio/SportActivitiesHome';
+import { SavedCardioPlans } from '@/components/cardio/SavedCardioPlans';
+import { CardioRoutineCard } from '@/components/cardio/CardioRoutineCard';
+import { useCardioBlocks, useCardioWorkouts } from '@/hooks/useCardioTraining';
+import { useSportActivities } from '@/hooks/useSportActivities';
+import type { CardioHomeSession } from '@/services/cardio/cardioHome';
 import { useTheme } from '@/theme/useTheme';
 import { useRoutines } from '@/hooks/useRoutines';
 import { useActiveWorkout } from '@/hooks/useActiveWorkout';
@@ -37,7 +41,6 @@ import {
   defaultExpandedRoutineId,
   defaultSessionId,
   type RoutineView,
-  type TrainingDomain,
 } from '@/services/training/routineView';
 
 /** The session with this id in the running microcycle of any routine. */
@@ -45,7 +48,7 @@ function findSession(routines: readonly RoutineView[], sessionId: string) {
   for (const routine of routines) {
     const current = routine.microcycles[routine.currentMicrocycleIndex];
     const found = current?.sessions.find((s) => s.id === sessionId);
-    if (found) return { routine, session: found };
+    if (found) return { routine, session: found, microcycleIndex: routine.currentMicrocycleIndex };
   }
   return null;
 }
@@ -66,10 +69,11 @@ export default function TrainHomeScreen() {
   const router = useRouter();
   const { status, routines: allRoutines, reload, activate, rename, remove } = useRoutines();
   const activeWorkout = useActiveWorkout();
+  const cardioBlocks = useCardioBlocks(), cardioWorkouts = useCardioWorkouts(), sportActivities = useSportActivities();
+  const activeCardio = cardioBlocks.entries.filter(block => block.userId === uid && block.endedAt === null);
   const resumeGoal = activeWorkout?.trainingGoal ?? allRoutines.find((routine) => routine.mesocycleId === activeWorkout?.mesocycleId)?.generationGoal;
   const [renaming, setRenaming] = useState<RoutineView | null>(null);
 
-  const [domain, setDomain] = useState<TrainingDomain>('STRENGTH');
   // null until the athlete touches the accordion, so the default follows the data.
   const [expandedRoutineId, setExpandedRoutineId] = useState<string | null>(null);
 
@@ -77,15 +81,23 @@ export default function TrainHomeScreen() {
   const muscleLabel = useCallback((muscle: string) => t(`muscle.${muscle}`), [t]);
 
   const routines = useMemo(
-    () => allRoutines.filter((routine) => routine.domain === domain),
-    [allRoutines, domain],
+    () => allRoutines.filter((routine) => routine.domain === 'STRENGTH'),
+    [allRoutines],
   );
 
   /** The first pending session of the active routine is today's workout. */
   const selectedSession = useMemo(() => {
+    if (activeWorkout) {
+      const routine = routines.find(item => item.mesocycleId === activeWorkout.mesocycleId);
+      const session = routine?.microcycles[activeWorkout.microcycleIndex]?.sessions
+        .find(item => item.plannedSessionIndex === activeWorkout.plannedSessionIndex);
+      if (routine && session) return { routine, session: { ...session, name: activeWorkout.sessionName ?? session.name },
+        microcycleIndex: activeWorkout.microcycleIndex };
+      return null;
+    }
     const active = routines.filter((routine) => routine.isActive);
     return findSession(active, defaultSessionId(active));
-  }, [routines]);
+  }, [routines, activeWorkout]);
   const orderedRoutines = useMemo(
     () => [...routines].sort((a, b) => Number(b.isActive) - Number(a.isActive)),
     [routines],
@@ -145,7 +157,8 @@ export default function TrainHomeScreen() {
     },
     [remove, t],
   );
-  const expandedId = expandedRoutineId ?? defaultExpandedRoutineId(routines);
+  const expandedId = expandedRoutineId ?? (routines.some(routine => routine.isActive) ? defaultExpandedRoutineId(routines)
+    : activeCardio[0] ? `cardio:${activeCardio[0].id}` : defaultExpandedRoutineId(routines));
 
   const startSession = useCallback(() => {
     if (selectedSession === null) return;
@@ -154,7 +167,7 @@ export default function TrainHomeScreen() {
       params: {
         mesocycleId: selectedSession.routine.mesocycleId,
         goal: selectedSession.routine.generationGoal,
-        microcycleIndex: String(selectedSession.routine.currentMicrocycleIndex),
+        microcycleIndex: String(selectedSession.microcycleIndex),
         plannedSessionIndex: String(selectedSession.session.plannedSessionIndex),
       },
     });
@@ -184,6 +197,15 @@ export default function TrainHomeScreen() {
     ]);
   };
 
+  const openCardio = (entry: CardioHomeSession) => entry.workout
+    ? router.push({ pathname: '/cardio-workout', params: { id: entry.workout.id } })
+    : router.push({ pathname: '/cardio-block', params: { id: entry.block.id, cycle: String(entry.slot.cycle) } });
+  const cardioCards = activeCardio.map(block => <View key={`cardio:${block.id}`} style={{ marginTop: spacing.sm }}>
+    <CardioRoutineCard block={block} workouts={cardioWorkouts.entries} sports={sportActivities.entries} onOpen={openCardio}
+      expanded={expandedId === `cardio:${block.id}`} onToggle={() => setExpandedRoutineId(expandedId === `cardio:${block.id}` ? '' : `cardio:${block.id}`)}
+      onOpenBlock={cycle => router.push({ pathname: '/cardio-block', params: { id: block.id, cycle: String(cycle) } })} />
+  </View>);
+
   return (
     <View style={[styles.screen, { ...surfaces.screen, backgroundColor: colors.bg, paddingTop: insets.top }]}>
       <ScrollView
@@ -197,17 +219,10 @@ export default function TrainHomeScreen() {
         }}
         showsVerticalScrollIndicator={false}>
         <Text style={[styles.title, { color: colors.textPrimary }]}>{t('tabs.train')}</Text>
+        <LocalChecksEntry />
 
-        <View style={{ marginTop: spacing.md }}>
-          <DomainPills
-            value={domain}
-            onChange={setDomain}
-            labels={{ strength: t('home.strength'), cardio: t('home.cardio') }}
-          />
-        </View>
-
-        {!activeWorkout && domain === 'STRENGTH' && <MicrocycleReviewPrompt routines={routines} />}
-        {activeWorkout && resumeGoal && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/session', params: {
+        {!activeWorkout && <MicrocycleReviewPrompt routines={routines} />}
+        {activeWorkout && !selectedSession && resumeGoal && <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/session', params: {
           mesocycleId: activeWorkout.mesocycleId, goal: resumeGoal,
           microcycleIndex: String(activeWorkout.microcycleIndex), plannedSessionIndex: String(activeWorkout.plannedSessionIndex),
         } })} style={{ ...surfaces.hero, padding: 20, marginTop: spacing.lg, borderRadius: radius.lg }}>
@@ -215,8 +230,6 @@ export default function TrainHomeScreen() {
           <Text style={{ color: colors.textPrimary, fontSize: 20, fontWeight: '700', marginVertical: 6 }}>{activeWorkout.sessionName ?? t('tabs.train')}</Text>
           <Text style={{ color: colors.textPrimary }}>{t('workout.resume')} →</Text>
         </Pressable>}
-        {domain === 'CARDIO' && <SportActivitiesHome />}
-        {domain === 'STRENGTH' && <>
         {selectedSession !== null ? (
           <View style={{ marginTop: spacing.lg }}>
             <TodayCard
@@ -226,24 +239,24 @@ export default function TrainHomeScreen() {
               routineColor={selectedSession.routine.color}
               muscleLabel={muscleLabel}
               labels={{
-                start: t('home.startWorkout'),
+                start: t(activeWorkout ? 'workout.resume' : 'home.startWorkout'),
                 preview: t('home.previewWorkout'),
                 exercises: t('home.exercises'),
                 sets: t('home.sets'),
               }}
               onPressPreview={() => openSessionDetail(selectedSession.routine,
                 selectedSession.session.plannedSessionIndex,
-                selectedSession.routine.currentMicrocycleIndex)}
+                selectedSession.microcycleIndex)}
               onPressStart={startSession}
             />
           </View>
         ) : status === 'loading' ? (
           <View accessibilityLabel={t('home.routines')} style={{ height: 180, backgroundColor: colors.bgElevated, borderRadius: radius.lg, marginTop: spacing.lg }} />
-        ) : (
+        ) : activeCardio.length === 0 ? (
           <View style={{ marginTop: spacing.lg }}>
             <Text style={[styles.empty, { color: colors.textMuted }]}>{t('home.noSession')}</Text>
           </View>
-        )}
+        ) : null}
 
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.xl }]}>
           {t('home.routines')}
@@ -268,7 +281,7 @@ export default function TrainHomeScreen() {
           </Pressable>
         ) : null}
 
-        {status === 'ready' && routines.length === 0 ? (
+        {status === 'ready' && routines.length === 0 && activeCardio.length === 0 ? (
           <Text style={[styles.empty, { color: colors.textMuted, marginTop: spacing.sm }]}>
             {t('home.noRoutines')}
           </Text>
@@ -277,16 +290,18 @@ export default function TrainHomeScreen() {
         {orderedRoutines.map((routine, index) => (
           <View key={routine.id} style={{ marginTop: spacing.sm }}>
             {/* The one active routine leads; the rest sit under their own label. */}
-            {!routine.isActive && (index === 0 || orderedRoutines[index - 1].isActive) ? (
+            {!routine.isActive && (index === 0 || orderedRoutines[index - 1].isActive) ? (<>{cardioCards}
               <Text
                 style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.md, marginBottom: spacing.xs }]}>
                 {t('home.otherRoutines')}
-              </Text>
+              </Text></>
             ) : null}
             <RoutineCard
               renderSessionList={(sessionRows) => <TrainingCalendarCard sessionRows={sessionRows} mesocycleId={routine.mesocycleId}
                 initialMesocycle={routine.mesocycleSnapshot} onSessionHold={(index) => showDayActions(routine, index)}
                 edgeScroll={dayScroll}
+                cardio={routine.isActive && cardioBlocks.ready && cardioWorkouts.ready && !cardioBlocks.error && !cardioWorkouts.error
+                  ? { routine, blocks: activeCardio, workouts: cardioWorkouts.entries, onOpen: openCardio } : undefined}
                 microcycleIndex={routine.currentMicrocycleIndex} goal={routine.generationGoal} onChanged={reload} />}
               routine={routine}
               expanded={routine.id === expandedId}
@@ -328,6 +343,22 @@ export default function TrainHomeScreen() {
           </View>
         ))}
 
+        {!orderedRoutines.some(routine => !routine.isActive) && cardioCards}
+        {cardioBlocks.entries.some(block => block.userId === uid && block.endedAt !== null) && <>
+          {!orderedRoutines.some(routine => !routine.isActive) && <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.md }]}>{t('home.otherRoutines')}</Text>}
+          {cardioBlocks.entries.filter(block => block.userId === uid && block.endedAt !== null).map(block => <View key={block.id} style={{ marginTop: spacing.sm }}>
+            <CardioRoutineCard block={block} workouts={cardioWorkouts.entries} sports={sportActivities.entries} onOpen={openCardio}
+              expanded={expandedId === `cardio:${block.id}`} onToggle={() => setExpandedRoutineId(expandedId === `cardio:${block.id}` ? '' : `cardio:${block.id}`)}
+              onOpenBlock={cycle => router.push({ pathname: '/cardio-block', params: { id: block.id, cycle: String(cycle) } })} />
+          </View>)}
+        </>}
+        {(activeCardio.length > 1 || cardioWorkouts.entries.filter(w => w.status === 'RUNNING' || w.status === 'PAUSED').length > 1) &&
+          <Text accessibilityRole="alert" style={{ color: colors.textSecondary, marginTop: 12 }}>{t('cardioTraining.conflict')}</Text>}
+        {(cardioBlocks.error || cardioWorkouts.error || sportActivities.error) && <Pressable accessibilityRole="button" accessibilityLabel={t('home.retry')}
+          onPress={() => { cardioBlocks.reload(); cardioWorkouts.reload(); sportActivities.reload(); }} style={{ minHeight: 44, marginTop: 12 }}>
+          <Text accessibilityRole="alert" style={{ color: colors.textSecondary }}>{t('cardioTraining.saveFailed')} · {t('home.retry')}</Text>
+        </Pressable>}
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('home.newRoutine')}
@@ -352,15 +383,16 @@ export default function TrainHomeScreen() {
             + {t('home.emptyWorkout')}
           </Text>
         </Pressable>
-        </>}
+        <SavedCardioPlans />
         <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: spacing.xl, marginBottom: spacing.md }]}>{t('library.tools')}</Text>
         <View style={{ ...surfaces.card, borderRadius: radius.lg, paddingHorizontal: spacing.lg }}>
           {([
             { route: 'exercises', icon: 'books.vertical', label: 'library.title' },
             { route: 'history', icon: 'clock.arrow.circlepath', label: 'workout.history' },
             { route: 'activities', icon: 'figure.run', label: 'sportActivities.title' },
+            { route: 'cardio-health', icon: 'heart.text.square', label: 'cardioHealth.title' },
             { route: 'rehab', icon: 'bandage', label: 'rehab.title' },
-          ] as const).map(({ route, icon, label }, index) => <Pressable key={route} accessibilityRole="button" onPress={() => router.push(`/${route}`)}
+          ] as const).map(({ route, icon, label }, index) => <Pressable key={route} accessibilityRole="button" accessibilityLabel={t(label)} onPress={() => router.push(`/${route}`)}
             style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 64, borderTopWidth: index ? 0.5 : 0, borderTopColor: colors.surfaceBorder }}>
             <SymbolView name={icon} tintColor={colors.textSecondary} size={24} />
             <Text style={{ flex: 1, color: colors.textPrimary, fontSize: 17, fontWeight: '600' }}>{t(label)}</Text>

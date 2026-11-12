@@ -220,6 +220,10 @@ export const Chip = memo(function Chip({
 });
 
 interface StepperProps {
+  /** Section forms share the control geometry without a filled capsule. */
+  plain?: boolean;
+  /** Keep longer availability labels outside the fixed control row. */
+  labelAbove?: boolean;
   label: string;
   value: number;
   min: number;
@@ -237,7 +241,7 @@ interface StepperProps {
  * have a narrow sensible range, and a keyboard would cover the live capacity
  * readout that makes the control worth using.
  */
-export function Stepper({ label, value, min, max, step = 1, unit, onChange }: StepperProps) {
+export function Stepper({ label, value, min, max, step = 1, unit, onChange, labelAbove = false, plain = false }: StepperProps) {
   const { colors, typography, spacing, radius, sectionAccent } = useTheme();
   const decrement = useCallback(
     () => onChange(Math.max(min, value - step)),
@@ -251,21 +255,25 @@ export function Stepper({ label, value, min, max, step = 1, unit, onChange }: St
   const atMax = value >= max;
 
   return (
+    <View style={labelAbove ? { gap: 8 } : undefined}>
+    {labelAbove && <Text style={[typography.body, { color: colors.textPrimary }]}>{label}</Text>}
     <View
       style={{
-        height: STEPPER_HEIGHT,
+        height: labelAbove || plain ? undefined : STEPPER_HEIGHT,
+        minHeight: STEPPER_HEIGHT,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.surface,
-        borderRadius: radius.md,
-        borderWidth: 1,
+        backgroundColor: plain ? 'transparent' : colors.surface,
+        borderRadius: plain ? 0 : radius.md,
+        borderWidth: plain ? 0 : 1,
         borderColor: colors.surfaceBorder,
-        paddingHorizontal: spacing.sm,
+        paddingHorizontal: plain ? 0 : spacing.sm,
+        ...(labelAbove ? { justifyContent: 'center' } : {}),
       }}
     >
-      <Text style={[typography.body, { color: colors.textPrimary, flex: 1, paddingLeft: spacing.sm }]}>
+      {!labelAbove && <Text style={[typography.body, { color: colors.textPrimary, flex: 1, paddingLeft: spacing.sm }]}>
         {label}
-      </Text>
+      </Text>}
       <Pressable
         onPress={decrement}
         disabled={atMin}
@@ -290,6 +298,7 @@ export function Stepper({ label, value, min, max, step = 1, unit, onChange }: St
       >
         <Text style={[typography.h2, { color: colors.textPrimary }]}>+</Text>
       </Pressable>
+    </View>
     </View>
   );
 }

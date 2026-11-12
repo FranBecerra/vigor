@@ -1,6 +1,19 @@
 import Svg, { Circle, Path } from 'react-native-svg';
 import type { IconProps } from './types';
 
+/** Two disciplines joining into one programme; matches the approved Merge symbol. */
+export function ConvergenceIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="M18 21a6 6 0 0 1-6-6V3m3 3-3-3-3 3M6 21a6 6 0 0 0 6-6" />
+  </Svg>;
+}
+
+export function WandIcon({ size = 24, color = 'currentColor' }: IconProps) {
+  return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <Path d="m14 5 5 5L7 22l-5-5L14 5Zm-3 3 5 5M5 2v4M3 4h4m12-3v4m-2-2h4m-1 11v4m-2-2h4" />
+  </Svg>;
+}
+
 export function CheckIcon({ size = 24, color = 'currentColor' }: IconProps) {
   return <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
     <Path d="m5 12 4 4L19 6" />

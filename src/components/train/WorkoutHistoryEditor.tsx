@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { EditorActions } from './EditorActions';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import type { WorkoutSession } from '@/models';
@@ -17,9 +18,9 @@ import { supportsExtensions } from '@/services/training/advancedSets';
 import { SessionEffortInput } from './SessionEffortInput';
 import { sessionEffortValue } from '@/services/training/sessionFeedback';
 
-export function WorkoutHistoryEditor({ session, onSave, onClose, onSavedClose = onClose, inline = false, onDirtyChange, onBusyChange }: {
+export function WorkoutHistoryEditor({ session, onSave, onClose, onSavedClose = onClose, inline = false, onDirtyChange, onBusyChange, afterActions }: {
   session: WorkoutSession; onSave: (draft: HistoryEdit, reviewProgression?: boolean) => Promise<void>; onClose: () => void;
-  inline?: boolean; onDirtyChange?: (dirty: boolean) => void; onBusyChange?: (busy: boolean) => void;
+  afterActions?: ReactNode; inline?: boolean; onDirtyChange?: (dirty: boolean) => void; onBusyChange?: (busy: boolean) => void;
   onSavedClose?: () => void;
 }) {
   const { t } = useTranslation(); const { surfaces, colors, spacing, radius, sectionAccent, semantic, typography } = useTheme();
@@ -46,15 +47,20 @@ export function WorkoutHistoryEditor({ session, onSave, onClose, onSavedClose = 
     finally { saving.current = false; if (mounted.current) setBusy(false); }
   };
   const Container = inline ? View : ScrollView;
-  const actions = <View style={{ flexDirection: 'row', gap: 12, marginVertical: 12 }}>
-    <Pressable accessibilityRole="button" disabled={busy} onPress={onClose} style={{ minHeight: 48, paddingHorizontal: 14, justifyContent: 'center' }}><Text style={{ color: colors.textSecondary, fontSize: 16 }}>{t('generate.cancel')}</Text></Pressable>
-    <Pressable accessibilityRole="button" accessibilityLabel={t('custom.save')} disabled={busy} onPress={() => save()}
-      style={{ minHeight: 48, flex: 1, ...surfaces.primary, backgroundColor: sectionAccent.train, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.onAccent, fontWeight: '700', fontSize: 16 }}>{t('custom.save')}</Text></Pressable>
-  </View>;
+  const cancel = () => {
+    if (busy) return;
+    if (inline || JSON.stringify(draft) === original.current) { onClose(); return; }
+    Alert.alert(t('sharedRoutineEditor.unsaved'), t('sharedRoutineEditor.unsavedHint'), [
+      { text: t('generate.cancel'), style: 'cancel' },
+      { text: t('sharedRoutineEditor.discard'), style: 'destructive', onPress: onClose },
+    ]);
+  };
   const content = <>
     <Container {...(inline ? {} : { keyboardShouldPersistTaps: 'handled' as const, contentContainerStyle: { padding: spacing.lg, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 } })}
       style={{ ...surfaces.screen, backgroundColor: colors.bg }}>
-      {inline ? actions : <Text style={[typography.emphasis, { color: colors.textPrimary }]}>{t('historyEdit.title')}</Text>}
+      {!inline && <Text style={[typography.emphasis, { color: colors.textPrimary, marginBottom: spacing.lg }]}>{t('historyEdit.title')}</Text>}
+      <EditorActions busy={busy} onCancel={cancel} onSave={() => { void save(); }} />
+      {afterActions}
       {inline && <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{t('editorFlow.actuals')}</Text>}
       {inline && <Pressable accessibilityRole="button" accessibilityState={{ expanded: metadataOpen }}
         accessibilityLabel={t('editorFlow.sessionDetails')} disabled={busy} onPress={() => setMetadataOpen(value => !value)}
@@ -132,14 +138,10 @@ export function WorkoutHistoryEditor({ session, onSave, onClose, onSavedClose = 
           style={{ minHeight: 48, justifyContent: 'center' }}><Text style={{ color: colors.accentText }}>+ {t('train.sets')}</Text></Pressable>
       </View>; })}
       {error && <Text accessibilityRole="alert" style={{ color: semantic.danger }}>{t('historyEdit.failed')}</Text>}
-      {!inline && <Pressable accessibilityRole="button" accessibilityLabel={t('custom.save')} disabled={busy} onPress={() => save()}
-        style={{ minHeight: 52, marginTop: 24, ...surfaces.primary, backgroundColor: sectionAccent.train, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.onAccent, fontWeight: '700' }}>{t('custom.save')}</Text></Pressable>
-      }
       {session.mesocycleId && session.plannedSessionIndex !== undefined && <Pressable accessibilityRole="button" accessibilityLabel={t('historyProgression.saveReview')}
         disabled={busy} onPress={() => save(true)} style={{ minHeight: 52, marginTop: 12, justifyContent: 'center', alignItems: 'center' }}>
         <Text style={{ color: colors.accentText, fontWeight: '600' }}>{t('historyProgression.saveReview')}</Text>
       </Pressable>}
-      {!inline && <Pressable accessibilityRole="button" disabled={busy} onPress={onClose} style={{ minHeight: 52, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: colors.textPrimary }}>{t('generate.cancel')}</Text></Pressable>}
     </Container>
     <ActionMenuSheet title={typePicker ? t('prescription.setType') : null} onClose={() => setTypePicker(null)} actions={SELECTABLE_SET_TYPES.map((setType) => ({ label: t(`setType.${setType}`), onPress: () => {
       if (!typePicker) return;
@@ -148,5 +150,5 @@ export function WorkoutHistoryEditor({ session, onSave, onClose, onSavedClose = 
         extensions: supportsExtensions(setType) ? row.extensions?.length ? row.extensions : [{}] : undefined });
     } }))} />
   </>;
-  return inline ? content : <Modal visible animationType="slide" onRequestClose={() => { if (!busy) onClose(); }}>{content}</Modal>;
+  return inline ? content : <Modal visible animationType="slide" onRequestClose={cancel}>{content}</Modal>;
 }
