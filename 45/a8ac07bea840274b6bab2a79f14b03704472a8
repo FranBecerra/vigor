@@ -1,0 +1,245 @@
+docs/audits/2026-11-04-cardio-sections.md
+  s_58860a6dd107b9::t_2b3d28eef4e113 11,13-15
+  s_58860a6dd107b9::t_1352514383cf25 1-10,16-20
+  s_58860a6dd107b9::t_7b41c7e4943c0a 12
+docs/implementation-checklist.md
+  s_58860a6dd107b9::t_2a6835594e0e99 37
+  s_58860a6dd107b9::t_9ebe36cc3273f6 40
+  s_b6a0f22c32fc5f::t_835f9eb6e8dacf 50-51
+  s_58860a6dd107b9::t_f688699590e0c8 26,30
+  s_b6a0f22c32fc5f::t_378a29d37ae53e 122
+  s_58860a6dd107b9::t_1a17b5291b3220 128
+  s_b6a0f22c32fc5f::t_2abc77b551f635 72
+  s_b6a0f22c32fc5f::t_6b0c3cb1a1552a 73
+  s_b6a0f22c32fc5f::t_1f5f1810f9e713 185-186,191-196,210
+  s_58860a6dd107b9::t_84a6d0c4881008 158
+  s_b6a0f22c32fc5f::t_9bfd4d277d61ca 35-36
+  s_58860a6dd107b9::t_397ac966184499 123,138
+  s_58860a6dd107b9::t_070c3efe9ad828 112-113
+  s_b6a0f22c32fc5f::t_c6bd1f091bfcb6 39,43-44,49
+  s_b6a0f22c32fc5f::t_c73fa16e0a55fe 54-57,62-64
+  s_b6a0f22c32fc5f::t_cf5b0a5a2f207e 111
+  s_b6a0f22c32fc5f::t_f14cd291a383ec 220
+  s_b6a0f22c32fc5f::t_970387ef97f8b8 219,221
+  s_58860a6dd107b9::t_78a696c68fe66e 101
+  s_b6a0f22c32fc5f::t_1a769a1d1a1977 118,145-151,162-163,170
+  s_b6a0f22c32fc5f::t_d09cc4c7e82b23 27-28
+  s_b6a0f22c32fc5f::t_f18494fb0c7f0c 23-24
+  s_b6a0f22c32fc5f::t_299405dc9eb2a0 31-32,53
+  s_b6a0f22c32fc5f::t_73b7761ac32680 41
+  s_58860a6dd107b9::t_83e28084417d79 95-100,102-103
+  s_b6a0f22c32fc5f::t_b54ae3768265a8 116
+  s_b6a0f22c32fc5f::t_dc4cc3c7ef9c35 104-105
+  s_b6a0f22c32fc5f::t_41e362b16690bb 29
+  s_58860a6dd107b9::t_7b2cb5ca363985 164-167
+  s_58860a6dd107b9::t_7b41c7e4943c0a 126
+  s_b6a0f22c32fc5f::t_22516e850a4b32 258
+  s_b6a0f22c32fc5f::t_baba1b784d96f0 179
+  s_58860a6dd107b9::t_d65c1c06d91b33 130-131
+  s_58860a6dd107b9::t_e4266db4705dd7 125
+  s_58860a6dd107b9::t_0273339a3f34ed 156
+  s_b6a0f22c32fc5f::t_3e271ec8ddcc51 46-47
+  s_b6a0f22c32fc5f::t_57528dbbc24bb4 152,154,176
+  s_58860a6dd107b9::t_3b2a940eda8581 108-110
+  s_b6a0f22c32fc5f::t_b8a7a1d4fdb4a5 178,181-184,188-190,200-202,206-209
+  s_b6a0f22c32fc5f::t_1d391c9f698655 21-22
+  s_b6a0f22c32fc5f::t_68a2b9179d6f0e 75,93
+  s_b6a0f22c32fc5f::t_d89a6f52036137 203,215-216,261-262
+  s_58860a6dd107b9::t_d8fd78387e2341 67-69,77,80
+  s_58860a6dd107b9::t_9a5edb986075f2 127,135
+  s_b6a0f22c32fc5f::t_0eb4c8aedff31b 61,76
+  s_b6a0f22c32fc5f::t_6a2d394246b829 42
+  s_58860a6dd107b9::t_0b944e1e76443c 129
+  s_b6a0f22c32fc5f::t_4cfa13ba6a9a0b 87
+  s_b6a0f22c32fc5f::t_15a96e52750dda 204,217-218,224-225,227-232,255
+  s_b6a0f22c32fc5f::t_82a858389fc6e6 187,197,199,211-213
+  s_58860a6dd107b9::t_50976d01e2bbcc 66
+  s_b6a0f22c32fc5f::t_2ae22cf2a21066 38
+  s_b6a0f22c32fc5f::t_5e0640a7cfe147 88
+  s_b6a0f22c32fc5f::t_6a79190aa53328 83-84
+  s_b6a0f22c32fc5f::t_5f4fe789059c26 205,222-223,226,256-257
+  s_b6a0f22c32fc5f::t_b62cd2d3b48cdc 114-115
+  s_58860a6dd107b9::t_259fd377fb43c7 16-17,25
+  s_58860a6dd107b9::t_f1ee0bfea63d9e 60
+  s_58860a6dd107b9::t_3e12f6179ef8f6 106
+  s_b6a0f22c32fc5f::t_cac5c94c17556a 86
+  s_b6a0f22c32fc5f::t_5ff5bdf5ee3176 175
+  s_b6a0f22c32fc5f::t_4271070ad0510a 153,174
+  s_b6a0f22c32fc5f::t_e93f2d39de6446 81-82
+  s_b6a0f22c32fc5f::t_5edcf9283931fc 85
+  s_58860a6dd107b9::t_62defe5922b10f 132
+  s_b6a0f22c32fc5f::t_3dae63498160f1 45
+  s_b6a0f22c32fc5f::t_81a104c548e1ac 94
+  s_b6a0f22c32fc5f::t_da9322028a6952 70-71,78
+  s_b6a0f22c32fc5f::t_61318f3bb6af0b 117
+  s_58860a6dd107b9::t_c175ea61a3920e 48
+  s_58860a6dd107b9::t_33d27f6e657562 52
+  s_58860a6dd107b9::t_009f8af4e6f2ce 143-144
+  s_b6a0f22c32fc5f::t_8299db4c574367 180
+  s_58860a6dd107b9::t_50e381409da08a 107,124
+  s_b6a0f22c32fc5f::t_c7b5d390b1638d 171,173
+  s_58860a6dd107b9::t_7cc08872ced768 3,19
+  s_b6a0f22c32fc5f::t_a15bd25f3e41af 33-34
+  s_b6a0f22c32fc5f::t_f7dd502ce434ec 198
+  s_58860a6dd107b9::t_bc610bc5aaa975 65
+  s_b6a0f22c32fc5f::t_16836432d6c677 177
+  s_b6a0f22c32fc5f::t_e20e17f201b746 159-161,172
+  s_58860a6dd107b9::t_7fabb7876e0cfd 119-121,139-142
+  s_b6a0f22c32fc5f::t_dbf95ded739cf6 74,90-91
+  s_58860a6dd107b9::t_9803f3d350e447 157,168-169
+  s_b6a0f22c32fc5f::t_fdb5cec7ec19e4 89,92
+  s_b6a0f22c32fc5f::t_737242b548ff1b 79
+  s_b6a0f22c32fc5f::t_86992ce4036703 7-15,18,20,58-59,133-134,136-137,155,214
+PRD.md
+  s_58860a6dd107b9::t_9ebe36cc3273f6 71
+  s_b6a0f22c32fc5f::t_89ac0745887beb 47-48
+  s_b6a0f22c32fc5f::t_2ae22cf2a21066 62
+  s_b6a0f22c32fc5f::t_f14cd291a383ec 261
+  s_b6a0f22c32fc5f::t_b8a7a1d4fdb4a5 228,295-311
+  s_58860a6dd107b9::t_9a5edb986075f2 129,145
+  s_b6a0f22c32fc5f::t_16836432d6c677 211
+  s_58860a6dd107b9::t_1352514383cf25 137-144,146
+  s_b6a0f22c32fc5f::t_5f4fe789059c26 237,250,257
+  s_b6a0f22c32fc5f::t_d89a6f52036137 279-280
+  s_b6a0f22c32fc5f::t_2c6ee3f0129e13 61
+  s_b6a0f22c32fc5f::t_21604a0955801c 43-44
+  s_b6a0f22c32fc5f::t_1a769a1d1a1977 158,213-214,216-222,224-226
+  s_b6a0f22c32fc5f::t_7ec1743874c8f1 1666
+  s_b6a0f22c32fc5f::t_3340673d4fff4f 59-60,63-68,72,74
+  s_b6a0f22c32fc5f::t_0eb4c8aedff31b 51-52,1691
+  s_b6a0f22c32fc5f::t_f18494fb0c7f0c 23-24
+  s_b6a0f22c32fc5f::t_e20e17f201b746 181-182
+  s_58860a6dd107b9::t_56f004356625a8 78
+  s_58860a6dd107b9::t_62defe5922b10f 147-148,152-156
+  s_58860a6dd107b9::t_7cc08872ced768 11
+  s_b6a0f22c32fc5f::t_970387ef97f8b8 262
+  s_58860a6dd107b9::t_7fabb7876e0cfd 111-114,116-119,136
+  s_58860a6dd107b9::t_50e381409da08a 77,79-87
+  s_58860a6dd107b9::t_7b2cb5ca363985 157,163,205
+  s_b6a0f22c32fc5f::t_d09cc4c7e82b23 16-20
+  s_b6a0f22c32fc5f::t_82a858389fc6e6 293-294
+  s_b6a0f22c32fc5f::t_0c9a5405f0dfe9 252,254,256,258,260
+  s_b6a0f22c32fc5f::t_24cf0587a3b62e 50
+  s_b6a0f22c32fc5f::t_c8ac8523c33825 267
+  s_58860a6dd107b9::t_7f468108d933d3 151
+  s_b6a0f22c32fc5f::t_73b7761ac32680 73
+  s_b6a0f22c32fc5f::t_7a3d65e6ec9d69 183-194
+  s_b6a0f22c32fc5f::t_dc4cc3c7ef9c35 75-76,88-94
+  s_b6a0f22c32fc5f::t_c3bacb22f9410f 207
+  s_b6a0f22c32fc5f::t_22516e850a4b32 255
+  s_b6a0f22c32fc5f::t_57528dbbc24bb4 197-204,206,208-210,212,215,223
+  s_b6a0f22c32fc5f::t_6b0c3cb1a1552a 53-54
+  s_b6a0f22c32fc5f::t_df76d106eadc50 41-42
+  s_58860a6dd107b9::t_524c9950d14bee 1806,1808
+  s_b6a0f22c32fc5f::t_5f50f1d6d0d39f 229-236
+  s_b6a0f22c32fc5f::t_3dae63498160f1 69-70
+  s_b6a0f22c32fc5f::t_1d391c9f698655 21-22
+  s_b6a0f22c32fc5f::t_15a96e52750dda 251,259
+  s_b6a0f22c32fc5f::t_a38031be0351fa 33,56-57
+  s_58860a6dd107b9::t_009f8af4e6f2ce 127-128
+  s_58860a6dd107b9::t_397ac966184499 135
+  s_58860a6dd107b9::t_e4266db4705dd7 115,130-134
+  s_58860a6dd107b9::t_d8fd78387e2341 1,29-30,1649-1653,1655-1665,1667-1690,1692-1707,1720,1730,1733,1736,1742-1744,1760-1762,1825-1827
+  s_b6a0f22c32fc5f::t_5ab426681e76fe 55,58
+  s_b6a0f22c32fc5f::t_24e4a384028c9c 45-46
+  s_b6a0f22c32fc5f::t_39e9055fb476a9 165-180
+  s_58860a6dd107b9::t_f1ee0bfea63d9e 35,49
+  s_b6a0f22c32fc5f::t_b62cd2d3b48cdc 103-104,106,108-110
+  s_58860a6dd107b9::t_d65c1c06d91b33 120-126
+  s_b6a0f22c32fc5f::t_f3c36f9e5d8e02 263-266,268-278
+  s_b6a0f22c32fc5f::t_1f5f1810f9e713 313
+  s_b6a0f22c32fc5f::t_41e362b16690bb 13-14
+  s_b6a0f22c32fc5f::t_0f81fca8ebc5c0 253
+  s_b6a0f22c32fc5f::t_baba1b784d96f0 227
+  s_58860a6dd107b9::t_83e28084417d79 95-102,105,107
+  s_58860a6dd107b9::t_84a6d0c4881008 238-249
+  s_b6a0f22c32fc5f::t_c73fa16e0a55fe 31-32,34,36-40
+  s_b6a0f22c32fc5f::t_f7dd502ce434ec 281-292
+  s_b6a0f22c32fc5f::t_5ff5bdf5ee3176 195-196
+  s_b6a0f22c32fc5f::t_6c296911a2d88f 3-10,12,15,25-28,149-150,159-162,164,312
+docs/audits/2026-11-06-strategic-product-review.md
+  s_58860a6dd107b9::t_524c9950d14bee 10,12
+  s_58860a6dd107b9::t_116832ebdd806c 1-9,11,13-32
+docs/audits/2026-11-04-joint-structure.md
+  s_58860a6dd107b9::t_7b2cb5ca363985 13-18
+  s_58860a6dd107b9::t_84a6d0c4881008 1-12,19-22
+docs/audits/2026-11-03-cardio-spacing.md
+  s_b6a0f22c32fc5f::t_39e9055fb476a9 1-22,29-30
+  s_b6a0f22c32fc5f::t_e20e17f201b746 23-28
+docs/audits/2026-11-03-expandable-hybrid-review.md
+  s_b6a0f22c32fc5f::t_c3bacb22f9410f 15
+  s_b6a0f22c32fc5f::t_57528dbbc24bb4 1-9,11-14,16-30
+  s_b6a0f22c32fc5f::t_16836432d6c677 10,31-37
+docs/audits/2026-11-03-training-generator-redesign.md
+  s_b6a0f22c32fc5f::t_1a769a1d1a1977 1-39
+  s_b6a0f22c32fc5f::t_baba1b784d96f0 45
+  s_b6a0f22c32fc5f::t_8299db4c574367 40-44,46-47
+docs/audits/2026-11-04-cardio-wand.md
+  s_58860a6dd107b9::t_1a17b5291b3220 11-16
+  s_b6a0f22c32fc5f::t_764e14ef1ce8b0 1-10,17-18
+docs/audits/2026-11-02-training-feedback.md
+  s_b6a0f22c32fc5f::t_1f5f1810f9e713 41-42
+  s_b6a0f22c32fc5f::t_82a858389fc6e6 12-17
+  s_b6a0f22c32fc5f::t_1ca9de913f9ae3 36-40,43-44
+  s_b6a0f22c32fc5f::t_d118a655d86403 3-11,19
+  s_b6a0f22c32fc5f::t_bd5ef42fe6e6bb 18
+  s_b6a0f22c32fc5f::t_b8a7a1d4fdb4a5 1-2,20-35
+docs/audits/2026-11-04-hybrid-authoring-return.md
+  s_58860a6dd107b9::t_b71d8237c41006 40-41
+  s_b6a0f22c32fc5f::t_0c0a6478780578 1-16,18-22,26-28,32-33
+  s_58860a6dd107b9::t_7f7a4eca924126 39
+  s_58860a6dd107b9::t_7f468108d933d3 34-38
+  s_58860a6dd107b9::t_cd1145c4f6ecba 17,23-25
+  s_58860a6dd107b9::t_0b944e1e76443c 29-31
+AGENTS.md
+  s_b6a0f22c32fc5f::t_378a29d37ae53e 36-37
+  s_58860a6dd107b9::t_7fabb7876e0cfd 31-35
+  s_b6a0f22c32fc5f::t_8b0902e340b2aa 21-30
+docs/audits/2026-11-02-recurring-activities.md
+  s_b6a0f22c32fc5f::t_f3c36f9e5d8e02 1-16,18
+  s_b6a0f22c32fc5f::t_d89a6f52036137 17,19-26
+docs/audits/2026-11-03-planning-history.md
+  s_b6a0f22c32fc5f::t_5ff5bdf5ee3176 24-34
+  s_b6a0f22c32fc5f::t_4271070ad0510a 20-23
+  s_b6a0f22c32fc5f::t_7a3d65e6ec9d69 1-19,35-36
+docs/audits/2026-11-10-cardio-home-integration.md
+  s_b6a0f22c32fc5f::t_41e362b16690bb 32
+  s_58860a6dd107b9::t_7cc08872ced768 5,33-36
+  s_b6a0f22c32fc5f::t_2c20199eeebc80 1-4,6-31
+docs/audits/2026-11-02-hybrid-capacity.md
+  s_b6a0f22c32fc5f::t_5f4fe789059c26 25-29
+  s_b6a0f22c32fc5f::t_a2c2ec197f2264 1-24
+docs/audits/2026-11-04-authoring-feedback.md
+  s_58860a6dd107b9::t_009f8af4e6f2ce 1-23
+docs/audits/2026-11-02-hybrid-authoring.md
+  s_b6a0f22c32fc5f::t_970387ef97f8b8 27-28
+  s_b6a0f22c32fc5f::t_f14cd291a383ec 26
+  s_b6a0f22c32fc5f::t_22516e850a4b32 1-15,17,19,30
+  s_b6a0f22c32fc5f::t_3d2dff44a10062 20-21
+  s_b6a0f22c32fc5f::t_15a96e52750dda 16,18,22-25
+  s_b6a0f22c32fc5f::t_94a5dfd1e602c3 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "45a8ac07bea840274b6bab2a79f14b03704472a8",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
