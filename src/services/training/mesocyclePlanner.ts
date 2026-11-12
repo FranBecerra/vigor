@@ -27,7 +27,7 @@ import {
   type VolumePlan,
   type VolumePlanInput,
 } from './volumePlan';
-import { createRandom, hypertrophyDominates, remainingVolumeUtility, selectExercises, summarizeSelection, directVolumeFloor, type RankingPolicy, type SelectionResult } from './exerciseSelection';
+import { createRandom, generationCandidates, hypertrophyDominates, remainingVolumeUtility, selectExercises, summarizeSelection, directVolumeFloor, type RankingPolicy, type SelectionResult } from './exerciseSelection';
 import { criteriaOf } from './exerciseCatalogue';
 import {
   SESSION_OVERHEAD_MINUTES,
@@ -347,6 +347,7 @@ export function completeDoseWithinCapacity(input: MesocyclePlanInput, baseline: 
   let best = baseline;
   const targets = new Map(baseline.uncappedPlan.muscles.map((muscle) => [muscle.muscle, muscle.meav]));
   const ceiling = TOTAL_SETS_RANGE[input.goal][input.level][1];
+  const eligibleCatalogue = generationCandidates(input.catalogue, input.goal);
   let evaluated = 0;
   for (let iteration = 0; iteration < 12 && best.selection.performedSets < ceiling; iteration++) {
     const attributed = new Map(Object.entries(best.selection.attributedByMuscle) as [import('@/models').MuscleGroup, number][]);
@@ -359,7 +360,7 @@ export function completeDoseWithinCapacity(input: MesocyclePlanInput, baseline: 
         if (useful > 0) proposals.push({ exercise: entry.exercise, sets: 1, sessionIndex,
           score: useful / Math.max(1, exerciseMinutes(entry.exercise, entry.sets + 1) - exerciseMinutes(entry.exercise, entry.sets)) });
       }
-      for (const exercise of input.catalogue) {
+      for (const exercise of eligibleCatalogue) {
         if (used.has(exercise.id) || exercise.generationTier === ExerciseGenerationTier.MANUAL_ONLY
           || exercise.generationTier === ExerciseGenerationTier.STRENGTH_VARIANT
           || exercise.generationTier === ExerciseGenerationTier.FALLBACK) continue;
@@ -444,7 +445,7 @@ function* mesocycleVariation(input: MesocyclePlanInput, baseline: MesocyclePlan)
     yield;
     const outgoing = baseline.distribution.sessions[position.sessionIndex].exercises[position.order];
     const used = new Set(best.selection.selected.map((entry) => entry.exercise.id));
-    const alternatives = input.catalogue.filter((exercise) => !used.has(exercise.id)
+    const alternatives = generationCandidates(input.catalogue, input.goal).filter((exercise) => !used.has(exercise.id)
       && exercise.generationTier !== ExerciseGenerationTier.MANUAL_ONLY
       && exercise.generationTier !== ExerciseGenerationTier.STRENGTH_VARIANT
       && (exercise.generationTier !== ExerciseGenerationTier.FALLBACK

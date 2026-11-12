@@ -18,7 +18,7 @@ export function formatWorkoutTime(seconds: number): string {
 
 /** Legacy drafts can still resume by resolving their routine's goal. */
 export function latestUnfinishedWorkout(sessions: readonly WorkoutSession[]): WorkoutSession | null {
-  return [...sessions].filter((session) => session.completedAt === undefined && session.exercises.length > 0
+  return [...sessions].filter((session) => session.completedAt === undefined && session.discardedAt === undefined && session.exercises.length > 0
     && !!session.mesocycleId && Number.isInteger(session.microcycleIndex) && session.microcycleIndex >= 0
     && Number.isInteger(session.plannedSessionIndex) && session.plannedSessionIndex! >= 0)
     .sort((a, b) => timestampMillis(b.performedAt) - timestampMillis(a.performedAt))[0] ?? null;

@@ -127,6 +127,14 @@ export interface RoutineGenerationInput {
 }
 
 export interface Routine {
+  /** Explicit authoring linkage; not an activated cardio block or performed work. */
+  hybrid?: {
+    policy: 'HYBRID_AUTHORING_V1';
+    cardioPlanId: string;
+    priority: 'STRENGTH' | 'BALANCED' | 'CARDIO';
+    totalMinutesPerCycle: number;
+    maxSessionMinutes: number;
+  };
   id: string;
   userId: string;
   name: string;

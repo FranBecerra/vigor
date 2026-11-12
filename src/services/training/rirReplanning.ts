@@ -1,8 +1,10 @@
-import { SetType, type PlannedExercise, type PlannedSession } from '@/models';
-import { deloadSets, reloadForRIR } from './microcyclePrescription';
+import { SetType, type PlannedExercise, type PlannedSession, type PlannedSet } from '@/models';
+import { deloadSetIndices, deloadSets, reloadForRIR } from './microcyclePrescription';
 
 export interface ProgressionStep { index: number; session: PlannedSession; isDeload?: boolean }
 const bounded = (rir: number) => Math.max(0, Math.min(5, Math.round(rir)));
+const setSignature = (set: PlannedSet) => JSON.stringify([set.setType, set.targetRepsMin ?? set.targetReps,
+  set.targetReps, set.targetRIR, set.targetWeightKg, set.targetDurationSeconds, set.targetLoadLevel]);
 const signature = (exercise: PlannedExercise) => JSON.stringify({
   id: exercise.exerciseId, rest: exercise.restSeconds,
   sets: exercise.sets.map((set) => [set.setType, set.targetRepsMin ?? set.targetReps, set.targetReps, set.targetRIR, set.targetDurationSeconds, set.targetLoadLevel]),
@@ -38,7 +40,16 @@ export function replanSessionRIR(steps: readonly ProgressionStep[], edited: Plan
     if (exercise.sets.every((set) => set.targetDurationSeconds !== undefined)) return { ...exercise, sets: exercise.sets.map((set) => ({ ...set })) };
     if (index === deload) {
       const accumulated = project(exercise, lastAccumulation);
-      return { ...accumulated, sets: deloadSets(accumulated.sets) };
+      const sets = deloadSets(accumulated.sets);
+      const sameStructure = old && old.sets.length === exercise.sets.length
+        && old.sets.every((set, row) => set.setType === exercise.sets[row].setType);
+      // A change in one row must not rebuild an untouched row's existing deload.
+      // Structural edits keep the full deload transform, since row pairing is then ambiguous.
+      const sourceRows = deloadSetIndices(accumulated.sets);
+      return { ...accumulated, sets: sameStructure && future?.sets.length === sets.length
+        ? sets.map((set, row) => setSignature(old.sets[sourceRows[row]]) === setSignature(exercise.sets[sourceRows[row]])
+          ? { ...future.sets[row] } : set)
+        : sets };
     }
     const end = final?.exercises.find((entry) => entry.exerciseId === exercise.exerciseId);
     const fraction = Math.min(1, Math.max(0, (index - start) / Math.max(1, lastAccumulation - start)));

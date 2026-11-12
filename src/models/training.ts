@@ -34,6 +34,8 @@ export interface Mesocycle {
   id: string;
   userId: string;
   status: MesocycleStatus;
+  /** Atomic receipt for the single reviewed successor of this block. */
+  continuation?: { successorId: string; microcycles: number; repSuggestions: string[] };
   /**
    * Routine this mesocycle was instantiated from.
    *

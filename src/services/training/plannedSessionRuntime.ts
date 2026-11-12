@@ -20,6 +20,10 @@ export function plannedMicrocycleDocumentId(mesocycleId: string, microcycleIndex
   return `${mesocycleId}:m${microcycleIndex}`;
 }
 
+export function plannedSetId(sessionIndex: number, exerciseOrder: number, setIndex: number): string {
+  return `${sessionIndex}:${exerciseOrder}:${setIndex}`;
+}
+
 /** Resolves a session's catalogue references in prescription order. */
 export function exercisesForPlannedSession(
   session: PlannedSession,
@@ -38,7 +42,7 @@ export function initialSetsForPlannedSession(session: PlannedSession): SessionSe
     .sort((a, b) => a.order - b.order)
     .forEach((exercise) => {
       state[exercise.exerciseId] = exercise.sets.map((set, index) => ({
-        id: `${session.index}:${exercise.order}:${index}`,
+        id: plannedSetId(session.index, exercise.order, index),
         setType: set.setType,
         targetWeight: set.targetWeightKg ?? 0,
         targetReps: set.targetReps,

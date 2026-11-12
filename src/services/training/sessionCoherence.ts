@@ -3,6 +3,7 @@ import { ExperienceLevel, MovementVector, MuscleGroup, type Exercise, type Plann
 import type { DistributedSession } from './sessionDistribution';
 import type { SessionFocus } from './sessionDistribution';
 import { LOWER_BODY_MUSCLES as lower } from './muscleGroups';
+import { sessionSplitAdherence } from './splitAdherence';
 
 const press = new Set([MovementVector.PUSH_HORIZONTAL, MovementVector.PUSH_VERTICAL]);
 const pull = new Set([MovementVector.PULL_HORIZONTAL, MovementVector.PULL_VERTICAL]);
@@ -28,9 +29,13 @@ const side = ({ primaryMuscle: m, movementVector: v }: Exercise): 'push' | 'pull
  * only is pull, and a mix is upper or full body depending on lower work.
  * Core, lumbar, forearm and neck work never decide it.
  */
-export function sessionPresentationFocus(session: DistributedSession): SessionFocus {
+export function sessionPresentationFocus(session: DistributedSession, preferIntendedFocus = false): SessionFocus {
   const work = session.exercises.map((e) => e.exercise).filter((e) => !neutral.has(e.primaryMuscle));
   if (work.length === 0) return session.focus;
+  // Reuse the disclosed light-spillover definition (at most two exercises and
+  // 25% of sets). Explicit slots remain recognizable, but not at any cost.
+  if (preferIntendedFocus && session.focus !== 'FULL_BODY'
+    && sessionSplitAdherence(session)?.light !== false) return session.focus;
   const hasLower = work.some((e) => lower.has(e.primaryMuscle));
   const hasUpper = work.some((e) => !lower.has(e.primaryMuscle));
   if (!hasUpper) return session.focus === 'LEGS' ? 'LEGS' : 'LOWER';
@@ -42,12 +47,15 @@ export function sessionPresentationFocus(session: DistributedSession): SessionFo
 
 /** Same naming for a saved session, so routines stored with an older label read correctly. */
 export function plannedPresentationFocus(session: PlannedSession,
-  exerciseById: ReadonlyMap<string, Exercise>): PlannedSessionFocus {
+  exerciseById: ReadonlyMap<string, Exercise>, preferIntendedFocus = false): PlannedSessionFocus {
   const exercises = session.exercises.flatMap((entry) => {
-    const exercise = exerciseById.get(entry.exerciseId);
+    const exercise = entry.exerciseSnapshot ?? exerciseById.get(entry.exerciseId);
     return exercise ? [{ exercise, sets: entry.sets.length }] : [];
   });
-  return sessionPresentationFocus({ index: session.index, focus: session.focus, estimatedWorkMinutes: 0, exercises });
+  // Unknown catalogue entries must not make a saved slot look more coherent
+  // than it is. Keep its label until all work can be classified.
+  if (exercises.length !== session.exercises.length) return session.focus;
+  return sessionPresentationFocus({ index: session.index, focus: session.focus, estimatedWorkMinutes: 0, exercises }, preferIntendedFocus);
 }
 
 export interface CoherenceFinding { code: string; subject?: string; actual: number; limit: number }

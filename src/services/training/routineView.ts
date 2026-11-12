@@ -52,7 +52,7 @@ export interface SessionExerciseView {
   primaryMuscle: MuscleGroup;
   primaryMuscles?: MuscleGroup[];
   secondaryMuscles: MuscleGroup[];
-  sets: { setType: SetType; targetRIR?: number }[];
+  sets: { setType: SetType; targetRIR?: number; targetReps?: number; targetRepsMin?: number; targetDurationSeconds?: number }[];
   restSeconds: number;
   /** Prescribed repetition range, for the preview. */
   repRange: string;
@@ -93,6 +93,7 @@ export interface MicrocycleView {
 }
 
 export interface RoutineView {
+  hybrid?: Routine['hybrid'];
   /** Already-loaded metadata keeps workout/rest rows in the first home render. */
   mesocycleSnapshot?: Mesocycle;
   durationFeedback?: ReturnType<typeof durationCalibration>;
@@ -231,7 +232,9 @@ function toExerciseView(
     ...(exercise.recording?.measure === 'SECONDS' ? { isTimed: true } : {}),
     ...(exercise.recording?.measure === 'SECONDS' ? { excludeFromVolume: true } : {}),
     secondaryMuscles: [...exercise.secondaryMuscles],
-    sets: planned.sets.map((set) => ({ setType: set.setType, targetRIR: set.targetRIR })),
+    sets: planned.sets.map((set) => ({ setType: set.setType, targetRIR: set.targetRIR, targetReps: set.targetReps,
+      ...(set.targetRepsMin === undefined ? {} : { targetRepsMin: set.targetRepsMin }),
+      ...(set.targetDurationSeconds === undefined ? {} : { targetDurationSeconds: set.targetDurationSeconds }) })),
     restSeconds: planned.restSeconds ?? restDurationFor(exercise.profile),
     repRange: last.targetDurationSeconds !== undefined ? `${last.targetDurationSeconds}s` : min < max ? formatRepRange({ min, max }) : `${max}`,
     targetRIR: Math.min(...effort.map((set) => set.targetRIR)),
@@ -255,8 +258,8 @@ export function toRoutineView(
   const planned = [...(mesocycle?.plannedSessions ?? [])].sort((a, b) => a.index - b.index);
   if (mesocycle === null || planned.length === 0) return null;
 
-  const names = sessionNames(routine.generation.goal === TrainingGoal.HYPERTROPHY && routine.generation.split === SplitStructure.AUTO
-    ? planned.map((session) => ({ ...session, focus: plannedPresentationFocus(session, exerciseById) }))
+  const names = sessionNames(routine.generation.goal === TrainingGoal.HYPERTROPHY
+    ? planned.map((session) => ({ ...session, focus: plannedPresentationFocus(session, exerciseById, routine.generation.split !== SplitStructure.AUTO) }))
     : planned, labels.focus);
   const storedCurrent = mesocycle.currentMicrocycleIndex;
   const count = Math.max(mesocycle.projectedMicrocycles ?? DEFAULT_PROJECTED_MICROCYCLES, storedCurrent + 1);
@@ -328,6 +331,7 @@ export function toRoutineView(
   return {
     ...(durationFeedback.sampleCount ? { durationFeedback } : {}),
     id: routine.id,
+    ...(routine.hybrid ? { hybrid: routine.hybrid } : {}),
     mesocycleSnapshot: mesocycle,
     mesocycleId: mesocycle.id,
     name: routine.name,

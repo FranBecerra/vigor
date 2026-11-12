@@ -49,15 +49,24 @@ export function reloadForRIR(kg: number, reps: number, fromRIR: number, toRIR: n
   return roundLoad((kg * (1 + (reps + fromRIR) / 30)) / (1 + (reps + toRIR) / 30));
 }
 
-export function deloadSets(sets: readonly PlannedSet[]): PlannedSet[] {
+/** Source-row identity survives removed singles and reduced work sets. */
+export function deloadSetIndices(sets: readonly PlannedSet[]): number[] {
   // The heavy single is exposure to near-maximal load, the one thing a deload removes.
   const working = sets.filter((set) => set.setType !== SetType.TOP_SINGLE && set.setType !== SetType.WARMUP);
   const kept = Math.round(working.length * DELOAD_SET_FACTOR) || (working.length ? 1 : 0);
   let count = 0;
-  return sets.flatMap((set) => {
+  return sets.flatMap((set, index) => {
     if (set.setType === SetType.TOP_SINGLE) return [];
-    if (set.setType === SetType.WARMUP) return [{ ...set }];
+    if (set.setType === SetType.WARMUP) return [index];
     if (count++ >= kept) return [];
+    return [index];
+  });
+}
+
+export function deloadSets(sets: readonly PlannedSet[]): PlannedSet[] {
+  return deloadSetIndices(sets).map(index => {
+    const set = sets[index];
+    if (set.setType === SetType.WARMUP) return { ...set };
     const deloaded: PlannedSet = {
       ...set,
       setType: SetType.NORMAL,
@@ -66,7 +75,7 @@ export function deloadSets(sets: readonly PlannedSet[]): PlannedSet[] {
     if (set.targetWeightKg !== undefined) {
       deloaded.targetWeightKg = roundLoad(set.targetWeightKg * DELOAD_LOAD_FACTOR);
     }
-    return [deloaded];
+    return deloaded;
   });
 }
 

@@ -392,6 +392,30 @@ export function hypertrophyPriorityLayers(exercises: readonly Exercise[]): Map<s
 }
 
 /**
+ * Do not fill a second variant slot with poorly progressable work when an
+ * eligible, clearly superior version solves the identical task. This is a
+ * narrow catalogue preference, not a ban on bands or a measured effect size.
+ * Compare the original eligible pool, including already chosen alternatives,
+ * so consuming the better candidate does not create a redundant lottery ticket.
+ */
+export function generationCandidates(catalogue: readonly Exercise[], goal: TrainingGoal): Exercise[] {
+  const eligible = catalogue.filter((exercise) => exercise.generationTier !== ExerciseGenerationTier.STRENGTH_VARIANT
+    && exercise.generationTier !== ExerciseGenerationTier.MANUAL_ONLY);
+  if (goal !== TrainingGoal.HYPERTROPHY) return eligible;
+  const sameSet = (a: readonly string[], b: readonly string[]) => {
+    const left = new Set(a); const right = new Set(b);
+    return left.size === right.size && [...left].every((value) => right.has(value));
+  };
+  return eligible.filter((exercise) => !exercise.criteria || exercise.criteria.loadProgressability >= 2
+    || !eligible.some((alternative) => alternative.criteria && alternative.criteria.loadProgressability >= 3
+      && alternative.generationTier !== ExerciseGenerationTier.FALLBACK
+      && alternative.profile === exercise.profile && alternative.movementVector === exercise.movementVector
+      && sameSet(alternative.secondaryMuscles, exercise.secondaryMuscles)
+      && sameSet(alternative.stimulusTags ?? [], exercise.stimulusTags ?? [])
+      && hypertrophyDominates(alternative, exercise)));
+}
+
+/**
  * Fallback exercises stay available when equipment/vetoes leave no standard
  * alternative, but never displace a standard option by random chance.
  */
@@ -517,10 +541,7 @@ export function selectExercises(input: SelectionInput): SelectionResult {
     const rank = input.deterministicAlternative?.position === position++ ? input.deterministicAlternative.rank : 0;
     return [...candidates].sort((a, b) => score(b) - score(a) || a.id.localeCompare(b.id))[Math.min(rank, candidates.length - 1)];
   };
-  const pool = input.catalogue.filter(
-    (exercise) => exercise.generationTier !== ExerciseGenerationTier.STRENGTH_VARIANT &&
-      exercise.generationTier !== ExerciseGenerationTier.MANUAL_ONLY,
-  );
+  const pool = generationCandidates(input.catalogue, input.volumePlan.goal);
   const maxExercisesPerMuscle =
     input.timeConstrained === true
       ? Math.min(config.maxExercisesPerMuscle, config.maxExercisesPerMuscleWhenTimeConstrained)

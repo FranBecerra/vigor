@@ -58,7 +58,7 @@ export const DEFAULT_TARGET_REPS = 10;
 
 /** Optional inputs that only some plans have. */
 export interface PlannedSessionOptions {
-  /** Keep an explicit split's intended label; disclose any spillover separately. */
+  /** Prefer an explicit slot's label only while its spillover remains light. */
   preserveFocus?: boolean;
   /**
    * Estimated 1RM per exercise, from the athlete's history. Only then does a
@@ -106,7 +106,7 @@ export function toPlannedSession(
 ): PlannedSession {
   return {
     index: session.index,
-    focus: (goal === TrainingGoal.HYPERTROPHY && !options.preserveFocus ? sessionPresentationFocus(session) : session.focus) as PlannedSessionFocus,
+    focus: (goal === TrainingGoal.HYPERTROPHY ? sessionPresentationFocus(session, options.preserveFocus) : session.focus) as PlannedSessionFocus,
     estimatedWorkMinutes: session.estimatedWorkMinutes,
     exercises: session.exercises.map((entry, order): PlannedExercise => {
       if (entry.strength !== undefined) {
@@ -223,11 +223,22 @@ export function normalizeRoutineName(raw: string): string | null {
 /** Long enough for a descriptive name, short enough for one line on a card. */
 export const MAX_ROUTINE_NAME_LENGTH = 40;
 
+/** Smallest free structure-based name; suffix fits within the same storage limit. */
+export function suggestedRoutineName(structure: string, existingNames: readonly string[]): string {
+  const base = normalizeRoutineName(structure) ?? 'Routine';
+  const taken = new Set(existingNames.map(name => normalizeRoutineName(name)?.toLocaleLowerCase()));
+  if (!taken.has(base.toLocaleLowerCase())) return base;
+  for (let index = 2; ; index++) {
+    const suffix = ` #${index}`;
+    const candidate = `${base.slice(0, MAX_ROUTINE_NAME_LENGTH - suffix.length).trimEnd()}${suffix}`;
+    if (!taken.has(candidate.toLocaleLowerCase())) return candidate;
+  }
+}
+
 export type RoutineNameProblem = 'empty' | 'duplicate';
 
 /**
- * Why a name cannot be used, or null when it can. A routine has no default name:
- * three routines all called "My routine" cannot be told apart on the home. Names
+ * Why a name cannot be used, or null when it can. Generated defaults are unique. Names
  * compare case-insensitively after normalising, so "Fuerza" and " fuerza " clash.
  */
 export function routineNameProblem(

@@ -38,6 +38,14 @@ export function nextExerciseAfterCompletion(order: readonly string[], sets: Sess
   return null;
 }
 
+/** Optional warmups do not prevent an exercise with all working sets done from being marked complete. */
+export function completedWorkoutExerciseIds(order: readonly string[], sets: SessionSetsByExercise): string[] {
+  return order.filter(id => {
+    const working = (sets[id] ?? []).filter(row => row.setType !== SetType.WARMUP);
+    return working.length > 0 && working.every(isLiveSetCompleted);
+  });
+}
+
 /** Keep editable numeric drafts empty and canonicalize accidental leading zeros. */
 export function editNumericDraft(text: string, key: string, decimal: boolean): string {
   if (key === 'clear') return '';

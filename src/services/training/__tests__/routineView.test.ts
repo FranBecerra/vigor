@@ -25,6 +25,27 @@ const LABELS = {
   goal: (goal: string) => `goal:${goal}`,
 };
 
+it('uses truthful explicit-split names without rewriting custom names or saved rests', () => {
+  const exercise = BY_ID.get('abduccion-cadera-maquina')!;
+  const upperIds = ['press-banca', 'jalon-al-pecho'];
+  const planned: PlannedSession = { index: 0, focus: 'LOWER', estimatedWorkMinutes: 20,
+    exercises: upperIds.map((exerciseId, order) => ({ exerciseId, order, isEdited: false, restSeconds: order ? 0 : 90,
+      sets: [{ setType: SetType.NORMAL, targetReps: 10, targetRIR: 2 }] })) };
+  const r = routine(); r.generation.split = SplitStructure.UPPER_LOWER;
+  const m = mesocycle('r1-m0', { plannedSessions: [planned] });
+  const snapshot = JSON.stringify(m);
+  const view = toRoutineView(r, m, BY_ID, LABELS)!;
+  expect(view.microcycles[0].sessions[0].name).toBe('upper');
+  expect(view.microcycles[0].sessions[0].exercises.map((entry) => entry.restSeconds)).toEqual([90, 0]);
+  expect(JSON.stringify(m)).toBe(snapshot);
+  expect(toRoutineView(r, { ...m, plannedSessions: [{ ...planned, name: 'My custom day' }] }, BY_ID, LABELS)!
+    .microcycles[0].sessions[0].name).toBe('My custom day');
+  const isolation = { ...planned, focus: 'LOWER' as const,
+    exercises: [{ ...planned.exercises[0], exerciseId: exercise.id, restSeconds: undefined }] };
+  expect(toRoutineView(r, { ...m, plannedSessions: [isolation] }, BY_ID, LABELS)!
+    .microcycles[0].sessions[0].exercises[0].restSeconds).toBe(120);
+});
+
 it('audits the home read critical path without confusing parallel queries with serial stages', async () => {
   jest.useFakeTimers();
   const sleep = <T,>(ms: number, result: T) => new Promise<T>(resolve => setTimeout(() => resolve(result), ms));

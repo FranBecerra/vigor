@@ -8,6 +8,18 @@ import type { DistributedSession } from '../sessionDistribution';
 const session = (focus: DistributedSession['focus'], ids: string[]): DistributedSession => ({ index: 0, focus,
   estimatedWorkMinutes: 20, exercises: ids.map((id) => ({ exercise: EXERCISE_CATALOGUE.find((e) => e.id === id)!, sets: 3 })) });
 const targets = new Set([MuscleGroup.CHEST, MuscleGroup.LATS, MuscleGroup.QUADS]);
+it('keeps explicit labels for small supplements, but not disguised full-body or opposite-body sessions', () => {
+  const light = session('UPPER', ['press-banca', 'jalon-al-pecho', 'curl-barra', 'sentadilla-libre']);
+  expect(sessionPresentationFocus(light, true)).toBe('UPPER');
+  expect(toPlannedSession(light, TrainingGoal.HYPERTROPHY, false, { preserveFocus: true }).focus).toBe('UPPER');
+  const mixed = session('UPPER', ['press-banca', 'jalon-al-pecho', 'sentadilla-libre']);
+  expect(sessionPresentationFocus(mixed, true)).toBe('FULL_BODY');
+  expect(toPlannedSession(mixed, TrainingGoal.HYPERTROPHY, false, { preserveFocus: true }).focus).toBe('FULL_BODY');
+  expect(sessionPresentationFocus(session('LOWER', ['press-banca', 'jalon-al-pecho']), true)).toBe('UPPER');
+  const lower = session('LOWER', ['sentadilla-libre', 'curl-femoral-sentado', 'extension-cuadriceps', 'curl-barra']);
+  expect(sessionPresentationFocus(lower, true)).toBe('LOWER');
+  expect(sessionPresentationFocus(session('FULL_BODY', []), true)).toBe('FULL_BODY');
+});
 it('flags a misleading focus while permitting mixed-body spillover', () => {
   expect(reviewSessionCoherence(session('PUSH', ['sentadilla-libre']), ExperienceLevel.ADVANCED, targets)[0].code).toBe('focus-without-press');
   expect(reviewSessionCoherence(session('PUSH', ['sentadilla-libre', 'press-banca']), ExperienceLevel.ADVANCED, targets)).toEqual([]);

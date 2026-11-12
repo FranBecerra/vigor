@@ -61,7 +61,7 @@ export function countWorkingSets(sets: readonly { setType: SetType }[]): number 
  * volumen por un dato mal introducido.
  */
 export function muscleSetVolume(
-  exercises: readonly PlannedExercise[],
+  exercises: readonly Pick<PlannedExercise, 'primaryMuscle' | 'primaryMuscles' | 'secondaryMuscles' | 'excludeFromVolume' | 'sets'>[],
 ): Record<string, number> {
   const volume: Record<string, number> = {};
 

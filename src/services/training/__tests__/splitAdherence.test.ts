@@ -4,6 +4,7 @@ import { splitAdherence } from '../splitAdherence';
 import { recommendCapacity, generateFromCapacityRecommendation } from '../capacityRecommendation';
 import { TrainingGoal, VolumeRegion } from '../volumePlan';
 import { toPlannedSessions } from '../routineMapper';
+import { sessionPresentationFocus } from '../sessionCoherence';
 
 it('distinguishes small supplements from a disguised full-body split, without counting core as spillover', () => {
   const exercise = EXERCISE_CATALOGUE[0];
@@ -14,12 +15,13 @@ it('distinguishes small supplements from a disguised full-body split, without co
   expect(splitAdherence({ ...distribution, requestedSplit: SplitStructure.AUTO }).sessions).toEqual([]);
   expect(splitAdherence({ ...distribution, sessions: [{ ...distribution.sessions[0], exercises: [{ exercise: { ...exercise, primaryMuscle: MuscleGroup.CORE }, sets: 3 }] }] }).light).toBe(true);
 });
-it.each(Object.values(ExperienceLevel))('retains the explicit upper/lower sequence for %s in Decide for me and keeps the intended preview labels', (level) => {
+it.each(Object.values(ExperienceLevel))('tries the explicit upper/lower sequence for %s and labels its actual content', (level) => {
   const input = { level, goal: TrainingGoal.HYPERTROPHY, split: SplitStructure.UPPER_LOWER,
     priorityRegions: [VolumeRegion.BACK, VolumeRegion.TRICEPS], catalogue: EXERCISE_CATALOGUE };
   const recommendation = recommendCapacity(input);
   const plan = generateFromCapacityRecommendation({ ...input, capacity: recommendation, seed: 4 }, recommendation)!;
   expect(plan.distribution.sessions.map((session) => session.focus)).toEqual(plan.distribution.sessions.map((_, index) => index % 2 ? 'LOWER' : 'UPPER'));
-  expect(toPlannedSessions(plan, false, { preserveFocus: true }).map((session) => session.focus)).toEqual(plan.distribution.sessions.map((session) => session.focus));
+  expect(toPlannedSessions(plan, false, { preserveFocus: true }).map((session) => session.focus))
+    .toEqual(plan.distribution.sessions.map((session) => sessionPresentationFocus(session, true)));
   expect(recommendation.reachesRecoverableVolume).toBe(true);
 });

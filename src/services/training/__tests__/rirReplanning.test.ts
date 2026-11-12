@@ -5,11 +5,58 @@ import { initialSetsForPlannedSession } from '../plannedSessionRuntime';
 import { applyPreviewEdits } from '../previewEditing';
 import { mergePrescriptionEdit } from '../prescriptionEntry';
 import { prescriptionForMicrocycle } from '../microcyclePrescription';
+import { progressionChanges } from '../progressionChanges';
 const session: PlannedSession = { index: 0, focus: 'LOWER', estimatedWorkMinutes: 20, exercises: ['rdl', 'curl'].map((id, order) => ({ exerciseId: id, order, isEdited: false,
   sets: Array.from({ length: 3 }, () => ({ setType: SetType.NORMAL, targetRIR: 2, targetReps: 10, targetRepsMin: 8, targetWeightKg: 40 })) })) };
 const meso: Mesocycle = { id: 'm', userId: 'u', status: 'ACTIVE', sessionsPerMicrocycle: 1, currentMicrocycleIndex: 0, plannedSessions: [session], projectedMicrocycles: 6, targetVolumePerGroup: {}, startedAt: 1, updatedAt: 1,
   scheduleTemplate: { days: 9, slots: [{ kind: 'workout', sessionIndex: 0 }, ...Array.from({ length: 8 }, () => ({ kind: 'rest' as const }))] } };
 const adjusted = (original = session): PlannedSession => ({ ...original, exercises: original.exercises.map((exercise, index) => index ? exercise : { ...exercise, isEdited: true, manualRIRBySet: { 0: 3, 1: 3, 2: 3 }, sets: exercise.sets.map((set) => ({ ...set, targetRIR: 3 })) }) });
+
+it('preserves untouched deload rows when only one set is reanchored', () => {
+  const original = sessionsForMicrocycle(meso, 'HYPERTROPHY', 0)[0];
+  const edited = { ...original, exercises: original.exercises.map((exercise, index) => index ? exercise : {
+    ...exercise, sets: exercise.sets.map((set, row) => row ? set : { ...set, targetRIR: 3 }),
+  }) };
+  const baseline = sessionsForMicrocycle(meso, 'HYPERTROPHY', 5)[0].exercises[0];
+  const proposal = sessionProgressionProposal(meso, 'HYPERTROPHY', 0, edited);
+  expect(proposal[5].session.exercises[0].sets[0].targetRIR).toBe(4);
+  expect(proposal[5].session.exercises[0].sets[1]).toEqual(baseline.sets[1]);
+  expect(proposal[5].session.exercises[1]).toEqual(sessionsForMicrocycle(meso, 'HYPERTROPHY', 5)[0].exercises[1]);
+  const baselineSteps = proposal.map(step => ({ ...step, session: sessionsForMicrocycle(meso, 'HYPERTROPHY', step.index)[0] }));
+  expect(progressionChanges(proposal, baselineSteps).find(step => step.index === 5)).toBeUndefined();
+});
+
+it('pairs deload rows through removed singles and interleaved warmups, from early or later anchors', () => {
+  const normal = session.exercises[0].sets[0];
+  const base = { ...session, exercises: [{ ...session.exercises[0], strengthRole: 'MAIN' as const, sets: [
+    { ...normal, setType: SetType.WARMUP, targetWeightKg: 10 },
+    { ...normal, setType: SetType.TOP_SINGLE }, normal, normal, normal,
+    { ...normal, setType: SetType.WARMUP, targetWeightKg: 15 },
+  ] }] };
+  for (const goal of ['HYPERTROPHY', 'STRENGTH']) for (const start of [0, 2]) {
+    const steps = Array.from({ length: 6 }, (_, index) => ({ index, session: prescriptionForMicrocycle([base], goal, index, 6)[0] }));
+    const anchor = steps[start].session;
+    const edited = { ...anchor, exercises: anchor.exercises.map(exercise => ({ ...exercise,
+      sets: exercise.sets.map((set, row) => row === 2 ? { ...set, targetRIR: set.targetRIR + 1 } : set) })) };
+    const snapshot = JSON.stringify(steps);
+    const proposed = replanSessionRIR(steps, edited, start, 6).at(-1)!.session.exercises[0].sets;
+    const baseline = steps[5].session.exercises[0].sets;
+    expect(proposed.map(set => set.setType)).toEqual([SetType.WARMUP, SetType.NORMAL, SetType.NORMAL, SetType.WARMUP]);
+    for (const row of [0, 2, 3]) expect(proposed[row]).toEqual(baseline[row]);
+    expect(JSON.stringify(steps)).toBe(snapshot);
+  }
+});
+
+it('keeps an existing deload override for an untouched row while still accepting structural edits', () => {
+  const steps = Array.from({ length: 6 }, (_, index) => ({ index, session: prescriptionForMicrocycle([session], 'HYPERTROPHY', index, 6)[0] }));
+  steps[5].session.exercises[0].sets[1] = { ...steps[5].session.exercises[0].sets[1], targetRIR: 5, targetWeightKg: 17.5 };
+  const edited = { ...steps[0].session, exercises: steps[0].session.exercises.map((exercise, index) => index ? exercise : {
+    ...exercise, sets: exercise.sets.map((set, row) => row ? set : { ...set, targetRIR: 3 }),
+  }) };
+  expect(replanSessionRIR(steps, edited, 0, 6)[5].session.exercises[0].sets[1]).toEqual(steps[5].session.exercises[0].sets[1]);
+  edited.exercises[0].sets = edited.exercises[0].sets.slice(0, 1);
+  expect(replanSessionRIR(steps, edited, 0, 6)[5].session.exercises[0].sets).toHaveLength(1);
+});
 
 it('reanchors only the edited exercise, progressively lowers RIR, and preserves every unrelated trajectory', () => {
   const edited = adjusted(); expect(hasSessionRIRChanges(session, edited)).toBe(true); expect(hasSessionRIRChanges(session, session)).toBe(false);

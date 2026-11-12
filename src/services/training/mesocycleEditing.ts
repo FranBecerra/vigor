@@ -1,6 +1,6 @@
 /** Persisted edits to a mesocycle's generated prescription. Pure logic. */
 import { SetType, type Exercise, type Mesocycle, type PlannedExercise, type PlannedSession } from '@/models';
-import { DEFAULT_PROJECTED_MICROCYCLES, prescriptionForMicrocycle } from './microcyclePrescription';
+import { DEFAULT_PROJECTED_MICROCYCLES, isDeloadMicrocycle, prescriptionForMicrocycle } from './microcyclePrescription';
 import { exerciseMinutes } from './trainingCapacity';
 import { TrainingGoal } from './volumePlan';
 import { replanSessionRIR, type ProgressionStep } from './rirReplanning';
@@ -9,29 +9,32 @@ export function sessionKey(microcycleIndex: number, sessionIndex: number): strin
   return `${microcycleIndex}:${sessionIndex}`;
 }
 
-/** Resolve the effective plan before a one-off override is applied. */
-export function baseSessionsForMicrocycle(
-  mesocycle: Mesocycle,
-  goal: string,
-  index: number,
-): PlannedSession[] {
+function basePrescription(mesocycle: Mesocycle, goal: string, index: number) {
   const horizon = mesocycle.projectedMicrocycles ?? DEFAULT_PROJECTED_MICROCYCLES;
   const revision = [...(mesocycle.prescriptionRevisions ?? [])]
     .filter((candidate) => candidate.fromMicrocycleIndex <= index)
     .sort((a, b) => b.fromMicrocycleIndex - a.fromMicrocycleIndex)[0];
   const start = revision?.fromMicrocycleIndex ?? 0;
-  if (mesocycle.prescriptionMode === 'MANUAL') return JSON.parse(JSON.stringify(revision?.plannedSessions ?? mesocycle.plannedSessions ?? []));
   // A strength ramp is tied to the whole mesocycle, not restarted when a
   // routine is edited halfway through it. Hypertrophy edits instead become
   // the new baseline for the remaining accumulation weeks.
   const prescriptionIndex = revision && goal === TrainingGoal.STRENGTH ? index : index - start;
   const prescriptionHorizon = revision && goal === TrainingGoal.STRENGTH ? horizon : horizon - start;
-  return prescriptionForMicrocycle(
-    revision?.plannedSessions ?? mesocycle.plannedSessions ?? [],
-    goal,
-    Math.max(0, prescriptionIndex),
-    Math.max(1, prescriptionHorizon),
-  );
+  return { sessions: revision?.plannedSessions ?? mesocycle.plannedSessions ?? [],
+    index: Math.max(0, prescriptionIndex), horizon: Math.max(1, prescriptionHorizon) };
+}
+
+/** Classify the base schedule; one-off session overrides may change its actual dose. */
+export function isPlannedDeload(mesocycle: Mesocycle, goal: string, index: number): boolean {
+  const base = basePrescription(mesocycle, goal, index);
+  return mesocycle.prescriptionMode !== 'MANUAL' && isDeloadMicrocycle(base.index, base.horizon);
+}
+
+/** Resolve the effective plan before a one-off override is applied. */
+export function baseSessionsForMicrocycle(mesocycle: Mesocycle, goal: string, index: number): PlannedSession[] {
+  const base = basePrescription(mesocycle, goal, index);
+  return mesocycle.prescriptionMode === 'MANUAL' ? JSON.parse(JSON.stringify(base.sessions))
+    : prescriptionForMicrocycle(base.sessions, goal, base.index, base.horizon);
 }
 
 export function sessionsForMicrocycle(

@@ -115,3 +115,19 @@ it('accepts an explicit note save with fresh text instead of the previous render
   await act(async () => tree.unmount());
   expect(mockWrite.mock.calls.at(-1)[0]).toMatchObject({ sessionNote: 'Today only', exercises: [{ notes: 'Seat 4' }] });
 });
+
+it('hands the exact accepted completion to automatic export and does not run it for drafts or failed writes', async () => {
+  const accepted = jest.fn(); let tree: any;
+  await act(async () => { tree = create(<Probe />); });
+  await act(async () => { expect(await result.flush(undefined, undefined, accepted)).toBe(true); });
+  expect(accepted).not.toHaveBeenCalled();
+  mockWrite.mockRejectedValueOnce(Error('rejected'));
+  await act(async () => { expect(await result.flush(200, undefined, accepted)).toBe(false); });
+  expect(accepted).not.toHaveBeenCalled();
+  const feedback = reviseSessionFeedback(undefined, 7, 201, 'AT_FINISH')!;
+  await act(async () => { expect(await result.flush(201, { sessionFeedback: feedback }, accepted)).toBe(true); });
+  expect(accepted).toHaveBeenCalledTimes(1);
+  expect(accepted.mock.calls[0][0]).toBe(mockWrite.mock.calls.at(-1)[0]);
+  expect(accepted.mock.calls[0][0]).toMatchObject({ completedAt: 201, sessionFeedback: feedback });
+  await act(async () => tree.unmount());
+});

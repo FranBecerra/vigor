@@ -116,7 +116,8 @@ export function useSessionPersistence({
   }, [sessionId, restoreAttempt]);
 
   /** Escribe ya, sin esperar al temporizador. Para cerrar o salir. */
-  const flush = useCallback(async (completedAt?: number, notePatch?: Pick<SessionContext, 'sessionNote' | 'exerciseNotes' | 'sessionFeedback'>): Promise<boolean> => {
+  const flush = useCallback(async (completedAt?: number, notePatch?: Pick<SessionContext, 'sessionNote' | 'exerciseNotes' | 'sessionFeedback'>,
+    onAcceptedCompletion?: (session: WorkoutSession) => void): Promise<boolean> => {
     if (context === null || writeGate.current.stopped || !hasRestored || currentSessionId.current !== context.sessionId || (!context.persistDraft && isSessionEmpty(latestSets.current))) return false;
     const finalCompletedAt = completedAt ?? completedAtRef.current;
     // Explicit note/feedback saves must survive an immediate background/unmount before
@@ -128,18 +129,23 @@ export function useSessionPersistence({
     let synced = false;
     let rejected = false;
     try {
+      const workout = toWorkoutSession(
+        { ...context, ...acceptedNoteIntent.current, ...(finalCompletedAt === undefined ? {} : { completedAt: finalCompletedAt }) },
+        latestOrder.current,
+        latestSets.current,
+      );
       const acceptance = await writeGate.current.write(() => workoutSessionRepository.createLocally(
-        toWorkoutSession(
-          { ...context, ...acceptedNoteIntent.current, ...(finalCompletedAt === undefined ? {} : { completedAt: finalCompletedAt }) },
-          latestOrder.current,
-          latestSets.current,
-        ),
+        workout,
         () => { synced = true; if (attempt === writeAttempt.current) setStatus('saved'); },
         () => { rejected = true; if (attempt === writeAttempt.current) setStatus('error'); },
       ));
       if (acceptance === null) return false;
       if (attempt === writeAttempt.current) setStatus(rejected ? 'error' : synced || acceptance === 'synced' ? 'saved' : 'queued');
-      if (!rejected && completedAt !== undefined) completedAtRef.current = completedAt;
+      if (!rejected && completedAt !== undefined) {
+        completedAtRef.current = completedAt;
+        // Completion effects receive the exact accepted record and cannot affect its save result.
+        if (onAcceptedCompletion) void Promise.resolve().then(() => onAcceptedCompletion(workout)).catch(() => undefined);
+      }
       return !rejected;
     } catch {
       if (attempt === writeAttempt.current) setStatus('error');
