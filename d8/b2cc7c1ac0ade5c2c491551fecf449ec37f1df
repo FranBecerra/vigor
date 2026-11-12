@@ -1,0 +1,53 @@
+src/components/bio/MicrocycleReviewPrompt.tsx
+  s_b6a0f22c32fc5f::t_4ac0b0ed8bc9db 2-4,13-15,24,27
+  s_b6a0f22c32fc5f::t_8590167a8396ec 17-18,23,31
+src/components/bio/__tests__/BioEvolution.test.tsx
+  s_b6a0f22c32fc5f::t_32fef68d730caa 21-23
+src/components/bio/__tests__/MetricColors.test.tsx
+  s_b6a0f22c32fc5f::t_2e570a4178704f 1-21
+src/components/bio/BioMetricVisual.tsx
+  s_b6a0f22c32fc5f::t_1e1fe2c174557e 6,11,13,15-16,18,36-37,58,67
+src/components/bio/BioMetricMonitor.tsx
+  s_b6a0f22c32fc5f::t_1e1fe2c174557e 44-45,59,77,79,97,102
+src/components/bio/MicrocycleReviewSheet.tsx
+  s_b6a0f22c32fc5f::t_206a8043e8874e 10,18,50,103-104
+  s_b6a0f22c32fc5f::t_f893b82fe8d502 32,35,57
+  s_b6a0f22c32fc5f::t_4ac0b0ed8bc9db 36,39,47,60,65,73,78,83
+src/components/bio/BioEvolution.tsx
+  s_b6a0f22c32fc5f::t_da3fa55954a808 7,11,13-14,23
+  s_b6a0f22c32fc5f::t_2e570a4178704f 33-36
+src/app/(tabs)/bio.tsx
+  s_b6a0f22c32fc5f::t_2e570a4178704f 118,121
+  s_b6a0f22c32fc5f::t_80ada66d3fb991 2,37,122
+  s_b6a0f22c32fc5f::t_da3fa55954a808 52-55,110,116,119
+src/components/bio/__tests__/BioHealthSettings.test.tsx
+  s_b6a0f22c32fc5f::t_827d99a840282c 21
+src/components/bio/__tests__/BioScreen.test.tsx
+  s_b6a0f22c32fc5f::t_32fef68d730caa 36-37,50,76-78,134,148-160
+  s_b6a0f22c32fc5f::t_29904be9d423fa 6,109-133,135,161
+  s_b6a0f22c32fc5f::t_826e29c8ee4157 2,87-108
+src/components/bio/__tests__/MicrocycleReviewSheet.test.tsx
+  s_b6a0f22c32fc5f::t_f893b82fe8d502 13
+  s_b6a0f22c32fc5f::t_2e570a4178704f 12
+src/components/bio/MicrocycleReviewDialog.tsx
+  s_b6a0f22c32fc5f::t_1bbf6f94fa4fa0 9
+  s_b6a0f22c32fc5f::t_4ac0b0ed8bc9db 1-8,10
+src/components/bio/MicrocycleReviewDialogContent.tsx
+  s_b6a0f22c32fc5f::t_4be3edd4837916 1-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d8b2cc7c1ac0ade5c2c491551fecf449ec37f1df",
+  "prompts": {},
+  "sessions": {
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
