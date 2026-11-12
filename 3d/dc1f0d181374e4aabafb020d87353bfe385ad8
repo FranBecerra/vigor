@@ -1,0 +1,158 @@
+src/services/training/__tests__/generatedStructureName.test.ts
+  s_b6a0f22c32fc5f::t_69c9748275f7b2 1-12
+src/services/training/mesocycleContinuity.ts
+  s_b6a0f22c32fc5f::t_83349d09c0c9f2 205-223
+  s_b6a0f22c32fc5f::t_c8b036f69d97a1 4,10,89-90,114-115,124-127,164-167
+  s_b6a0f22c32fc5f::t_1ab07468bf11a5 7,18,23,51-52,62-73,80-88,91-98,103-106,110-113,118-123,130-132,136-147,151-152,161-163,168,181-182,193,203,231
+  s_58860a6dd107b9::t_284087b67dd8d1 1
+  s_58860a6dd107b9::t_c210ea7ba2eaae 28-49
+  s_58860a6dd107b9::t_be777c6fb49501 186-187
+  s_b6a0f22c32fc5f::t_b3c8383c5e1d3e 2,53-56,78-79,99-102,107-109,116-117,128-129,133-135,148-150,153-160,202,228
+  s_b6a0f22c32fc5f::t_5df1f3c768ab7c 3,5-6,8-9,11-17,19-22,24-27,50,57-61,74-77,169-180,183-185,188-192,194-201,204,224-227,229-230
+src/services/training/__tests__/mesocycleContinuity.test.ts
+  s_b6a0f22c32fc5f::t_bfca09bece1b7d 124,134,271,288,295,308-366,380
+  s_58860a6dd107b9::t_8b6efb080edeea 4,291,297-305
+  s_58860a6dd107b9::t_c210ea7ba2eaae 128
+  s_b6a0f22c32fc5f::t_af634081146171 6-9,130,166,199-201,203-213,215-216,218-225,227-228,230-249,282
+  s_b6a0f22c32fc5f::t_bc52b09ed420be 10-94,102-115
+  s_b6a0f22c32fc5f::t_759f2514c48861 306
+  s_b6a0f22c32fc5f::t_a4193c738492aa 214,217,226
+  s_b6a0f22c32fc5f::t_6904dfd39425b7 229
+  s_b6a0f22c32fc5f::t_4ff5ce52e29da0 5,118,155-165,167-198,253
+  s_b6a0f22c32fc5f::t_acd5ee7d75258a 142
+  s_b6a0f22c32fc5f::t_77b28dec94ba21 202
+  s_b6a0f22c32fc5f::t_a83b2ddba960fe 136-141,143-154,250-251,307,367-379
+  s_b6a0f22c32fc5f::t_6b0c3cb1a1552a 95-101
+  s_58860a6dd107b9::t_ca4819883654e2 1-3
+  s_b6a0f22c32fc5f::t_dd8e87f56f9a04 116-117
+  s_b6a0f22c32fc5f::t_25b60956805aee 119-123
+  s_b6a0f22c32fc5f::t_2f096e6ce9f4f9 131-133
+  s_b6a0f22c32fc5f::t_8d471d2ec4a5af 135
+  s_b6a0f22c32fc5f::t_4209e6cbc1446c 252
+  s_b6a0f22c32fc5f::t_0ca87452afb8ce 254-256,268-270
+  s_b6a0f22c32fc5f::t_f0546e76d6724a 272-274,279-281
+  s_b6a0f22c32fc5f::t_ee284109776b76 283-287
+  s_58860a6dd107b9::t_7d7bfc1806ad55 125-127,129,257-267,275-278,289-290,292-294,296
+src/models/routine.ts
+  s_b6a0f22c32fc5f::t_59bbcc73c9a51b 136
+  s_b6a0f22c32fc5f::t_c32525d92b1d8e 130-135,137
+src/services/training/generatedStructureName.ts
+  s_b6a0f22c32fc5f::t_69c9748275f7b2 1-16
+src/services/training/__tests__/routineView.test.ts
+  s_b6a0f22c32fc5f::t_1de09d41362295 28-48
+src/services/training/plannedSessionRuntime.ts
+  s_b6a0f22c32fc5f::t_95528d2ec24c43 23-26,45
+src/services/training/__tests__/progressionChanges.test.ts
+  s_b6a0f22c32fc5f::t_061e5311caccfc 1-30
+src/services/training/__tests__/mesocycleContinuityRepository.test.ts
+  s_b6a0f22c32fc5f::t_bfca09bece1b7d 4,58,61-62,67,69,97-113
+  s_b6a0f22c32fc5f::t_a854ada0d5007e 24,53,56-57,70,73-74,85,114,117-118,124-125,127-129,132,141
+  s_58860a6dd107b9::t_8b6efb080edeea 77,83-84,87-96,122-123,126,130-131,133-140
+  s_b6a0f22c32fc5f::t_ff67c406bdd5d5 1-3
+  s_b6a0f22c32fc5f::t_77c73360f5e0f5 5-7,21-23
+  s_b6a0f22c32fc5f::t_f7582d9ac1338c 25-27,50-52
+  s_b6a0f22c32fc5f::t_98184f0f83d519 54-55
+  s_b6a0f22c32fc5f::t_43e9cfd2f8946a 59-60
+  s_b6a0f22c32fc5f::t_5ac293b4de330d 63-66
+  s_b6a0f22c32fc5f::t_636cf8ba14c222 68
+  s_b6a0f22c32fc5f::t_6da3605567b0bb 71-72
+  s_58860a6dd107b9::t_e97a35d1c1e615 78-82
+  s_b6a0f22c32fc5f::t_cf234ee26ac841 115-116
+  s_58860a6dd107b9::t_79e84574a7bd38 8-20,28-49,75-76,86,119-121
+src/services/training/workoutExecution.ts
+  s_b6a0f22c32fc5f::t_4761fc3609bb6b 41-48
+src/services/training/mesocycleEditing.ts
+  s_b6a0f22c32fc5f::t_95528d2ec24c43 3,12,23-37
+src/services/training/mesocycleContinuityRepository.ts
+  s_58860a6dd107b9::t_be777c6fb49501 1-4,6-60,67-74,76-91,94-110,113-114,116-119
+  s_58860a6dd107b9::t_284087b67dd8d1 5,61-66,75,92,111-112,115
+  s_b6a0f22c32fc5f::t_3ebde698ba73fc 93
+src/services/training/exerciseSelection.ts
+  s_b6a0f22c32fc5f::t_64443699a51a39 395-417,544
+  s_b6a0f22c32fc5f::t_ab54adf82b7923 394
+src/services/training/routineView.ts
+  s_b6a0f22c32fc5f::t_47b20bfdc6f3d2 261-262
+  s_b6a0f22c32fc5f::t_59bbcc73c9a51b 96,334
+  s_b6a0f22c32fc5f::t_d0bada6159f311 55,235-237
+src/services/training/rirReplanning.ts
+  s_b6a0f22c32fc5f::t_b248fe5c1a662f 1-2,6-7,43-52
+src/services/training/__tests__/sessionCoherence.test.ts
+  s_b6a0f22c32fc5f::t_ad24f69c528bba 11-22
+src/services/training/__tests__/splitAdherence.test.ts
+  s_b6a0f22c32fc5f::t_ad24f69c528bba 7,18,24-25
+src/services/training/__tests__/rirReplanning.test.ts
+  s_b6a0f22c32fc5f::t_cc3e2f49b3fcc2 15-24,59
+  s_b6a0f22c32fc5f::t_e5b3378dc4bf00 8,25-58
+  s_b6a0f22c32fc5f::t_406729da9c2d31 60
+src/services/training/mesocyclePlanner.ts
+  s_b6a0f22c32fc5f::t_74e015b960591a 350,363
+  s_b6a0f22c32fc5f::t_64443699a51a39 30,448
+src/services/training/progressionChanges.ts
+  s_b6a0f22c32fc5f::t_fc5c516b1abb2f 2,12-43
+  s_b6a0f22c32fc5f::t_733d94d352f1b2 11
+  s_b6a0f22c32fc5f::t_9758661f27a62c 1,3-10
+src/services/training/__tests__/executionPolish.test.ts
+  s_b6a0f22c32fc5f::t_32fef68d730caa 1-30
+src/hooks/useSessionPersistence.ts
+  s_58860a6dd107b9::t_de53f5c9397270 119-120,132-136,138,144-148
+src/services/training/__tests__/generationCandidatePreference.test.ts
+  s_b6a0f22c32fc5f::t_74e015b960591a 1-43,45-56
+  s_b6a0f22c32fc5f::t_9ef86337932c33 44
+src/services/training/exerciseHistory.ts
+  s_b6a0f22c32fc5f::t_acbf6664d3b3bb 1-11,15-20
+  s_b6a0f22c32fc5f::t_6085ae9f4078f0 12-14
+src/services/training/routineMapper.ts
+  s_b6a0f22c32fc5f::t_47b20bfdc6f3d2 61,109
+  s_b6a0f22c32fc5f::t_76efa699962b6f 226-237,241
+src/services/training/strengthCycleEvidence.ts
+  s_b6a0f22c32fc5f::t_40335a081110a2 124-125
+  s_b6a0f22c32fc5f::t_6f0a4e0afc7d7a 3-7,11-12,98-114,119-123,126-139
+  s_b6a0f22c32fc5f::t_ca6c5a4a8266c9 115-118
+  s_b6a0f22c32fc5f::t_6b0c3cb1a1552a 38-39
+  s_b6a0f22c32fc5f::t_f88159dc8c5e46 1-2,8-10,13-37,40-97
+src/services/training/numericWheel.ts
+  s_b6a0f22c32fc5f::t_592ce8c64c7207 17-23
+src/services/training/microcyclePrescription.ts
+  s_b6a0f22c32fc5f::t_b248fe5c1a662f 52-53,58,60,62-69,78
+src/services/training/__tests__/exerciseHistory.test.ts
+  s_b6a0f22c32fc5f::t_6085ae9f4078f0 1-48
+src/services/training/splitAdherence.ts
+  s_b6a0f22c32fc5f::t_f89037ac8bf1d2 1,9-10,15-17
+  s_b6a0f22c32fc5f::t_f7dd502ce434ec 18-24
+  s_b6a0f22c32fc5f::t_62fd607a57b5a8 25
+src/services/training/workoutRuntime.ts
+  s_b6a0f22c32fc5f::t_fa995917468925 21
+src/models/training.ts
+  s_58860a6dd107b9::t_be777c6fb49501 37-38
+src/services/training/sessionCoherence.ts
+  s_b6a0f22c32fc5f::t_47b20bfdc6f3d2 32,35-37,50,52,55-58
+  s_b6a0f22c32fc5f::t_f89037ac8bf1d2 6,38
+src/services/training/sessionSummary.ts
+  s_b6a0f22c32fc5f::t_8d423b787c5c4c 64
+src/hooks/__tests__/sessionPersistence.test.tsx
+  s_b6a0f22c32fc5f::t_8d8967bb70179f 118-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3ddc1f0d181374e4aabafb020d87353bfe385ad8",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
