@@ -1,0 +1,47 @@
+src/services/training/__tests__/restTimer.test.ts
+  s_b6a0f22c32fc5f::t_ad24f69c528bba 25,28,35,40-41,47
+src/services/health/__tests__/healthCapabilities.test.ts
+  s_b6a0f22c32fc5f::t_f3fb5826626c01 19
+src/services/health/workoutExport.ts
+  s_b6a0f22c32fc5f::t_2244f6eeb95b63 109,152
+  s_58860a6dd107b9::t_de53f5c9397270 151
+src/services/training/restTimer.ts
+  s_b6a0f22c32fc5f::t_47b20bfdc6f3d2 44-48,53
+modules/vigor-health/ios/VigorHealthModule.swift
+  s_b6a0f22c32fc5f::t_ead2353d512b94 156,171,200-202
+  s_58860a6dd107b9::t_de53f5c9397270 368-370
+  s_b6a0f22c32fc5f::t_1ad20130b7d092 158-170
+src/services/health/__tests__/workoutExport.test.ts
+  s_58860a6dd107b9::t_9ebe36cc3273f6 261
+  s_b6a0f22c32fc5f::t_940710aee8c3b6 254-260,262-268
+plugins/withWorkoutHealth.js
+  s_b6a0f22c32fc5f::t_8524a8cbe1c3d2 10
+src/services/health/__tests__/healthClient.test.ts
+  s_b6a0f22c32fc5f::t_4f4115482285f3 2,10-15,17,25,36-45
+src/services/health/healthClient.ts
+  s_b6a0f22c32fc5f::t_f7e4d698f20b08 12-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fec98868747aaef109484c2e1ab3d3c77af08502",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
