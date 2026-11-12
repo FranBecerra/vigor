@@ -1,0 +1,272 @@
+src/components/cardio/SportRecurrenceFields.tsx
+  s_b6a0f22c32fc5f::t_463bd2dd7b0622 2-14,21-23,25-47,49-65,67,72-79
+  s_b6a0f22c32fc5f::t_8c748f33d8f024 15,66,68-71
+  s_b6a0f22c32fc5f::t_c8ac8523c33825 1,16-20
+  s_b6a0f22c32fc5f::t_e49bcf8746221c 24,48
+src/components/cardio/CardioSelectRow.tsx
+  s_b6a0f22c32fc5f::t_afb8418b7564fd 1-27
+src/components/cardio/CardioHealthReviewPanel.tsx
+  s_b6a0f22c32fc5f::t_3dd26d30b42d6e 59,112
+  s_b6a0f22c32fc5f::t_ce94e94a390f56 17-18,25,85
+  s_b6a0f22c32fc5f::t_1ad20130b7d092 98
+  s_b6a0f22c32fc5f::t_2d18ca36bba3b2 29,86-88,111,115
+  s_b6a0f22c32fc5f::t_ead2353d512b94 8,90,96-97
+  s_b6a0f22c32fc5f::t_499286d8abe06e 12,19,23,113
+src/components/cardio/CardioCycleView.tsx
+  s_b6a0f22c32fc5f::t_ee5c476cbd01ed 22-23,90
+  s_b6a0f22c32fc5f::t_4b8960de27fd9e 3,5,9-15,19,21,24-33,35-45,47-79,86-89,91-113,116-119,122-123
+  s_b6a0f22c32fc5f::t_673242bddb4f2e 124-125
+  s_58860a6dd107b9::t_ec9b849fadbec0 1,80-85
+  s_58860a6dd107b9::t_f4b3acdb8e71e7 2
+src/components/cardio/SportActivityCard.tsx
+  s_b6a0f22c32fc5f::t_463bd2dd7b0622 23
+src/app/(tabs)/(train)/cardio-plan.tsx
+  s_b6a0f22c32fc5f::t_1d32d8b1e316a3 9
+  s_b6a0f22c32fc5f::t_9cb5dcfbd3d595 4
+  s_b6a0f22c32fc5f::t_d894d018e60625 1-2,7-8
+src/components/cardio/CardioTimeline.tsx
+  s_b6a0f22c32fc5f::t_1c40ecdedcfd9b 12,15,17
+  s_b6a0f22c32fc5f::t_239876941c02cd 42,44
+src/components/cardio/__tests__/CardioCycleView.test.tsx
+  s_b6a0f22c32fc5f::t_cff56f1f517eb6 1-78
+src/test-support/PlanningHistoryCheck.tsx
+  s_b6a0f22c32fc5f::t_a93ed2751a18bf 1-48
+src/components/cardio/CardioPlanningHistoryContext.tsx
+  s_b6a0f22c32fc5f::t_8de990e00f5df3 2,6,9-10,13-15
+  s_b6a0f22c32fc5f::t_ce94e94a390f56 5,7,12
+  s_b6a0f22c32fc5f::t_94b11e897ce30c 1,3-4,8,11
+src/components/cardio/__tests__/CardioFunctionalFlow.test.tsx
+  s_b6a0f22c32fc5f::t_ecc2d23f5e7e92 19-22,98-143
+  s_b6a0f22c32fc5f::t_174bd682ec4a56 40
+  s_b6a0f22c32fc5f::t_104b31eaeb5a47 305
+  s_b6a0f22c32fc5f::t_45066726da23b1 33
+  s_b6a0f22c32fc5f::t_0548e62b18a06f 298,300
+  s_b6a0f22c32fc5f::t_6c7b164ffe120a 52-59,232
+  s_b6a0f22c32fc5f::t_d1a2afb7da33ef 18,283-297,299,301-304
+  s_b6a0f22c32fc5f::t_a3c5b005a3784e 23,144,238-239,265,272,306-329
+  s_b6a0f22c32fc5f::t_dd08fdca78baf3 32
+  s_b6a0f22c32fc5f::t_8528b2016eb690 230-231
+  s_b6a0f22c32fc5f::t_560310aa644a9b 233-237
+  s_b6a0f22c32fc5f::t_c02f4142235296 240
+  s_b6a0f22c32fc5f::t_96e936af6e3cb7 264
+  s_b6a0f22c32fc5f::t_0452dc91969f52 266-271
+  s_b6a0f22c32fc5f::t_7a87ba26166c6f 273
+src/components/cardio/CardioPlanBuilder.tsx
+  s_b6a0f22c32fc5f::t_1d32d8b1e316a3 21,119-120
+  s_b6a0f22c32fc5f::t_69c9748275f7b2 71,116
+  s_58860a6dd107b9::t_ec9b849fadbec0 69,126-127,220,240-242,245,268-272
+  s_b6a0f22c32fc5f::t_b8522f7735aeb5 106,158
+  s_58860a6dd107b9::t_5d0c429c9c6f2f 36,111,117,181,183,236-239,243-244,248-249,261,332
+  s_b6a0f22c32fc5f::t_9310da72d88a9a 18,73-76,87,99,148,162,169-170,175-178,192,318,326-327,341-342
+  s_b6a0f22c32fc5f::t_a009fb57ad3829 33
+  s_b6a0f22c32fc5f::t_6fdbfb1a8aee64 163,180
+  s_b6a0f22c32fc5f::t_815790e884fce6 22
+  s_b6a0f22c32fc5f::t_c32525d92b1d8e 31,68,305
+  s_b6a0f22c32fc5f::t_7f88aaef3dc5f8 28,143,215-216,224,229-233,263
+  s_b6a0f22c32fc5f::t_04d7ffd7e716e1 20,29,53,56,63-64,78-80,82-83,291-292,294,296,298
+  s_b6a0f22c32fc5f::t_36d19d57135ea3 161
+  s_58860a6dd107b9::t_522e13c8c2f9e4 32,128-131
+  s_58860a6dd107b9::t_0273339a3f34ed 51-52,124,132-133
+  s_58860a6dd107b9::t_1722578753999a 16,84,171
+  s_58860a6dd107b9::t_44de5f91f10bb8 7,9,54,81,92,101,112-115,134-142,172,188,190,198,217-219,222-223,225-228,234-235,262,264-267,273-279,286-290,328,337-339,344-347
+  s_b6a0f22c32fc5f::t_d7531f2d1de521 57
+  s_58860a6dd107b9::t_83e28084417d79 205-213
+  s_b6a0f22c32fc5f::t_e1ce5aaa298db4 110,164-165,167-168,173,325
+  s_b6a0f22c32fc5f::t_263721e111c65c 122,303-304
+  s_58860a6dd107b9::t_bcaed59171fcf8 280
+  s_58860a6dd107b9::t_69d73964afeae5 1,27,166,174,195
+  s_b6a0f22c32fc5f::t_2aec501811b05f 19,30,48-49,61-62,72,105,107-109,121,125,146,197,221,353
+src/components/cardio/__tests__/SportActivityForm.test.tsx
+  s_b6a0f22c32fc5f::t_00b261703b8985 166
+  s_b6a0f22c32fc5f::t_ac0d59892ba869 10-11,115-165,167-169
+src/components/cardio/__tests__/SavedCardioPlans.test.tsx
+  s_b6a0f22c32fc5f::t_063f3a6445f860 41
+  s_b6a0f22c32fc5f::t_75018992f65ece 7-10,81-94
+  s_b6a0f22c32fc5f::t_67185c9c2ad23c 95
+src/components/cardio/CardioPlanningHistoryPrompt.tsx
+  s_58860a6dd107b9::t_44de5f91f10bb8 83
+  s_58860a6dd107b9::t_43dba5c4031ab4 90
+  s_58860a6dd107b9::t_4902988c712728 45
+  s_b6a0f22c32fc5f::t_2d18ca36bba3b2 1-9,12-14,17,19,21-22,26-35,57-58,61-62,66-76,84-85,88-89,92,94-103
+  s_b6a0f22c32fc5f::t_6a010a128b3640 49
+  s_b6a0f22c32fc5f::t_964b630a79465f 41-42
+  s_b6a0f22c32fc5f::t_4c07e9db97de3e 10-11,15-16,18,20,23-25,36-40,43-44,46-48,50-56,59,63-64,77-82,86-87,91,93
+  s_b6a0f22c32fc5f::t_0e84d76c13fb76 65
+  s_58860a6dd107b9::t_2b3b31e90803bb 60
+src/test-support/HybridCapacityCheck.tsx
+  s_b6a0f22c32fc5f::t_5f50f1d6d0d39f 1-37
+src/components/cardio/__tests__/HybridPlanBuilder.test.tsx
+  s_b6a0f22c32fc5f::t_063f3a6445f860 8,62,70,103-106,108,110-111,122,250
+  s_b6a0f22c32fc5f::t_dbcb36e91da517 5,71-73,78-97,160,272
+  s_58860a6dd107b9::t_44de5f91f10bb8 22
+  s_b6a0f22c32fc5f::t_1840630a3369c5 24-39,133,136-140,203-243
+  s_b6a0f22c32fc5f::t_0c9a5405f0dfe9 1,3-4,6,12-14,16-21,23,59-61,74-77,98-102,107,109,112-121,123-124,145
+  s_b6a0f22c32fc5f::t_6a9344790a13d1 125-130
+  s_b6a0f22c32fc5f::t_8c20bf958ad824 2,63-68,169
+  s_b6a0f22c32fc5f::t_118a4a6d443cad 10-11,41-44,46,48-58
+  s_b6a0f22c32fc5f::t_ae50370bc76ec2 69,152
+  s_b6a0f22c32fc5f::t_c7593028592e0d 15
+  s_58860a6dd107b9::t_e9f7af66fc80b3 142-143,154-155,159,161,163,173-197,260,263,267,298-299
+  s_b6a0f22c32fc5f::t_2afb384e604b4e 45,47
+  s_b6a0f22c32fc5f::t_6089bb10fd9be9 7,9,40,131-132,134-135,141,144,146-151,153,156-158,162,164-168,170-172,198-202,244-249,251-259,261-262,264-266,268-271,273-297
+src/components/cardio/__tests__/CardioRoutineCard.test.tsx
+  s_b6a0f22c32fc5f::t_961827c9e4dbf6 1-33
+src/app/(tabs)/(train)/cardio-block.tsx
+  s_b6a0f22c32fc5f::t_1c40ecdedcfd9b 19-20,22,52
+src/test-support/hybridFixture.ts
+  s_b6a0f22c32fc5f::t_e55e3fdfca659d 9,12-13,16
+  s_b6a0f22c32fc5f::t_6e5acef888fcb0 2-8,10-11,14-15,17-43
+  s_b6a0f22c32fc5f::t_bc549f9654c6c8 1
+src/components/cardio/__tests__/CardioPlanningHistory.test.tsx
+  s_b6a0f22c32fc5f::t_b193fe8077674a 49-51
+  s_b6a0f22c32fc5f::t_1840630a3369c5 14,18,87-96,98-105,109-117
+  s_b6a0f22c32fc5f::t_881a314a63caac 1-13,15-16,19-46,52-65,67-86,118
+  s_58860a6dd107b9::t_44de5f91f10bb8 66
+  s_b6a0f22c32fc5f::t_118a4a6d443cad 17
+  s_b6a0f22c32fc5f::t_6a010a128b3640 97,106-108
+  s_b6a0f22c32fc5f::t_c3c3c051bc4e0a 47-48
+src/components/cardio/CardioActivation.tsx
+  s_b6a0f22c32fc5f::t_a1401aa7b225f7 16-17,34,41-49,57-58,62,66-67,71,74,82,84
+  s_b6a0f22c32fc5f::t_cf3589e7ff567e 40
+  s_b6a0f22c32fc5f::t_ecc2d23f5e7e92 21-31,79
+src/components/cardio/CardioPlanFlow.tsx
+  s_58860a6dd107b9::t_5d0c429c9c6f2f 8,24,27-28
+src/components/cardio/SportActivityForm.tsx
+  s_b6a0f22c32fc5f::t_00b261703b8985 58-59
+  s_b6a0f22c32fc5f::t_463bd2dd7b0622 12,20,23,36,61-63,65-66,77-79
+  s_b6a0f22c32fc5f::t_8c748f33d8f024 75,82
+src/components/cardio/CardioStartingPointPanel.tsx
+  s_b6a0f22c32fc5f::t_ce94e94a390f56 12-14,20,75-81,83-86
+  s_58860a6dd107b9::t_4902988c712728 41
+  s_b6a0f22c32fc5f::t_3dd26d30b42d6e 31,40,42-43,72,74,82,89
+  s_b6a0f22c32fc5f::t_499286d8abe06e 15,18,22,44,48,62
+  s_58860a6dd107b9::t_44a84b3a6e1d08 29-30,39,49,66
+  s_b6a0f22c32fc5f::t_1ad20130b7d092 70
+src/components/cardio/CardioPlanningHealthReview.tsx
+  s_b6a0f22c32fc5f::t_94b11e897ce30c 2-13,17,19-20,25-26
+  s_b6a0f22c32fc5f::t_964b630a79465f 22-24
+  s_b6a0f22c32fc5f::t_ce94e94a390f56 18,21
+  s_b6a0f22c32fc5f::t_20b6b13edaa581 1
+  s_b6a0f22c32fc5f::t_a3fd4fd946c112 14-16
+src/components/cardio/CardioPlanningHistoryProvider.tsx
+  s_b6a0f22c32fc5f::t_ce94e94a390f56 10
+  s_b6a0f22c32fc5f::t_9cb5dcfbd3d595 1-8,11
+  s_b6a0f22c32fc5f::t_3e02fc7af1c6f0 9
+src/components/cardio/HybridPlanBuilder.tsx
+  s_b6a0f22c32fc5f::t_1548eaa183af70 2,14,23,46,48,51-53,196,215-216,218-220,223-226,228,230,234-236
+  s_58860a6dd107b9::t_b76831d18d3f7e 128-131,161-164
+  s_b6a0f22c32fc5f::t_a94c9d14d18783 1
+  s_b6a0f22c32fc5f::t_964b630a79465f 189-191,193-195,198,200
+  s_b6a0f22c32fc5f::t_e1ce5aaa298db4 171-174,179-184,186,251,258
+  s_b6a0f22c32fc5f::t_a009fb57ad3829 3-5,11-13,15,20,25,28-37,42-45,56-59,61,63-65,71-76,96-99,105,107-123,135-151,169,188,231,233,237,250,255-256,271,274-277
+  s_b6a0f22c32fc5f::t_6a9344790a13d1 62
+  s_b6a0f22c32fc5f::t_24eb3ec8a75e0b 217,221-222,227
+  s_b6a0f22c32fc5f::t_cdc33338c0a75a 9,83-90,240-247,252
+  s_58860a6dd107b9::t_5d0c429c9c6f2f 17,26,60,93-95,104,106,199,253-254,273
+  s_b6a0f22c32fc5f::t_2cf25504bdf79c 40-41,47,49-50,69-70,170,175-178,185,187,197,201-213,229,232
+  s_b6a0f22c32fc5f::t_1d32d8b1e316a3 27
+  s_58860a6dd107b9::t_522e13c8c2f9e4 192
+  s_b6a0f22c32fc5f::t_c3bacb22f9410f 214
+  s_b6a0f22c32fc5f::t_75018992f65ece 133-134
+  s_b6a0f22c32fc5f::t_0fc15268e85921 6-8,10,16,18-19,21-22,24,38-39,54-55,66-68,77-82,91-92,100-103,124-127,132,152-160,165-168,238-239,248-249,257,259-270,272
+src/components/cardio/CardioRoutineCard.tsx
+  s_b6a0f22c32fc5f::t_d59aefa7eba0bc 38,41,44-45,56
+  s_58860a6dd107b9::t_eab535216b6ac0 54
+  s_b6a0f22c32fc5f::t_77e0a0c2e36b97 1-37,39-40,42-43,46-53,55,57-63
+src/components/cardio/__tests__/CardioPlanBuilder.test.tsx
+  s_b6a0f22c32fc5f::t_263721e111c65c 11-12,42-51,84-85
+  s_b6a0f22c32fc5f::t_0f136e709f7f13 102,258-259,262,264-272,291,309,326-327
+  s_b6a0f22c32fc5f::t_063f3a6445f860 154
+  s_b6a0f22c32fc5f::t_fcbfee339bbedf 279-283,287
+  s_b6a0f22c32fc5f::t_94b11e897ce30c 21
+  s_b6a0f22c32fc5f::t_b8522f7735aeb5 13-14,52-81,83
+  s_58860a6dd107b9::t_44de5f91f10bb8 35,82,113,126,129,131-134,141-142,147,173-175,184,199-201,260,263,277,298,318
+  s_b6a0f22c32fc5f::t_5a78e200db24d4 2-3,22,86-87,92,94,98-101,103-104,107,149,159-168,220-222,253,261,273-276,278,284-286,288-290,292-297,299-308,310-317,319-325
+src/components/cardio/SportActivitiesHome.tsx
+  s_b6a0f22c32fc5f::t_e8560f1856a116 1-2,10,15-22
+src/app/(tabs)/(train)/cardio-cycle.tsx
+  s_b6a0f22c32fc5f::t_59bbcc73c9a51b 23-25,39-40,44
+  s_b6a0f22c32fc5f::t_ee5c476cbd01ed 43
+src/components/cardio/__tests__/HybridPlanRoute.test.tsx
+  s_b6a0f22c32fc5f::t_e55e3fdfca659d 15-16
+  s_b6a0f22c32fc5f::t_c7593028592e0d 1-10,12-14,17-35
+  s_b6a0f22c32fc5f::t_94b11e897ce30c 11
+src/app/(tabs)/(train)/hybrid-plan.tsx
+  s_b6a0f22c32fc5f::t_e55e3fdfca659d 10-11
+  s_b6a0f22c32fc5f::t_a009fb57ad3829 1-7,13-30
+  s_b6a0f22c32fc5f::t_9cb5dcfbd3d595 12
+  s_b6a0f22c32fc5f::t_a94c9d14d18783 9
+  s_b6a0f22c32fc5f::t_32a01a71d0cdec 8
+src/components/cardio/__tests__/CardioPlanningHealthReview.test.tsx
+  s_b6a0f22c32fc5f::t_dc0a4fdd40c4ed 1-57
+src/components/cardio/__tests__/SportActivityRoutes.test.tsx
+  s_b6a0f22c32fc5f::t_174bd682ec4a56 31
+  s_b6a0f22c32fc5f::t_d1a2afb7da33ef 2,8,36-56
+  s_b6a0f22c32fc5f::t_0fa6b01da642a0 57-58
+src/components/cardio/HybridCapacityPanel.tsx
+  s_b6a0f22c32fc5f::t_5f50f1d6d0d39f 1-2,10,31-35
+  s_b6a0f22c32fc5f::t_a1401aa7b225f7 3-9,11-30,36-37
+src/components/cardio/ManualCardioEditor.tsx
+  s_b6a0f22c32fc5f::t_d65984da2d858e 2,115-117,184
+  s_58860a6dd107b9::t_ae814273918b85 1,3-114,118-183,185
+src/components/cardio/__tests__/CardioStartingPoint.test.tsx
+  s_b6a0f22c32fc5f::t_b193fe8077674a 74,78-80
+  s_b6a0f22c32fc5f::t_118a4a6d443cad 69-73,75-77,81-85
+src/app/(tabs)/(train)/cardio-check.tsx
+  s_b6a0f22c32fc5f::t_5f50f1d6d0d39f 21,38,66,108-110
+  s_b6a0f22c32fc5f::t_283bf6f7401fb6 27,93,96-98
+  s_b6a0f22c32fc5f::t_2d3a10f2917182 41,58-59,94
+  s_b6a0f22c32fc5f::t_0548e62b18a06f 77,81
+  s_b6a0f22c32fc5f::t_f52164960529c9 19-20,36-37,67-73,111-114
+  s_b6a0f22c32fc5f::t_0369071f464330 29,40,64,90-92
+  s_b6a0f22c32fc5f::t_e8560f1856a116 15-18,34-35,63,74-76,78-80,82-83,104,115-127
+  s_58860a6dd107b9::t_6c45094fbafa1e 22-25,44-57,99-102
+  s_b6a0f22c32fc5f::t_a93ed2751a18bf 28,39,65,105-107
+  s_b6a0f22c32fc5f::t_157286ed09558d 60-62
+  s_b6a0f22c32fc5f::t_b7fe709c00b142 89
+  s_b6a0f22c32fc5f::t_6069929f5b1131 95
+src/components/cardio/HybridProgress.tsx
+  s_58860a6dd107b9::t_fbab697caeb187 1-30
+src/app/(tabs)/(train)/activity.tsx
+  s_b6a0f22c32fc5f::t_ac0d59892ba869 24
+src/test-support/planningHistoryFixture.ts
+  s_b6a0f22c32fc5f::t_09a0063ed64b3a 1-11
+src/app/(tabs)/(train)/cardio-workout.tsx
+  s_b6a0f22c32fc5f::t_0d2abf31fc04a3 1,10,82-83,87-93
+src/app/cardio-health-check.tsx
+  s_b6a0f22c32fc5f::t_0616fab8aa60fa 11,42
+src/components/cardio/ManualCardioPlanFlow.tsx
+  s_b6a0f22c32fc5f::t_c204da1af3536a 1-58
+src/components/cardio/__tests__/CardioSelectRow.test.tsx
+  s_b6a0f22c32fc5f::t_623886c9c24939 1-30
+src/components/cardio/__tests__/ManualCardioEditor.test.tsx
+  s_b6a0f22c32fc5f::t_8a87f9f116370a 1-67
+src/components/cardio/__tests__/ManualCardioPlanFlow.test.tsx
+  s_b6a0f22c32fc5f::t_e9d5cede26f357 1-45
+src/components/cardio/manualCardioLabels.ts
+  s_b6a0f22c32fc5f::t_97e50a29ca267f 1-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e181a5932a39710fbbd4bada3b416b6b2a27a59c",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
