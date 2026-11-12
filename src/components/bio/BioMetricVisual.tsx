@@ -3,16 +3,19 @@ import { Platform, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 import { useTheme } from '@/theme/useTheme';
 import { metricChartSlots, metricCoordinate, metricDomain, type MetricMonitor } from '@/services/bio/metricMonitor';
+import type { BioHealthMetric } from '@/models/bioHealth';
 
 /** Shared Soft-light material for overview and drill-down. No score or animation is encoded by lighting. */
 const material = {
   dark: { surface: '#26362D', end: '#293D30', track: '#35463B', trackEnd: '#3D4D42', range: '#729985', rangeEnd: '#567864',
-    green: '#9DD5B5', amber: '#F2CA7F', neutral: '#ADBCB1', gleam: '#E5F4E8' },
+    green: '#9DD5B5', amber: '#F2CA7F', blue: '#A6CFFF', neutral: '#ADBCB1', gleam: '#E5F4E8' },
   light: { surface: '#FCFDFB', end: '#E4EDE3', track: '#DDE6DC', trackEnd: '#E8EEE7', range: '#7CA38A', rangeEnd: '#A3BDA8',
-    green: '#28623F', amber: '#805000', neutral: '#526356', gleam: '#F6FAF3' },
+    green: '#28623F', amber: '#805000', blue: '#245B8E', neutral: '#526356', gleam: '#F6FAF3' },
 } as const;
-export function metricTone(view: MetricMonitor): 'green' | 'amber' | 'neutral' {
+/** Blue is a directional departure, never a diagnosis of improved recovery. */
+export function metricTone(view: MetricMonitor, metric?: BioHealthMetric): 'green' | 'amber' | 'blue' | 'neutral' {
   return view.position === 'WITHIN' || view.position === 'TARGET_MET' ? 'green'
+    : view.position === 'BELOW' && metric === 'RESTING_HR' || view.position === 'ABOVE' && metric === 'HRV_SDNN' ? 'blue'
     : ['BELOW', 'ABOVE', 'TARGET_BELOW'].includes(view.position) ? 'amber' : 'neutral';
 }
 export function useMetricMaterial() {
@@ -30,8 +33,8 @@ export function SoftMetricSurface({ children, style, testID }: PropsWithChildren
     ...(Platform.OS === 'web' ? { backgroundImage: image } as ViewStyle : { experimental_backgroundImage: image }) }, style]}>{children}</View>;
 }
 
-export function BioIntervalBar({ view, label }: { view: MetricMonitor; label: string }) {
-  const m = useMetricMaterial(), id = useId().replace(/:/g, ''), tone = m[metricTone(view)];
+export function BioIntervalBar({ view, label, metric }: { view: MetricMonitor; label: string; metric?: BioHealthMetric }) {
+  const m = useMetricMaterial(), id = useId().replace(/:/g, ''), tone = m[metricTone(view, metric)];
   if (!view.range || !view.latest || view.position === 'STALE') return null;
   const domain = metricDomain([view.range.lower, view.range.upper, view.latest.value])!;
   const low = metricCoordinate(view.range.lower, domain), high = metricCoordinate(view.range.upper, domain);
@@ -52,7 +55,7 @@ export function BioIntervalBar({ view, label }: { view: MetricMonitor; label: st
   </View>;
 }
 
-export function BioMetricTrend({ view, label }: { view: MetricMonitor; label: string }) {
+export function BioMetricTrend({ view, label, metric }: { view: MetricMonitor; label: string; metric?: BioHealthMetric }) {
   const m = useMetricMaterial(), id = useId().replace(/:/g, ''), [width, setWidth] = useState(280);
   const slots = metricChartSlots(view), observations = slots.flatMap((slot) => slot.day ? [slot.day.value] : []);
   const domain = metricDomain([...observations, ...(view.range ? [view.range.lower, view.range.upper] : [])]);
@@ -61,7 +64,7 @@ export function BioMetricTrend({ view, label }: { view: MetricMonitor; label: st
   // Never draw through a missing calendar day. Isolated observations remain visible as points.
   let path = '', connected = false;
   slots.forEach((slot, index) => { if (slot.day) { path += `${connected ? ' L' : ' M'}${x(index)},${y(slot.day.value)}`; connected = true; } else connected = false; });
-  const tone = metricTone(view) === 'amber' ? m.amber : m.range;
+  const tone = m[metricTone(view, metric)];
   return <View testID="bio-metric-trend" accessible accessibilityRole="image" accessibilityLabel={label}
     onLayout={(event) => { const next = Math.max(48, event.nativeEvent.layout.width); if (Number.isFinite(next)) setWidth(next); }}>
     <Svg width="100%" height={164} viewBox={`0 0 ${width} 164`} accessible={false}>

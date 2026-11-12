@@ -18,9 +18,9 @@ it('switches actual-work granularities and exposes daily context/errors and obse
   let tree: any; await act(async () => { tree = create(<BioEvolution owner="owner" history={history} catalogue={catalogue} />); });
   expect(button(tree, 'bioEvolution.moreWork')).toBeDefined(); await act(async () => button(tree, 'bioEvolution.moreWork').props.onPress());
   expect(button(tree, 'bioEvolution.moreWork')).toBeUndefined();
-  await act(async () => button(tree, 'bioEvolution.SESSION').props.onPress()); expect(text(tree)).toContain('bioEvolution.credit');
-  await act(async () => button(tree, 'bioEvolution.performance').props.onPress()); expect(text(tree)).toContain('bioEvolution.unknownEffort');
-  expect(tree.root.findAll((node: any) => Array.isArray(node.props.children) && node.props.children.join('') === '49 kg × 10')).not.toHaveLength(0);
+  await act(async () => button(tree, 'bioEvolution.DAY').props.onPress()); expect(text(tree)).toContain('bioEvolution.credit');
+  expect(button(tree, 'bioEvolution.SESSION')).toBeUndefined();
+  expect(button(tree, 'bioEvolution.performance')).toBeUndefined();
   mockDaily = { ready: true, error: true, entries: [] };
   await act(async () => button(tree, 'bioEvolution.daily').props.onPress()); await act(async () => tree.update(<BioEvolution owner="owner" history={history} catalogue={catalogue} />));
   await act(async () => button(tree, 'bio.retry').props.onPress()); expect(mockReload).toHaveBeenCalled();

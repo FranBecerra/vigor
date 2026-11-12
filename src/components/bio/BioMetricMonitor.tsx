@@ -41,8 +41,8 @@ export function BioMetricMonitor({ health, sleepGoalMinutes }: { health: ReturnT
       {!!view.latest && <Text style={[typography.caption, { color: colors.textSecondary }]}> {unit(trend.metric)}</Text>}
     </Text>
     <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-      <View accessible={false} style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: pending ? colors.textSecondary : material[metricTone(view)] }} />
-      <Text style={[typography.caption, { flexShrink: 1, color: pending ? colors.textSecondary : material[metricTone(view)], fontWeight: '600' }]}>{pending ? t('bioMetricsRefreshing') : t(`bioMetric.position.${view.position}`)}</Text>
+      <View accessible={false} style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: pending ? colors.textSecondary : material[metricTone(view, trend.metric)] }} />
+      <Text style={[typography.caption, { flexShrink: 1, color: pending ? colors.textSecondary : material[metricTone(view, trend.metric)], fontWeight: '600' }]}>{pending ? t('bioMetricsRefreshing') : t(`bioMetric.position.${view.position}`)}</Text>
     </View>
   </>;
   return <View style={{ gap: 14, marginBottom: 16 }}>
@@ -56,6 +56,7 @@ export function BioMetricMonitor({ health, sleepGoalMinutes }: { health: ReturnT
     {info && <SoftMetricSurface style={{ padding: 18, gap: 10 }}>
       <Text style={[typography.body, { color: colors.textSecondary }]}>{t('bioMetric.method')}</Text>
       <Text style={[typography.caption, { color: colors.textSecondary }]}>{t('bioHealth.contextOnly')}</Text>
+      <Text style={[typography.caption, { color: colors.textSecondary }]}>{t('executionPolish.metricColors')}</Text>
     </SoftMetricSurface>}
     {health.state === 'OFF' && <SoftMetricSurface style={{ padding: 20 }}>
       <Text style={[typography.body, { color: colors.textSecondary }]}>{t('bioHealth.connectIntro')}</Text>
@@ -73,9 +74,9 @@ export function BioMetricMonitor({ health, sleepGoalMinutes }: { health: ReturnT
             <Text style={[typography.caption, { color: colors.textSecondary, minHeight: 32 }]}>{t(`bioMetric.label.${trend.metric}`)}</Text>
             {reading(trend, view)}
             <View style={{ height: 36, justifyContent: 'center' }}>
-              {pending && !view.latest ? <ActivityIndicator color={colors.bioText} /> : <BioIntervalBar view={view} label={t('bioMetric.intervalLabel', { value: view.latest ? full(trend.metric, view.latest.value) : '—', range: range(trend.metric, view) })} />}
+              {pending && !view.latest ? <ActivityIndicator color={colors.bioText} /> : <BioIntervalBar metric={trend.metric} view={view} label={t('bioMetric.intervalLabel', { value: view.latest ? full(trend.metric, view.latest.value) : '—', range: range(trend.metric, view) })} />}
             </View>
-            <Text style={[typography.caption, { color: colors.textSecondary, minHeight: 36 }]}>{view.range ? `${t('bioMetric.range')}\n${range(trend.metric, view)}` : pending ? ' ' : t(view.position === 'MISSING' ? 'bioHealth.missing' : view.position === 'ERROR' ? 'bioHealth.error' : 'bioMetric.noRange')}</Text>
+            <Text style={[typography.caption, { color: pending ? colors.textSecondary : material[metricTone(view, trend.metric)], minHeight: 36 }]}>{view.range ? `${t('bioMetric.range')}\n${range(trend.metric, view)}` : pending ? ' ' : t(view.position === 'MISSING' ? 'bioHealth.missing' : view.position === 'ERROR' ? 'bioHealth.error' : 'bioMetric.noRange')}</Text>
             <Text style={[typography.caption, { color: colors.textSecondary }]}>{view.latest ? date(view.latest.date) : ' '}</Text>
           </Pressable>
         </SoftMetricSurface>
@@ -93,12 +94,12 @@ export function BioMetricMonitor({ health, sleepGoalMinutes }: { health: ReturnT
             {reading(active.trend, active.view)}
             {active.view.latest && <Text style={[typography.caption, { color: colors.textSecondary }]}>{date(active.view.latest.date)}</Text>}
             <Text style={[typography.title, { color: colors.textPrimary }]}>{t('bioMetric.trend')}</Text>
-            <BioMetricTrend view={active.view} label={t('bioHealth.chartLabel', { count: metricChartSlots(active.view).filter((slot) => slot.day).length })} />
+            <BioMetricTrend metric={active.trend.metric} view={active.view} label={t('bioHealth.chartLabel', { count: metricChartSlots(active.view).filter((slot) => slot.day).length })} />
             {active.view.latest && <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
               <Text style={[typography.caption, { color: colors.textSecondary }]}>{date(metricChartSlots(active.view)[0].date)}</Text>
               <Text style={[typography.caption, { color: colors.textSecondary }]}>{date(active.view.latest.date)}</Text>
             </View>}
-            <Text style={[typography.body, { color: colors.textPrimary }]}>{active.view.range ? `${t('bioMetric.range')}: ${range(active.trend.metric, active.view)}` : t(active.view.latest ? 'bioHealth.buildingReference' : 'bioHealth.noData')}</Text>
+            <Text style={[typography.body, { color: material[metricTone(active.view, active.trend.metric)] }]}>{active.view.range ? `${t('bioMetric.range')}: ${range(active.trend.metric, active.view)}` : t(active.view.latest ? 'bioHealth.buildingReference' : 'bioHealth.noData')}</Text>
             {active.view.goal !== undefined && <Text style={[typography.body, { color: colors.textPrimary }]}>{t('bioMetric.goal', { value: full('SLEEP', active.view.goal) })}</Text>}
             {active.trend.metric === 'SLEEP' && <Text style={[typography.caption, { color: colors.textSecondary }]}>{t('bioMetric.sleepBoundary')}</Text>}
             {active.view.position === 'GOAL_MISSING' && button(t('bioReadiness.setGoal'), () => { setSelected(null); router.push('/settings'); })}

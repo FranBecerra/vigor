@@ -1,8 +1,9 @@
 import React from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, Modal } from 'react-native';
 import BioScreen from '@/app/(tabs)/bio';
 import { MicrocycleReviewSheet } from '../MicrocycleReviewSheet';
 import { MicrocycleReviewPrompt } from '../MicrocycleReviewPrompt';
+import { MicrocycleReviewDialog } from '../MicrocycleReviewDialog';
 import { BioNightDetailsSheet } from '../BioNightDetailsSheet';
 import { BioNightCard } from '../BioNightCard';
 import { buildBioCycles, createMicrocycleReview } from '@/services/bio/microcycleReview';
@@ -32,7 +33,8 @@ const button = (tree: any, label: string) => tree.root.findAll((node: any) => no
 const text = (tree: any) => tree.root.findAll((node: any) => typeof node.props.children === 'string').map((node: any) => node.props.children).join(' ');
 beforeEach(() => {
   jest.clearAllMocks(); mockUid = 'owner'; mockParams = {}; mockNightState = 'OFF';
-  mockData = { owner: mockUid, ready: true, error: false, plans: [plan], routines: [{ id: 'routine', name: 'Personal plan' }], history: [], reload: mockReload };
+  mockData = { owner: mockUid, ready: true, error: false, plans: [plan], routines: [{ id: 'routine', name: 'Personal plan' }], history: [{ id: 'observed', userId: 'owner', mesocycleId: 'plan', microcycleIndex: 0,
+    plannedSessionIndex: 0, performedAt: 20, completedAt: 60, exercises: [] }], reload: mockReload };
   mockReviews = { ready: true, error: false, entries: [], save: mockSave }; mockSave.mockResolvedValue(undefined);
 });
 it('shows no invented readiness and lets the athlete review actual cycles without touching prescriptions', async () => {
@@ -45,7 +47,7 @@ it('shows no invented readiness and lets the athlete review actual cycles withou
   await act(async () => tree.root.findByType(MicrocycleReviewSheet).props.onClose());
   expect(button(tree, 'bio.today')).toBeUndefined(); expect(button(tree, 'bio.response')).toBeUndefined();
   await act(async () => button(tree, 'bio.seeResponse').props.onPress());
-  expect(text(tree)).toContain('bio.workingSets'); expect(text(tree)).toContain('bio.skipped');
+  expect(text(tree)).toContain('bio.workingSets');
   expect(plan.currentMicrocycleIndex).toBe(1); await act(async () => tree.unmount());
 });
 it('preserves reviewed answers, permits editing and never presents retrospective feedback as today’s score', async () => {
@@ -71,13 +73,64 @@ it('handles read failures, empty states, skipped reviews and saves that fail wit
 it('uses an inline invitation only for closed, unreviewed cycles; dismissed feedback stays dismissed', async () => {
   let tree: any; await act(async () => { tree = create(<MicrocycleReviewPrompt routines={[routine]} />); });
   await act(async () => button(tree, 'bio.review').props.onPress());
-  expect(mockNavigate).toHaveBeenCalledWith({ pathname: '/(tabs)/bio', params: { mesocycleId: 'plan' } });
+  expect(mockNavigate).not.toHaveBeenCalled();
+  expect(tree.root.findByType(MicrocycleReviewSheet).props.cycleNumber).toBe(1);
+  await act(async () => tree.root.findByType(MicrocycleReviewSheet).props.onClose());
   mockReviews.entries = [createMicrocycleReview('owner', { ...cycle, id: 'plan:m1', index: 1 }, {}, 'DISMISSED', undefined, 200)];
   const withBacklog = { ...routine, microcycles: [...routine.microcycles, { number: 2, sessions: [{ completedOn: '2026-10-26' }] }] };
   await act(async () => tree.update(<MicrocycleReviewPrompt routines={[withBacklog]} />)); expect(tree.toJSON()).toBeNull();
   mockReviews.entries = []; mockReviews.error = true;
   await act(async () => tree.update(<MicrocycleReviewPrompt routines={[routine]} />)); expect(tree.toJSON()).toBeNull();
   mockReviews.error = false; await act(async () => tree.update(<MicrocycleReviewPrompt routines={[]} />)); expect(tree.toJSON()).toBeNull();
+  await act(async () => tree.unmount());
+});
+
+it('keeps one native Modal alive when the Training invitation loads the questionnaire asynchronously', async () => {
+  mockData = { ...mockData, ready: false, plans: [], history: [] };
+  let tree: any;
+  const render = () => <MicrocycleReviewPrompt routines={[routine]} />;
+  await act(async () => { tree = create(render()); });
+  await act(async () => button(tree, 'bio.review').props.onPress());
+  const host = tree.root.findByType(Modal);
+  expect(tree.root.findAllByType(MicrocycleReviewSheet)).toHaveLength(0);
+  mockData = { ...mockData, ready: true, plans: [plan], history: [] };
+  await act(async () => tree.update(render()));
+  expect(tree.root.findAllByType(Modal)).toHaveLength(1);
+  expect(tree.root.findByType(Modal)).toBe(host);
+  expect(tree.root.findByType(MicrocycleReviewSheet).props.embedded).toBe(true);
+  await act(async () => button(tree, 'bio.recovery.USUAL').props.onPress());
+  mockSave.mockRejectedValueOnce(Error('offline'));
+  await act(async () => button(tree, 'bio.save').props.onPress());
+  expect(text(tree)).toContain('bio.saveError');
+  expect(tree.root.findByType(Modal)).toBe(host);
+  await act(async () => button(tree, 'bio.save').props.onPress());
+  expect(mockSave).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'plan:m0' }), { recovery: 'USUAL' });
+  expect(tree.root.findAllByType(Modal)).toHaveLength(0);
+  await act(async () => tree.unmount());
+});
+it('opens the survey locally, preserves its draft through an error, and closes across an owner round trip', async () => {
+  let tree: any; await act(async () => { tree = create(<MicrocycleReviewPrompt routines={[routine]} />); });
+  await act(async () => button(tree, 'bio.review').props.onPress());
+  const original = tree.root.findByType(MicrocycleReviewSheet);
+  await act(async () => button(tree, 'bio.recovery.BETTER').props.onPress());
+  mockReviews.error = true;
+  await act(async () => tree.update(<MicrocycleReviewPrompt routines={[routine]} />));
+  expect(tree.root.findByType(MicrocycleReviewSheet)).toBe(original);
+  expect(button(tree, 'bio.recovery.BETTER').props.accessibilityState.selected).toBe(true);
+  mockUid = 'other'; await act(async () => tree.update(<MicrocycleReviewPrompt routines={[routine]} />));
+  expect(tree.root.findAllByType(MicrocycleReviewSheet)).toHaveLength(0);
+  mockUid = 'owner'; mockReviews.error = false; await act(async () => tree.update(<MicrocycleReviewPrompt routines={[routine]} />));
+  expect(tree.root.findAllByType(MicrocycleReviewSheet)).toHaveLength(0); expect(mockNavigate).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+it('keeps the initial local review loading/error states dismissible and retries only the read', async () => {
+  mockData.ready = false; let tree: any;
+  await act(async () => { tree = create(<MicrocycleReviewDialog id="plan:m0" onClose={mockNavigate} />); });
+  expect(text(tree)).toContain('bioMetricsRefreshing'); expect(mockSave).not.toHaveBeenCalled();
+  mockData.ready = true; mockData.error = true;
+  await act(async () => tree.update(<MicrocycleReviewDialog id="plan:m0" onClose={mockNavigate} />));
+  await act(async () => button(tree, 'bio.retry').props.onPress()); expect(mockReload).toHaveBeenCalled();
+  await act(async () => button(tree, 'bio.close').props.onPress()); expect(mockNavigate).toHaveBeenCalledTimes(1);
   await act(async () => tree.unmount());
 });
 it('never leaves a private review editor visible after the owner changes', async () => {
@@ -91,6 +144,20 @@ it('keeps a legacy block with a missing start date usable rather than crashing t
   mockData.plans = [{ ...plan, startedAt: undefined }]; mockParams = { mesocycleId: 'plan' };
   let tree: any; await act(async () => { tree = create(<BioScreen />); });
   expect(text(tree)).toContain('Personal plan · —'); await act(async () => tree.unmount());
+});
+
+it('omits unstarted, discarded-only, foreign and future-only plans and removes upcoming plan/volume and raw workout panels', async () => {
+  mockParams = { mesocycleId: 'never' };
+  mockData.plans.push({ ...plan, id: 'never', routineId: 'never' }, { ...plan, id: 'discarded' }, { ...plan, id: 'foreign' }, { ...plan, id: 'future' });
+  mockData.routines.push({ id: 'never', name: 'Never started' });
+  const record = mockData.history[0];
+  mockData.history.push({ ...record, id: 'discarded', mesocycleId: 'discarded', discardedAt: 100 },
+    { ...record, id: 'foreign', mesocycleId: 'foreign', userId: 'other' }, { ...record, id: 'future', mesocycleId: 'future', completedAt: Date.now() + 100000 });
+  let tree: any; await act(async () => { tree = create(<BioScreen />); });
+  expect(text(tree)).not.toContain('Never started'); expect(text(tree)).toContain('bio.workingSets');
+  expect(text(tree)).not.toContain('bioDose.title'); expect(text(tree)).not.toContain('bioSession.title');
+  expect(button(tree, 'bioEvolution.performance')).toBeUndefined();
+  await act(async () => tree.unmount());
 });
 it('opens overnight measurements outside the scrolling layout, with spacing and an unchanged overview', async () => {
   mockNightState = 'READY'; let tree: any;

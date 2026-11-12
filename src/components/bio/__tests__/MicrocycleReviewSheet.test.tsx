@@ -9,6 +9,8 @@ it('starts unanswered, accepts a short partial review and never preselects an ef
   const save = jest.fn().mockResolvedValue(undefined), close = jest.fn(); let tree: any;
   await act(async () => { tree = create(<MicrocycleReviewSheet initial={{}} cycleNumber={1} onSave={save} onSkip={jest.fn()} onClose={close} />); });
   expect(button(tree, 'bio.save').props.disabled).toBe(true);
+  expect(button(tree, 'bio.recovery.USUAL').props.style.width).toBe('100%');
+  expect(button(tree, 'bio.close').props.style.width).toBeUndefined();
   expect(tree.root.findAll((node: any) => node.props.accessibilityState?.selected === true)).toHaveLength(0);
   await act(async () => button(tree, 'bio.recovery.USUAL').props.onPress());
   expect(button(tree, 'bio.save').props.disabled).toBe(false);

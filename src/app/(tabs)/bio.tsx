@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BackHandler, FlatList, Pressable, ScrollView, Text, View } from 'react-native';
+import { BackHandler, FlatList, Pressable, Text, View } from 'react-native';
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,14 +14,10 @@ import type { MicrocycleReview } from '@/models/microcycleReview';
 import { BioHealthCard } from '@/components/bio/BioHealthCard';
 import { useBioHealth } from '@/hooks/useBioHealth';
 import { BioEvolution } from '@/components/bio/BioEvolution';
-import { BioVolumeReview } from '@/components/bio/BioVolumeReview';
-import { reviewVolumeResponse } from '@/services/bio/volumeResponse';
 import { useBioNight } from '@/hooks/useBioNight';
 import { BioNightDetailsSheet } from '@/components/bio/BioNightDetailsSheet';
 import { useBioReadiness } from '@/hooks/useBioReadiness';
 import { BioReadinessCard } from '@/components/bio/BioReadinessCard';
-import { useBioSessionContext } from '@/hooks/useBioSessionContext';
-import { BioSessionContextCard } from '@/components/bio/BioSessionContextCard';
 import { useAppSettings } from '@/hooks/useAppSettings';
 
 export default function BioScreen() {
@@ -34,13 +30,11 @@ export default function BioScreen() {
   const night = useBioNight();
   const readiness = useBioReadiness(night);
   const { exercisesById } = useExerciseCatalogue();
-  const sessionLabels = useMemo(() => ({ focus: (focus: import('@/models').PlannedSessionFocus) => t(`generate.focus${focus}`),
-    goal: (goal: string) => goal }), [t]);
-  const sessionContext = useBioSessionContext(data, reviews, exercisesById, readiness, sessionLabels);
   const params = useLocalSearchParams<{ mesocycleId?: string }>();
   const [tab, setTab] = useState<'TODAY' | 'RESPONSE'>(params.mesocycleId ? 'RESPONSE' : 'TODAY');
   const [selected, setSelected] = useState<string | null>(params.mesocycleId ?? null);
   const [editing, setEditing] = useState<{ id: string; owner: string } | null>(null);
+  useEffect(() => { setEditing(null); }, [uid]);
   const [actionError, setActionError] = useState(false);
   const [nightDetailsOwner, setNightDetailsOwner] = useState<string | null>(null);
   const nightOff = night.state === 'OFF';
@@ -55,14 +49,10 @@ export default function BioScreen() {
     return () => listener.remove();
   }, [tab]));
   const cycles = useMemo(() => uid ? buildBioCycles(uid, data.plans, data.history, Date.now()) : [], [uid, data.plans, data.history]);
-  const planId = data.plans.some((plan) => plan.id === selected) ? selected
-    : data.plans.find((plan) => plan.status === 'ACTIVE' || plan.status === 'DELOAD')?.id ?? data.plans[0]?.id;
-  const visible = cycles.filter((cycle) => cycle.mesocycleId === planId);
-  const doseReview = useMemo(() => {
-    const plan = data.plans.find((plan) => plan.id === planId);
-    return uid && plan && reviews.ready && !reviews.error && !data.error
-      ? reviewVolumeResponse(uid, plan, data.history, reviews.entries, exercisesById, Date.now()) : [];
-  }, [uid, data.plans, data.history, data.error, reviews.ready, reviews.error, reviews.entries, exercisesById, planId]);
+  const observedPlans = data.plans.filter(plan => cycles.some(cycle => cycle.mesocycleId === plan.id && cycle.workouts.length > 0));
+  const planId = observedPlans.some((plan) => plan.id === selected) ? selected
+    : observedPlans.find((plan) => plan.status === 'ACTIVE' || plan.status === 'DELOAD')?.id ?? observedPlans[0]?.id;
+  const visible = cycles.filter((cycle) => cycle.mesocycleId === planId && cycle.workouts.length > 0);
   const reviewMap = new Map(reviews.entries.map((entry) => [entry.id, entry]));
   const latestClosed = visible.filter((cycle) => cycle.closed).sort((a, b) => b.index - a.index)[0];
   const pending = latestClosed && !reviewMap.has(latestClosed.id) ? latestClosed : undefined;
@@ -106,7 +96,6 @@ export default function BioScreen() {
         {tab === 'TODAY' ? <>
           <BioReadinessCard view={readiness} />
           <BioHealthCard health={health} sleepGoalMinutes={preferences.ready ? preferences.settings.bioSleepGoalMinutes : undefined} />
-          <BioSessionContextCard view={sessionContext} />
           {!nightOff && <View testID="bio-night-details-trigger" style={{ marginBottom: spacing.lg }}>
             {button(t('bioSummary.nightDetails'), () => setNightDetailsOwner(uid))}
           </View>}
@@ -118,22 +107,19 @@ export default function BioScreen() {
               {button(t('bio.seeResponse'), () => { setSelected(pending.mesocycleId); setTab('RESPONSE'); })}
             </View>
           </View>}
-          <Pressable accessibilityRole="button" accessibilityLabel={t('bio.seeResponse')} onPress={() => setTab('RESPONSE')}
+          {observedPlans.length > 0 && <Pressable accessibilityRole="button" accessibilityLabel={t('bio.seeResponse')} onPress={() => setTab('RESPONSE')}
             style={[card, { minHeight: 88, gap: 8 }]}>
             <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
               <Text style={[typography.h2, { flex: 1, color: colors.textPrimary }]}>{t('bio.yourContext')}</Text>
               <Text style={[typography.h2, { color: colors.bioText }]}>›</Text>
             </View>
-            <Text style={[typography.body, { color: colors.textSecondary }]}>{t('bio.contextIntro')}</Text>
-          </Pressable>
+          </Pressable>}
         </> : <>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 16 }}>
-            {data.plans.map((plan) => <View key={plan.id}>{button(`${titleFor(plan.id)} · ${date(typeof plan.startedAt === 'number' ? plan.startedAt : plan.startedAt?.seconds * 1000)}`,
+          <View style={{ gap: 8, paddingBottom: 16 }}>
+            {observedPlans.map((plan) => <View key={plan.id}>{button(`${titleFor(plan.id)} · ${date(typeof plan.startedAt === 'number' ? plan.startedAt : plan.startedAt?.seconds * 1000)}`,
               () => setSelected(plan.id), plan.id === planId)}</View>)}
-          </ScrollView>
-          <Text style={[typography.body, { color: colors.textSecondary, marginBottom: 16 }]}>{t('bio.responseIntro')}</Text>
-          <BioEvolution key={`${uid}:${planId}`} owner={uid} history={data.history.filter((workout) => workout.mesocycleId === planId)} catalogue={exercisesById} />
-          <BioVolumeReview items={doseReview} />
+          </View>
+          <BioEvolution key={`${uid}:${planId}`} owner={uid} history={planId ? data.history.filter((workout) => workout.mesocycleId === planId) : []} catalogue={exercisesById} />
           {data.ready && !data.error && visible.length === 0 && <Text style={[typography.body, { color: colors.textSecondary }]}>{t('bio.empty')}</Text>}
         </>}
       </>}

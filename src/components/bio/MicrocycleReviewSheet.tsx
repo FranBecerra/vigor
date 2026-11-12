@@ -7,6 +7,7 @@ import { REVIEW_CONTEXT, REVIEW_MUSCLES, normalizeReviewAnswers } from '@/servic
 import { useTheme } from '@/theme/useTheme';
 
 interface Props {
+  embedded?: boolean;
   initial: MicrocycleReviewAnswers;
   cycleNumber: number;
   onClose: () => void;
@@ -14,7 +15,7 @@ interface Props {
   onSkip: () => Promise<void>;
 }
 
-export function MicrocycleReviewSheet({ initial, cycleNumber, onClose, onSave, onSkip }: Props) {
+export function MicrocycleReviewSheet({ initial, cycleNumber, onClose, onSave, onSkip, embedded = false }: Props) {
   const { t } = useTranslation();
   const { surfaces, colors, typography, radius, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -28,14 +29,14 @@ export function MicrocycleReviewSheet({ initial, cycleNumber, onClose, onSave, o
     setBusy(true); setError(false);
     try { await operation(); onClose(); } catch { setError(true); } finally { setBusy(false); }
   };
-  const choice = (label: string, selected: boolean, onPress: () => void, key = label) => <Pressable key={key}
+  const choice = (label: string, selected: boolean, onPress: () => void, key = label, compact = false) => <Pressable key={key}
     accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected, disabled: busy }} disabled={busy}
     onPress={onPress} style={{ minHeight: 48, justifyContent: 'center', paddingHorizontal: 14, paddingVertical: 10,
-      borderRadius: radius.md, borderWidth: 1, borderColor: selected ? colors.accentText : colors.controlBorder,
-      backgroundColor: selected ? colors.surface : colors.bgElevated }}>
+      ...(compact ? {} : { width: '100%' as const }), borderRadius: radius.sm, borderWidth: 1, borderColor: selected ? colors.accentText : colors.surfaceBorder,
+      backgroundColor: selected ? colors.accentTint : colors.surface }}>
     <Text style={[typography.body, { color: selected ? colors.accentText : colors.textPrimary, fontWeight: selected ? '700' : '400' }]}>{label}</Text>
   </Pressable>;
-  const musclePicker = (field: 'unrecoveredMuscles' | 'discomfortMuscles') => <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+  const musclePicker = (field: 'unrecoveredMuscles' | 'discomfortMuscles') => <View style={{ gap: 8, marginTop: 10 }}>
     {REVIEW_MUSCLES.map((muscle) => choice(t(`muscle.${muscle}`), answers[field]?.includes(muscle) ?? false, () => {
       setAnswers((old) => {
         const values = old[field] ?? [];
@@ -43,25 +44,25 @@ export function MicrocycleReviewSheet({ initial, cycleNumber, onClose, onSave, o
       });
     }, `${field}:${muscle}`))}
   </View>;
-  const question = (title: string, children: ReactNode) => <View style={{ marginBottom: spacing.xl }}>
+  const question = (title: string, children: ReactNode) => <View style={{ ...surfaces.card, padding: 16, borderRadius: radius.lg, marginBottom: spacing.lg }}>
     <Text style={[typography.title, { color: colors.textPrimary, marginBottom: 10 }]}>{title}</Text>{children}
   </View>;
-  return <Modal transparent animationType="slide" onRequestClose={() => { if (!busy) onClose(); }}>
+  const content =
     <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: colors.scrim }}>
       <View accessibilityViewIsModal style={{ maxHeight: '94%', paddingTop: 20, paddingBottom: Math.max(12, insets.bottom),
         ...surfaces.screen, backgroundColor: colors.bg, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }}>
         <View style={{ paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flex: 1 }}><Text style={[typography.h2, { color: colors.textPrimary }]}>{t('bio.reviewTitle')}</Text>
             <Text style={[typography.body, { color: colors.textSecondary, marginTop: 4 }]}>{t('bio.cycle', { count: cycleNumber })}</Text></View>
-          {choice(t('bio.close'), false, onClose)}
+          {choice(t('bio.close'), false, onClose, 'close', true)}
         </View>
         <ScrollView contentContainerStyle={{ padding: 20 }}>
-          {question(t('bio.qRecovery'), <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {question(t('bio.qRecovery'), <View style={{ gap: 8 }}>
             {(['WORSE', 'USUAL', 'BETTER'] as const).map((value) => choice(t(`bio.recovery.${value}`), answers.recovery === value,
               () => setAnswers((old) => ({ ...old, recovery: value }))))}
           </View>)}
           {question(t('bio.qMuscles'), <>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <View style={{ gap: 8 }}>
               {choice(t('bio.none'), answers.unrecoveredMuscles?.length === 0 && !choosingMuscles, () => {
                 setChoosingMuscles(false); setAnswers((old) => ({ ...old, unrecoveredMuscles: [] }));
               })}
@@ -69,17 +70,17 @@ export function MicrocycleReviewSheet({ initial, cycleNumber, onClose, onSave, o
             </View>{choosingMuscles && musclePicker('unrecoveredMuscles')}
           </>)}
           {question(t('bio.qDiscomfort'), <>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ gap: 8 }}>
               {(['NONE', 'PRESENT'] as const).map((value) => choice(t(`bio.discomfort.${value}`), answers.discomfort === value,
                 () => setAnswers((old) => normalizeReviewAnswers({ ...old, discomfort: value }))))}
             </View>{answers.discomfort === 'PRESENT' && musclePicker('discomfortMuscles')}
           </>)}
-          {question(t('bio.qSustainable'), <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {question(t('bio.qSustainable'), <View style={{ gap: 8 }}>
             {(['YES', 'TIGHT', 'NO'] as const).map((value) => choice(t(`bio.sustainability.${value}`), answers.sustainability === value,
               () => setAnswers((old) => ({ ...old, sustainability: value }))))}
           </View>)}
           {choice(t('bio.contextTitle'), showContext, () => setShowContext(!showContext))}
-          {showContext && <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
+          {showContext && <View style={{ gap: 8, marginTop: 10 }}>
             {REVIEW_CONTEXT.map((value) => choice(t(`bio.context.${value}`), answers.context?.includes(value) ?? false, () => {
               setAnswers((old) => ({ ...old, context: old.context?.includes(value) ? old.context.filter((item) => item !== value) : [...(old.context ?? []), value] }));
             }))}
@@ -99,6 +100,6 @@ export function MicrocycleReviewSheet({ initial, cycleNumber, onClose, onSave, o
           </Pressable>
         </View>
       </View>
-    </View>
-  </Modal>;
+    </View>;
+  return embedded ? content : <Modal transparent animationType="slide" onRequestClose={() => { if (!busy) onClose(); }}>{content}</Modal>;
 }

@@ -18,6 +18,7 @@ it('opens a visible review even if iOS has no new authorization prompt, and clos
   mockUid = 'other'; await act(async () => tree.update(<BioHealthSettings />)); expect(tree.root.findAllByType(HealthAccessReview)).toHaveLength(0);
   await act(async () => tree.unmount());
 });
+
 it('prompts only on explicit connection, serializes taps, and disconnects without a permission request', async () => {
   let tree: any; await act(async () => { tree = create(<BioHealthSettings />); }); expect(mockAuthorize).not.toHaveBeenCalled(); expect(mockChange).not.toHaveBeenCalled();
   await act(async () => { tree.root.findByType(Switch).props.onValueChange(true); tree.root.findByType(Switch).props.onValueChange(true); });
