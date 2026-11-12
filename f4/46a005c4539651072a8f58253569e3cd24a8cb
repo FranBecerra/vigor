@@ -1,0 +1,384 @@
+src/test-support/cardioHomeFixture.ts
+  s_b6a0f22c32fc5f::t_0369071f464330 1-15
+src/app/(tabs)/(train)/session.tsx
+  s_58860a6dd107b9::t_de53f5c9397270 469-472,716
+  s_b6a0f22c32fc5f::t_da3fa55954a808 611
+  s_b6a0f22c32fc5f::t_73b7761ac32680 428-430,696
+  s_b6a0f22c32fc5f::t_4761fc3609bb6b 57
+  s_58860a6dd107b9::t_a0f00682d9457b 488-489
+  s_58860a6dd107b9::t_b6b8c728a404eb 485-487
+  s_58860a6dd107b9::t_fd5abb518701cc 490-492
+  s_b6a0f22c32fc5f::t_70fb97823387cf 697
+  s_58860a6dd107b9::t_ba8ba7a4321c2d 717
+  s_58860a6dd107b9::t_0c63f6b5c53346 50,61,73,158,197,217,484,493-497
+src/components/train/generate/GenerateControls.tsx
+  s_b6a0f22c32fc5f::t_c3bacb22f9410f 225-226,258-259,263,271,274,276
+  s_b6a0f22c32fc5f::t_afb8418b7564fd 223-224,244,262,266-268,270
+  s_58860a6dd107b9::t_56b476574127c5 302
+src/app/(tabs)/(train)/routine.tsx
+  s_b6a0f22c32fc5f::t_9758661f27a62c 23,337,355-357,360,362-365,369-370,500-501
+  s_b6a0f22c32fc5f::t_554ff973334918 1
+src/components/home/RoutineDayIndicator.tsx
+  s_b6a0f22c32fc5f::t_77e0a0c2e36b97 5,9,12
+src/components/train/__tests__/MesocycleHistoryFlow.test.tsx
+  s_b6a0f22c32fc5f::t_914629148dfd77 30-41,69-70
+  s_b6a0f22c32fc5f::t_f173f7f02a1f9c 66-68
+  s_58860a6dd107b9::t_fc37253e773878 56-65
+src/components/train/WorkoutExerciseStrip.tsx
+  s_b6a0f22c32fc5f::t_4761fc3609bb6b 21-22,39,43,45,52,54,112
+src/components/train/ExerciseDetailSheet.tsx
+  s_b6a0f22c32fc5f::t_760d1914cb700b 10-11,13,16,27
+  s_b6a0f22c32fc5f::t_24accc198ef857 23
+  s_b6a0f22c32fc5f::t_501763b243f3e5 45
+src/test-support/CardioHomeCheck.tsx
+  s_b6a0f22c32fc5f::t_0369071f464330 1-41,44-46
+  s_b6a0f22c32fc5f::t_d59aefa7eba0bc 42-43
+src/components/train/__tests__/WorkoutControls.test.tsx
+  s_b6a0f22c32fc5f::t_32fef68d730caa 76,79-80
+  s_b6a0f22c32fc5f::t_69c9748275f7b2 81
+src/test-support/continuityFixture.ts
+  s_b6a0f22c32fc5f::t_2d3a10f2917182 2-4,15-16,32-54
+  s_b6a0f22c32fc5f::t_69d8fbb6819278 1,18
+  s_b6a0f22c32fc5f::t_588d2a80aefe2b 26-27
+  s_b6a0f22c32fc5f::t_283bf6f7401fb6 5,30,55-70
+  s_b6a0f22c32fc5f::t_0536d36b129324 6-14,17,19-25,28-29,31
+src/components/train/RehabRunner.tsx
+  s_b6a0f22c32fc5f::t_da3fa55954a808 21,131
+src/components/train/__tests__/WorkoutHistoryEditor.test.tsx
+  s_b6a0f22c32fc5f::t_914629148dfd77 2,15-34
+  s_58860a6dd107b9::t_13e541e85fe990 46,56,59,69,71,99,105
+src/components/train/__tests__/AutomaticMesocycleReview.test.tsx
+  s_b6a0f22c32fc5f::t_6b8687665816eb 15-31,40-44,49,60,71
+  s_b6a0f22c32fc5f::t_0e725506b53389 39,45
+  s_b6a0f22c32fc5f::t_ed1f6e420ba66a 12-14
+  s_b6a0f22c32fc5f::t_0e9a2ad37993d1 32-34,36-38
+  s_b6a0f22c32fc5f::t_cefb9d255c5485 46-48
+  s_b6a0f22c32fc5f::t_7df4efb6cc6f63 50-52,57-59
+  s_b6a0f22c32fc5f::t_ea553cace33e50 61-63,68-70
+  s_58860a6dd107b9::t_509b52495f8a59 1-11,35,53-56,64-67
+src/components/train/__tests__/RoutineDayList.test.tsx
+  s_b6a0f22c32fc5f::t_b3636691a7eaa1 10,16-23
+  s_b6a0f22c32fc5f::t_f79eafdf7bf4a3 24
+src/i18n/__tests__/sportActivities.test.ts
+  s_b6a0f22c32fc5f::t_ecc2d23f5e7e92 53-64
+src/components/train/WorkoutHistoryEditor.tsx
+  s_b6a0f22c32fc5f::t_9f9073a8ca978e 1-3,21,23,50-57,61-63,153
+src/components/home/__tests__/RoutineDayPresentation.test.tsx
+  s_b6a0f22c32fc5f::t_88e1fd21c81d13 83
+src/components/train/WorkoutHealthExport.tsx
+  s_58860a6dd107b9::t_de53f5c9397270 29,36,44
+src/components/train/TrainingCalendarCard.tsx
+  s_b6a0f22c32fc5f::t_9011becbb783df 17-20,28,60-63,94-101
+  s_b6a0f22c32fc5f::t_1c40ecdedcfd9b 89
+  s_b6a0f22c32fc5f::t_705d2f54d87828 23,29-30,71-72
+src/components/train/EditorActions.tsx
+  s_b6a0f22c32fc5f::t_2b9db2d2bd268b 1-40
+src/components/profile/__tests__/AthleteIntakeForm.test.tsx
+  s_58860a6dd107b9::t_87339475c791cf 77-79,84-85
+src/components/train/ExerciseHistoryTimeline.tsx
+  s_b6a0f22c32fc5f::t_acbf6664d3b3bb 1-17,19-26
+  s_b6a0f22c32fc5f::t_24accc198ef857 18
+package.json
+  s_b6a0f22c32fc5f::t_d09cc4c7e82b23 101
+src/components/train/__tests__/TrainHomeResume.test.tsx
+  s_b6a0f22c32fc5f::t_45066726da23b1 24
+  s_b6a0f22c32fc5f::t_961827c9e4dbf6 6,8-9,14,21,50-56,60,66-69
+  s_b6a0f22c32fc5f::t_570c6dbc22b103 22
+  s_58860a6dd107b9::t_eab535216b6ac0 2-3,27,57-59,61,64,81-95
+  s_b6a0f22c32fc5f::t_abe09663552bc9 7,31,62-63,65,70-80
+  s_b6a0f22c32fc5f::t_061e5311caccfc 1,4-5,10-13,15-20,23,25-26,28-30,32-49,96-97
+src/components/train/__tests__/RoutineCreation.test.tsx
+  s_b6a0f22c32fc5f::t_0c9a5405f0dfe9 67
+  s_b6a0f22c32fc5f::t_88e1fd21c81d13 2,43-53,59
+  s_b6a0f22c32fc5f::t_102d6374c36b7d 54-58,60,63-66,68-85
+src/components/train/__tests__/WheelNumber.test.tsx
+  s_b6a0f22c32fc5f::t_32fef68d730caa 67,81-94,105
+  s_b6a0f22c32fc5f::t_fd36b727b5486d 98-104
+src/components/home/RoutineCard.tsx
+  s_b6a0f22c32fc5f::t_4761fc3609bb6b 132,150
+  s_b6a0f22c32fc5f::t_da3fa55954a808 141
+src/components/train/__tests__/SessionPreviousPerformance.test.tsx
+  s_b6a0f22c32fc5f::t_fc0fa7d8eaf4e0 9,20-21,27,35,38,52,57-75,171,187
+  s_b6a0f22c32fc5f::t_5eb6104e90e67f 76,109,130,156,161-170,172-186,188
+src/components/train/StrengthBlockComparison.tsx
+  s_b6a0f22c32fc5f::t_0e642174bf1911 1-74
+src/test-support/LocalChecksEntry.tsx
+  s_b6a0f22c32fc5f::t_63505174024edb 1-16
+src/app/(tabs)/(train)/workout-check.tsx
+  s_b6a0f22c32fc5f::t_9a80a94c56a6a8 42-43,82,144-146,148-149
+  s_58860a6dd107b9::t_8f3464359af5bd 40,58-63,183
+  s_b6a0f22c32fc5f::t_aa4964d59ef7c2 21,115
+  s_b6a0f22c32fc5f::t_9bbb3c915fba29 41,81,120
+  s_b6a0f22c32fc5f::t_a88b6860856dac 12,65,147
+  s_b6a0f22c32fc5f::t_9758661f27a62c 192-194
+src/test-support/metricMonitorFixture.ts
+  s_b6a0f22c32fc5f::t_3afe9b9d5d32ef 11
+src/components/train/__tests__/GenerationWizardPresentation.test.tsx
+  s_58860a6dd107b9::t_44d12ceaebae8b 18,33,175,192-212,243
+  s_b6a0f22c32fc5f::t_69c9748275f7b2 76,131,158
+  s_b6a0f22c32fc5f::t_c7593028592e0d 3,86-95
+  s_b6a0f22c32fc5f::t_cff56f1f517eb6 39-55,98,191,219,242
+  s_b6a0f22c32fc5f::t_75018992f65ece 96-97,231
+  s_b6a0f22c32fc5f::t_5811444b2feaa8 99-100,173-174,176-190,213-218,220-230,232-241
+src/test-support/MicrocycleReviewLoadingCheck.tsx
+  s_b6a0f22c32fc5f::t_061e5311caccfc 1-9,11-31
+  s_b6a0f22c32fc5f::t_733d94d352f1b2 10
+src/theme/surfaces.ts
+  s_b6a0f22c32fc5f::t_d0bada6159f311 49-59
+src/i18n/locales/ja.json
+  s_b6a0f22c32fc5f::t_6e5acef888fcb0 62,67-71,77-88
+  s_b6a0f22c32fc5f::t_1ad20130b7d092 27
+  s_b6a0f22c32fc5f::t_3dd26d30b42d6e 9-10,12
+  s_b6a0f22c32fc5f::t_0f136e709f7f13 781
+  s_b6a0f22c32fc5f::t_5ec2428e9b8fdd 271
+  s_58860a6dd107b9::t_522e13c8c2f9e4 75
+  s_b6a0f22c32fc5f::t_8c748f33d8f024 90
+  s_b6a0f22c32fc5f::t_cf3589e7ff567e 51,53-60
+  s_b6a0f22c32fc5f::t_9cb5dcfbd3d595 13-25
+  s_58860a6dd107b9::t_4902988c712728 7,11
+  s_b6a0f22c32fc5f::t_6fdbfb1a8aee64 44-50
+  s_b6a0f22c32fc5f::t_263721e111c65c 64-65
+  s_b6a0f22c32fc5f::t_4310ad48e0307f 89,91-100
+  s_b6a0f22c32fc5f::t_3161ec982bc480 76
+  s_58860a6dd107b9::t_01279dd9e635fb 268
+  s_b6a0f22c32fc5f::t_5f50f1d6d0d39f 52
+  s_58860a6dd107b9::t_83e28084417d79 34
+  s_58860a6dd107b9::t_8f3464359af5bd 2-6
+  s_b6a0f22c32fc5f::t_e1ce5aaa298db4 35,37-43
+  s_b6a0f22c32fc5f::t_32fef68d730caa 621
+  s_b6a0f22c32fc5f::t_ee5c476cbd01ed 26,28-33,36
+  s_b6a0f22c32fc5f::t_59bbcc73c9a51b 66
+  s_b6a0f22c32fc5f::t_e765063a08e9bc 61
+  s_b6a0f22c32fc5f::t_92b607a6be200d 63
+  s_58860a6dd107b9::t_ee35144f6f253c 267
+src/app/(tabs)/(train)/index.tsx
+  s_b6a0f22c32fc5f::t_fa995917468925 51,90-97,100,170,225,242,249
+  s_58860a6dd107b9::t_eab535216b6ac0 5,28,84-85,224,347-354,386,393
+  s_b6a0f22c32fc5f::t_abe09663552bc9 160-161,255,259
+  s_b6a0f22c32fc5f::t_d59aefa7eba0bc 205
+  s_b6a0f22c32fc5f::t_1c40ecdedcfd9b 303-304,346,357-360
+  s_b6a0f22c32fc5f::t_705d2f54d87828 355-356
+  s_b6a0f22c32fc5f::t_8f14314123042b 29-32,72-73,200-204,206-208,284,293,297
+  s_b6a0f22c32fc5f::t_63505174024edb 21,222
+  s_b6a0f22c32fc5f::t_2459b939252e3a 361,395
+src/components/icons/CycleReviewIcons.tsx
+  s_58860a6dd107b9::t_fbab697caeb187 1,14-16,24-27
+  s_b6a0f22c32fc5f::t_d0bada6159f311 2-13,28-29
+  s_58860a6dd107b9::t_ec9b849fadbec0 17-23
+src/components/train/__tests__/ExerciseDetailHistory.test.tsx
+  s_b6a0f22c32fc5f::t_2508e91dcfa185 2-29,31-49
+  s_b6a0f22c32fc5f::t_501763b243f3e5 1,30
+src/components/train/__tests__/RoutineProgressionFlow.test.tsx
+  s_58860a6dd107b9::t_1b6534d1b1997a 30
+src/components/train/RoutineDayList.tsx
+  s_b6a0f22c32fc5f::t_9011becbb783df 33,36,73
+src/components/train/__tests__/RoutineRestDays.test.tsx
+  s_b6a0f22c32fc5f::t_961827c9e4dbf6 9,119-120,124-136
+  s_b6a0f22c32fc5f::t_45066726da23b1 14,18
+  s_b6a0f22c32fc5f::t_d5171b30ae35e3 8,121-123
+  s_b6a0f22c32fc5f::t_570c6dbc22b103 111
+  s_b6a0f22c32fc5f::t_3e5cca24028955 137-138
+src/app/(tabs)/(train)/create-routine.tsx
+  s_b6a0f22c32fc5f::t_b407f598247912 2,92
+  s_b6a0f22c32fc5f::t_c7fe1b12eb41e5 96
+  s_58860a6dd107b9::t_ec9b849fadbec0 8,67
+  s_58860a6dd107b9::t_aed47c0fc36411 1,3,6-7,12-20,22-66,68-91,93-95,97-100
+src/components/train/generate/PlanPreview.tsx
+  s_b6a0f22c32fc5f::t_4761fc3609bb6b 207,212
+  s_b6a0f22c32fc5f::t_14d01236b81443 34,71,103,202-205,224
+src/app/(tabs)/(train)/mesocycle-continuity.tsx
+  s_b6a0f22c32fc5f::t_0e227241f95285 53
+  s_b6a0f22c32fc5f::t_304b4193fd1835 9,18-52
+  s_58860a6dd107b9::t_967ba088b982a1 10,56
+  s_b6a0f22c32fc5f::t_3b3e06b3c2a09e 6-8
+  s_58860a6dd107b9::t_d081b0e493d2a6 57-59
+  s_58860a6dd107b9::t_6e41ea485b5a06 1-5,11-17,54-55,60-70
+src/test-support/__tests__/LocalChecksEntry.test.tsx
+  s_b6a0f22c32fc5f::t_63505174024edb 1-18
+src/components/icons/ActionIcons.tsx
+  s_b6a0f22c32fc5f::t_b407f598247912 4-16
+src/app/workout-history.tsx
+  s_b6a0f22c32fc5f::t_9758661f27a62c 27,89,94-96,114,134
+  s_b6a0f22c32fc5f::t_e2c48a80a2f83c 1
+src/i18n/locales/en.json
+  s_58860a6dd107b9::t_8f3464359af5bd 2-6
+  s_b6a0f22c32fc5f::t_83349d09c0c9f2 1315-1316
+  s_b6a0f22c32fc5f::t_3161ec982bc480 76
+  s_b6a0f22c32fc5f::t_e1ce5aaa298db4 35,37-43
+  s_b6a0f22c32fc5f::t_ee5c476cbd01ed 26,28-33,36
+  s_b6a0f22c32fc5f::t_263721e111c65c 64-65
+  s_b6a0f22c32fc5f::t_6fdbfb1a8aee64 44-50
+  s_b6a0f22c32fc5f::t_cf3589e7ff567e 51,53-60
+  s_58860a6dd107b9::t_aad95438f422f6 295
+  s_58860a6dd107b9::t_4902988c712728 7,11
+  s_58860a6dd107b9::t_522e13c8c2f9e4 75
+  s_b6a0f22c32fc5f::t_59bbcc73c9a51b 66
+  s_b6a0f22c32fc5f::t_6e5acef888fcb0 62,67-71,77-88
+  s_b6a0f22c32fc5f::t_2e3e89df37befc 944
+  s_b6a0f22c32fc5f::t_5f50f1d6d0d39f 52
+  s_b6a0f22c32fc5f::t_0f136e709f7f13 1107
+  s_58860a6dd107b9::t_01279dd9e635fb 268
+  s_b6a0f22c32fc5f::t_1ad20130b7d092 27
+  s_b6a0f22c32fc5f::t_9cb5dcfbd3d595 13-25
+  s_58860a6dd107b9::t_83e28084417d79 34
+  s_b6a0f22c32fc5f::t_8c748f33d8f024 90,92
+  s_b6a0f22c32fc5f::t_3dd26d30b42d6e 9-10,12
+  s_b6a0f22c32fc5f::t_2d3a10f2917182 1327-1354
+  s_b6a0f22c32fc5f::t_4310ad48e0307f 89,91,93-100,1286
+  s_b6a0f22c32fc5f::t_68adac1d68b024 271
+  s_b6a0f22c32fc5f::t_c3e1f3d0a5c372 61
+  s_b6a0f22c32fc5f::t_a28fa61a2de64e 63
+  s_58860a6dd107b9::t_911ca68db3e7ae 267
+  s_b6a0f22c32fc5f::t_699a6b72d64b47 1287-1289,1312-1314
+  s_b6a0f22c32fc5f::t_7b85aa1ce0cd55 1317-1319,1324-1326
+src/components/train/WorkoutHistoryDetails.tsx
+  s_b6a0f22c32fc5f::t_501763b243f3e5 11
+  s_58860a6dd107b9::t_329266d05ee1a6 12,22-36
+src/app/(tabs)/(train)/bio-check.tsx
+  s_b6a0f22c32fc5f::t_061e5311caccfc 26,71
+src/components/train/MesocycleContinuityFlow.tsx
+  s_b6a0f22c32fc5f::t_7af017ae9e69a1 8,24,36
+  s_b6a0f22c32fc5f::t_861c3a901fb2c9 37,42-43
+  s_b6a0f22c32fc5f::t_0e642174bf1911 13,34,93
+  s_58860a6dd107b9::t_284087b67dd8d1 9,48
+  s_58860a6dd107b9::t_dfee1a8ec3a8bd 1-7,10-12,14-17,19-23,25,27-33,38-41,44-47,49-71,73-92,94-125,128-148
+  s_b6a0f22c32fc5f::t_b66390ca2ca73b 18,35
+  s_58860a6dd107b9::t_c3d375a04359cd 26,72
+  s_b6a0f22c32fc5f::t_83349d09c0c9f2 126-127
+src/components/train/WheelNumber.tsx
+  s_b6a0f22c32fc5f::t_592ce8c64c7207 4,26-31,33-39,41,45-48,56,62,66,69-70,74,83,85-89,92-93,98,107,111,116
+  s_b6a0f22c32fc5f::t_fd36b727b5486d 68
+src/components/train/__tests__/HistoryScreen.test.tsx
+  s_b6a0f22c32fc5f::t_d092f221b8291e 45-46
+src/components/train/RIRProgressionPreview.tsx
+  s_b6a0f22c32fc5f::t_76bc76d478b5f4 20
+  s_b6a0f22c32fc5f::t_4a1cb1cbb7f53b 21
+  s_b6a0f22c32fc5f::t_b2cd0d08f52a3c 44
+  s_b6a0f22c32fc5f::t_fc5c516b1abb2f 9-10,13-14,17-19,27-28,30-37,43
+src/app/(tabs)/(train)/_layout.tsx
+  s_b6a0f22c32fc5f::t_a009fb57ad3829 29
+  s_b6a0f22c32fc5f::t_9c1b81f4780173 27
+src/components/train/__tests__/RIRProgressionPreview.test.tsx
+  s_b6a0f22c32fc5f::t_a5cdc35e1cf444 1-28
+src/components/train/RecordedSessionEditor.tsx
+  s_b6a0f22c32fc5f::t_9f9073a8ca978e 1,19-20,55
+  s_b6a0f22c32fc5f::t_9758661f27a62c 15,75
+src/components/train/__tests__/MesocycleContinuityFlow.test.tsx
+  s_b6a0f22c32fc5f::t_737b626c98f5c4 12-40,72
+  s_b6a0f22c32fc5f::t_283bf6f7401fb6 3,59-60,66,73-88
+  s_58860a6dd107b9::t_8b6efb080edeea 42-58
+  s_b6a0f22c32fc5f::t_642ef8016bc959 1-2,4-11,41,61-65,67-71
+src/i18n/locales/fr.json
+  s_58860a6dd107b9::t_01279dd9e635fb 268
+  s_58860a6dd107b9::t_83e28084417d79 34
+  s_b6a0f22c32fc5f::t_263721e111c65c 64-65
+  s_b6a0f22c32fc5f::t_3dd26d30b42d6e 9-10,12
+  s_b6a0f22c32fc5f::t_10159b6c9ada4b 271
+  s_b6a0f22c32fc5f::t_32fef68d730caa 621
+  s_b6a0f22c32fc5f::t_9cb5dcfbd3d595 13-25
+  s_b6a0f22c32fc5f::t_5f50f1d6d0d39f 52
+  s_58860a6dd107b9::t_4902988c712728 7,11
+  s_b6a0f22c32fc5f::t_ee5c476cbd01ed 26,28-33,36
+  s_b6a0f22c32fc5f::t_4310ad48e0307f 89,91,93-100
+  s_b6a0f22c32fc5f::t_cf3589e7ff567e 51,53-60
+  s_b6a0f22c32fc5f::t_59bbcc73c9a51b 66
+  s_b6a0f22c32fc5f::t_8c748f33d8f024 90,92
+  s_b6a0f22c32fc5f::t_1ad20130b7d092 27
+  s_b6a0f22c32fc5f::t_3161ec982bc480 76
+  s_58860a6dd107b9::t_8f3464359af5bd 2-6
+  s_b6a0f22c32fc5f::t_0f136e709f7f13 781
+  s_b6a0f22c32fc5f::t_e1ce5aaa298db4 35,37-43
+  s_b6a0f22c32fc5f::t_6e5acef888fcb0 62,67-71,77-88
+  s_b6a0f22c32fc5f::t_6fdbfb1a8aee64 44-50
+  s_58860a6dd107b9::t_522e13c8c2f9e4 75
+  s_b6a0f22c32fc5f::t_8ef788f2136af7 61
+  s_b6a0f22c32fc5f::t_1b7690dd893565 63
+  s_58860a6dd107b9::t_3c5e80ae46f14d 267
+src/i18n/locales/es.json
+  s_b6a0f22c32fc5f::t_2e3e89df37befc 944
+  s_b6a0f22c32fc5f::t_1ad20130b7d092 27
+  s_b6a0f22c32fc5f::t_e1ce5aaa298db4 35,37-43
+  s_58860a6dd107b9::t_83e28084417d79 34
+  s_b6a0f22c32fc5f::t_6fdbfb1a8aee64 44-50
+  s_58860a6dd107b9::t_522e13c8c2f9e4 75
+  s_b6a0f22c32fc5f::t_ee5c476cbd01ed 26,28-33,36
+  s_58860a6dd107b9::t_4902988c712728 7,11
+  s_b6a0f22c32fc5f::t_5f50f1d6d0d39f 52
+  s_b6a0f22c32fc5f::t_59bbcc73c9a51b 66
+  s_b6a0f22c32fc5f::t_83349d09c0c9f2 1315-1316
+  s_b6a0f22c32fc5f::t_6e5acef888fcb0 62,67-71,77-88
+  s_b6a0f22c32fc5f::t_9cb5dcfbd3d595 13-25
+  s_b6a0f22c32fc5f::t_0f136e709f7f13 1107
+  s_58860a6dd107b9::t_01279dd9e635fb 268
+  s_58860a6dd107b9::t_aad95438f422f6 295
+  s_b6a0f22c32fc5f::t_3dd26d30b42d6e 9-10,12
+  s_b6a0f22c32fc5f::t_4310ad48e0307f 89,91,93-100,1286
+  s_b6a0f22c32fc5f::t_3161ec982bc480 76
+  s_b6a0f22c32fc5f::t_3b71dc7c19a50d 271
+  s_b6a0f22c32fc5f::t_8c748f33d8f024 90,92
+  s_b6a0f22c32fc5f::t_263721e111c65c 64-65
+  s_b6a0f22c32fc5f::t_cf3589e7ff567e 51,53-60
+  s_b6a0f22c32fc5f::t_2d3a10f2917182 1327-1354
+  s_58860a6dd107b9::t_8f3464359af5bd 2-6
+  s_b6a0f22c32fc5f::t_78d3513aada6f9 61
+  s_b6a0f22c32fc5f::t_0100339df25d2b 63
+  s_58860a6dd107b9::t_fba2bde19dec06 267
+  s_b6a0f22c32fc5f::t_2c0e76ef576630 1287-1289,1312-1314
+  s_b6a0f22c32fc5f::t_a20babac702950 1317-1319,1324-1326
+src/app/(tabs)/(train)/generate.tsx
+  s_58860a6dd107b9::t_522e13c8c2f9e4 982
+  s_58860a6dd107b9::t_4a0724f19a8cd1 75,260,772-786,825-826
+  s_b6a0f22c32fc5f::t_c32525d92b1d8e 45,272,274-277,736,758,760,769-770,788-791,823,855,865,884,1401
+  s_b6a0f22c32fc5f::t_75018992f65ece 330,787
+  s_b6a0f22c32fc5f::t_04d7ffd7e716e1 296-299,978,981,987,1056
+  s_b6a0f22c32fc5f::t_69c9748275f7b2 59-60,570-581,1102,1117,1121
+  s_58860a6dd107b9::t_83e28084417d79 1-3,261,267,278,300-304,442-446,477,997,1020-1023,1026
+  s_58860a6dd107b9::t_69d73964afeae5 4,262-266,268-271,273,287-292,294-295,305-310,312,384,510-513,540,543-545,558,716,724-735,805,849,856,889,907,1185,1241,1251,1280,1282,1380
+  s_b6a0f22c32fc5f::t_76efa699962b6f 110,707,718,822,1211
+  s_b6a0f22c32fc5f::t_ee5c476cbd01ed 908
+  s_58860a6dd107b9::t_43dba5c4031ab4 396-402,527,851,890,892-893,1179-1180,1342,1412
+  s_b6a0f22c32fc5f::t_e55e3fdfca659d 824
+  s_b6a0f22c32fc5f::t_3aacbd33830fe7 5-6,559-569,704-705,771,827,860
+src/app/(tabs)/(train)/mesocycle.tsx
+  s_b6a0f22c32fc5f::t_c90f6fe0a8e005 1,82,94,97-98,100-108,251
+src/app/(tabs)/_layout.tsx
+  s_b6a0f22c32fc5f::t_3622ef83d1490a 16
+src/components/train/RoutineEditorFixture.tsx
+  s_b6a0f22c32fc5f::t_1ac97062e63652 32-36
+src/components/train/__tests__/WorkoutHealthExport.test.tsx
+  s_b6a0f22c32fc5f::t_52dc4e70358b0c 52-64
+src/app/(tabs)/(train)/manual-routine.tsx
+  s_cffd13d1a98738::t_1981375f9bb54c 1,7,26-39,42-45,66,69,72,75-76,87,94,129,131
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f446a005c4539651072a8f58253569e3cd24a8cb",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_cffd13d1a98738": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a0a9-a738-7020-8f0b-96bf79e2aa1f",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
