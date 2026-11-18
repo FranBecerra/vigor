@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useSyncExternalStore, type ReactNode } from 'react';
 import { AppState } from 'react-native';
 import { useAuth } from './useAuth';
-import { workoutHealth } from '@/services/health/healthClient';
+import { discardNativeCardioCapture, workoutHealth } from '@/services/health/healthClient';
 import type { HealthExportView } from '@/services/health/workoutExport';
 
 const Context = createContext<HealthExportView | null>(null);
@@ -16,6 +16,10 @@ export function HealthExportProvider({ children }: { children: ReactNode }) {
     });
     return () => subscription.remove();
   }, [uid, isLoading]);
+  useEffect(() => () => discardNativeCardioCapture(), [uid]);
+  useEffect(() => {
+    if (state.owner === uid && state.ready && !state.enabled) discardNativeCardioCapture();
+  }, [state.owner, state.ready, state.enabled, uid]);
   // Never show a previous account's local journal during an account switch.
   const visible = state.owner === uid && !isLoading ? state : { ...state, owner: uid, ready: false, enabled: false, entries: {}, error: false };
   return <Context.Provider value={visible}>{children}</Context.Provider>;

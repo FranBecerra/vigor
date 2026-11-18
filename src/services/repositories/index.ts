@@ -120,14 +120,14 @@ class MesocycleRepository extends BaseRepository<Mesocycle> {
 
   /** Retry against fresh data so concurrent calendar edits cannot erase each other. */
   async updateTrainingCalendar(id: string,
-    transform: (calendar: NonNullable<Mesocycle['trainingCalendar']>) => NonNullable<Mesocycle['trainingCalendar']>,
+    transform: (calendar: NonNullable<Mesocycle['trainingCalendar']>, current: Mesocycle) => NonNullable<Mesocycle['trainingCalendar']>,
     now: number): Promise<Mesocycle> {
     const reference = this.ref(id);
     return runTransaction(db, async (transaction) => {
       const snapshot = await transaction.get(reference);
       if (!snapshot.exists()) throw new Error('Missing mesocycle');
       const current = { ...snapshot.data(), id } as Mesocycle;
-      const trainingCalendar = transform(current.trainingCalendar ?? {});
+      const trainingCalendar = transform(current.trainingCalendar ?? {}, current);
       transaction.update(reference, { trainingCalendar, updatedAt: now });
       return { ...current, trainingCalendar, updatedAt: now };
     });

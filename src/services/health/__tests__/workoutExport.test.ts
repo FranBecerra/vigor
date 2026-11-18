@@ -1,5 +1,8 @@
 import { SetType, type WorkoutSession } from '@/models';
-import { WorkoutHealthExport, healthWorkout, readHealthJournal, type HealthBridge, type HealthEntry, type HealthWorkout } from '../workoutExport';
+import { cardioFixture, CARDIO_FIXTURE_NOW } from '@/test-support/cardioFixture';
+import { createLinkedCardioWorkout } from '@/services/cardio/cardioHealthLink';
+import { startCardioWorkout, transitionCardioWorkout } from '@/services/cardio/cardioWorkout';
+import { WorkoutHealthExport, cardioHealthExport, healthWorkout, readHealthJournal, type CardioHealthExport, type HealthBridge, type HealthEntry, type HealthWorkout } from '../workoutExport';
 
 const session = (owner = 'owner'): WorkoutSession => ({
   id: 'session', userId: owner, mesocycleId: 'meso', microcycleId: 'micro', microcycleIndex: 0,
@@ -7,14 +10,15 @@ const session = (owner = 'owner'): WorkoutSession => ({
     sets: [{ id: 'set', setType: SetType.NORMAL, targetReps: 10, targetWeight: 20, targetRIR: 2,
       actualReps: 10, actualWeight: 20, completionState: 'DONE', isAutoFilled: false }] }],
 });
-function setup(initial: string | null = null) {
+function setup(initial: string | null = null, now = 10000) {
   let text = initial;
   const storage = { read: jest.fn(async () => text), write: jest.fn(async (value: string) => { text = value; }) };
-  const bridge: jest.Mocked<HealthBridge> = {
+  const bridge: jest.Mocked<Required<HealthBridge>> = {
     authorization: jest.fn(async () => 'authorized'), authorize: jest.fn(async () => 'authorized'),
     saveWorkout: jest.fn(async (_workout: HealthWorkout): Promise<void> => undefined), deleteWorkout: jest.fn(async (_workout: HealthWorkout): Promise<void> => undefined),
+    saveCardioWorkout: jest.fn(async (_workout: CardioHealthExport): Promise<void> => undefined),
   };
-  const service = new WorkoutHealthExport(storage, bridge, () => 10000);
+  const service = new WorkoutHealthExport(storage, bridge, () => now);
   const enable = async (owner = 'owner') => { await service.activate(owner); await service.setEnabled(owner, true); };
   const entries = () => Object.values(service.getSnapshot().entries);
   return { storage, bridge, service, enable, entries, text: () => text };
@@ -22,6 +26,105 @@ function setup(initial: string | null = null) {
 const queued = (action: 'save' | 'delete' = 'save', enabled = true) => JSON.stringify({ version: 1, owners: { owner: { enabled, entries: {
   '["owner","session",5000]': { ...healthWorkout(session(), 'owner', 10000), sessionId: 'session', status: 'queued', action },
 } } } });
+
+describe('completed cardio export', () => {
+  const start = CARDIO_FIXTURE_NOW, end = start + 120000;
+  const block = cardioFixture({}, start), slot = block.slots[0];
+  const running = startCardioWorkout(block, slot.id, start, 'session');
+  const paused = transitionCardioWorkout(running, 'PAUSE', start + 75000);
+  const finished = transitionCardioWorkout(paused, 'FINISH', end, 180);
+
+  it.each(['RUNNING', 'CYCLING', 'MACHINE'] as const)('uses measured active time and preserves the %s activity', activity => {
+    const workout = { ...finished, prescription: { ...finished.prescription, modality: activity } };
+    expect(cardioHealthExport(workout, 'owner', end)).toEqual({
+      identity: JSON.stringify(['owner', 'cardio', workout.id, end]), startMs: start, endMs: end, durationMs: 75000, activity,
+    });
+  });
+
+  it('rejects imported, unfinished, discarded, unmeasured and foreign records', () => {
+    const linked = createLinkedCardioWorkout(block, slot.id, 'watch', { version: 1, truncated: false, workouts: [{
+      kind: 'RUNNING', id: 'watch', sourceName: 'Watch', sourceId: 'watch', start, end, durationSeconds: 120,
+      manuallyEntered: false, mixedActivities: false, ownExport: false, linkKey: 'a'.repeat(64),
+    }] }, [], end, 'linked');
+    for (const workout of [linked, running, paused, transitionCardioWorkout(finished, 'DISCARD', end),
+      { ...finished, actualSeconds: 0 }, { ...finished, elapsedMs: 0 },
+      { ...finished, finishedAt: start + 1 }, { ...finished, startedAt: NaN }]) {
+      expect(cardioHealthExport(workout, 'owner', end)).toBeNull();
+    }
+    expect(cardioHealthExport(finished, 'another', end)).toBeNull();
+    expect(cardioHealthExport(finished, 'owner', end - 1)).toBeNull();
+  });
+
+  it('honors the existing switch and retries after restart through the typed native method only', async () => {
+    const h = setup(null, end);
+    await h.service.activate('owner');
+    expect(await h.service.exportCardio(finished)).toBe(false);
+    await h.service.setEnabled('owner', true);
+    h.bridge.saveCardioWorkout.mockRejectedValueOnce(Error('locked'));
+    expect(await h.service.exportCardio(finished)).toBe(false);
+    expect(h.entries()[0].status).toBe('failed');
+    const reopened = setup(h.text(), end);
+    await reopened.service.activate('owner');
+    expect(reopened.bridge.saveCardioWorkout).toHaveBeenCalledWith(expect.objectContaining({ activity: 'RUNNING', durationMs: 75000 }));
+    expect(await reopened.service.exportCardio(finished)).toBe(true);
+    expect(reopened.bridge.saveCardioWorkout).toHaveBeenCalledTimes(1);
+    expect(reopened.bridge.saveWorkout).not.toHaveBeenCalled();
+    expect(reopened.bridge.authorize).not.toHaveBeenCalled();
+    expect(await reopened.service.export(session())).toBe(true);
+    expect(reopened.entries()).toHaveLength(2);
+  });
+
+  it('stores available measured quantities on this device and skips re-export', async () => {
+    const h = setup(null, end);
+    await h.enable();
+    const measurement = { source: 'IPHONE_HEALTHKIT' as const, startMs: start + 4000, endMs: end,
+      distanceMeters: 240, averageBpm: 136.5 };
+    h.bridge.saveCardioWorkout.mockResolvedValueOnce({ ...measurement, unrelated: ['sample'] } as typeof measurement);
+    expect(await h.service.exportCardio(finished)).toBe(true);
+    expect(h.entries()[0]).toMatchObject({ measurement, status: 'saved', durationMs: 75000 });
+    expect(h.text()).not.toContain('unrelated');
+    const reopened = setup(h.text(), end);
+    await reopened.service.activate('owner');
+    expect(reopened.entries()[0].measurement).toEqual(measurement);
+    expect(await reopened.service.exportCardio(finished)).toBe(true);
+    expect(reopened.bridge.saveCardioWorkout).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { startMs: start - 1, averageBpm: 140 },
+    { endMs: end + 1, averageBpm: 140 },
+    { averageBpm: NaN },
+    { distanceMeters: -1 },
+    { distanceMeters: 0 },
+    {},
+  ])('keeps the Health receipt without an invalid or empty reading %p', async fields => {
+    const h = setup(null, end);
+    await h.enable();
+    h.bridge.saveCardioWorkout.mockResolvedValueOnce({ source: 'IPHONE_HEALTHKIT', startMs: start, endMs: end, ...fields });
+    expect(await h.service.exportCardio(finished)).toBe(true);
+    expect(h.entries()[0]).toMatchObject({ status: 'saved' });
+    expect(h.entries()[0].measurement).toBeUndefined();
+  });
+
+  it('keeps pulse only for generic indoor machines', async () => {
+    const h = setup(null, end);
+    await h.enable();
+    h.bridge.saveCardioWorkout.mockResolvedValueOnce({ source: 'IPHONE_HEALTHKIT', startMs: start, endMs: end, averageBpm: 115 });
+    expect(await h.service.exportCardio({ ...finished, prescription: { ...finished.prescription, modality: 'MACHINE' } })).toBe(true);
+    expect(h.entries()[0].measurement).toMatchObject({ averageBpm: 115 });
+    expect(h.entries()[0].measurement?.distanceMeters).toBeUndefined();
+  });
+
+  it('leaves a failed queue entry on an older native bridge instead of writing cardio as strength', async () => {
+    const h = setup(null, end);
+    const legacy: HealthBridge = { ...h.bridge, saveCardioWorkout: undefined };
+    const service = new WorkoutHealthExport(h.storage, legacy, () => end);
+    await service.activate('owner'); await service.setEnabled('owner', true);
+    expect(await service.exportCardio(finished)).toBe(false);
+    expect(Object.values(service.getSnapshot().entries)[0].status).toBe('failed');
+    expect(h.bridge.saveWorkout).not.toHaveBeenCalled();
+  });
+});
 
 describe('completed-workout payload', () => {
   it('uses actual times, stable event identity, and no invented health quantities', () => {

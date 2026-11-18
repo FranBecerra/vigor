@@ -47,3 +47,18 @@ it('rejects duplicate/stale transitions, invalid corrections and non-cardio/ende
   expect(() => startCardioWorkout({ ...block, schemaVersion: 99 } as any, block.slots[0].id, now, 'run')).toThrow('invalidCardioStart');
   const early = cardioFixture({}, now - 3600000); expect(startCardioWorkout(early, early.slots[0].id, now - 3600000, 'early').startedAt).toBe(now - 3600000);
 });
+
+it('alternates jogging and walking inside the easy phase, excluding pauses and keeping the original total', () => {
+  const run = make();
+  const w = { ...run, prescription: { ...run.prescription, runWalk: true as const } };
+  expect(validCardioWorkout(w, 'owner')).toBe(true);
+  expect(cardioPhase(w, now + 239000)).toMatchObject({ phase: 'WARMUP', remaining: 1 });
+  expect(cardioPhase(w, now + 240000)).toMatchObject({ phase: 'RUN_WALK_RUN', remaining: 60 });
+  expect(cardioPhase(w, now + 300000)).toMatchObject({ phase: 'RUN_WALK_WALK', remaining: 90 });
+  const paused = transitionCardioWorkout(w, 'PAUSE', now + 309000);
+  expect(cardioPhase(paused, now + 550000)).toMatchObject({ phase: 'RUN_WALK_WALK', remaining: 81 });
+  expect(cardioPhase(w, now + 959000)).toMatchObject({ phase: 'RUN_WALK_WALK', remaining: 1 });
+  expect(cardioPhase(w, now + 960000)).toMatchObject({ phase: 'COOLDOWN', remaining: 240 });
+  expect(cardioPhase(w, now + 1200000)).toMatchObject({ phase: 'READY', remaining: 0 });
+  expect(validCardioWorkout({ ...w, prescription: { ...w.prescription, modality: 'CYCLING' } }, 'owner')).toBe(false);
+});

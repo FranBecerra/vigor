@@ -14,7 +14,11 @@ export function validCardioWorkout(value: unknown, owner: string): value is Card
     || !validSportIdentity(w.slotId) || typeof w.name !== 'string' || !w.name || w.name.length > 80
     || !['RUNNING', 'PAUSED', 'FINISHED', 'DISCARDED'].includes(w.status) || !stamp(w.startedAt) || !stamp(w.updatedAt) || w.updatedAt < w.startedAt
     || !Number.isSafeInteger(w.revision) || w.revision < 1 || !Number.isSafeInteger(w.elapsedMs) || w.elapsedMs < 0 || w.elapsedMs > w.updatedAt - w.startedAt
-    || w.source !== 'TIMER_TIME_EFFORT_V1' || !p || !validSportIdentity(p.id)) return false;
+    || !p || !validSportIdentity(p.id)) return false;
+  if (w.source === 'APPLE_HEALTH_LINK_V1') {
+    if (!['FINISHED', 'DISCARDED'].includes(w.status) || !stamp(w.finishedAt) || w.finishedAt <= w.startedAt
+      || w.elapsedMs > w.finishedAt - w.startedAt || typeof w.healthLinkKey !== 'string' || !/^[a-f0-9]{64}$/.test(w.healthLinkKey)) return false;
+  } else if (w.source !== 'TIMER_TIME_EFFORT_V1' || w.healthLinkKey !== undefined) return false;
   if (p.policy === 'MANUAL_PHASES_V1') {
     const phase = w.manualPhase;
     if (!validManualPrescription(p) || !phase || !Number.isInteger(phase.index)
@@ -22,6 +26,7 @@ export function validCardioWorkout(value: unknown, owner: string): value is Card
       || phase.startedAtElapsedMs < 0 || phase.startedAtElapsedMs > w.elapsedMs) return false;
   } else if (w.manualPhase !== undefined || p.schemaVersion !== 1 || !['EASY_START_V1', 'REVIEWED_EASY_DURATION_V1'].includes(p.policy)
     || !['RUNNING', 'CYCLING', 'MACHINE'].includes(p.modality) || p.stimulus !== 'EASY' || !['CURRENT_PRACTICE', 'FAMILIARIZATION', 'REVIEWED_HISTORY'].includes(p.basis)
+    || p.runWalk !== undefined && (p.runWalk !== true || p.modality !== 'RUNNING' || !p.allowWalking || p.basis !== 'FAMILIARIZATION')
     || !Number.isInteger(p.durationSeconds) || p.durationSeconds < 60 || p.durationSeconds > 36000 || typeof p.allowWalking !== 'boolean'
     || !Array.isArray(p.adjustments) || p.adjustments.some(a => !['UNKNOWN_DURATION', 'TOLERATED_DURATION_CAP', 'AVAILABILITY_CAP'].includes(a))
     || !Array.isArray(p.segments) || p.segments.length !== 3
@@ -68,6 +73,13 @@ export function cardioPhase(w: CardioWorkout, now: number) {
   }
   let elapsed = Math.floor(cardioElapsed(w, now) / 1000);
   for (const segment of w.prescription.segments) {
+    if (elapsed < segment.durationSeconds && w.prescription.runWalk && segment.phase === 'EASY') {
+      const offset = elapsed % 150;
+      const jogging = offset < 60;
+      return { phase: jogging ? 'RUN_WALK_RUN' as const : 'RUN_WALK_WALK' as const,
+        remaining: Math.min(segment.durationSeconds - elapsed, (jogging ? 60 : 150) - offset),
+        effort: jogging ? segment.effort : { ...segment.effort, min: 1, max: 2 } };
+    }
     if (elapsed < segment.durationSeconds) return { phase: segment.phase, remaining: segment.durationSeconds - elapsed, effort: segment.effort };
     elapsed -= segment.durationSeconds;
   }

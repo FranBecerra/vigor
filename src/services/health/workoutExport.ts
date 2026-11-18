@@ -1,16 +1,29 @@
 import { SetType, type WorkoutSession } from '@/models';
+import type { CardioPlanningModality } from '@/models/cardio';
+import type { CardioWorkout } from '@/models/cardioTraining';
+import { validCardioWorkout } from '@/services/cardio/cardioWorkout';
 import { isSetCompleted } from '@/services/training/sessionMapper';
 
 export type HealthAuthorization = 'authorized' | 'denied' | 'notDetermined' | 'unavailable';
 export type HealthExportStatus = 'queued' | 'saved' | 'denied' | 'failed' | 'deleted' | 'kept';
-export interface HealthWorkout { identity: string; startMs: number; endMs: number }
-export interface HealthEntry extends HealthWorkout { sessionId: string; status: HealthExportStatus; action: 'save' | 'delete' }
+interface HealthWorkoutTimes { identity: string; startMs: number; endMs: number }
+export type CardioHealthExport = HealthWorkoutTimes & { activity: CardioPlanningModality; durationMs: number };
+export type HealthWorkout = (HealthWorkoutTimes & { activity?: undefined; durationMs?: undefined }) | CardioHealthExport;
+export interface CardioHealthMeasurement {
+  source: 'IPHONE_HEALTHKIT';
+  startMs: number;
+  endMs: number;
+  distanceMeters?: number;
+  averageBpm?: number;
+}
+export type HealthEntry = HealthWorkout & { sessionId: string; status: HealthExportStatus; action: 'save' | 'delete'; measurement?: CardioHealthMeasurement };
 interface OwnerData { enabled: boolean; entries: Record<string, HealthEntry> }
 export interface HealthJournal { version: 1; owners: Record<string, OwnerData> }
 export interface HealthBridge {
   authorization(): Promise<HealthAuthorization>;
   authorize(): Promise<HealthAuthorization>;
   saveWorkout(workout: HealthWorkout): Promise<void>;
+  saveCardioWorkout?(workout: CardioHealthExport): Promise<CardioHealthMeasurement | null | void>;
   deleteWorkout(workout: HealthWorkout): Promise<void>;
 }
 export interface HealthStorage { read(): Promise<string | null>; write(value: string): Promise<void> }
@@ -39,6 +52,34 @@ export function healthWorkout(session: WorkoutSession, owner: string, now = Date
   return { identity: JSON.stringify([owner, session.id, endMs]), startMs, endMs };
 }
 
+export function cardioHealthExport(workout: CardioWorkout, owner: string, now = Date.now()): CardioHealthExport | null {
+  if (!validCardioWorkout(workout, owner) || workout.status !== 'FINISHED' || workout.source !== 'TIMER_TIME_EFFORT_V1'
+    || !Number.isFinite(now) || workout.finishedAt === null || workout.finishedAt > now
+    || workout.elapsedMs <= 0 || workout.elapsedMs > workout.finishedAt - workout.startedAt) return null;
+  return { identity: JSON.stringify([owner, 'cardio', workout.id, workout.finishedAt]), startMs: workout.startedAt,
+    endMs: workout.finishedAt, activity: workout.prescription.modality, durationMs: workout.elapsedMs };
+}
+
+function validCardioMeasurement(value: unknown, entry: HealthEntry): value is CardioHealthMeasurement {
+  if (!value || typeof value !== 'object' || !entry.activity) return false;
+  const reading = value as CardioHealthMeasurement;
+  const positive = (v: number | undefined) => v === undefined || Number.isFinite(v) && v > 0;
+  return reading.source === 'IPHONE_HEALTHKIT' && Number.isFinite(reading.startMs) && Number.isFinite(reading.endMs)
+    && reading.startMs >= entry.startMs && reading.endMs <= entry.endMs && reading.endMs > reading.startMs
+    && positive(reading.averageBpm) && positive(reading.distanceMeters)
+    && (reading.averageBpm !== undefined || reading.distanceMeters !== undefined)
+    && (entry.activity !== 'MACHINE' || reading.distanceMeters === undefined);
+}
+
+function validHealthEntry(owner: string, entry: HealthEntry) {
+  if (entry.activity === undefined) {
+    return entry.durationMs === undefined && entry.identity === JSON.stringify([owner, entry.sessionId, entry.endMs]);
+  }
+  return ['RUNNING', 'CYCLING', 'MACHINE'].includes(entry.activity) && Number.isSafeInteger(entry.durationMs)
+    && entry.durationMs > 0 && entry.durationMs <= entry.endMs - entry.startMs && entry.action === 'save'
+    && entry.identity === JSON.stringify([owner, 'cardio', entry.sessionId, entry.endMs]);
+}
+
 /** Fail closed on a corrupt journal instead of silently losing consent or links. */
 export function readHealthJournal(text: string | null): HealthJournal {
   if (text === null) return { version: 1, owners: {} };
@@ -47,7 +88,8 @@ export function readHealthJournal(text: string | null): HealthJournal {
   for (const [owner, value] of Object.entries(data.owners)) {
     if (!owner || !value || typeof value.enabled !== 'boolean' || !value.entries || typeof value.entries !== 'object' || Array.isArray(value.entries)) throw Error('Invalid health owner');
     for (const [key, entry] of Object.entries(value.entries)) {
-      if (!entry || key !== entry.identity || entry.identity !== JSON.stringify([owner, entry.sessionId, entry.endMs])
+      if (!entry || key !== entry.identity || !validHealthEntry(owner, entry)
+        || entry.measurement !== undefined && (entry.status !== 'saved' || !validCardioMeasurement(entry.measurement, entry))
         || typeof entry.sessionId !== 'string' || !entry.sessionId || !Number.isFinite(entry.startMs) || !Number.isFinite(entry.endMs) || entry.startMs <= 0 || entry.endMs <= entry.startMs
         || !['queued', 'saved', 'denied', 'failed', 'deleted', 'kept'].includes(entry.status)
         || !['save', 'delete'].includes(entry.action)) throw Error('Invalid health entry');
@@ -112,15 +154,21 @@ export class WorkoutHealthExport {
     });
   }
   export(session: WorkoutSession): Promise<boolean> {
+    return this.queueExport(session?.id, owner => healthWorkout(session, owner, this.now()));
+  }
+  exportCardio(workout: CardioWorkout): Promise<boolean> {
+    return this.queueExport(workout?.id, owner => cardioHealthExport(workout, owner, this.now()));
+  }
+  private queueExport(sessionId: string, project: (owner: string) => HealthWorkout | null): Promise<boolean> {
     const owner = this.owner;
     return this.run(async () => {
       if (!owner || !this.view.ready || this.owner !== owner || !this.ownerData(owner)?.enabled) return false;
-      const payload = healthWorkout(session, owner, this.now());
+      const payload = project(owner);
       if (!payload) return false;
       const previous = this.ownerData(owner)!.entries[payload.identity];
       if (previous?.status === 'saved') return true;
       try {
-        const entry: HealthEntry = { ...payload, sessionId: session.id, action: 'save', status: 'queued' };
+        const entry: HealthEntry = { ...payload, sessionId, action: 'save', status: 'queued' };
         await this.entry(owner, entry); return await this.perform(owner, entry);
       } catch { this.publish({ error: true }); return false; }
     });
@@ -155,16 +203,26 @@ export class WorkoutHealthExport {
   private async perform(owner: string, entry: HealthEntry): Promise<boolean> {
     if (this.owner !== owner) return false;
     let status: HealthExportStatus;
+    let measurement: CardioHealthMeasurement | undefined;
     try {
       const auth = await this.bridge.authorization();
       if (this.owner !== owner) return false;
       if (auth !== 'authorized') status = auth === 'unavailable' ? 'failed' : 'denied';
       else {
-        if (entry.action === 'save') await this.bridge.saveWorkout(entry); else await this.bridge.deleteWorkout(entry);
+        if (entry.action === 'delete') await this.bridge.deleteWorkout(entry);
+        else if (entry.activity) {
+          if (!this.bridge.saveCardioWorkout) throw Error('Cardio workout export requires the updated native module');
+          const result = await this.bridge.saveCardioWorkout(entry);
+          if (validCardioMeasurement(result, entry)) {
+            // Keep only the bounded aggregate, not unknown native fields or samples.
+            measurement = { source: result.source, startMs: result.startMs, endMs: result.endMs,
+              distanceMeters: result.distanceMeters, averageBpm: result.averageBpm };
+          }
+        } else await this.bridge.saveWorkout(entry);
         status = entry.action === 'save' ? 'saved' : 'deleted';
       }
     } catch { status = 'failed'; }
-    await this.entry(owner, { ...entry, status });
+    await this.entry(owner, { ...entry, status, ...(measurement ? { measurement } : {}) });
     if (this.owner === owner) this.publish({ error: false });
     return status === 'saved' || status === 'deleted';
   }

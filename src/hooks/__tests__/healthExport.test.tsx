@@ -5,8 +5,9 @@ const { create, act } = require('react-test-renderer');
 let mockUid: string | null = 'owner'; let mockLoading = false;
 let mockState: any = { owner: 'owner', ready: true, enabled: true, available: true, error: false, entries: { private: { status: 'saved' } } };
 const mockActivate = jest.fn(async (_owner: string | null) => undefined); const mockRetry = jest.fn(async (_owner: string) => undefined);
+const mockDiscardCardio = jest.fn();
 jest.mock('../useAuth', () => ({ useAuth: () => ({ uid: mockUid, isLoading: mockLoading }) }));
-jest.mock('@/services/health/healthClient', () => ({ workoutHealth: {
+jest.mock('@/services/health/healthClient', () => ({ discardNativeCardioCapture: () => mockDiscardCardio(), workoutHealth: {
   subscribe: () => () => undefined, getSnapshot: () => mockState,
   activate: (owner: string | null) => mockActivate(owner), retryPending: (owner: string) => mockRetry(owner),
 } }));
@@ -32,6 +33,7 @@ it('hides previous-owner state immediately and deactivates on sign-out', async (
   expect(result).toMatchObject({ owner: 'other', enabled: false, ready: false, entries: {} });
   expect(mockActivate).toHaveBeenLastCalledWith('other');
   mockUid = null; await act(async () => tree.update(<HealthExportProvider><Probe /></HealthExportProvider>));
+  expect(mockDiscardCardio).toHaveBeenCalledTimes(2);
   expect(mockActivate).toHaveBeenLastCalledWith(null); expect(result.entries).toEqual({});
   await act(async () => tree.unmount());
 });
@@ -41,4 +43,14 @@ it('does not treat an unresolved auth restore as permission to process an outbox
   expect(mockActivate).not.toHaveBeenCalled(); expect(result.entries).toEqual({});
   mockLoading = false; await act(async () => tree.update(<HealthExportProvider><Probe /></HealthExportProvider>));
   expect(mockActivate).toHaveBeenCalledWith('owner'); await act(async () => tree.unmount());
+});
+
+it('stops native capture when workout export is switched off for the current owner', async () => {
+  let tree: any;
+  await act(async () => { tree = create(<HealthExportProvider><Probe /></HealthExportProvider>); });
+  expect(mockDiscardCardio).not.toHaveBeenCalled();
+  mockState = { ...mockState, enabled: false };
+  await act(async () => tree.update(<HealthExportProvider><Probe /></HealthExportProvider>));
+  expect(mockDiscardCardio).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount());
 });

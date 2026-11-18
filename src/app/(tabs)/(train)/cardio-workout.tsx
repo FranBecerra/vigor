@@ -6,6 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/theme/useTheme';
 import { useAuth } from '@/hooks/useAuth';
+import { syncNativeCardioCapture } from '@/services/health/healthClient';
+import { useHealthExport } from '@/hooks/useHealthExport';
 import { useCardioWorkouts } from '@/hooks/useCardioTraining';
 import { advanceManualCardioPhase, cardioElapsed, cardioPhase, correctCardioWorkout, transitionCardioWorkout } from '@/services/cardio/cardioWorkout';
 import { SessionEffortInput } from '@/components/train/SessionEffortInput';
@@ -21,10 +23,20 @@ export default function CardioWorkoutScreen() {
 }
 function OwnedWorkout({ id }: { id?: string }) {
   const workouts = useCardioWorkouts();
-  return <CardioWorkoutPanel id={id} workouts={workouts} />;
+  const { service, enabled, ready } = useHealthExport();
+  const workout = workouts.entries.find(w => w.id === id);
+  const captureEnabled = ready && enabled;
+  useEffect(() => {
+    if (workout && workouts.ready && !workouts.error) syncNativeCardioCapture(workout, captureEnabled, true);
+  }, [workout, workouts.ready, workouts.error, captureEnabled]);
+  return <CardioWorkoutPanel id={id} workouts={workouts} onSaved={saved => syncNativeCardioCapture(saved, captureEnabled)} onFinished={workout => {
+    void service.exportCardio(workout).catch(() => undefined);
+  }} />;
 }
 /** The native acceptance fixture supplies an in-memory store, never athlete writes. */
-export function CardioWorkoutPanel({ id, workouts, onExit }: { id?: string; workouts: ReturnType<typeof useCardioWorkouts>; onExit?: () => void }) {
+export function CardioWorkoutPanel({ id, workouts, onExit, onFinished, onSaved }: {
+  id?: string; workouts: ReturnType<typeof useCardioWorkouts>; onExit?: () => void; onFinished?: (workout: CardioWorkout) => void; onSaved?: (workout: CardioWorkout) => void;
+}) {
   const router = useRouter(), insets = useSafeAreaInsets();
   const exit = () => onExit ? onExit() : router.dismissTo('/(tabs)/(train)');
   const back = () => onExit ? onExit() : backToTraining(router);
@@ -41,7 +53,13 @@ export function CardioWorkoutPanel({ id, workouts, onExit }: { id?: string; work
   const action = async (next: () => CardioWorkout, done?: () => void) => {
     if (!workout || lock.current || !live.current || !workouts.ready || workouts.error) return;
     lock.current = true; setBusy(true); setError(false);
-    try { await workouts.save(next(), workout); if (live.current) done?.(); }
+    try {
+      const updated = next();
+      const saved = await workouts.save(updated, workout);
+      if (saved.status !== workout.status) onSaved?.(saved);
+      if (workout.status !== 'FINISHED' && saved.status === 'FINISHED') onFinished?.(saved);
+      if (live.current) done?.();
+    }
     catch { if (live.current) setError(true); }
     finally { if (live.current) { lock.current = false; setBusy(false); } }
   };
@@ -65,7 +83,8 @@ export function CardioWorkoutPanel({ id, workouts, onExit }: { id?: string; work
       <Text accessibilityRole="header" style={{ color: colors.textPrimary, fontSize: 29, fontWeight: '700', marginVertical: 20 }}>{t(`cardioPlan.${workout.prescription.modality}`)}</Text>
       {workout.status === 'FINISHED' && !editing ? <>
         <Text style={{ color: colors.bioText, fontSize: 35, fontWeight: '700' }}>{duration(workout.actualSeconds! * 1000)}</Text>
-        <Text style={{ color: colors.textSecondary, marginVertical: 12 }}>{workout.name} · {t('cardioTraining.recordedTime')}</Text>
+        <Text style={{ color: colors.textSecondary, marginVertical: 12 }}>{workout.name} · {t(workout.source === 'APPLE_HEALTH_LINK_V1'
+          ? 'trainingAgenda.healthSource' : 'cardioTraining.recordedTime')}</Text>
         {sessionEffortValue(workout.feedback) !== null && <Text style={{ color: colors.textPrimary }}>{t('sessionEffort.summary', { value: sessionEffortValue(workout.feedback) })}</Text>}
         {button(t('cardioTraining.editResult'), () => { setMinutes(workout.actualSeconds! / 60); setEffort(sessionEffortValue(workout.feedback)); setEditing(true); })}
         {button(t('workout.done'), back)}
@@ -89,15 +108,18 @@ export function CardioWorkoutPanel({ id, workouts, onExit }: { id?: string; work
             {phase?.phase !== 'READY' && button(t('manualCardio.nextPhase'), () => action(() => advanceManualCardioPhase(workout, Date.now())), false, workout.status !== 'RUNNING')}
           </> : <>
             <Text style={{ color: colors.textSecondary }}>{t('cardioPlan.talkTest')}</Text>
-            {workout.prescription.allowWalking && <Text style={{ color: colors.textSecondary }}>{t('cardioPlan.walking')}</Text>}
+            {workout.prescription.allowWalking && <Text style={{ color: colors.textSecondary }}>{t(workout.prescription.runWalk ? 'cardioPlan.runWalk' : 'cardioPlan.walking')}</Text>}
           </>}
         </View>
         {button(t(workout.status === 'RUNNING' ? 'cardioTraining.pause' : 'cardioTraining.resume'), () => action(() => transitionCardioWorkout(workout, workout.status === 'RUNNING' ? 'PAUSE' : 'RESUME', Date.now())))}
         {button(t('cardioTraining.finish'), beginSummary)}
         <Text style={{ color: colors.textSecondary, marginTop: 18 }}>{t('cardioTraining.timerNotice')}</Text>
       </>}
-      {button(t('cardioTraining.discard'), () => Alert.alert(t('cardioTraining.discard'), t('cardioTraining.confirmDiscard'), [
-        { text: t('generate.cancel'), style: 'cancel' }, { text: t('cardioTraining.discard'), style: 'destructive', onPress: () => action(() => transitionCardioWorkout(workout, 'DISCARD', Date.now()), exit) },
+      {button(t(workout.source === 'APPLE_HEALTH_LINK_V1' ? 'trainingAgenda.unlink' : 'cardioTraining.discard'), () => Alert.alert(
+        t(workout.source === 'APPLE_HEALTH_LINK_V1' ? 'trainingAgenda.unlink' : 'cardioTraining.discard'),
+        t(workout.source === 'APPLE_HEALTH_LINK_V1' ? 'trainingAgenda.confirmUnlink' : 'cardioTraining.confirmDiscard'), [
+        { text: t('generate.cancel'), style: 'cancel' }, { text: t(workout.source === 'APPLE_HEALTH_LINK_V1' ? 'trainingAgenda.unlink' : 'cardioTraining.discard'),
+          style: 'destructive', onPress: () => action(() => transitionCardioWorkout(workout, 'DISCARD', Date.now()), exit) },
       ]), true)}
       {workouts.pending && <Text style={{ color: colors.textSecondary, marginTop: 12 }}>{t('cardioSaved.pending')}</Text>}
     </>}

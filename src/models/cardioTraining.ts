@@ -42,6 +42,7 @@ export interface CardioBlock {
   updatedAt: number;
   revision: number;
   endedAt: number | null;
+  archivedAt?: number;
   /** Absent on legacy blocks; never upgrade those blocks implicitly. */
   progression?: CardioProgression;
 }
@@ -64,5 +65,6 @@ export interface CardioWorkout {
   finishedAt: number | null;
   actualSeconds: number | null;
   feedback: SessionFeedback | null;
-  source: 'TIMER_TIME_EFFORT_V1';
+  source: 'TIMER_TIME_EFFORT_V1' | 'APPLE_HEALTH_LINK_V1';
+  healthLinkKey?: string;
 }

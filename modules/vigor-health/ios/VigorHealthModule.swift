@@ -10,9 +10,16 @@ struct VigorHealthWorkout: Record {
   @Field var identity: String = ""
   @Field var startMs: Double = 0
   @Field var endMs: Double = 0
+  @Field var activity: String?
+  @Field var durationMs: Double?
+  @Field var captureKey: String?
 }
 
 public class VigorHealthModule: Module {
+  @MainActor private lazy var cardioCapture: AnyObject? = {
+    if #available(iOS 26.0, *) { return CardioCapture(store: store) }
+    return nil
+  }()
   private let store = HKHealthStore()
   private var restWork: DispatchWorkItem?
   private var restPlayer: AVAudioPlayer?
@@ -172,6 +179,8 @@ public class VigorHealthModule: Module {
       if let external = workout.metadata?[HKMetadataKeyExternalUUID] as? String, !external.isEmpty, external.utf8.count <= 4096 {
         observation["externalId"] = SHA256.hash(data: Data(external.utf8)).map { String(format: "%02x", $0) }.joined()
       }
+      let linkIdentity = (observation["externalId"] as? String).map { "external:" + $0 } ?? "healthkit:" + workout.uuid.uuidString
+      observation["linkKey"] = SHA256.hash(data: Data(linkIdentity.utf8)).map { String(format: "%02x", $0) }.joined()
       return observation
     }
     result["workouts"] = observations
@@ -373,6 +382,60 @@ public class VigorHealthModule: Module {
         throw error
       }
     }
+    AsyncFunction("healthJournalDirectory") { () throws -> String in
+      let manager = FileManager.default
+      let library = try manager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+      var directory = library.appendingPathComponent("VigorHealth", isDirectory: true)
+      try manager.createDirectory(at: directory, withIntermediateDirectories: true)
+      var values = URLResourceValues()
+      values.isExcludedFromBackup = true
+      try directory.setResourceValues(values)
+      return directory.absoluteString
+    }
+    AsyncFunction("startCardioCapture") { (key: String, activity: String, startedAt: Double) async throws in
+      if #available(iOS 26.0, *), let capture = await self.cardioCapture as? CardioCapture {
+        try await capture.start(key: key, activity: activity, startedAt: startedAt)
+      }
+    }
+    AsyncFunction("setCardioCaptureState") { (key: String, state: String) async in
+      if #available(iOS 26.0, *), let capture = await self.cardioCapture as? CardioCapture {
+        await capture.setState(key: key, state: state)
+      }
+    }
+    AsyncFunction("discardCardioCapture") { () async in
+      if #available(iOS 26.0, *), let capture = await self.cardioCapture as? CardioCapture {
+        await capture.discard()
+      }
+    }
+    AsyncFunction("saveCardioWorkout") { (input: VigorHealthWorkout) async throws -> [String: Any]? in
+      let identifier = try self.syncIdentifier(input)
+      guard self.authorization() == "authorized" else {
+        throw NSError(domain: "VigorHealth", code: 2, userInfo: [NSLocalizedDescriptionKey: "Workout write permission required"])
+      }
+      let activity: HKWorkoutActivityType
+      switch input.activity {
+      case "RUNNING": activity = .running
+      case "CYCLING": activity = .cycling
+      case "MACHINE": activity = .mixedCardio
+      default: throw NSError(domain: "VigorHealth", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid cardio activity"])
+      }
+      guard let duration = input.durationMs, duration.isFinite, duration > 0, duration <= input.endMs - input.startMs else {
+        throw NSError(domain: "VigorHealth", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid cardio duration"])
+      }
+      var metadata: [String: Any] = [HKMetadataKeySyncIdentifier: identifier, HKMetadataKeySyncVersion: 1]
+      if input.activity == "MACHINE" { metadata[HKMetadataKeyIndoorWorkout] = true }
+      if #available(iOS 26.0, *), let key = input.captureKey,
+        let capture = await self.cardioCapture as? CardioCapture,
+        let result = try await capture.save(key: key, endMs: input.endMs, metadata: metadata) {
+        return result
+      }
+      // The timer stores total active time. The explicit duration avoids inventing pause events or counting summary time.
+      let workout = HKWorkout(activityType: activity,
+        start: Date(timeIntervalSince1970: input.startMs / 1000), end: Date(timeIntervalSince1970: input.endMs / 1000),
+        duration: duration / 1000, totalEnergyBurned: nil, totalDistance: nil, metadata: metadata)
+      try await self.store.save(workout)
+      return nil
+    }
     AsyncFunction("deleteWorkout") { (input: VigorHealthWorkout, promise: Promise) in
       do {
         let identifier = try self.syncIdentifier(input)
@@ -391,5 +454,157 @@ public class VigorHealthModule: Module {
         }
       } catch { promise.reject(error) }
     }
+  }
+}
+
+/// HealthKit owns the measurement stream. Only aggregate measurements leave the builder.
+@available(iOS 26.0, *)
+@MainActor
+final class CardioCapture {
+  private let store: HKHealthStore
+  private var key: String?
+  private var pending: UUID?
+  private var lastRequestedKey: String?
+  private var targetState = "RUNNING"
+  private var session: HKWorkoutSession?
+  private var builder: HKLiveWorkoutBuilder?
+  private var startedAt: Double = 0
+  private var types: [HKQuantityType] = []
+  private var closedAt: Double?
+  private var saving = false
+
+  init(store: HKHealthStore) { self.store = store }
+
+  func start(key: String, activity: String, startedAt: Double) async throws {
+    let now = Date().timeIntervalSince1970 * 1000
+    guard self.key == nil, key != lastRequestedKey, !key.isEmpty, startedAt.isFinite, startedAt > 0,
+      now >= startedAt, now - startedAt <= 60_000,
+      HKHealthStore.isHealthDataAvailable(),
+      store.authorizationStatus(for: HKObjectType.workoutType()) == .sharingAuthorized else { return }
+
+    let configuration = HKWorkoutConfiguration()
+    let distance: HKQuantityTypeIdentifier?
+    switch activity {
+    case "RUNNING": configuration.activityType = .running; distance = .distanceWalkingRunning
+    case "CYCLING": configuration.activityType = .cycling; distance = .distanceCycling
+    case "MACHINE":
+      configuration.activityType = .mixedCardio
+      configuration.locationType = .indoor
+      distance = nil
+    default: return
+    }
+    let metrics = [distance, .heartRate].compactMap { $0 }.compactMap { HKQuantityType.quantityType(forIdentifier: $0) }
+    self.key = key
+    lastRequestedKey = key
+    let attempt = UUID()
+    pending = attempt
+    do {
+      let share = Set<HKSampleType>(metrics)
+      try await store.requestAuthorization(toShare: share, read: Set<HKObjectType>(metrics))
+      guard pending == attempt else { return }
+      guard targetState == "RUNNING",
+        store.authorizationStatus(for: HKObjectType.workoutType()) == .sharingAuthorized else {
+        discard()
+        return
+      }
+      let permitted = metrics.filter { store.authorizationStatus(for: $0) == .sharingAuthorized }
+      guard !permitted.isEmpty else { discard(); return }
+      let workout = try HKWorkoutSession(healthStore: store, configuration: configuration)
+      let live = workout.associatedWorkoutBuilder()
+      let dataSource = HKLiveWorkoutDataSource(healthStore: store, workoutConfiguration: configuration)
+      for type in dataSource.typesToCollect where !permitted.contains(type) {
+        dataSource.disableCollection(for: type)
+      }
+      live.dataSource = dataSource
+      session = workout
+      builder = live
+      let start = Date()
+      self.startedAt = start.timeIntervalSince1970 * 1000
+      types = permitted
+      workout.startActivity(with: start)
+      try await live.beginCollection(at: start)
+      if pending == attempt { pending = nil }
+    } catch {
+      if pending == attempt { discard() }
+      throw error
+    }
+  }
+
+  func setState(key: String, state: String) {
+    guard self.key == key, !saving, closedAt == nil else { return }
+    switch state {
+    case "PAUSED": targetState = state; session?.pause()
+    case "RUNNING": targetState = state; session?.resume()
+    case "DISCARDED": discard()
+    default: break
+    }
+  }
+
+  func discard() {
+    guard !saving else { return }
+    session?.end()
+    builder?.discardWorkout()
+    reset()
+  }
+
+  private func reset() {
+    session = nil
+    builder = nil
+    key = nil
+    pending = nil
+    targetState = "RUNNING"
+    types = []
+    closedAt = nil
+  }
+
+  func save(key: String, endMs: Double, metadata: [String: Any]) async throws -> [String: Any]? {
+    guard self.key == key else { return nil }
+    guard let session, let builder, startedAt < endMs, pending == nil,
+      session.state == .running || session.state == .paused || session.state == .stopped else {
+      discard()
+      return nil
+    }
+    saving = true
+    defer { saving = false }
+    let end = Date(timeIntervalSince1970: endMs / 1000)
+    if closedAt == nil {
+      if session.state != .stopped { session.stopActivity(with: end) }
+      // Stopping flushes pending readings before the builder is closed.
+      for _ in 0..<40 where session.state != .stopped {
+        try await Task.sleep(nanoseconds: 50_000_000)
+      }
+      guard session.state == .stopped else { throw CaptureError.notStopped }
+      try await builder.addMetadata(metadata)
+      try await builder.endCollection(at: end)
+      closedAt = endMs
+    }
+
+    var result: [String: Any] = ["source": "IPHONE_HEALTHKIT", "startMs": startedAt, "endMs": endMs]
+    for type in types {
+      guard let statistics = builder.statistics(for: type) else { continue }
+      if type.identifier == HKQuantityTypeIdentifier.heartRate.rawValue,
+        let pulse = statistics.averageQuantity()?.doubleValue(for: HKUnit.count().unitDivided(by: .minute())),
+        pulse.isFinite, pulse > 0 {
+        result["averageBpm"] = pulse
+      } else if let distance = statistics.sumQuantity()?.doubleValue(for: .meter()),
+        distance.isFinite, distance > 0 {
+        result["distanceMeters"] = distance
+      }
+    }
+    guard result["distanceMeters"] != nil || result["averageBpm"] != nil else {
+      builder.discardWorkout()
+      session.end()
+      reset()
+      return nil
+    }
+    guard try await builder.finishWorkout() != nil else { throw CaptureError.notSaved }
+    session.end()
+    reset()
+    return result
+  }
+
+  private enum CaptureError: Error {
+    case notStopped
+    case notSaved
   }
 }

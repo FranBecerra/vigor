@@ -12,10 +12,12 @@ it('retains workout writes and separately discloses optional local Bio reads, pr
   expect(result.modResults).toEqual({ 'com.apple.developer.healthkit': true,
     'com.apple.security.application-groups': ['group.com.franciscobecerra.vigor'] });
   const info = await config.mods.ios.infoPlist({ ...config, modResults: { NSSupportsLiveActivities: true }, modRequest: {} });
-  expect(info.modResults.NSHealthUpdateUsageDescription).toMatch(/start and end times/);
+  expect(info.modResults.NSHealthUpdateUsageDescription).toMatch(/available cardio distance and heart rate/);
+  expect(info.modResults.NSHealthUpdateUsageDescription).toMatch(/strength and cardio workouts/);
   expect(info.modResults.NSHealthShareUsageDescription).toMatch(/sleep, resting heart rate/);
   expect(info.modResults.NSHealthShareUsageDescription).toMatch(/separate overnight opt-in/);
   expect(info.modResults.NSHealthShareUsageDescription).toMatch(/SDNN\/RMSSD/);
   expect(info.modResults.NSHealthShareUsageDescription).toMatch(/optional cardio review reads workout dates, activities, durations, distances, sources and available workout heart rate/);
+  expect(info.modResults.NSHealthShareUsageDescription).toMatch(/iPhone cardio session can also record available distance and sensor heart rate/);
   expect(info.modResults.NSHealthShareUsageDescription).toMatch(/stay on this device/); expect(info.modResults.NSSupportsLiveActivities).toBe(true);
 });
