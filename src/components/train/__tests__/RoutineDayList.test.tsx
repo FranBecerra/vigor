@@ -48,3 +48,23 @@ it('edge-scrolls while a day is held near the screen boundary and stops when the
   act(() => jest.advanceTimersByTime(96)); expect(scrollBy).toHaveBeenCalledTimes(calls); expect(reorder).not.toHaveBeenCalled();
   await act(async () => tree.unmount()); jest.useRealTimers();
 });
+
+it('skips locked drop targets and discards a drop after the underlying order changes', async () => {
+  const items = [{ id: 'lift', kind: 'strength' }, { id: 'class', kind: 'sport' }, { id: 'run', kind: 'cardio' }];
+  const reorder = jest.fn();
+  const list = (rows = items) => <RoutineDayList items={rows} onReorder={reorder}
+    itemHeight={72} canDrop={item => item.kind !== 'sport'} renderItem={item => <Text>{item.id}</Text>} />;
+  let tree: any;
+  mockGestures.length = 0;
+  await act(async () => { tree = create(list()); });
+  const pan = mockGestures[0];
+  act(() => { pan.callbacks.onStart(); pan.callbacks.onUpdate({ translationY: 72 }); pan.callbacks.onEnd(); });
+  expect(reorder).not.toHaveBeenCalled();
+  act(() => { pan.callbacks.onStart(); pan.callbacks.onUpdate({ translationY: 144 }); pan.callbacks.onEnd(); });
+  expect(reorder).toHaveBeenCalledWith(0, 2);
+  act(() => { pan.callbacks.onStart(); pan.callbacks.onUpdate({ translationY: 144 }); });
+  await act(async () => tree.update(list([items[1], items[0], items[2]])));
+  act(() => pan.callbacks.onEnd());
+  expect(reorder).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount());
+});

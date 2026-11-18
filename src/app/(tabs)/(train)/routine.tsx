@@ -492,6 +492,10 @@ export default function RoutineDetailScreen() {
           backgroundColor: sectionAccent.train }}>
         <Text style={[typography.title, { color: '#16191C' }]}>{t('routine.startSession')}</Text>
       </Pressable>
+      <Pressable onPress={() => setMenu('skip')} accessibilityRole="button"
+        style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center', marginHorizontal: spacing.lg }}>
+        <Text style={[typography.body, { color: colors.textSecondary }]}>{t('routine.skipSession')}</Text>
+      </Pressable>
     </View>}
     <ActionMenuSheet title={menuTitle}
       subtitle={menu === 'skip' ? t('routine.skipConfirm')

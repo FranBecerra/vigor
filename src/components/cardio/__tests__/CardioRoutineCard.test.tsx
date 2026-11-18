@@ -3,6 +3,7 @@ import { MesoRail } from '@/components/home/HomeHeader';
 import { RoutineDayIndicator } from '@/components/home/RoutineDayIndicator';
 import { cardioHomeFixture } from '@/test-support/cardioHomeFixture';
 import { cardioHomeSessions } from '@/services/cardio/cardioHome';
+import { startCardioWorkout } from '@/services/cardio/cardioWorkout';
 const { create, act } = require('react-test-renderer');
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 
@@ -29,5 +30,28 @@ it('shows skip and sport states without awarding completed cardio to a reserved 
   await act(async () => tree.update(<CardioSessionRow entry={entry} onOpen={() => {}} />));
   expect(tree.root.findByType(RoutineDayIndicator).props.completed).toBe(true);
   expect(JSON.stringify(tree.toJSON())).toContain('line-through');
+  await act(async () => tree.unmount());
+});
+
+it('opens the date editor on hold or through accessibility only for unlocked cardio', async () => {
+  const { block } = cardioHomeFixture(), onAdjust = jest.fn(), onOpen = jest.fn();
+  const render = (workouts: ReturnType<typeof startCardioWorkout>[] = []) =>
+    <CardioRoutineCard block={block} workouts={workouts} sports={[]} onOpen={onOpen} onAdjust={onAdjust} onOpenBlock={() => {}} />;
+  let tree: any;
+  await act(async () => { tree = create(render()); });
+  const row = () => tree.root.findAllByType(CardioSessionRow)[0];
+  const button = row().findAll((n: any) => typeof n.props.onLongPress === 'function')[0];
+  await act(async () => button.props.onLongPress());
+  await act(async () => button.props.onAccessibilityAction({ nativeEvent: { actionName: 'adjust' } }));
+  expect(onAdjust.mock.calls.map(([entry]) => entry.slot.id)).toEqual([block.slots[0].id, block.slots[0].id]);
+  expect(onOpen).not.toHaveBeenCalled();
+  const running = startCardioWorkout(block, block.slots[0].id, Date.now(), 'test-running');
+  await act(async () => tree.update(render([running])));
+  expect(row().props.onAdjust).toBeUndefined();
+  await act(async () => tree.update(render([{ ...running, status: 'DISCARDED' }])));
+  expect(row().props.onAdjust).toBe(onAdjust);
+  block.slots[0].disposition = 'SKIPPED';
+  await act(async () => tree.update(render()));
+  expect(row().props.onAdjust).toBeUndefined();
   await act(async () => tree.unmount());
 });

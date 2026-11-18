@@ -1,7 +1,8 @@
 import { cardioHomeSessions, cardioHomeCycle, cardioCalendarRows } from '../cardioHome';
 import { hybridFixture } from '@/test-support/hybridFixture';
 import { prepareHybridBundle } from '../hybridAuthoring';
-import { createCardioBlock } from '../cardioBlock';
+import { changeCardioSlot, createCardioBlock } from '../cardioBlock';
+import { shiftCalendarDate } from '@/services/training/trainingCalendar';
 import { startCardioWorkout, transitionCardioWorkout } from '../cardioWorkout';
 import { toRoutineView } from '@/services/training/routineView';
 import { routineDays, routineRestDays } from '@/services/training/routineRestDays';
@@ -21,6 +22,20 @@ it('shows an eight-day linked rhythm without changing either plan or merging blo
   expect([...rows.values()].flat().map(s => s.slot.id).sort()).toEqual(f.block.slots.filter(s => s.cycle === 0).map(s => s.id).sort());
   expect(rows.size).toBeGreaterThan(0); expect(JSON.stringify(f)).toBe(before);
   expect(cardioHomeCycle(f.block, cardioHomeSessions(f.block, []))).toBe(0);
+});
+
+it('moves an adjusted opportunity to the new shared-calendar day without changing its cycle or dose', () => {
+  const { block, routine, days } = fixture();
+  const slot = block.slots[0];
+  const previous = cardioCalendarRows(routine, days, [block], [], 'owner');
+  const target = days.findIndex(day => !previous.get(day.id)?.some(entry => entry.slot.id === slot.id));
+  const nextDate = shiftCalendarDate(block.startDate, target);
+  const moved = changeCardioSlot(block, slot.id, nextDate, 'CARDIO', null, [], now + 1);
+  const calendar = cardioCalendarRows(routine, days, [moved], [], 'owner');
+  const instances = [...calendar].flatMap(([key, entries]) => entries.filter(entry => entry.slot.id === slot.id).map(entry => ({ key, entry })));
+  expect(instances).toEqual([{ key: days[target].id, entry: expect.objectContaining({
+    slot: { ...slot, date: nextDate }, date: nextDate, seconds: cardioHomeSessions(block, []).find(entry => entry.slot.id === slot.id)!.seconds,
+  }) }]);
 });
 it('keeps unknown, changed, inactive and foreign-owner strength context out of the relative calendar', () => {
   const f = fixture();

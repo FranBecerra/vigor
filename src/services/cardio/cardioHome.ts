@@ -40,6 +40,21 @@ export function cardioHomeCycle(block: CardioBlock, sessions: readonly CardioHom
   return sessions.find(s => !s.resolved)?.slot.cycle ?? block.cycles - 1;
 }
 
+export function cardioProgressSegments(block: CardioBlock, cycle: number) {
+  return Array.from({ length: block.cycles }, (_, index) => ({
+    id: `${block.id}:${index}`, isDeload: false, isProjected: index > cycle,
+  }));
+}
+
+export function linkedCardioCycle(routine: RoutineView, days: readonly RoutineDay[], block: CardioBlock): number | null {
+  const source = block.proposal.strengthSource;
+  if (!routine.mesocycleSnapshot || source?.routineId !== routine.id || source.microcycleIndex === undefined
+    || block.createdAt < timestampMillis(routine.mesocycleSnapshot.startedAt) || block.proposal.input.cycleDays !== days.length) return null;
+  const cycle = routine.currentMicrocycleIndex - source.microcycleIndex;
+  return cycle >= 0 && cycle < block.cycles && !cardioStrengthChanged({ ...block.proposal,
+    strengthSource: { ...source, microcycleIndex: routine.currentMicrocycleIndex } }, routine) ? cycle : null;
+}
+
 /** Add dated cardio beside existing days; strength IDs/order/checks remain untouched. */
 export function cardioCalendarRows(routine: RoutineView, days: readonly RoutineDay[], blocks: readonly CardioBlock[],
   workouts: readonly CardioWorkout[], owner: string): Map<string, CardioHomeSession[]> {
@@ -47,17 +62,11 @@ export function cardioCalendarRows(routine: RoutineView, days: readonly RoutineD
   const current = routine.microcycles[routine.currentMicrocycleIndex];
   if (!routine.isActive || !current || routine.mesocycleSnapshot?.userId !== owner) return result;
   for (const block of blocks.filter(b => b.userId === owner && b.endedAt === null)) {
-    const source = block.proposal.strengthSource;
-    const cycle = source?.microcycleIndex === undefined ? -1 : routine.currentMicrocycleIndex - source.microcycleIndex;
-    // Only an unchanged, explicitly linked relative rhythm can supply dates for undated strength days.
-    const forecast = source?.routineId === routine.id && cycle >= 0 && cycle < block.cycles
-      && block.createdAt >= timestampMillis(routine.mesocycleSnapshot!.startedAt)
-      && block.proposal.input.cycleDays === days.length && !cardioStrengthChanged({ ...block.proposal,
-        strengthSource: { ...source, microcycleIndex: routine.currentMicrocycleIndex } }, routine);
+    const cycle = linkedCardioCycle(routine, days, block);
     const dates = days.map((day, index) => {
       const session = day.kind === 'workout' ? current.sessions.find(s => s.plannedSessionIndex === day.sessionIndex) : undefined;
       const explicit = session?.scheduledOn ?? session?.completedOn;
-      return explicit && validCalendarDate(explicit) ? explicit : forecast ? shiftCalendarDate(block.startDate, cycle * days.length + index) : undefined;
+      return explicit && validCalendarDate(explicit) ? explicit : cycle !== null ? shiftCalendarDate(block.startDate, cycle * days.length + index) : undefined;
     });
     for (const entry of cardioHomeSessions(block, workouts)) {
       const matches = dates.flatMap((date, index) => date === entry.date ? [index] : []);
@@ -68,4 +77,11 @@ export function cardioCalendarRows(routine: RoutineView, days: readonly RoutineD
     }
   }
   return result;
+}
+
+/** A recorded or running opportunity remains tied to its original prescription. */
+export function canAdjustCardioHomeSession(entry: CardioHomeSession, workouts: readonly CardioWorkout[]): boolean {
+  return entry.block.endedAt === null && entry.slot.disposition === 'CARDIO'
+    && !workouts.some(w => w.userId === entry.block.userId && w.blockId === entry.block.id
+      && w.slotId === entry.slot.id && w.status !== 'DISCARDED');
 }

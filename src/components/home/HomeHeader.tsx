@@ -58,12 +58,14 @@ export function DomainPills({ value, onChange, labels }: DomainPillsProps) {
 }
 
 interface MesoRailProps {
-  microcycles: readonly MockMicrocycle[];
+  microcycles: readonly Pick<MockMicrocycle, 'id' | 'isDeload' | 'isProjected'>[];
   currentIndex: number;
   /** Texto de contexto bajo el raíl, p. ej. "Microciclo 3 de 6". */
   caption: string;
   /** Etiqueta de la acción, p. ej. "Ver mesociclo". */
   actionLabel: string;
+  accessibilityLabel?: string;
+  segmentColor?: string;
   onPress: () => void;
 }
 
@@ -80,6 +82,8 @@ export function MesoRail({
   currentIndex,
   caption,
   actionLabel,
+  accessibilityLabel,
+  segmentColor,
   onPress,
 }: MesoRailProps) {
   const { colors, sectionAccent, semantic, radius } = useTheme();
@@ -88,12 +92,12 @@ export function MesoRail({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={actionLabel}
+      accessibilityLabel={accessibilityLabel ?? actionLabel}
       style={[styles.rail, { backgroundColor: colors.surface, borderRadius: radius.md }]}>
       <View style={styles.railSegments}>
         {microcycles.map((micro, index) => {
           const isCurrent = index === currentIndex;
-          const color = micro.isDeload ? semantic.deload : sectionAccent.train;
+          const color = micro.isDeload ? semantic.deload : segmentColor ?? sectionAccent.train;
           const opacity = micro.isProjected
             ? PROJECTED_OPACITY
             : isCurrent

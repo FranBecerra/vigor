@@ -6,6 +6,7 @@ export interface ActionMenuItem {
   label: string;
   onPress: () => void;
   tone?: 'normal' | 'danger';
+  disabled?: boolean;
 }
 
 interface ActionMenuSheetProps {
@@ -30,8 +31,8 @@ export function ActionMenuSheet({ title, subtitle, actions, onClose }: ActionMen
         marginTop: spacing.xs, marginBottom: spacing.md }]}>{subtitle}</Text> : null}
       <View style={{ marginTop: spacing.md }}>
         {actions.map((action) => <Pressable key={action.label}
-          onPress={() => { onClose(); action.onPress(); }} accessibilityRole="button"
-          style={[styles.action, { borderTopColor: colors.surfaceBorder }]}>
+          onPress={() => { onClose(); action.onPress(); }} accessibilityRole="button" disabled={action.disabled}
+          style={[styles.action, { borderTopColor: colors.surfaceBorder, opacity: action.disabled ? .55 : 1 }]}>
           <Text style={[typography.body, { color: action.tone === 'danger'
             ? semantic.danger : colors.textPrimary }]}>{action.label}</Text>
           <Text style={[typography.body, { color: colors.accentText }]}>›</Text>

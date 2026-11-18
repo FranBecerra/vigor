@@ -53,6 +53,7 @@ interface RoutineCardProps {
   onRename: () => void;
   onIdentity?: () => void;
   onRemove: () => void;
+  onActions?: () => void;
   renderSessionList?: (rows: readonly { index: number; content: ReactNode }[]) => ReactNode;
 }
 
@@ -72,6 +73,7 @@ export function RoutineCard({
   onRename,
   onIdentity,
   onRemove,
+  onActions,
   renderSessionList,
 }: RoutineCardProps) {
   const { surfaces, colors, sectionAccent, semantic, radius, spacing } = useTheme();
@@ -103,6 +105,10 @@ export function RoutineCard({
           accessibilityRole="button" accessibilityLabel={labels.sessions}>
           <Text style={[styles.chevron, { color: colors.textMuted, padding: 12 }]}>{expanded ? '▲' : '▼'}</Text>
         </Pressable>
+        {onActions && <Pressable accessibilityRole="button" accessibilityLabel={`${labels.identity ?? labels.rename} · ${routine.name}`}
+          onPress={onActions} style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: colors.textMuted, fontWeight: '700' }}>···</Text>
+        </Pressable>}
       </View>
 
       {expanded ? (

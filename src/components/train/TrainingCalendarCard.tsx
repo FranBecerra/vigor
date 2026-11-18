@@ -16,7 +16,7 @@ import { RoutineDayList, type DayListScroll } from './RoutineDayList';
 import { RoutineDayIndicator } from '@/components/home/RoutineDayIndicator';
 import type { CardioBlock, CardioWorkout } from '@/models/cardioTraining';
 import type { RoutineView } from '@/services/training/routineView';
-import { cardioCalendarRows, type CardioHomeSession } from '@/services/cardio/cardioHome';
+import { canAdjustCardioHomeSession, cardioCalendarRows, type CardioHomeSession } from '@/services/cardio/cardioHome';
 import { CardioSessionRow } from '@/components/cardio/CardioRoutineCard';
 
 /** One atomic workout/rest timeline. Incoming home metadata prevents deferred rest insertion. */
@@ -25,7 +25,8 @@ export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, onCha
   sessionRows?: readonly { index: number; content: ReactNode }[]; onSessionHold?: (index: number) => void;
   durationFeedback?: ReturnType<typeof durationCalibration>; onChanged?: () => void;
   edgeScroll?: DayListScroll;
-  cardio?: { routine: RoutineView; blocks: readonly CardioBlock[]; workouts: readonly CardioWorkout[]; onOpen(entry: CardioHomeSession): void };
+  cardio?: { routine: RoutineView; blocks: readonly CardioBlock[]; workouts: readonly CardioWorkout[];
+    onOpen(entry: CardioHomeSession): void; onAdjust?(entry: CardioHomeSession): void };
   /** Optional persistence boundary for a memory-only native acceptance fixture. */
   persist?: (patch: Partial<Mesocycle>) => Promise<void>;
 }) {
@@ -95,7 +96,8 @@ export function TrainingCalendarCard({ mesocycleId, microcycleIndex, goal, onCha
       if (!displayed[from]?.day || !displayed[to] || displayed[from].anchor === displayed[to].anchor) return;
       const next = moveRoutineDay(slots, displayed[from].anchor, displayed[to].anchor); void save(next.restDays, meso.restDayChecks ?? {}, next.sessionOrder);
     }} onHold={onSessionHold ? item => { if (item.day?.kind === 'workout') onSessionHold(item.day.sessionIndex); } : undefined}
-      renderItem={item => item.entry && cardio ? <CardioSessionRow entry={item.entry} onOpen={cardio.onOpen} /> : item.day?.kind === 'rest'
+      renderItem={item => item.entry && cardio ? <CardioSessionRow entry={item.entry} onOpen={cardio.onOpen}
+        onAdjust={canAdjustCardioHomeSession(item.entry, cardio.workouts) ? cardio.onAdjust : undefined} /> : item.day?.kind === 'rest'
         ? renderRestDay(days.find(day => day.id === item.id)!)
         : sessionRows?.find(row => row.index === (item.day?.kind === 'workout' ? item.day.sessionIndex : -1))?.content
           ?? <Text style={{ color: colors.textPrimary }}>{sessions.find(session => item.day?.kind === 'workout' && session.index === item.day.sessionIndex)?.name}</Text>} />
