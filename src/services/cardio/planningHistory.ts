@@ -1,5 +1,6 @@
 import type { CardioHealthRead } from '@/models/cardioHealth';
 import type { CardioWorkout } from '@/models/cardioTraining';
+import { sessionEffortValue } from '@/services/training/sessionFeedback';
 import { validCardioWorkout } from './cardioWorkout';
 import { cardioHealthWindow } from './cardioHealthReview';
 import { freshReviewedCardioStart, type ReviewedCardioStart } from './reviewedCardioStart';
@@ -26,11 +27,13 @@ export function vigorPlanningHistory(entries: readonly CardioWorkout[], owner: s
   for (const value of entries) {
     if (value?.userId !== owner) continue;
     if (!validCardioWorkout(value, owner)) throw Error('invalidPlanningHistory');
-    if (value.status !== 'FINISHED' || value.startedAt < window.start || value.finishedAt! > now) continue;
+    // Linked records can inform planning through the existing consented Health history path.
+    if (value.source !== 'TIMER_TIME_EFFORT_V1' || value.status !== 'FINISHED' || value.startedAt < window.start || value.finishedAt! > now) continue;
     // A corrected duration may be longer than the recorded interval. Do not invent dates.
     if (value.finishedAt! < value.startedAt || value.actualSeconds! * 1000 > value.finishedAt! - value.startedAt + 1000) throw Error('inconsistentPlanningHistory');
     if (value.prescription.modality === 'MACHINE') continue;
-    workouts.push({ id: `vigor:${value.id}`, kind: value.prescription.modality, start: value.startedAt, end: value.finishedAt!,
+    const effort = sessionEffortValue(value.feedback);
+    workouts.push({ ...(effort !== null ? { sessionEffort: effort } : {}), id: `vigor:${value.id}`, kind: value.prescription.modality, start: value.startedAt, end: value.finishedAt!,
       durationSeconds: value.actualSeconds!, sourceId: 'vigor-timer', sourceName: 'Vigor', manuallyEntered: false, ownExport: false, mixedActivities: false });
   }
   return { version: 1, truncated: workouts.length > 1000, workouts: workouts.slice(0, 1000) };
@@ -38,7 +41,7 @@ export function vigorPlanningHistory(entries: readonly CardioWorkout[], owner: s
 
 /** Reuse the generator's capacity; never ask the athlete for it a second time. */
 export function planningHistoryContext(input: CardioPreviewInput, modality: 'RUNNING' | 'CYCLING'): CardioStartContext {
-  return { modality, response: 'UNKNOWN', inferFromHistory: true,
+  return { modality, response: 'UNKNOWN', inferFromHistory: true, assessMonthlyCapacity: true,
     cycleDays: input.cycleDays, maxSessions: input.sessions, maxSessionMinutes: input.sessionMinutes, totalMinutes: input.cardioMinutes };
 }
 

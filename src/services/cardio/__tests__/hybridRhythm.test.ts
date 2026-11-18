@@ -1,6 +1,6 @@
 import { buildCardioPreview, type CardioPreviewInput } from '../cardioPreview';
 import { cardioGapCost } from '../cardioSpacing';
-import { hybridRhythmQuality, hybridRhythmRankIsBetter, HybridRhythmCancelled, suggestHybridRhythm } from '../hybridRhythm';
+import { hybridRhythmQuality, hybridRhythmRankIsBetter, hybridRunningProximity, HybridRhythmCancelled, suggestHybridRhythm } from '../hybridRhythm';
 
 const base = (patch: Partial<CardioPreviewInput> = {}): CardioPreviewInput => ({ placementPolicy: 'BALANCED_V2', modalities: ['CYCLING'],
   profile: { schemaVersion: 1, modalities: {} }, cycleDays: 8, availableDays: [0, 1, 2, 3, 4, 5, 6, 7],
@@ -84,4 +84,38 @@ it('keeps a run closer to the lighter leg prescription when categorical conflict
   })).preview.scheduled[0].dayIndex;
   expect(await runDay(2, 8)).toBe(0);
   expect(await runDay(8, 2)).toBe(2);
+});
+
+it('uses priority to protect the earlier session when a run and leg work cannot be separated', async () => {
+  const input = base({ cycleDays: 7, modalities: ['RUNNING'], availableDays: [0, 1, 6], maxActiveDays: 3,
+    sessions: 1, cardioMinutes: 20, strength: base().strength.slice(0, 2).map(s => ({ ...s, lowerBodyDemand: 'HIGH' })) });
+  const legSets = new Map([['s0', 5], ['s1', 5]]);
+  const strength = await suggestHybridRhythm(input, { legSets, priority: 'STRENGTH', yieldControl: noWait });
+  const cardio = await suggestHybridRhythm(input, { legSets, priority: 'CARDIO', yieldControl: noWait });
+  expect(strength.preview.scheduled[0].dayIndex).toBe(1);
+  expect(cardio.preview.scheduled[0].dayIndex).toBe(6);
+  expect(strength.after.proximity).toBe(cardio.after.proximity);
+  for (const result of [strength, cardio]) {
+    expect(result.preview.usedMinutes).toBe(20);
+    expect(result.preview.omitted).toEqual([]);
+    expect(result.input.strength.map(({ dayIndex, ...s }) => s)).toEqual(input.strength.map(({ dayIndex, ...s }) => s));
+  }
+  expect(hybridRunningProximity(strength.input, strength.preview, legSets, 'STRENGTH')).toEqual({ nearbySets: 5, priorityCost: 0 });
+  expect(hybridRunningProximity(strength.input, strength.preview, legSets, 'CARDIO')).toEqual({ nearbySets: 5, priorityCost: 5 });
+  expect(hybridRunningProximity(cardio.input, cardio.preview, legSets, 'STRENGTH')).toEqual({ nearbySets: 5, priorityCost: 5 });
+  expect(hybridRunningProximity(cardio.input, cardio.preview, legSets)).toEqual({ nearbySets: 5, priorityCost: 0 });
+});
+
+it('counts same-day work for either priority and ignores cycling and distant or missing placements', () => {
+  const input = base({ modalities: ['RUNNING'], sessions: 1, availableDays: [0], allowDoubles: true, maxActiveDays: 1,
+    strength: [{ ...base().strength[0], lowerBodyDemand: 'HIGH' }] });
+  const preview = buildCardioPreview(input);
+  expect(preview.scheduled).toHaveLength(1);
+  expect(hybridRunningProximity(input, preview, undefined, 'CARDIO')).toEqual({ nearbySets: 2, priorityCost: 2 });
+  expect(hybridRunningProximity(input, preview, new Map(), 'STRENGTH')).toEqual({ nearbySets: 0, priorityCost: 0 });
+  const incomplete = { ...input, strength: [{ ...input.strength[0], dayIndex: undefined }, { ...input.strength[0], dayIndex: 4 }] };
+  expect(hybridRunningProximity(incomplete, preview)).toEqual({ nearbySets: 0, priorityCost: 0 });
+  const cycling = { ...input, modalities: ['CYCLING'] as CardioPreviewInput['modalities'] };
+  expect(hybridRunningProximity(cycling, buildCardioPreview(cycling)))
+    .toEqual({ nearbySets: 0, priorityCost: 0 });
 });

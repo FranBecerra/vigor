@@ -1,5 +1,6 @@
 import { buildCardioPreview, cardioPreviewIssue, type CardioPreview, type CardioPreviewInput } from './cardioPreview';
 import { cardioGapCost } from './cardioSpacing';
+import type { HybridPriority } from './hybridAuthoring';
 
 export class HybridRhythmCancelled extends Error {}
 
@@ -25,12 +26,39 @@ export function hybridRhythmRankIsBetter(a: readonly number[], b: readonly numbe
   return false;
 }
 
+/** Compare running and leg work across the cycle boundary as well as within it. */
+export function hybridRunningProximity(input: CardioPreviewInput, preview: CardioPreview,
+  legSets?: ReadonlyMap<string, number>, priority: HybridPriority = 'BALANCED') {
+  let nearbySets = 0, beforeStrength = 0, beforeCardio = 0;
+  for (const run of preview.scheduled) {
+    if (run.modality !== 'RUNNING') continue;
+    for (const session of input.strength) {
+      if (session.dayIndex === undefined) continue;
+      const sets = legSets?.get(session.id) ?? (legSets ? 0 : Number(session.lowerBodyDemand === 'HIGH'));
+      const fromRun = (session.dayIndex - run.dayIndex + input.cycleDays) % input.cycleDays;
+      if (fromRun === 0) {
+        nearbySets += 2 * sets;
+        beforeStrength += 2 * sets;
+        beforeCardio += 2 * sets;
+      } else if (fromRun === 1) {
+        nearbySets += sets;
+        beforeStrength += sets;
+      } else if (fromRun === input.cycleDays - 1) {
+        nearbySets += sets;
+        beforeCardio += sets;
+      }
+    }
+  }
+  return { nearbySets, priorityCost: priority === 'STRENGTH' ? beforeStrength : priority === 'CARDIO' ? beforeCardio : 0 };
+}
+
 /**
  * Search only new, undated strength placements; never change dose, roster, within-strength order or actual dates.
  * Keep legacy saved preview reconstruction untouched. Every candidate still uses the existing scheduler.
  */
 export async function suggestHybridRhythm(input: CardioPreviewInput, options: {
   legSets?: ReadonlyMap<string, number>;
+  priority?: HybridPriority;
   isCancelled?: () => boolean; yieldControl?: () => Promise<void>;
 } = {}) {
   if (cardioPreviewIssue(input) || input.strength.some((s, i) => !input.availableDays.includes(s.dayIndex!)
@@ -43,17 +71,9 @@ export async function suggestHybridRhythm(input: CardioPreviewInput, options: {
     const duplicateCardio = preview.scheduled.length - new Set(preview.scheduled.map(s => s.dayIndex)).size;
     const sameDayLoad = preview.scheduled.reduce((sum, c) => sum + candidate.strength.filter(s => s.dayIndex === c.dayIndex).reduce((n, s) => n + s.estimatedMinutes, 0), 0);
     const sharedDays = preview.scheduled.filter(c => candidate.strength.some(s => s.dayIndex === c.dayIndex)).length;
-    let nearbyLegSets = 0;
-    if (options.legSets) {
-      for (const run of preview.scheduled.filter(s => s.modality === 'RUNNING')) {
-        for (const strength of candidate.strength) {
-          const delta = Math.abs(run.dayIndex - strength.dayIndex!);
-          const distance = Math.min(delta, candidate.cycleDays - delta);
-          if (distance < 2) nearbyLegSets += (options.legSets.get(strength.id) ?? 0) * (2 - distance);
-        }
-      }
-    }
-    return [preview.omitted.length, duplicateCardio, q.proximity, nearbyLegSets, ...(input.spacingPolicy ? [sharedDays] : []), q.longestRun,
+    const running = hybridRunningProximity(candidate, preview, options.legSets, options.priority);
+    return [preview.omitted.length, duplicateCardio, q.proximity, options.legSets ? running.nearbySets : 0, running.priorityCost,
+      ...(input.spacingPolicy ? [sharedDays] : []), q.longestRun,
       ...(input.spacingPolicy ? [cardioGapCost(preview.scheduled.map(s => s.dayIndex), input.cycleDays)] : []), q.adjacentActivePairs, sameDayLoad,
       candidate.strength.reduce((sum, s, i) => sum + Math.abs(s.dayIndex! - original[i]), 0)];
   };

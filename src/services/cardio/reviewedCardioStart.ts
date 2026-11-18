@@ -1,11 +1,11 @@
 import type { CardioProfile } from '@/models/cardio';
 import type { CardioPreviewInput } from './cardioPreview';
-import { proposeCardioStartingPoint, type CardioStartContext } from './cardioStartingPoint';
+import { proposeCardioStartingPoint, type CardioStartContext, type StartPolicy } from './cardioStartingPoint';
 
 /** Minimal numeric provenance. No workout IDs, sources, traces or symptom responses. */
 export interface ReviewedCardioStart {
   version: 1;
-  policy: 'OBSERVED_EASY_START_POC_V1' | 'OBSERVED_REPEATABLE_START_V2';
+  policy: StartPolicy;
   modality: 'RUNNING' | 'CYCLING';
   observedAt: number;
   acceptedAt: number;
@@ -33,7 +33,7 @@ const DAY = 86400000;
 export function validReviewedCardioStart(value: unknown): value is ReviewedCardioStart {
   const v = value as ReviewedCardioStart;
   if (!v || Object.keys(v).length !== keys.length || keys.some(key => !Object.prototype.hasOwnProperty.call(v, key))
-    || v.version !== 1 || !['OBSERVED_EASY_START_POC_V1', 'OBSERVED_REPEATABLE_START_V2'].includes(v.policy) || !['RUNNING', 'CYCLING'].includes(v.modality)
+    || v.version !== 1 || !['OBSERVED_EASY_START_POC_V1', 'OBSERVED_REPEATABLE_START_V2', 'OBSERVED_MONTHLY_CAPACITY_V3', 'OBSERVED_MONTHLY_REPARTITION_V3'].includes(v.policy) || !['RUNNING', 'CYCLING'].includes(v.modality)
     || !integer(v.observedAt, 42 * DAY + 1, 8.64e15) || !integer(v.acceptedAt, v.observedAt, Math.min(8.64e15, v.observedAt + DAY))
     || !integer(v.cycleDays, 7, 31) || !integer(v.sessions, 1, 14) || !integer(v.sessionMinutes, 1, 600)
     || !integer(v.totalMinutes, 1, 1440) || !integer(v.comfortableMinutes, 1, 600)
@@ -41,7 +41,10 @@ export function validReviewedCardioStart(value: unknown): value is ReviewedCardi
     || !integer(v.observedSessions, 4, 1000) || !integer(v.representedWeeks, 3, 4)
     || !positive(v.typicalMinutes, 7 * 1440) || !positive(v.weeklyMinutes, 7 * 1440)
     || !positive(v.weeklySessions, 1000) || !Number.isInteger(v.weeklySessions * 2)) return false;
-  const sessions = Math.min(v.maxSessions, Math.floor(v.weeklySessions * v.cycleDays / 7));
+  const observedSessions = Math.floor(v.weeklySessions * v.cycleDays / 7);
+  const repartition = v.policy === 'OBSERVED_MONTHLY_REPARTITION_V3';
+  const sessions = Math.min(v.maxSessions, repartition ? Math.round(2 * v.cycleDays / 7) : observedSessions);
+  if (repartition && (v.weeklySessions !== 1 || sessions <= observedSessions)) return false;
   const minutes = Math.floor(Math.min(v.typicalMinutes, v.comfortableMinutes, v.maxSessionMinutes,
     v.availableMinutes / sessions, v.weeklyMinutes * v.cycleDays / 7 / sessions));
   return v.sessions === sessions && v.sessionMinutes === minutes && v.totalMinutes === sessions * minutes;

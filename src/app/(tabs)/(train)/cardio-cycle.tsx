@@ -9,20 +9,22 @@ import { useRoutines } from '@/hooks/useRoutines';
 import { useTheme } from '@/theme/useTheme';
 import { CardioCycleView } from '@/components/cardio/CardioCycleView';
 import { cardioStrengthChanged } from '@/services/cardio/savedCardioPlan';
+import { RenameRoutineSheet } from '@/components/home/RenameRoutineSheet';
 import { CardioActivation } from '@/components/cardio/CardioActivation';
 
 export default function CardioCycleScreen() {
-  const { uid } = useAuth(); const { id } = useLocalSearchParams<{ id?: string }>();
-  return <OwnedCycle key={`${uid}:${id}`} id={id} />;
+  const { uid } = useAuth(); const { id, edit } = useLocalSearchParams<{ id?: string; edit?: string }>();
+  return <OwnedCycle key={`${uid}:${id}:${edit}`} id={id} edit={edit === '1'} />;
 }
 
-function OwnedCycle({ id }: { id?: string }) {
+function OwnedCycle({ id, edit }: { id?: string; edit: boolean }) {
   const plans = useCardioPlans(), strength = useRoutines(); const router = useRouter(); const insets = useSafeAreaInsets();
   const { t } = useTranslation(); const { colors, surfaces, semantic } = useTheme();
   const plan = plans.entries.find(p => p.id === id);
   const linkedHybrid = strength.routines.find(r => r.id === plan?.strengthSource?.routineId && r.hybrid?.cardioPlanId === plan?.id);
   const routine = linkedHybrid ?? strength.routines.find(r => r.isActive && r.domain === 'STRENGTH');
   const inactiveHybrid = !!linkedHybrid && !linkedHybrid.isActive;
+  const [renaming, setRenaming] = useState(edit);
   const [busy, setBusy] = useState(false), [error, setError] = useState(false); const live = useRef(false), lock = useRef(false);
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
   const back = () => router.dismissTo('/(tabs)/(train)');
@@ -34,6 +36,16 @@ function OwnedCycle({ id }: { id?: string }) {
       <Text style={{ color: colors.textPrimary }}>{t('cardioSaved.loadFailed')}</Text>
     </View> : <>
       <Text accessibilityRole="header" style={{ color: colors.textPrimary, fontSize: 29, fontWeight: '700', marginVertical: 16 }}>{plan.name}</Text>
+      {edit && !plans.error && button(t('home.renameRoutine'), () => setRenaming(true))}
+      {edit && <RenameRoutineSheet currentName={renaming ? plan.name : null}
+        otherNames={plans.entries.filter(other => other.id !== plan.id).map(other => other.name)}
+        labels={{ title: t('home.renameRoutine'), save: t('home.renameSave'), cancel: t('generate.cancel'), duplicate: t('generate.nameDuplicate') }}
+        onClose={() => setRenaming(false)} onSave={name => {
+          setRenaming(false); if (lock.current) return;
+          lock.current = true; setBusy(true); setError(false);
+          void plans.rename(plan, name).catch(() => { if (live.current) setError(true); })
+            .finally(() => { if (live.current) { lock.current = false; setBusy(false); } });
+        }} />}
       <Text style={{ color: colors.bioText, fontSize: 15, marginBottom: 16 }}>{t('cardioSaved.proposal')}</Text>
       <Text style={{ color: colors.textSecondary, fontSize: 15, lineHeight: 21, marginBottom: 20 }}>{t('cardioSaved.notActive')}</Text>
       {inactiveHybrid && <View><Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('hybridPlan.inactiveStrength')}</Text>

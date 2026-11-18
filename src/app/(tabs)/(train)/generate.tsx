@@ -1,5 +1,5 @@
 import { WandIcon } from '@/components/icons/ActionIcons';
-import { strengthHybridTarget, suggestHybridFrequency, type HybridAvailability } from '@/services/cardio/hybridAvailability';
+import { hybridStrengthSessionCeiling, strengthHybridTarget, suggestHybridFrequency, type HybridAvailability } from '@/services/cardio/hybridAvailability';
 import type { HybridPriority } from '@/services/cardio/hybridAuthoring';
 import type { ReactNode } from 'react';
 import { toRoutineView } from '@/services/training/routineView';
@@ -70,6 +70,7 @@ import { useExerciseCatalogue } from '@/hooks/useExerciseCatalogue';
 import {
   filterCatalogue,
 } from '@/services/training/exerciseCatalogue';
+import { hybridHypertrophyCatalogue } from '@/services/training/exerciseSelection';
 import { planDoseFirstMesocycle, rerollMesocycleAsync, type MesocyclePlan } from '@/services/training/mesocyclePlanner';
 import { RerollFeedback, type RerollNotice } from '@/components/train/generate/RerollFeedback';
 import { hybridTemplates, type HybridTemplate } from '@/services/cardio/hybridTemplates';
@@ -391,7 +392,7 @@ function OwnedGenerateScreen({ onPrepared, onExit, newRoutineId, recommendedSess
     setRecommending(false);
     setRecommendationFailed(false);
     return cancel;
-  }, [settings, phase]);
+  }, [settings, phase, step]);
 
   // Page identity belongs to React state. A native sheet/resize must never reveal
   // the configuration page beneath preview actions through a reset animation.
@@ -423,10 +424,10 @@ function OwnedGenerateScreen({ onPrepared, onExit, newRoutineId, recommendedSess
     () => filterCatalogue(sharedCatalogue.filter((exercise) => exercise.archivedAt === undefined), { availableEquipment: equipment }),
     [equipment, sharedCatalogue],
   );
-  const planningCatalogue = useMemo(
-    () => filterCatalogue(availableCatalogue, { vetoedExerciseIds: [...notRecommendedExerciseIds] }),
-    [availableCatalogue, notRecommendedExerciseIds],
-  );
+  const planningCatalogue = useMemo(() => {
+    const catalogue = filterCatalogue(availableCatalogue, { vetoedExerciseIds: [...notRecommendedExerciseIds] });
+    return sharedAvailability && goal === TrainingGoal.HYPERTROPHY ? hybridHypertrophyCatalogue(catalogue) : catalogue;
+  }, [availableCatalogue, notRecommendedExerciseIds, sharedAvailability, goal]);
 
   const toggleEquipment = useCallback((item: Equipment) => {
     setEquipment((current) =>
@@ -439,7 +440,7 @@ function OwnedGenerateScreen({ onPrepared, onExit, newRoutineId, recommendedSess
   /** Yield between plans, and discard results when settings change or the route exits. */
   const onRecommendCapacity = useCallback(async () => {
     if (recommendationTask.current) return;
-    if (sharedAvailability) {
+    if (sharedAvailability && goal !== TrainingGoal.HYPERTROPHY) {
       frequencyEdited.current = true;
       setSessions(suggestHybridFrequency(sharedAvailability, hybridPriority ?? 'BALANCED', strengthHybridTarget(level)).strength);
       return;
@@ -450,6 +451,10 @@ function OwnedGenerateScreen({ onPrepared, onExit, newRoutineId, recommendedSess
     setRecommendationFailed(false);
     try {
       const best = await recommendCapacityAsync({
+        ...(sharedAvailability ? { fixedAvailability: {
+          maxSessions: hybridStrengthSessionCeiling(sharedAvailability, hybridPriority ?? 'BALANCED'),
+          minutesPerSession: sharedAvailability.minutesPerSession,
+        } } : {}),
         level,
         goal,
         catalogue: planningCatalogue,
@@ -458,6 +463,7 @@ function OwnedGenerateScreen({ onPrepared, onExit, newRoutineId, recommendedSess
         deprioritizedRegions: emphasis.deprioritized,
       }, { isCancelled: () => task.cancelled });
       if (task.cancelled || recommendationTask.current !== task) return;
+      frequencyEdited.current = false;
       setSessions(best.sessionsPerMicrocycle);
       setMinutes(best.minutesPerSession);
       setRecommendation(best);
@@ -477,7 +483,8 @@ function OwnedGenerateScreen({ onPrepared, onExit, newRoutineId, recommendedSess
   }, [planningCatalogue, emphasis, goal, level, split, settings, sharedAvailability, hybridPriority]);
 
   const generate = useCallback(
-    (withSeed: number) => {
+    async (withSeed: number) => {
+      if (recommendationTask.current) return;
       setRerollNotice(null);
       const catalogue = planningCatalogue;
       const input = {
@@ -490,17 +497,42 @@ function OwnedGenerateScreen({ onPrepared, onExit, newRoutineId, recommendedSess
           deprioritizedRegions: emphasis.deprioritized,
           capacity: { sessionsPerMicrocycle: sessions, minutesPerSession: minutes },
       };
-      const prepared = recommendationSignature.current === settingsSignature(settings) && recommendationCatalogue.current === planningCatalogue
-        ? generateFromCapacityRecommendation(input, recommendation) : null;
+      let nextSettings = settings;
+      let capacityChoice = recommendationSignature.current === settingsSignature(settings) && recommendationCatalogue.current === planningCatalogue
+        ? recommendation : null;
+      if (sharedAvailability && goal === TrainingGoal.HYPERTROPHY && !frequencyEdited.current && !capacityChoice) {
+        const task = { cancelled: false };
+        recommendationTask.current = task;
+        setRecommending(true);
+        try {
+          capacityChoice = await recommendCapacityAsync({ ...input, fixedAvailability: {
+            maxSessions: hybridStrengthSessionCeiling(sharedAvailability, hybridPriority ?? 'BALANCED'),
+            minutesPerSession: minutes,
+          } }, { isCancelled: () => task.cancelled });
+          if (task.cancelled || recommendationTask.current !== task) return;
+          input.capacity.sessionsPerMicrocycle = capacityChoice.sessionsPerMicrocycle;
+          nextSettings = { ...settings, sessionsPerMicrocycle: capacityChoice.sessionsPerMicrocycle };
+          setSessions(capacityChoice.sessionsPerMicrocycle);
+        } catch (error) {
+          if (!(error instanceof CapacityRecommendationCancelled) && !task.cancelled) setRecommendationFailed(true);
+          return;
+        } finally {
+          if (recommendationTask.current === task) {
+            recommendationTask.current = null;
+            setRecommending(false);
+          }
+        }
+      }
+      const prepared = generateFromCapacityRecommendation(input, capacityChoice);
       setPlan(prepared ?? planDoseFirstMesocycle(input));
-      setPlanSignature(settingsSignature(settings));
+      setPlanSignature(settingsSignature(nextSettings));
       setPreviewEdits({});
       setPreviewAdditions([]);
       setSwapTarget(null);
       setAddTarget(null);
       setPhase('preview');
     },
-    [planningCatalogue, level, goal, split, emphasis, sessions, minutes, settings, recommendation],
+    [planningCatalogue, level, goal, split, emphasis, sessions, minutes, settings, recommendation, sharedAvailability, hybridPriority],
   );
 
   useEffect(() => () => { if (variationTask.current) variationTask.current.cancelled = true; variationTask.current = null; }, []);

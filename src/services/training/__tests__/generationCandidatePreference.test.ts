@@ -1,6 +1,6 @@
 import { ExerciseGenerationTier, ExerciseProfile, MovementVector, MuscleGroup, type Exercise } from '@/models';
 import { EXERCISE_CATALOGUE } from '../exerciseCatalogue';
-import { generationCandidates, selectExercises } from '../exerciseSelection';
+import { generationCandidates, hybridHypertrophyCatalogue, selectExercises } from '../exerciseSelection';
 import { buildVolumePlan, TrainingGoal } from '../volumePlan';
 import { ExperienceLevel } from '@/models/athlete';
 
@@ -54,3 +54,14 @@ it('does not invent ratings or eliminate adequately progressable alternatives', 
     { ...machine, secondaryMuscles: [MuscleGroup.CORE, MuscleGroup.BICEPS] },
   ]);
 });
+
+it.each([['remo-con-barra', 'remo-maquina'], ['remo-barra-agarre-supino', 'remo-pecho-apoyado']])(
+  'uses a stable equivalent before %s for hypertrophy without removing fallback or lift practice', (rowId, stableId) => {
+    const row = EXERCISE_CATALOGUE.find(e => e.id === rowId)!;
+    const stable = EXERCISE_CATALOGUE.find(e => e.id === stableId)!;
+    expect(hybridHypertrophyCatalogue([row, stable])).toEqual([stable]);
+    expect(hybridHypertrophyCatalogue([row])[0]).toMatchObject({ id: rowId, criteria: { loadProgressability: 3 } });
+    expect(row.criteria?.loadProgressability).toBe(5);
+    expect(generationCandidates([row, stable], TrainingGoal.STRENGTH)).toEqual([row, stable]);
+    expect(hybridHypertrophyCatalogue([row, { ...stable, primaryMuscle: MuscleGroup.CHEST }]).map(e => e.id)).toContain(rowId);
+  });

@@ -47,7 +47,7 @@ export function HybridPlanBuilder({ exercises, onCancel, onSave, initialStrength
   const [customAvailability, setAvailability] = useState<HybridAvailability>({ cycleDays: initialStrength?.mesocycle.scheduleTemplate?.days ?? 7,
     trainingDays: 4, minutesPerSession: 60, allowDoubles: false });
   const availability = useMemo(() => unrestricted ? { ...customAvailability, trainingDays: Math.min(6, customAvailability.cycleDays),
-    minutesPerSession: 60, allowDoubles: false } : customAvailability, [unrestricted, customAvailability]);
+    minutesPerSession: 75, allowDoubles: false } : customAvailability, [unrestricted, customAvailability]);
   const availabilityValid = validHybridAvailability(availability);
   const allocation = availabilityValid ? suggestHybridFrequency(availability, priority, unrestricted || intake.level ? strengthHybridTarget(intake.level) : undefined) : null;
   const settings = useMemo(() => availabilityValid ? availabilityHybridSettings(availability, priority) : null, [availability, availabilityValid, priority]);
@@ -157,7 +157,7 @@ export function HybridPlanBuilder({ exercises, onCancel, onSave, initialStrength
             || currentDraft.current.strength !== strength || currentDraft.current.settings !== settings) return;
           setCardio(input); setStage('REVIEW');
         }} /> : <CardioPlanBuilder active={stage === 'CARDIO'} progress={<HybridProgress stage="CARDIO" />} routine={view} sharedAvailability={availability}
-        recommendedSessions={allocation?.cardio} hybrid={{ name: view.name, priority, onReview: input => {
+        recommendedSessions={Math.min(14, Math.round(2 * availability.cycleDays / 7))} hybrid={{ name: view.name, priority, onReview: input => {
         if (!live.current || saving.current || currentDraft.current.stage !== 'CARDIO'
           || currentDraft.current.strength !== strength || currentDraft.current.settings !== settings) return;
         setCardio(input); setStage('REVIEW');
@@ -229,7 +229,7 @@ export function HybridPlanBuilder({ exercises, onCancel, onSave, initialStrength
           </>}
           {!availabilityValid && <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('sharedAvailability.invalid')}</Text>}
         </View>
-        {allocation && <Text style={{ color: colors.textSecondary, lineHeight: 21, marginTop: 12 }}>{t('hybridPlan.priorityScope', allocation)}</Text>}
+        {allocation && <Text style={{ color: colors.textSecondary, lineHeight: 21, marginTop: 12 }}>{t(manual ? 'hybridPlan.priorityScope' : 'hybridPlan.automaticDose', allocation)}</Text>}
         {action(strength ? 'hybridPlan.resume' : 'hybridPlan.buildStrength', () => {
           if (!availabilityValid) return;
           if (cardio) setStage('REVIEW'); else if (startedStrength && !initialStrength && !strengthLocked) setStage('STRENGTH'); else if (strength) { setStartedCardio(true); setStage('CARDIO'); } else { setStartedStrength(true); setStage('STRENGTH'); }

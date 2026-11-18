@@ -128,3 +128,15 @@ it.each([null, { modalities: null }, { modalities: [] }, { modalities: ['BAD'] }
   { profile: null }, { cycleDays: 6 }, { cycleDays: 32 }, { strength: null }, { strength: Array(9).fill({}) }])('rejects invalid suggestion context %p', patch => {
   expect(() => suggestCardioCapacity(patch === null ? null as any : base(patch as any))).toThrow('invalidCardioSuggestion');
 });
+
+it('authors run-walk only for new running drafts without a known comfortable duration', () => {
+  const input = base({ modalities: ['RUNNING', 'CYCLING'], familiarizationPolicy: 'BEGINNER_RUN_WALK_V1',
+    profile: { schemaVersion: 1, modalities: { RUNNING: { status: 'NEW', qualityExposure: 'UNKNOWN' } } } });
+  const withDuration = { ...input, profile: { schemaVersion: 1 as const,
+    modalities: { RUNNING: { status: 'NEW' as const, qualityExposure: 'UNKNOWN' as const, typicalSessionMinutes: 35 } } } };
+  expect(buildCardioPreview(input).prescriptions.find(p => p.modality === 'RUNNING'))
+    .toMatchObject({ runWalk: true, durationSeconds: 1200 });
+  expect(buildCardioPreview(input).prescriptions.find(p => p.modality === 'CYCLING')).not.toHaveProperty('runWalk');
+  expect(buildCardioPreview(withDuration).prescriptions.every(p => !('runWalk' in p))).toBe(true);
+  expect(buildCardioPreview({ ...input, familiarizationPolicy: undefined }).prescriptions.every(p => !('runWalk' in p))).toBe(true);
+});

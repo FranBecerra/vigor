@@ -102,3 +102,19 @@ it('invalidates an in-flight read while authentication becomes unresolved, inclu
   expect(mockRead).toHaveBeenCalledTimes(1); await act(async () => result.read()); expect(result.state).toBe('READY');
   await act(async () => tree.unmount());
 });
+
+it('reads only from local Monday for agenda links and handles the exact week boundary', async () => {
+  const monday = new Date(2026, 10, 9, 0).getTime();
+  const friday = new Date(2026, 10, 13, 14).getTime();
+  const clock = jest.spyOn(Date, 'now').mockReturnValue(friday);
+  let tree: any; await act(async () => { tree = create(<Probe />); });
+  await act(async () => result.read(false, 'week'));
+  expect(mockRead).toHaveBeenCalledWith(monday, friday);
+  expect(mockAuthorize).not.toHaveBeenCalled();
+  clock.mockReturnValue(monday);
+  await act(async () => result.read(false, 'week'));
+  expect(result.state).toBe('READY');
+  expect(result.data?.workouts).toEqual([]);
+  expect(mockRead).toHaveBeenCalledTimes(1);
+  await act(async () => tree.unmount());
+});

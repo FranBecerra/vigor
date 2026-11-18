@@ -45,3 +45,13 @@ it.each(['save', 'archive'] as const)('reports immediate and late native rejecti
   await expect(invoke()).rejects.toThrow('cardioSaveFailed');
   current = true; writer.mockRejectedValueOnce(Error('native')); await expect(invoke()).rejects.toThrow('native');
 });
+
+it('renames only the current owned proposal and rejects blank names or archived plans', async () => {
+  const repo = new CardioPlanRepository('owner'), current = () => true, reject = jest.fn();
+  await expect(repo.rename(plan, ' Another name ', current, reject)).resolves.toEqual({ ...plan, name: 'Another name' });
+  expect(patch).toHaveBeenCalledWith(plan.id, { name: 'Another name' }, expect.any(Function));
+  await expect(repo.rename(plan, ' ', current, reject)).rejects.toThrow('invalidCardioPlan');
+  read.mockResolvedValueOnce({ ...plan, archivedAt: now });
+  await expect(repo.rename(plan, 'New name', current, reject)).rejects.toThrow('staleCardioPlan');
+  expect(patch).toHaveBeenCalledTimes(1);
+});

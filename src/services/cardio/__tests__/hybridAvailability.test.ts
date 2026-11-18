@@ -1,7 +1,7 @@
 import { MuscleGroup, SetType } from '@/models';
 import { toRoutineView } from '@/services/training/routineView';
 import { hybridFixture } from '@/test-support/hybridFixture';
-import { availabilityHybridSettings, strengthHybridTarget, suggestHybridFrequency, validHybridAvailability, withHybridAvailability, type HybridAvailability } from '../hybridAvailability';
+import { hybridStrengthSessionCeiling, availabilityHybridSettings, strengthHybridTarget, suggestHybridFrequency, validHybridAvailability, withHybridAvailability, type HybridAvailability } from '../hybridAvailability';
 import { buildCardioPreview, hybridLegSets } from '../cardioPreview';
 import { prepareHybridBundle, validHybridBundle } from '../hybridAuthoring';
 const base: HybridAvailability = { cycleDays: 8, trainingDays: 4, minutesPerSession: 60, allowDoubles: false };
@@ -83,4 +83,12 @@ it('uses experience for the starting proposal even when six days are available',
   expect(suggestHybridFrequency(available, 'BALANCED', strengthHybridTarget('BEGINNER' as any))).toEqual({ strength: 2, cardio: 2 });
   expect(suggestHybridFrequency(available, 'BALANCED', strengthHybridTarget('ADVANCED' as any))).toEqual({ strength: 4, cardio: 2 });
   expect(suggestHybridFrequency(available, 'BALANCED', strengthHybridTarget())).toEqual({ strength: 3, cardio: 2 });
+});
+
+it('reserves accessible cardio places while allowing a fourth hypertrophy session', () => {
+  expect(hybridStrengthSessionCeiling({ ...base, trainingDays: 6 }, 'BALANCED')).toBe(4);
+  expect(hybridStrengthSessionCeiling(base, 'STRENGTH')).toBe(3);
+  expect(hybridStrengthSessionCeiling(base, 'CARDIO')).toBe(2);
+  expect(hybridStrengthSessionCeiling({ ...base, trainingDays: 3 }, 'BALANCED')).toBe(2);
+  expect(hybridStrengthSessionCeiling({ ...base, trainingDays: 5, allowDoubles: true }, 'STRENGTH')).toBe(5);
 });

@@ -54,7 +54,7 @@ function OwnedCardioPlanBuilder({ routine, ready, error, onRetry, onCancel, onSa
   const [step, setStep] = useState<0 | 3>(0), [preview, setPreview] = useState<CardioPreview | null>(null);
   const intake = useAthleteIntakeDefaults();
   const [input, setInput] = useState<CardioPreviewInput>(() => {
-    const initial: CardioPreviewInput = { placementPolicy: 'BALANCED_V2', spacingPolicy: 'SPREAD_EASY_V1', ...cardioIntakeDefaults(intake),
+    const initial: CardioPreviewInput = { familiarizationPolicy: 'BEGINNER_RUN_WALK_V1', placementPolicy: 'BALANCED_V2', spacingPolicy: 'SPREAD_EASY_V1', ...cardioIntakeDefaults(intake),
     cycleDays: initialCycle, availableDays: Array.from({ length: initialCycle }, (_, i) => i), sessions: 2, cardioMinutes: 40, sessionMinutes: 20,
     maxActiveDays: Math.min(initialCycle, source.sessions.length + (initialBaseline?.sessions ?? 2)), allowDoubles: false,
     strength: source.sessions.map(s => initialBaseline && s.dayIndex !== undefined && s.dayIndex >= initialCycle ? { ...s, dayIndex: undefined } : s),
@@ -168,7 +168,7 @@ function OwnedCardioPlanBuilder({ routine, ready, error, onRetry, onCancel, onSa
     }
     const task = { cancelled: false }; rhythmTask.current = task; setOptimizing(true); setRhythmNotice(null);
     try {
-      const result = await suggestHybridRhythm(input, { legSets, isCancelled: () => task.cancelled });
+      const result = await suggestHybridRhythm(input, { legSets, priority: hybrid.priority, isCancelled: () => task.cancelled });
       if (task.cancelled || rhythmTask.current !== task) return;
       setInput(result.input); setPreview(result.preview); setRhythmNotice(result.changed ? 'changed' : 'unchanged');
       if (hybrid.onReview) { availabilityEdited.current = true; hybrid.onReview(result.input); } else setStep(3);

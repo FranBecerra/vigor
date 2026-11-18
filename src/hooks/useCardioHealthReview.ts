@@ -3,7 +3,7 @@ import { AppState } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useAuth } from './useAuth';
 import { cardioHealthBridge } from '@/services/health/cardioHealthClient';
-import { cardioHealthWindow, reviewCardioHealth } from '@/services/cardio/cardioHealthReview';
+import { cardioHealthWeekWindow, cardioHealthWindow, reviewCardioHealth } from '@/services/cardio/cardioHealthReview';
 import type { CardioHealthBridge, CardioHealthRead } from '@/models/cardioHealth';
 
 export type CardioHealthState = 'IDLE' | 'AUTHORIZING' | 'LOADING' | 'READY' | 'UNAVAILABLE' | 'ERROR';
@@ -35,7 +35,7 @@ export function useCardioHealthReview(bridge: CardioHealthBridge = cardioHealthB
     });
     return () => listener.remove();
   }, [clear]);
-  const read = async (authorize = true) => {
+  const read = async (authorize = true, scope: 'history' | 'week' = 'history') => {
     if (!uid || isLoading || life.current.owner !== uid || !life.current.focused || life.current.busy || AppState.currentState === 'background') return;
     const owner = uid, epoch = ++life.current.epoch;
     life.current.busy = true; setSnapshot({ owner, epoch, state: authorize ? 'AUTHORIZING' : 'LOADING' });
@@ -46,7 +46,11 @@ export function useCardioHealthReview(bridge: CardioHealthBridge = cardioHealthB
       if (authorize) await bridge.authorize();
       if (!current()) return;
       setSnapshot({ owner, epoch, state: 'LOADING' });
-      const now = Date.now(), window = cardioHealthWindow(now), data = await bridge.read(window.start, window.end);
+      const now = Date.now();
+      const window = scope === 'week' ? cardioHealthWeekWindow(now) : cardioHealthWindow(now);
+      const data: CardioHealthRead = window.start === window.end
+        ? { version: 1, truncated: false, workouts: [] }
+        : await bridge.read(window.start, window.end);
       if (!current()) return;
       // Validate before publishing; malformed native envelopes never become an apparently empty history.
       reviewCardioHealth(data, now);

@@ -45,7 +45,7 @@ it('reuses existing limits, infers a duration and applies selected Vigor practic
   await act(async () => { tree = create(<CardioPlanningHistoryContext.Provider value={history}><CardioPlanningHistoryPrompt input={i} onApply={onApply} /></CardioPlanningHistoryContext.Provider>); });
   await press(tree, 'planningHistory.reviewVigor');
   expect(tree.root.findAllByType(NumericField).map((n: any) => n.props.accessibilityLabel)).toEqual([]);
-  expect(button(tree, 'cardioPlan.CYCLING')).toBeUndefined(); expect(output(tree)).toContain('planningHistory.inferredContext');
+  expect(button(tree, 'cardioPlan.CYCLING')).toBeUndefined(); expect(output(tree)).toContain('planningHistory.monthlyContext');
   expect(output(tree)).not.toContain('planningHistory.localScope');
   await press(tree, 'cardioStart.info'); expect(output(tree)).toContain('planningHistory.localScope');
   expect(onApply).not.toHaveBeenCalled(); await press(tree, 'planningHistory.apply');

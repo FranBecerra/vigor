@@ -9,20 +9,24 @@ import { useCardioBlocks, useCardioWorkouts } from '@/hooks/useCardioTraining';
 import { useSportActivities } from '@/hooks/useSportActivities';
 import { useRoutines } from '@/hooks/useRoutines';
 import { CardioSlotEditor, CardioTimeline } from '@/components/cardio/CardioTimeline';
-import { changeCardioSlot, cardioStartContext, datedStrength, endCardioBlock, improveCardioDates } from '@/services/cardio/cardioBlock';
+import { changeCardioSlot, cardioStartContext, datedStrength, endCardioBlock, improveCardioDates, renameCardioBlock } from '@/services/cardio/cardioBlock';
 import { startCardioWorkout } from '@/services/cardio/cardioWorkout';
 import { cardioStrengthChanged } from '@/services/cardio/savedCardioPlan';
 import type { CardioSlot } from '@/models/cardioTraining';
+import { RenameRoutineSheet } from '@/components/home/RenameRoutineSheet';
+import { CardioActivation } from '@/components/cardio/CardioActivation';
 import { CardioProgressionReview } from '@/components/cardio/CardioProgressionReview';
 
 export default function CardioBlockScreen() {
-  const { uid } = useAuth(), { id, cycle } = useLocalSearchParams<{ id?: string; cycle?: string }>();
-  return <OwnedBlock key={`${uid}:${id}:${cycle}`} id={id} initialCycle={cycle ? Number(cycle) : 0} />;
+  const { uid } = useAuth(), { id, cycle, relative, edit, activate } = useLocalSearchParams<{ id?: string; cycle?: string; relative?: string; edit?: string; activate?: string }>();
+  return <OwnedBlock key={`${uid}:${id}:${cycle}:${relative}:${edit}:${activate}`} id={id} initialCycle={cycle ? Number(cycle) : 0} relative={relative === '1'} edit={edit === '1'} activate={activate === '1'} />;
 }
-function OwnedBlock({ id, initialCycle }: { id?: string; initialCycle: number }) {
+function OwnedBlock({ id, initialCycle, relative, edit, activate }: { id?: string; initialCycle: number; relative: boolean; edit: boolean; activate: boolean }) {
   const blocks = useCardioBlocks(), workouts = useCardioWorkouts(), sports = useSportActivities(), strength = useRoutines();
   const { t } = useTranslation(), { colors, surfaces, semantic } = useTheme(), insets = useSafeAreaInsets(), router = useRouter();
-  const block = blocks.entries.find(b => b.id === id), routine = strength.routines.find(r => r.domain === 'STRENGTH' && r.isActive);
+  const block = blocks.entries.find(b => b.id === id && b.archivedAt === undefined), routine = strength.routines.find(r => r.domain === 'STRENGTH' && r.isActive);
+  const linked = strength.routines.find(r => r.id === block?.proposal.strengthSource?.routineId && r.hybrid?.cardioPlanId === block?.proposal.id);
+  const [renaming, setRenaming] = useState(false);
   const assigned = datedStrength(routine, block?.timeZone ?? 'UTC');
   const [busy, setBusy] = useState(false), [error, setError] = useState(false), [editing, setEditing] = useState<CardioSlot | null>(null);
   const live = useRef(false), lock = useRef(false), runId = useRef<string | null>(null);
@@ -43,6 +47,13 @@ function OwnedBlock({ id, initialCycle }: { id?: string; initialCycle: number })
     {button(t('generate.back'), () => router.dismissTo('/(tabs)/(train)'))}
     {!blocks.ready ? <ActivityIndicator /> : !block ? <Text style={{ color: colors.textPrimary }}>{t('cardioSaved.loadFailed')}</Text> : <>
       <Text accessibilityRole="header" style={{ color: colors.textPrimary, fontSize: 29, fontWeight: '700', marginVertical: 16 }}>{block.proposal.name}</Text>
+      {edit && button(t('home.renameRoutine'), () => setRenaming(true), false, !usable)}
+      {edit && <RenameRoutineSheet currentName={renaming ? block.proposal.name : null}
+        otherNames={blocks.entries.filter(b => b.id !== block.id && b.archivedAt === undefined).map(b => b.proposal.name)}
+        labels={{ title: t('home.renameRoutine'), save: t('home.renameSave'), cancel: t('generate.cancel'), duplicate: t('generate.nameDuplicate') }}
+        onClose={() => setRenaming(false)} onSave={name => { setRenaming(false); void action(() => blocks.save(renameCardioBlock(block, name, Date.now()), block)); }} />}
+      {activate && block.endedAt !== null && <CardioActivation plan={block.proposal} routine={linked ?? routine}
+        ready={usable && (!linked || linked.isActive)} />}
       <Text style={{ color: colors.textSecondary, marginBottom: 16 }}>{t(block.endedAt === null ? 'cardioTraining.active' : 'cardioTraining.ended')} · {block.startDate} · {block.timeZone}</Text>
       <Text style={{ color: colors.textSecondary, marginBottom: 16 }}>{t('cardioTraining.forecastNotice')}</Text>
       {(active.length > 1 || running.length > 1) && <Text accessibilityRole="alert" style={{ color: semantic.warning }}>{t('cardioTraining.conflict')}</Text>}
@@ -61,7 +72,7 @@ function OwnedBlock({ id, initialCycle }: { id?: string; initialCycle: number })
             if (live.current) router.push({ pathname: '/cardio-workout', params: { id: next.id } });
             runId.current = null;
           });
-          const context = cardioStartContext(block, slot.id, Date.now(), sports.entries, assigned);
+          const context = cardioStartContext(block, slot.id, Date.now(), sports.entries, assigned, relative);
           if (context.review) Alert.alert(t('cardioTraining.startNow'), `${t('cardioTraining.startContext', { date: context.date })}\n${context.issues.map(i => t(`cardioTraining.issue_${i}`)).join('\n')}`, [
             { text: t('generate.cancel'), style: 'cancel' }, { text: t('cardioTraining.start'), onPress: launch },
           ]); else void launch();

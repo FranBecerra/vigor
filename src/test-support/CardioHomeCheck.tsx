@@ -8,16 +8,19 @@ import { cardioHomeFixture } from './cardioHomeFixture';
 import { RoutineCard } from '@/components/home/RoutineCard';
 import { TrainingCalendarCard } from '@/components/train/TrainingCalendarCard';
 import { CardioRoutineCard } from '@/components/cardio/CardioRoutineCard';
-import { CardioTimeline } from '@/components/cardio/CardioTimeline';
+import { CardioSlotEditor, CardioTimeline } from '@/components/cardio/CardioTimeline';
 import { CardioWorkoutPanel } from '@/app/(tabs)/(train)/cardio-workout';
 import type { CardioWorkout } from '@/models/cardioTraining';
 import type { CardioHomeSession } from '@/services/cardio/cardioHome';
 import { startCardioWorkout } from '@/services/cardio/cardioWorkout';
+import { changeCardioSlot } from '@/services/cardio/cardioBlock';
 
 export function CardioHomeCheck({ onExit }: { onExit(): void }) {
   const { uid } = useAuth(), { t, i18n } = useTranslation(), { colors, surfaces } = useTheme(), insets = useSafeAreaInsets();
   const sample = useMemo(() => cardioHomeFixture(uid ?? 'owner'), [uid]);
   const [meso, setMeso] = useState(sample.routine.mesocycleSnapshot!), [expanded, setExpanded] = useState(true);
+  const [block, setBlock] = useState(sample.block), [cardioExpanded, setCardioExpanded] = useState(false);
+  const [editing, setEditing] = useState<CardioHomeSession | null>(null);
   const [cycle, setCycle] = useState<number | null>(null), [workouts, setWorkouts] = useState<CardioWorkout[]>([]), [running, setRunning] = useState<string | null>(null);
   const routine = { ...sample.routine, mesocycleSnapshot: meso };
   const open = (entry: CardioHomeSession) => { if (entry.workout) setRunning(entry.workout.id); else setCycle(entry.slot.cycle); };
@@ -28,8 +31,8 @@ export function CardioHomeCheck({ onExit }: { onExit(): void }) {
   return <ScrollView style={{ ...surfaces.screen, flex: 1 }} contentContainerStyle={{ padding: 16, paddingTop: insets.top + 12, paddingBottom: insets.bottom + 110 }}>
     <Pressable accessibilityRole="button" onPress={cycle === null ? onExit : () => setCycle(null)} style={{ minHeight: 44, justifyContent: 'center' }}><Text style={{ color: colors.accentText }}>{cycle === null ? 'Close cardio home fixture' : 'Back to active routines'}</Text></Pressable>
     <Text style={{ color: colors.textPrimary, fontSize: 24, fontWeight: '700', marginBottom: 16 }}>Active routines · memory only</Text>
-    {cycle !== null ? <CardioTimeline key={cycle} initialCycle={cycle} block={sample.block} workouts={workouts} sports={[]} strength={[]}
-      onOpen={(slot, workout) => { const next = workout ?? startCardioWorkout(sample.block, slot.id, Date.now(), `home-run-${slot.id}`);
+    {cycle !== null ? <CardioTimeline key={cycle} initialCycle={cycle} block={block} workouts={workouts} sports={[]} strength={[]}
+      onOpen={(slot, workout) => { const next = workout ?? startCardioWorkout(block, slot.id, Date.now(), `home-run-${slot.id}`);
         if (!workout) setWorkouts(old => [...old, next]); setRunning(next.id); }} /> : <>
       <RoutineCard routine={routine} expanded={expanded} selectedSessionId="" locale={i18n.language} muscleLabel={m => t(`muscle.${m}`)}
         labels={{ sessions: t('home.sessions'), sets: t('home.sets'), today: t('home.today'), viewMesocycle: t('home.viewMesocycle'),
@@ -37,10 +40,14 @@ export function CardioHomeCheck({ onExit }: { onExit(): void }) {
         onToggle={() => setExpanded(!expanded)} onPressDetail={() => {}} onSelectSession={() => {}} onPressMesocycle={() => {}} onRename={() => {}} onRemove={() => {}}
         renderSessionList={rows => <TrainingCalendarCard mesocycleId={routine.mesocycleId} microcycleIndex={0} goal={routine.generationGoal}
           initialMesocycle={meso} sessionRows={rows} persist={async patch => setMeso(old => ({ ...old, ...patch }))}
-          cardio={{ routine, blocks: [sample.block], workouts, onOpen: open }} />} />
+          cardio={{ routine, blocks: [block], workouts, onOpen: open, onAdjust: setEditing }} />} />
       <View style={{ height: 12 }} />
-      <CardioRoutineCard block={sample.block} workouts={workouts} sports={[]} onOpen={open} onOpenBlock={setCycle}
-        expanded={!expanded} onToggle={() => setExpanded(!expanded)} />
+      <CardioRoutineCard block={block} workouts={workouts} sports={[]} onOpen={open} onAdjust={setEditing} onOpenBlock={setCycle}
+        expanded={cardioExpanded} onToggle={() => setCardioExpanded(!cardioExpanded)} />
+      {editing && <CardioSlotEditor block={block} slot={editing.slot} sports={[]} onClose={() => setEditing(null)}
+        onSave={async (date, disposition, sport) => {
+          setBlock(changeCardioSlot(block, editing.slot.id, date, disposition, sport, workouts, Date.now()));
+        }} />}
     </>}
   </ScrollView>;
 }

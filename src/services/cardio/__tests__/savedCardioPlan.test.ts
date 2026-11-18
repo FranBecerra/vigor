@@ -91,3 +91,13 @@ it('archives recoverably without mutating the saved plan or its prescriptions', 
   expect(() => archiveCardioProposal(saved, 'other', now)).toThrow();
   expect(() => archiveCardioProposal(saved, 'owner', NaN)).toThrow();
 });
+
+it('round-trips automatic beginner run-walk without adding it to existing plans', () => {
+  const plan = saveCardioProposal('run-walk', 'owner', 'Run and walk', {
+    ...input, placementPolicy: 'BALANCED_V2', familiarizationPolicy: 'BEGINNER_RUN_WALK_V1', modalities: ['RUNNING'],
+    profile: { schemaVersion: 1, modalities: { RUNNING: { status: 'NEW', qualityExposure: 'UNKNOWN' } } },
+  }, null, now);
+  expect(validSavedCardioPlan(JSON.parse(JSON.stringify(plan)), 'owner')).toBe(true);
+  expect(plan.preview.prescriptions[0]).toMatchObject({ runWalk: true });
+  expect(fixture.preview.prescriptions[0]).not.toHaveProperty('runWalk');
+});

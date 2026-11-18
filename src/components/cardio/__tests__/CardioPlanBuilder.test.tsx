@@ -55,8 +55,9 @@ it('keeps the new hybrid strength source mandatory and blocks a strength placeme
 it('reviews the default joint rhythm but retains an explicitly edited strength placement unless redistribution is requested', async () => {
   const f = hybridFixture(), view = toRoutineView(f.draft.routine, f.draft.mesocycle, f.exercises, f.labels)!;
   const search = jest.spyOn(hybridRhythm, 'suggestHybridRhythm'); let tree: any;
-  await act(async () => { tree = create(<CardioPlanBuilder {...props} routine={view} hybrid={{ name: view.name }} />); });
+  await act(async () => { tree = create(<CardioPlanBuilder {...props} routine={view} hybrid={{ name: view.name, priority: 'CARDIO' }} />); });
   await reachAvailability(tree); await press(tree, 'cardioPlan.review'); expect(search).toHaveBeenCalledTimes(1);
+  expect(search.mock.calls[0][1]?.priority).toBe('CARDIO');
   expect(tree.root.findByType(CardioCycleView).props.preview.omitted).toHaveLength(0);
   await press(tree, 'cardioPlan.edit'); await press(tree, 'cardioGuidance.editPlacement');
   const field = tree.root.findAllByType(NumericField).find((n: any) => String(n.props.accessibilityLabel).startsWith('cardioPlan.strengthDay:'));

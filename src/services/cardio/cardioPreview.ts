@@ -16,6 +16,7 @@ export interface CardioStrengthPlacement {
   lowerBodyDemand: 'LOW' | 'HIGH';
 }
 export interface CardioPreviewInput {
+  familiarizationPolicy?: 'BEGINNER_RUN_WALK_V1';
   manualSessions?: ManualCardioSession[];
   spacingPolicy?: 'SPREAD_EASY_V1';
   doublePolicy?: 'STRENGTH_CARDIO_ONLY_V1';
@@ -38,6 +39,7 @@ const integer = (n: unknown, min: number, max: number): n is number => typeof n 
 export function cardioPreviewIssue(input: CardioPreviewInput): CardioPreviewIssue | null {
   if (!input || !Array.isArray(input.modalities) || !input.modalities.length || input.modalities.length > 3
     || new Set(input.modalities).size !== input.modalities.length || input.modalities.some(m => !CARDIO_MODALITIES.includes(m))) return 'MODALITIES';
+  if (input.familiarizationPolicy !== undefined && input.familiarizationPolicy !== 'BEGINNER_RUN_WALK_V1') return 'PROFILE';
   if (!validateCardioProfile(input.profile)) return 'PROFILE';
   if (input.healthBaseline !== undefined && (!validReviewedCardioStart(input.healthBaseline)
     || input.placementPolicy !== 'BALANCED_V2' || input.modalities.length !== 1 || input.modalities[0] !== input.healthBaseline.modality
@@ -83,7 +85,10 @@ export function buildCardioPreview(input: CardioPreviewInput) {
   const plan = input.manualSessions ? buildManualCardioPlan(input) : automatic();
   const prescriptions = input.healthBaseline
     ? (plan as ReturnType<typeof automatic>).prescriptions.map(p => ({ ...p, basis: 'REVIEWED_HISTORY' as const }))
-    : plan.prescriptions;
+    : input.familiarizationPolicy === 'BEGINNER_RUN_WALK_V1' && !input.manualSessions
+      && input.profile.modalities.RUNNING?.status === 'NEW' && input.profile.modalities.RUNNING.typicalSessionMinutes === undefined
+      ? (plan as ReturnType<typeof automatic>).prescriptions.map(p => p.modality === 'RUNNING' ? { ...p, runWalk: true as const } : p)
+      : plan.prescriptions;
   const demanding = [
     ...input.strength.filter(s => s.lowerBodyDemand === 'HIGH').map(s => ({ id: `strength:${s.id}`, day: s.dayIndex! })),
     ...plan.scheduled.filter(s => s.lowerBodyDemand === 'HIGH').map(s => ({ id: s.id, day: s.dayIndex })),

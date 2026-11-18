@@ -415,6 +415,31 @@ export function generationCandidates(catalogue: readonly Exercise[], goal: Train
       && hypertrophyDominates(alternative, exercise)));
 }
 
+const unsupportedBarbellRows = new Set(['remo-con-barra', 'remo-barra-agarre-supino']);
+
+function hasComparableStableRow(exercise: Exercise, available: readonly Exercise[]) {
+  if (!unsupportedBarbellRows.has(exercise.id) || exercise.equipment !== Equipment.BARBELL
+    || exercise.movementVector !== MovementVector.PULL_HORIZONTAL || !exercise.criteria) return false;
+  const current = exercise.criteria;
+  return available.some(other => {
+    const rating = other.criteria;
+    return other.id !== exercise.id && other.primaryMuscle === exercise.primaryMuscle
+      && other.movementVector === exercise.movementVector && other.generationTier !== ExerciseGenerationTier.FALLBACK
+      && !!rating && rating.stabilityCost >= 4 && rating.systemicFatigueCost >= 4
+      && rating.stretchedPositionLoading >= current.stretchedPositionLoading && rating.rangeOfMotion >= current.rangeOfMotion
+      && rating.loadProgressability >= current.loadProgressability;
+  });
+}
+
+/** Prefer controlled horizontal pulls for hybrid back work with shared recovery demands. */
+export function hybridHypertrophyCatalogue(catalogue: readonly Exercise[]): Exercise[] {
+  const adjusted = catalogue.map(exercise => unsupportedBarbellRows.has(exercise.id) && exercise.criteria
+    ? { ...exercise, criteria: { ...exercise.criteria, loadProgressability: Math.min(3, exercise.criteria.loadProgressability) as 1 | 2 | 3 } }
+    : exercise);
+  const generationPool = generationCandidates(adjusted, TrainingGoal.HYPERTROPHY);
+  return adjusted.filter(exercise => !hasComparableStableRow(exercise, generationPool));
+}
+
 /**
  * Fallback exercises stay available when equipment/vetoes leave no standard
  * alternative, but never displace a standard option by random chance.

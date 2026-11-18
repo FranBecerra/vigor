@@ -28,6 +28,7 @@ const canonical = (value: unknown): string => {
 /** Only declared planning fields may leave the draft; never persist arbitrary context. */
 function planningInput(input: CardioPreviewInput): CardioPreviewInput {
   return { ...(input.manualSessions ? { manualSessions: input.manualSessions } : {}), ...(input.healthBaseline ? { healthBaseline: copyReviewedCardioStart(input.healthBaseline) } : {}),
+    ...(input.familiarizationPolicy ? { familiarizationPolicy: input.familiarizationPolicy } : {}),
     ...(input.spacingPolicy ? { spacingPolicy: input.spacingPolicy } : {}),
     ...(input.doublePolicy ? { doublePolicy: input.doublePolicy } : {}),
     ...(input.placementPolicy ? { placementPolicy: input.placementPolicy } : {}), modalities: [...input.modalities], cycleDays: input.cycleDays, availableDays: [...input.availableDays],

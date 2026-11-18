@@ -6,6 +6,7 @@ export interface CardioStartContext {
   modality: 'RUNNING' | 'CYCLING';
   representative?: boolean;
   inferFromHistory?: boolean;
+  assessMonthlyCapacity?: boolean;
   response: 'UNKNOWN' | 'RECOVERED' | 'DIFFICULT' | 'DISCOMFORT';
   comfortableMinutes?: number;
   cycleDays: number;
@@ -15,7 +16,8 @@ export interface CardioStartContext {
 }
 export type CardioStartIssue = 'INVALID_CONTEXT' | 'STALE_REVIEW' | 'REVIEW_REQUIRED' | 'LIMITED_HISTORY'
   | 'CONTEXT_REQUIRED' | 'REVIEW_TOLERANCE' | 'DISCOMFORT' | 'INSUFFICIENT_HISTORY' | 'TIME_TOO_LOW';
-type StartPolicy = 'OBSERVED_EASY_START_POC_V1' | 'OBSERVED_REPEATABLE_START_V2';
+export type StartPolicy = 'OBSERVED_EASY_START_POC_V1' | 'OBSERVED_REPEATABLE_START_V2'
+  | 'OBSERVED_MONTHLY_CAPACITY_V3' | 'OBSERVED_MONTHLY_REPARTITION_V3';
 export type CardioStartResult = { policy: StartPolicy; state: CardioStartIssue } | {
   policy: StartPolicy; state: 'READY'; modality: 'RUNNING' | 'CYCLING'; cycleDays: number;
   sessions: number; sessionMinutes: number; totalMinutes: number;
@@ -33,7 +35,7 @@ const median = (values: number[]) => {
 
 /** Infer recording interruptions for planning only. The original history stays intact. */
 function groupRecordingFragments(workouts: readonly CardioHealthWorkout[], infer: boolean) {
-  const sessions: Array<{ start: number; end: number; durationSeconds: number; sourceId: string; gaps: number; measured: number; lowerZones: number }> = [];
+  const sessions: Array<{ start: number; end: number; durationSeconds: number; sourceId: string; gaps: number; measured: number; lowerZones: number; effort?: number }> = [];
   for (const workout of [...workouts].sort((a, b) => a.start - b.start)) {
     const measured = workout.heartRateZoneSeconds?.reduce((sum, value) => sum + value, 0) ?? 0;
     const lowerZones = (workout.heartRateZoneSeconds?.[0] ?? 0) + (workout.heartRateZoneSeconds?.[1] ?? 0);
@@ -45,9 +47,11 @@ function groupRecordingFragments(workouts: readonly CardioHealthWorkout[], infer
       previous.durationSeconds += workout.durationSeconds;
       previous.gaps += gap;
       previous.measured += measured; previous.lowerZones += lowerZones;
+      previous.effort = previous.effort === undefined || workout.sessionEffort === undefined
+        ? undefined : Math.max(previous.effort, workout.sessionEffort);
     } else {
       const { start, end, durationSeconds, sourceId } = workout;
-      sessions.push({ start, end, durationSeconds, sourceId, gaps: 0, measured, lowerZones });
+      sessions.push({ start, end, durationSeconds, sourceId, gaps: 0, measured, lowerZones, effort: workout.sessionEffort });
     }
   }
   return sessions;
@@ -61,10 +65,12 @@ function groupRecordingFragments(workouts: readonly CardioHealthWorkout[], infer
 export function proposeCardioStartingPoint(raw: unknown, observedAt: number, now: number, context: CardioStartContext,
   sourceId?: string, excludedIds: readonly string[] = []): CardioStartResult {
   const infer = context?.inferFromHistory === true;
-  const policy = infer ? 'OBSERVED_REPEATABLE_START_V2' : 'OBSERVED_EASY_START_POC_V1';
+  const monthly = infer && context?.assessMonthlyCapacity === true;
+  const policy = monthly ? 'OBSERVED_MONTHLY_CAPACITY_V3' : infer ? 'OBSERVED_REPEATABLE_START_V2' : 'OBSERVED_EASY_START_POC_V1';
   const issue = (state: CardioStartIssue): CardioStartResult => ({ policy, state });
   if (!context || !['RUNNING', 'CYCLING'].includes(context.modality)
     || !['UNKNOWN', 'RECOVERED', 'DIFFICULT', 'DISCOMFORT'].includes(context.response)
+    || context.assessMonthlyCapacity !== undefined && typeof context.assessMonthlyCapacity !== 'boolean'
     || context.representative !== undefined && typeof context.representative !== 'boolean'
     || context.comfortableMinutes !== undefined && !integer(context.comfortableMinutes, 1, 600)
     || !integer(context.cycleDays, 7, 31) || !integer(context.maxSessions, 0, 14)
@@ -92,7 +98,7 @@ export function proposeCardioStartingPoint(raw: unknown, observedAt: number, now
   const representedWeeks = counts.filter(count => count > 0).length;
   if (workouts.length < 4 || representedWeeks < 3 || Math.max(...workouts.map(w => w.end)) < observedAt - 10 * DAY) return issue('INSUFFICIENT_HISTORY');
   const weeklySessions = median(counts);
-  const weeklyMinutes = median(infer ? minutes.filter((_, i) => counts[i] > 0) : minutes);
+  const weeklyMinutes = median(infer && !monthly ? minutes.filter((_, i) => counts[i] > 0) : minutes);
   const durations = workouts.map(w => w.durationSeconds / 60);
   // A long outing can anchor duration only when repeated at least a day apart.
   const ordered = (infer ? eligible : workouts).filter(w => w.start >= observedAt - 42 * DAY).sort((a, b) => b.durationSeconds - a.durationSeconds);
@@ -100,10 +106,20 @@ export function proposeCardioStartingPoint(raw: unknown, observedAt: number, now
     candidates.slice(0, i).some(other => Math.abs(w.start - other.start) >= DAY && Math.max(w.start, other.start) >= start));
   const easyRepeat = infer ? repeat(ordered.filter(w => w.measured >= w.durationSeconds * 0.8 && w.lowerZones >= w.measured * 0.75)) : undefined;
   const repeated = easyRepeat ?? repeat(ordered);
-  const typicalMinutes = infer && repeated ? repeated.durationSeconds / 60 : median(durations);
+  const measuredEasy = (w: typeof workouts[number]) =>
+    w.measured >= w.durationSeconds * 0.8 && w.lowerZones >= w.measured * 0.75;
+  const easyMonth = workouts.filter(w => w.effort !== undefined ? w.effort <= 4 : measuredEasy(w));
+  const repeatedEasy = repeat(easyMonth);
+  const typicalMinutes = monthly && repeatedEasy ? median(easyMonth.map(w => w.durationSeconds / 60))
+    : infer && !monthly && repeated ? repeated.durationSeconds / 60 : median(durations);
   const comfortableMinutes = infer ? Math.max(1, Math.min(600, Math.floor(typicalMinutes))) : context.comfortableMinutes!;
   const observedSessions = Math.floor(weeklySessions * context.cycleDays / 7);
-  const sessions = Math.min(context.maxSessions, observedSessions);
+  // Repartition a familiar dose across two opportunities without increasing weekly time.
+  // Explicit low effort or adequate time in low zones is evidence of easy exposure, not a fitness ceiling.
+  const repartition = monthly && weeklySessions === 1 && (repeatedEasy || context.response === 'RECOVERED')
+    && !workouts.some(w => w.effort !== undefined && w.effort >= 6)
+    && Math.min(context.maxSessions, Math.round(2 * context.cycleDays / 7)) > observedSessions;
+  const sessions = Math.min(context.maxSessions, repartition ? Math.round(2 * context.cycleDays / 7) : observedSessions);
   if (sessions < 1) return issue('TIME_TOO_LOW');
   // Use recorded active time as a conservative ceiling for the *whole* proposed
   // session, including its warm-up/cool-down. No pace/distance conversion or growth.
@@ -117,7 +133,8 @@ export function proposeCardioStartingPoint(raw: unknown, observedAt: number, now
   if (context.maxSessions < observedSessions) cappedBy.push('SESSION_COUNT');
   if (context.totalMinutes / sessions < typicalMinutes) cappedBy.push('TOTAL_TIME');
   if (weeklyMinutes * context.cycleDays / 7 / sessions < typicalMinutes) cappedBy.push('OBSERVED_VOLUME');
-  return { policy, comfortableMinutes, ...(easyRepeat ? { usedZones: true as const } : {}), state: 'READY', modality: context.modality, cycleDays: context.cycleDays,
+  return { policy: repartition ? 'OBSERVED_MONTHLY_REPARTITION_V3' : policy, comfortableMinutes,
+    ...((monthly ? repeatedEasy && easyMonth.every(measuredEasy) : easyRepeat) ? { usedZones: true as const } : {}), state: 'READY', modality: context.modality, cycleDays: context.cycleDays,
     sessions, sessionMinutes, totalMinutes: sessions * sessionMinutes, observedSessions: workouts.length,
     representedWeeks, typicalMinutes, weeklySessions, weeklyMinutes, cappedBy };
 }

@@ -1,5 +1,5 @@
 import { cardioFixture, CARDIO_FIXTURE_NOW as now } from '@/test-support/cardioFixture';
-import { changeCardioSlot, cardioStartContext, coordinateCardioBlock, createCardioBlock, datedStrength, dateInZone, endCardioBlock, improveCardioDates, validCardioBlock } from '../cardioBlock';
+import { archiveCardioBlock, renameCardioBlock, changeCardioSlot, cardioStartContext, coordinateCardioBlock, createCardioBlock, datedStrength, dateInZone, endCardioBlock, improveCardioDates, validCardioBlock } from '../cardioBlock';
 import { saveSportDraft } from '../sportActivities';
 import { startCardioWorkout, transitionCardioWorkout } from '../cardioWorkout';
 import { shiftCalendarDate } from '@/services/training/trainingCalendar';
@@ -114,6 +114,15 @@ it('reviews actual-today context when starting ahead/late without silently movin
   expect(() => cardioStartContext(b, 'missing', now, [], [])).toThrow(); expect(JSON.stringify(b)).toBe(copy);
 });
 
+it('allows an overdue relative opportunity after the nominal horizon while retaining real same-day conflicts', () => {
+  const block = cardioFixture(), overdue = now + 40 * 86400000, slot = block.slots[0];
+  expect(cardioStartContext(block, slot.id, overdue, [], []).issues).toEqual(['OUTSIDE_BLOCK']);
+  expect(cardioStartContext(block, slot.id, overdue, [], [], true).review).toBe(false);
+  const date = dateInZone(overdue, block.timeZone);
+  expect(cardioStartContext(block, slot.id, overdue, [], [{ id: 'done', date, demand: 'LOW' }], true).issues).toEqual(['STRENGTH']);
+  expect(cardioStartContext(block, slot.id, now - 86400000, [], [], true).issues).toEqual(['OUTSIDE_BLOCK']);
+});
+
 it('replaces the matching v2 forecast with its assigned date, preserving other cycles and unrelated strength', () => {
   const b = cardioFixture({ placementPolicy: 'BALANCED_V2', sessions: 1, strength: [
     { id: 'r:0', name: 'Lower', dayIndex: 3, estimatedMinutes: 60, lowerBodyDemand: 'HIGH' },
@@ -157,4 +166,22 @@ it('improves v2 same-day balance without moving performed opportunities or excee
   expect(coordinateCardioBlock(moved, [], [])[0].issues).toEqual([]);
   const run = startCardioWorkout(heavy, heavy.slots[0].id, now + 1, 'run');
   expect(improveCardioDates(heavy, [], [], [run], now + 2).slots[0].date).toBe('2026-10-29');
+});
+
+it('renames a cardio block without changing its prescription and archives it without losing slots or history', () => {
+  const block = cardioFixture();
+  const workout = startCardioWorkout(block, block.slots[0].id, now, 'run');
+  const renamed = renameCardioBlock(block, ' New name ', now + 1);
+  expect(renamed).toMatchObject({ revision: block.revision + 1, proposal: { name: 'New name' } });
+  expect(renamed.slots).toBe(block.slots);
+  expect(renamed.proposal.preview).toBe(block.proposal.preview);
+  expect(() => renameCardioBlock(block, ' ', now)).toThrow();
+  expect(() => archiveCardioBlock(renamed, [workout], now + 2)).toThrow();
+  const finished = transitionCardioWorkout(workout, 'FINISH', now + 60000, 60);
+  const archived = archiveCardioBlock(renamed, [finished], now + 60001);
+  expect(archived).toMatchObject({ archivedAt: now + 60001, endedAt: now + 60001, slots: block.slots });
+  expect(validCardioBlock(archived, block.userId)).toBe(true);
+  expect(validCardioBlock({ ...archived, endedAt: null }, block.userId)).toBe(false);
+  expect(() => archiveCardioBlock(archived, [], now + 60002)).toThrow();
+  expect(() => renameCardioBlock(archived, 'Other', now + 60002)).toThrow();
 });

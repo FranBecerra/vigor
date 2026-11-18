@@ -6,6 +6,7 @@ import {
   RECOMMENDED_SESSION_MINUTES,
 } from '@/services/training/capacityRecommendation';
 import { TOTAL_SETS_RANGE, TrainingGoal, VolumeRegion } from '@/services/training/volumePlan';
+import { hybridHypertrophyCatalogue } from '../exerciseSelection';
 import { planMesocycle } from '../mesocyclePlanner';
 import { SESSION_OVERHEAD_MINUTES } from '../sessionDuration';
 
@@ -167,4 +168,17 @@ describe('recommendCapacity', () => {
     expect(recommendation.sets).toBe(0);
     expect(recommendation.reachesRecoverableVolume).toBe(false);
   });
+});
+
+it('compares a single hypertrophy dose across calendars bounded by the hybrid time and session limits', () => {
+  const input = { level: ExperienceLevel.INTERMEDIATE, goal: TrainingGoal.HYPERTROPHY, catalogue: hybridHypertrophyCatalogue(gym) };
+  const narrow = recommendCapacity({ ...input, fixedAvailability: { maxSessions: 3, minutesPerSession: 60 } });
+  const wider = recommendCapacity({ ...input, fixedAvailability: { maxSessions: 4, minutesPerSession: 60 } });
+  expect(narrow.sessionsPerMicrocycle).toBeLessThanOrEqual(3);
+  expect(wider).toMatchObject({ sessionsPerMicrocycle: 4, minutesPerSession: 60 });
+  const feasible = recommendCapacity({ ...input, fixedAvailability: { maxSessions: 4, minutesPerSession: 75 } });
+  expect(feasible).toMatchObject({ sessionsPerMicrocycle: 4, minutesPerSession: 75, reachesRecoverableVolume: true });
+  expect(feasible.preparedPlan?.distribution.unassigned).toHaveLength(0);
+  expect(feasible.preparedPlan?.distribution.sessions.every(s => s.estimatedWorkMinutes + SESSION_OVERHEAD_MINUTES <= 75.01)).toBe(true);
+  expect(wider.sets).toBeGreaterThanOrEqual(narrow.sets);
 });

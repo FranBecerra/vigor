@@ -8,6 +8,8 @@ export interface CardioHealthWorkout {
   end: number;
   durationSeconds: number;
   distanceMetres?: number;
+  /** Device-memory Vigor history feedback, never inferred from Health. */
+  sessionEffort?: number;
   /** Workout-associated average only, when provided by HealthKit. */
   averageHeartRateBpm?: number;
   /** Associated system or user five-zone durations, ordered from lowest to highest. */
@@ -19,6 +21,8 @@ export interface CardioHealthWorkout {
   mixedActivities: boolean;
   /** Hashed external provenance, never a raw metadata/account identifier. */
   externalId?: string;
+  /** Opaque, stable match key. The raw HealthKit UUID is never persisted by a link. */
+  linkKey?: string;
 }
 export interface CardioHealthRead {
   version: 1;

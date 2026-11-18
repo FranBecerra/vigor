@@ -46,5 +46,6 @@ export function useCardioPlans() {
   return { ...visible, reload: () => setRetry(n => n + 1), newId: () => repository?.newId() ?? '',
     save: (plan: SavedCardioPlan) => write((repo, current, reject) => repo.save(plan, current, reject)),
     archive: (plan: SavedCardioPlan) => write((repo, current, reject) => repo.archive(plan, Date.now(), current, reject)),
+    rename: (plan: SavedCardioPlan, name: string) => write((repo, current, reject) => repo.rename(plan, name, current, reject)),
   };
 }

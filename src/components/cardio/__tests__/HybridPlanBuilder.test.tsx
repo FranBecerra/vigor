@@ -34,7 +34,7 @@ it('separates priority from availability and restores custom limits when the unr
   expect(field(tree, 'sharedAvailability.minutes').props.value).toBe(75);
   await press(tree, 'sharedAvailability.unrestricted');
   await press(tree, 'hybridPlan.buildStrength');
-  expect((renderStrength.mock.lastCall as any)[0].sharedAvailability).toEqual({ cycleDays: 7, trainingDays: 6, minutesPerSession: 60, allowDoubles: false });
+  expect((renderStrength.mock.lastCall as any)[0].sharedAvailability).toEqual({ cycleDays: 7, trainingDays: 6, minutesPerSession: 75, allowDoubles: false });
   await act(async () => tree.unmount());
 });
 it('saves only the accepted prescription and rejects an expired Health review', async () => {

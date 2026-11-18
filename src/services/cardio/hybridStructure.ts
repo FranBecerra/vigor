@@ -6,8 +6,8 @@ import { effectiveSetsByMuscle, focusAcceptsMuscle, MIN_HYPERTROPHY_SESSION_SETS
 import { exerciseMinutes } from '../training/trainingCapacity';
 import { toRoutineView, type RoutineViewLabels } from '../training/routineView';
 import { hybridLegSets, strengthPlacements, type CardioPreviewInput } from './cardioPreview';
-import { reviewHybridAuthoring, type HybridSettings, type HybridStrengthDraft } from './hybridAuthoring';
-import { hybridRhythmQuality, hybridRhythmRankIsBetter } from './hybridRhythm';
+import { reviewHybridAuthoring, type HybridPriority, type HybridSettings, type HybridStrengthDraft } from './hybridAuthoring';
+import { hybridRhythmQuality, hybridRhythmRankIsBetter, hybridRunningProximity } from './hybridRhythm';
 
 type Review = ReturnType<typeof reviewHybridAuthoring>;
 type Move = { exercise: Exercise; fromDay: number; toDay: number };
@@ -23,12 +23,12 @@ function runExposure(day: number, candidate: Candidate) {
   }, 0);
 }
 
-function rank(candidate: Candidate) {
+function rank(candidate: Candidate, priority: HybridPriority) {
   const legSets = hybridLegSets(candidate.review.view);
   const quality = hybridRhythmQuality(candidate.cardio, candidate.review.preview);
-  const nearbySets = candidate.cardio.strength.reduce((n,s) => n + (legSets.get(s.id) ?? 0) * runExposure(s.dayIndex!, candidate), 0);
+  const running = hybridRunningProximity(candidate.cardio, candidate.review.preview, legSets, priority);
   const shared = candidate.review.preview.scheduled.filter(s => candidate.cardio.strength.some(x => x.dayIndex === s.dayIndex)).length;
-  return [candidate.review.issues.length, quality.proximity, nearbySets, shared, quality.longestRun, candidate.moves.length];
+  return [candidate.review.issues.length, quality.proximity, running.nearbySets, running.priorityCost, shared, quality.longestRun, candidate.moves.length];
 }
 
 /** Compare complete prescriptions on the selected calendar, retaining main lifts and every prescribed set. */
@@ -65,10 +65,10 @@ export function suggestHybridStructure(draft: HybridStrengthDraft, input: Cardio
     const joint = reviewHybridAuthoring(strength,cardio,settings,catalogue,labels);
     if (joint.issues.length) continue;
     const candidate = { strength, cardio, review: joint, moves: [], split: template.split };
-    if (hybridRhythmRankIsBetter(rank(candidate),rank(current))) current = candidate;
+    if (hybridRhythmRankIsBetter(rank(candidate, settings.priority), rank(current, settings.priority))) current = candidate;
   }
   for (let pass = 0; pass < 3 && remaining > 0; pass++) {
-    let best = current, bestRank = rank(current);
+    let best = current, bestRank = rank(current, settings.priority);
     const rows = current.strength.mesocycle.plannedSessions!;
     for (const from of rows) for (const to of rows) {
       if (from.supersets || to.supersets || runExposure(day(from),current) <= runExposure(day(to),current)) continue;
@@ -110,7 +110,7 @@ export function suggestHybridStructure(draft: HybridStrengthDraft, input: Cardio
           || nextReview.preview.scheduled.some((s,i) => s.id !== current.review.preview.scheduled[i]?.id ||
           s.dayIndex !== current.review.preview.scheduled[i]?.dayIndex)) continue;
         const next = { strength, cardio, review: nextReview, split: current.split, moves: [...current.moves,{exercise,fromDay:day(from)+1,toDay:day(to)+1}] };
-        const score = rank(next);
+        const score = rank(next, settings.priority);
         if (hybridRhythmRankIsBetter(score,bestRank)) { best = next; bestRank = score; }
       }
     }

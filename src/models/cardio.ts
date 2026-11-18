@@ -120,6 +120,7 @@ export interface EasyCardioPrescription {
   stimulus: 'EASY';
   durationSeconds: number;
   allowWalking: boolean;
+  runWalk?: true;
   basis: 'CURRENT_PRACTICE' | 'FAMILIARIZATION' | 'REVIEWED_HISTORY';
   adjustments: Array<'UNKNOWN_DURATION' | 'TOLERATED_DURATION_CAP' | 'AVAILABILITY_CAP'>;
   segments: Array<{

@@ -27,6 +27,8 @@ import { MesocycleContinuityFlow } from '@/components/train/MesocycleContinuityF
 import { continuityAutomaticFixture, continuityComparisonFixture, continuityFixture } from '@/test-support/continuityFixture';
 import { PlanningHistoryCheck } from '@/test-support/PlanningHistoryCheck';
 import { CardioHomeCheck } from '@/test-support/CardioHomeCheck';
+import { TrainingAgendaCheck } from '@/test-support/TrainingAgendaCheck';
+import { cardioHealthExport } from '@/services/health/workoutExport';
 
 export default function CardioCheck() {
   const { colors, surfaces } = useTheme(), insets = useSafeAreaInsets();
@@ -38,6 +40,8 @@ export default function CardioCheck() {
   const [capacityOpen, setCapacityOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [homeOpen, setHomeOpen] = useState(false);
+  const [agendaOpen, setAgendaOpen] = useState<'standard' | 'weekly' | null>(null);
+  const [healthPreview, setHealthPreview] = useState<number | null>(null);
   const [continuity, setContinuity] = useState<(ReturnType<typeof continuityFixture> & Partial<Pick<ReturnType<typeof continuityComparisonFixture>, 'feedback'>>) | null>(null);
   const [continuityResult, setContinuityResult] = useState<number | null>(null);
   const [failContinuity, setFailContinuity] = useState(true);
@@ -61,6 +65,7 @@ export default function CardioCheck() {
       if (failContinuity) { setFailContinuity(false); throw Error('syntheticContinuityFailure'); }
       setContinuityResult(selection.microcycles); setContinuity(null);
     }} />;
+  if (agendaOpen) return <TrainingAgendaCheck weekly={agendaOpen === 'weekly'} onExit={() => setAgendaOpen(null)} />;
   if (homeOpen) return <CardioHomeCheck onExit={() => setHomeOpen(false)} />;
   if (historyOpen) return <PlanningHistoryCheck onExit={() => setHistoryOpen(false)} />;
   if (capacityOpen) return <HybridCapacityCheck onExit={() => setCapacityOpen(false)} />;
@@ -81,12 +86,28 @@ export default function CardioCheck() {
       setSportEntries((old) => typeof sportEditor === 'string' ? next : old.map((entry) => entry.id === next[0].id ? next[0] : entry));
       setSportEditor(null);
     }} />;
-  if (selected) return <CardioWorkoutPanel id={selected} onExit={() => setSelected(null)} workouts={{ owner: 'owner', entries: workouts, ready: true, error: false, pending: false,
+  if (selected) return <CardioWorkoutPanel id={selected} onExit={() => setSelected(null)} onFinished={workout => {
+    if (workout.id === 'synthetic-health-preview') setHealthPreview(cardioHealthExport(workout, 'owner')?.durationMs ?? null);
+  }} workouts={{ owner: 'owner', entries: workouts, ready: true, error: false, pending: false,
     newId: () => 'synthetic-run', reload: () => undefined, save: async next => { setWorkouts(old => [...old.filter(w => w.id !== next.id), next]); return next; } }} />;
   return <ScrollView style={{ ...surfaces.screen, flex: 1 }} contentContainerStyle={{ padding: 20, paddingTop: insets.top + 12, paddingBottom: insets.bottom + 110 }}>
     <Text style={{ color: colors.textPrimary, fontSize: 25, marginBottom: 16 }}>CARDIO CHECK · memory only</Text>
     <Text style={{ color: colors.textSecondary, marginBottom: 20 }}>Fabricated 8-day cycle · no account writes or sensor readings</Text>
     {process.env.EXPO_PUBLIC_VIGOR_LOCAL_CHECKS === '1' && <>
+      <Pressable accessibilityRole="button" onPress={() => {
+        const start = Date.now() - 120000, source = cardioFixture({}, start);
+        const running = startCardioWorkout(source, source.slots[0].id, start, 'synthetic-health-preview');
+        setHealthPreview(null); setWorkouts([transitionCardioWorkout(running, 'PAUSE', start + 60000)]); setSelected(running.id);
+      }} style={{ minHeight: 48 }}>
+        <Text style={{ color: colors.accentText }}>Preview cardio export (memory only)</Text>
+      </Pressable>
+      {healthPreview !== null && <Text style={{ color: colors.textPrimary }}>Synthetic Health payload · {healthPreview / 1000} active seconds</Text>}
+      <Pressable accessibilityRole="button" onPress={() => setAgendaOpen('standard')} style={{ minHeight: 48 }}>
+        <Text style={{ color: colors.accentText }}>Preview grouped agenda (memory only)</Text>
+      </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => setAgendaOpen('weekly')} style={{ minHeight: 48 }}>
+        <Text style={{ color: colors.accentText }}>Preview tomorrow’s weekly run (memory only)</Text>
+      </Pressable>
       <Pressable accessibilityRole="button" accessibilityLabel="Preview active cardio routines (memory only)" onPress={() => setHomeOpen(true)} style={{ minHeight: 48 }}>
         <Text style={{ color: colors.accentText }}>Preview active cardio routines (memory only)</Text>
       </Pressable>

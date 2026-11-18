@@ -48,6 +48,8 @@ export interface CapacityRecommendationInput extends VolumePlanInput {
   deprioritizedRegions?: readonly VolumeRegion[];
   /** Paired diagnostic control only; not a user-facing setting. */
   capacityPacking?: boolean;
+  /** Optional hybrid ceilings, applied after the uncapped muscle targets are built. */
+  fixedAvailability?: { maxSessions: number; minutesPerSession: number };
 }
 
 export interface CapacityRecommendation {
@@ -229,10 +231,13 @@ function* recommendationSearch(input: CapacityRecommendationInput): Generator<vo
     .map((covered, index) => covered && selections[index].performedSets >= TOTAL_SETS_RANGE[input.goal][input.level][0]);
   const targetsCovered = coverage.some(Boolean);
   const candidates: (ScoredCapacity & { overflow: number; quality: number })[] = [];
-  const calendars = [PRACTICAL_MINUTES, RECOMMENDED_SESSION_MINUTES.filter((minutes) => minutes > 75)]
+  const fixed = input.fixedAvailability;
+  const calendars = fixed ? RECOMMENDED_SESSION_COUNTS.filter(sessions => sessions <= fixed.maxSessions)
+    .map(sessions => ({ sessions, minutes: fixed.minutesPerSession }))
+    : [PRACTICAL_MINUTES, RECOMMENDED_SESSION_MINUTES.filter((minutes) => minutes > 75)]
     .flatMap((lengths) => RECOMMENDED_SESSION_COUNTS.flatMap((sessions) => lengths.map((minutes) => ({ sessions, minutes }))));
   for (const { sessions, minutes } of calendars) {
-      if (minutes > 75 && (!targetsCovered || candidates.some((candidate) => candidate.reachesRecoverableVolume
+      if (!fixed && minutes > 75 && (!targetsCovered || candidates.some((candidate) => candidate.reachesRecoverableVolume
         && candidate.preparedPlan && splitAdherence(candidate.preparedPlan.distribution).light))) break;
       yield;
       const distributions = selections.map((selection) => distributeSelection({
@@ -282,7 +287,8 @@ function* recommendationSearch(input: CapacityRecommendationInput): Generator<vo
   if (pool.length) {
     const bestQuality = Math.min(...pool.map((candidate) => candidate.quality));
     pool = pool.filter((candidate) => candidate.quality <= bestQuality + STRUCTURE_TOLERANCE);
-    pool.sort((a, b) => a.weeklyMinutes - b.weeklyMinutes || a.sessionsPerMicrocycle - b.sessionsPerMicrocycle);
+    pool.sort((a, b) => (fixed ? a.quality - b.quality : 0)
+      || a.weeklyMinutes - b.weeklyMinutes || a.sessionsPerMicrocycle - b.sessionsPerMicrocycle);
   } else {
     pool = [...candidates].sort((a, b) => Number(a.hasEmptySession) - Number(b.hasEmptySession)
       || a.overflow - b.overflow || a.quality - b.quality || a.weeklyMinutes - b.weeklyMinutes);

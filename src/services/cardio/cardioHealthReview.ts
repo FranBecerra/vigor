@@ -26,6 +26,13 @@ export function cardioHealthWindow(now: number) {
   if (!finite(now) || now <= CARDIO_HEALTH_DAYS * day) throw Error('invalidCardioHealthWindow');
   return { start: now - CARDIO_HEALTH_DAYS * day, end: now };
 }
+/** Monday midnight in the device calendar, including weeks that cross a DST transition. */
+export function cardioHealthWeekWindow(now: number) {
+  const monday = new Date(now);
+  monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
+  monday.setHours(0, 0, 0, 0);
+  return { start: monday.getTime(), end: now };
+}
 function validWorkout(v: CardioHealthWorkout, start: number, end: number) {
   return !!v && text(v.id) && HEALTH_CARDIO_KINDS.includes(v.kind) && finite(v.start) && finite(v.end)
     && v.start >= start && v.end <= end && v.end > v.start && finite(v.durationSeconds) && v.durationSeconds > 0
@@ -55,7 +62,10 @@ export function reviewCardioHealth(raw: unknown, now: number, sourceId?: string,
       manuallyEntered: value.manuallyEntered, ownExport: false, mixedActivities: value.mixedActivities,
       ...(value.distanceMetres === undefined ? {} : { distanceMetres: value.distanceMetres }),
       ...(validZones(value.heartRateZoneSeconds, value.durationSeconds) ? { heartRateZoneSeconds: [...value.heartRateZoneSeconds] } : {}),
+      ...(value.sourceId === 'vigor-timer' && value.id.startsWith('vigor:') && Number.isInteger(value.sessionEffort)
+        && value.sessionEffort! >= 1 && value.sessionEffort! <= 10 ? { sessionEffort: value.sessionEffort } : {}),
       ...(validPulse(value.averageHeartRateBpm) ? { averageHeartRateBpm: value.averageHeartRateBpm } : {}),
+      ...(typeof value.linkKey === 'string' && /^[a-f0-9]{64}$/.test(value.linkKey) ? { linkKey: value.linkKey } : {}),
       ...(value.externalId === undefined ? {} : { externalId: value.externalId }) };
     const previous = unique.get(v.id);
     if (previous) {

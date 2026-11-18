@@ -1,3 +1,4 @@
+import { createLinkedCardioWorkout } from '@/services/cardio/cardioHealthLink';
 import { saveCardioProposal } from '@/services/cardio/savedCardioPlan';
 import { createCardioBlock } from '@/services/cardio/cardioBlock';
 import type { CardioPreviewInput } from '@/services/cardio/cardioPreview';
@@ -12,4 +13,20 @@ export function cardioFixture(input: Partial<CardioPreviewInput> = {}, at = CARD
   }, input.strength?.length ? { routineId: 'r', fingerprint: 'synthetic',
     ...(input.placementPolicy ? { microcycleIndex: 0 } : {}) } : null, at);
   return createCardioBlock('block', proposal, '2026-10-29', 2, 'Europe/Madrid', at);
+}
+
+/** A weekly run linked before the next cycle opens on Monday. */
+export function weeklyCardioAgendaFixture() {
+  const now = Date.UTC(2026, 10, 15, 14);
+  const original = cardioFixture({ cycleDays: 7, sessions: 1, availableDays: [0] }, Date.UTC(2026, 10, 9, 8));
+  const [first, second] = original.slots;
+  const block = { ...original, startDate: '2026-11-09', slots: [
+    { ...first, date: '2026-11-09' }, { ...second, date: '2026-11-16' },
+  ] };
+  const monday = Date.UTC(2026, 10, 9, 12);
+  const workout = createLinkedCardioWorkout(block, first.id, 'weekly-run', { version: 1, truncated: false, workouts: [{
+    id: 'weekly-run', kind: 'RUNNING', start: monday, end: monday + 1800000, durationSeconds: 1800,
+    linkKey: 'b'.repeat(64), sourceId: 'watch', sourceName: 'Watch', manuallyEntered: false, mixedActivities: false, ownExport: false,
+  }] }, [], now, 'linked-weekly-run');
+  return { now, today: '2026-11-15', block, workouts: [workout] };
 }

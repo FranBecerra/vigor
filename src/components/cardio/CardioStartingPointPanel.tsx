@@ -27,6 +27,7 @@ export function CardioStartingPointPanel({ data, observedAt, sourceId, excludedI
     <Text style={{ ...text, color: colors.accentText, fontWeight: '600' }}>{t(`cardioStart.${key}`)}</Text>
   </Pressable>;
   const infer = planningContext?.inferFromHistory === true;
+  const monthly = planningContext?.assessMonthlyCapacity === true;
   const result = (calculated || infer) ? proposeCardioStartingPoint(data, observedAt, Date.now(), answers as CardioStartContext, sourceId, excludedIds) : null;
   const useLabel = t(planningContext ? 'planningHistory.apply' : 'healthPlanning.use');
   if (!open) return action('open', () => setOpen(true));
@@ -36,9 +37,9 @@ export function CardioStartingPointPanel({ data, observedAt, sourceId, excludedI
       <Pressable accessibilityRole="button" accessibilityLabel={t('cardioStart.info')} onPress={() => setDetails(v => !v)}
         style={{ minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}><InfoIcon size={22} color={colors.accentText} /></Pressable>
     </View>
-    <Text style={caption}>{t(infer ? 'planningHistory.inferredContext' : planningContext ? 'planningHistory.confirmCurrent' : onPlan ? 'healthPlanning.previewOnly' : 'cardioStart.previewOnly')}</Text>
+    <Text style={caption}>{t(monthly ? 'planningHistory.monthlyContext' : infer ? 'planningHistory.inferredContext' : planningContext ? 'planningHistory.confirmCurrent' : onPlan ? 'healthPlanning.previewOnly' : 'cardioStart.previewOnly')}</Text>
     {details && <>
-      <Text style={caption}>{t(infer ? 'planningHistory.inferredMethod' : 'cardioStart.method')}</Text>
+      <Text style={caption}>{t(monthly ? 'planningHistory.monthlyMethod' : infer ? 'planningHistory.inferredMethod' : 'cardioStart.method')}</Text>
       {planningContext && <Text style={caption}>{t(vigor ? 'planningHistory.localScope' : 'planningHistory.appliedScope')}</Text>}
     </>}
     {!planningContext && <View accessibilityRole="radiogroup">{(['RUNNING', 'CYCLING'] as const).map(modality => <Pressable key={modality} accessibilityRole="radio"
@@ -67,7 +68,8 @@ export function CardioStartingPointPanel({ data, observedAt, sourceId, excludedI
     {result && (result.state === 'READY' ? <View accessibilityLiveRegion="polite" style={{ ...surfaces.field, padding: 16, borderRadius: radius.md, gap: 10 }}>
       <Text style={{ ...text, fontSize: 23, fontWeight: '700', color: colors.accentText }}>{t('cardioStart.proposal', { sessions: result.sessions, minutes: result.sessionMinutes, days: result.cycleDays })}</Text>
       <Text style={text}>{t('cardioStart.total', { minutes: result.totalMinutes })}</Text>
-      <Text style={caption}>{t(infer ? result.usedZones ? 'planningHistory.observedEasy' : 'planningHistory.observedRepeatable' : 'cardioStart.observed', { count: result.observedSessions, duration: Math.round(result.typicalMinutes * 10) / 10 })}</Text>
+      <Text style={caption}>{t(monthly ? 'planningHistory.monthlyObserved' : infer ? result.usedZones ? 'planningHistory.observedEasy' : 'planningHistory.observedRepeatable' : 'cardioStart.observed', { count: result.observedSessions, duration: Math.round(result.typicalMinutes * 10) / 10 })}</Text>
+      {result.policy === 'OBSERVED_MONTHLY_REPARTITION_V3' && <Text style={caption}>{t('planningHistory.repartition')}</Text>}
       {result.cappedBy.map(reason => <Text key={reason} style={caption}>{t(`cardioStart.cap_${reason}`)}</Text>)}
       <Text style={caption}>{t(planningContext ? 'planningHistory.easyShort' : 'cardioStart.easy')}</Text>
       {onPlan && <>

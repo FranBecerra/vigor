@@ -35,6 +35,7 @@ export function validCardioBlock(value: unknown, owner: string): value is Cardio
     || !validCalendarDate(b.startDate) || !validSportTimeZone(b.timeZone) || !whole(b.cycles, 1, 8)
     || !timestamp(b.createdAt) || !timestamp(b.updatedAt) || b.updatedAt < b.createdAt || !whole(b.revision, 1, Number.MAX_SAFE_INTEGER)
     || b.endedAt !== null && (!timestamp(b.endedAt) || b.endedAt < b.createdAt || b.endedAt > b.updatedAt)
+    || b.archivedAt !== undefined && (!timestamp(b.archivedAt) || b.endedAt === null || b.archivedAt < b.endedAt || b.archivedAt > b.updatedAt)
     || !Array.isArray(b.slots) || b.slots.length !== b.cycles * b.proposal.preview.scheduled.length) return false;
   const ids = new Set<string>(), sports = new Set<string>();
   const slotsValid = b.slots.every(s => {
@@ -68,6 +69,19 @@ export function changeCardioSlot(block: CardioBlock, id: string, date: string, d
 export function endCardioBlock(block: CardioBlock, now: number): CardioBlock {
   if (!validCardioBlock(block, block.userId) || block.endedAt !== null || !timestamp(now) || now < block.updatedAt || block.revision === Number.MAX_SAFE_INTEGER) throw Error('invalidCardioBlock');
   return { ...block, endedAt: now, updatedAt: now, revision: block.revision + 1 };
+}
+
+export function archiveCardioBlock(block: CardioBlock, workouts: readonly CardioWorkout[], now: number): CardioBlock {
+  if (!validCardioBlock(block, block.userId) || block.archivedAt !== undefined || !timestamp(now) || now < block.updatedAt
+    || block.revision === Number.MAX_SAFE_INTEGER || workouts.some(w => w.userId === block.userId && w.blockId === block.id
+      && (w.status === 'RUNNING' || w.status === 'PAUSED'))) throw Error('cardioBlockLocked');
+  return { ...block, endedAt: block.endedAt ?? now, archivedAt: now, updatedAt: now, revision: block.revision + 1 };
+}
+
+export function renameCardioBlock(block: CardioBlock, name: string, now: number): CardioBlock {
+  const next = { ...block, proposal: { ...block.proposal, name: name.trim() }, updatedAt: now, revision: block.revision + 1 };
+  if (block.archivedAt !== undefined || now < block.updatedAt || !validCardioBlock(next, block.userId)) throw Error('invalidCardioBlock');
+  return next;
 }
 
 export interface DatedStrength { id: string; date: string; demand: 'LOW' | 'HIGH'; placementId?: string; microcycleIndex?: number; estimatedMinutes?: number }
@@ -159,10 +173,19 @@ export function coordinateCardioBlock(block: CardioBlock, sports: readonly Sport
 }
 
 /** Starting another day's opportunity is allowed, but today's context needs review. */
-export function cardioStartContext(block: CardioBlock, slotId: string, now: number, sports: readonly SportActivity[], strength: readonly DatedStrength[]) {
+export function cardioStartContext(block: CardioBlock, slotId: string, now: number, sports: readonly SportActivity[], strength: readonly DatedStrength[], relative = false) {
   const slot = block.slots.find(s => s.id === slotId);
   if (!slot) throw Error('invalidCardioStart');
   const date = dateInZone(now, block.timeZone);
+  if (relative && date >= block.startDate) {
+    const high = block.proposal.preview.scheduled.find(p => p.id === slot.prescriptionId)?.lowerBodyDemand === 'HIGH';
+    const nearby = new Set(high ? [shiftCalendarDate(date, -1), date, shiftCalendarDate(date, 1)] : [date]);
+    const issues: CardioCoordinationIssue[] = [];
+    if (strength.some(s => !block.proposal.input.allowDoubles && s.date === date || high && s.demand === 'HIGH' && nearby.has(s.date))) issues.push('STRENGTH');
+    if (sports.some(s => s.userId === block.userId && s.discardedAt === null && (s.record ?? s.planned)
+      && nearby.has(dateInZone((s.record ?? s.planned)!.startAt, block.timeZone)))) issues.push('SPORT');
+    return { date, review: issues.length > 0, issues };
+  }
   if (date < block.startDate || date > shiftCalendarDate(block.startDate, block.cycles * block.proposal.input.cycleDays - 1)) {
     return { date, review: true, issues: ['OUTSIDE_BLOCK' as const] };
   }

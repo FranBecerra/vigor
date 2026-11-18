@@ -1,14 +1,99 @@
 # Vigor delivery checklist
 
-Updated: 2026-11-12. Product decisions live in PRD.md; this checklist tracks delivery, not a second specification.
+Updated: 2026-11-18. Product decisions live in PRD.md; this checklist tracks delivery, not a second specification.
 
 Legend: `[x]` implemented and automated checks passing; `[ ]` open. Native acceptance is tracked separately and is never implied by unit tests.
+
+## Development installation recovery — 2026-11-18
+
+- [x] Diagnose the previous physical build's provisioning expiry on November 17 at 19:32 UTC. Renew app/widget provisioning with Xcode, build Release, verify the strict/deep signature and install over the existing iPhone 13 application. The new app profile expires November 25 at 08:33 UTC. Signed app entitlements match the renewed profile.
+- [x] Athlete confirmed Vigor opens after the previous iOS developer trust error. Evidence is in `/private/tmp/vigor-nov18-renew-build.log`, `/private/tmp/vigor-nov18-install.log` and `/private/tmp/vigor-nov18-launch.log`.
+
+## Priority order agreed 2026-11-17
+
+1. **Joint hybrid generator — immediate priority.** Complete automatic priority-aware joint dose allocation, future strength prescriptions that account for cardio placement, coherent review and integrated activation. The goal is to keep the chosen strength/cardio priority and avoid unnecessary leg-running overlap while respecting the user's available sessions and time. Existing bounded joint proposal generation is a foundation, not completion.
+2. **Measured cardio recording in the iPhone app.** Expand beyond the current duration-only timer/export so a Vigor-started session records actual timing and, when supported, distance and heart-rate data with source, units, sample times and coverage. Outdoor location, indoor equipment/manual entry, unavailable sensors and paused time need explicit behavior. Do not infer measured data from the prescription. Verify HealthKit write behavior for each supported metric and retain a truthful sensor-free path.
+3. **Defer the Vigor watchOS companion.** Do not begin the companion app until the iPhone cardio flow and measurement quality are polished. Keep paired-watch start/control/mirroring as a later phase, separate from verifying that Apple Health imports a workout recorded by Apple Watch.
+
+Before adding or materially changing cardio execution screens or menus, present three detailed Vigor-style image options and wait for the athlete's selection. The above priority order does not approve a new visual design.
+
+### Joint hybrid generator — calendar priority
+
+- [x] Use the selected priority to rank unavoidable adjacent running and lower-body sessions when coverage and overall overlap tie. Share the rule between relative calendar search and strength structure comparison, including the cycle boundary.
+- [x] Verify both priority directions, coverage preservation, missing strength placements and the editor's priority handoff with automated tests. TypeScript and all 3,475 tests across 297 suites pass.
+- [ ] Verify the priority-dependent preview on the simulator with the production editor.
+- [ ] Complete joint dose allocation beyond frequency and calendar preferences, and integrate activation of the reviewed strength and cardio prescriptions.
+
+### Hybrid hypertrophy dose and monthly cardio review
+
+- [x] Evaluate hybrid hypertrophy frequency against one target dose, shared availability and room for cardio. Preserve explicitly chosen counts.
+- [x] Prefer comparable stable pulls to unsupported barbell rows in hybrid hypertrophy generation.
+- [x] Use 28-day history medians and repeated easy evidence to offer a second shorter session at the usual total dose.
+- [x] Author and run a timed run/walk pattern for newly generated beginner sessions without an established duration.
+- [x] Pass TypeScript, 3,499 automated tests across 298 suites, and the Release simulator build. The intermediate full-gym fixture fits its target in four 75-minute slots.
+- [ ] Check new authoring and interval playback end to end in Device Hub. The simulator Release reached sign-in without an active account, blocking both flows. The session was closed. Evidence: `/private/tmp/vigor-dose-monthly-acceptance/`. Verify longer-term cardio tolerance with the existing microcycle review.
+
+## Cardio export to Apple Health — 2026-11-17
+
+- [x] Queue eligible iPhone timer workouts after saving in Vigor, with the existing write opt-in, modality and measured active time. Retry without duplicates and leave linked workouts in their original source. TypeScript and all 3,473 tests across 297 suites pass.
+- [x] Verify the finish and save flow in Device Hub with a synthetic running session and 60 seconds of active time. Session closed. The simulator Release also builds with the new native Health bridge linked. Evidence: `/private/tmp/vigor-cardio-export-acceptance/`.
+- [ ] Verify that a real timer-only cardio session appears in Apple Health on the physical iPhone after an in-place update. This confirms the current duration-only slice; it does not verify distance or heart-rate capture.
+
+## Measured cardio execution — 2026-11-18
+
+- [x] Connect new Vigor timer sessions on iOS 26+ to HealthKit workout collection when export is enabled. Preserve time-only operation if the bridge, write consent, or measurements are unavailable.
+- [x] Queue the native measured workout under the existing stable export identity. Store only validated, optional distance/pulse summaries and collection bounds in the device-local export journal.
+- [x] Pass TypeScript, 3,488 automated tests across 298 suites, and the Release simulator build.
+- [ ] Repeat the timer interaction in Device Hub on an authenticated simulator. The Release opens, but the auth gate redirects the in-memory fixture to sign-in even with the local-checks flag. The Device Hub session was closed. Evidence: `/private/tmp/vigor-cardio-capture-acceptance-20261118/`.
+- [ ] Verify a real running workout and paired heart-rate sensor on the physical iPhone, including lock, pause/resume, missing readings and one Health workout on retry.
+- [ ] Review live and completed metrics designs, then show available readings in Vigor. Add explicit gap/coverage details, manual indoor distance and native recovery across process termination.
+
+## Relative Training agenda — 2026-11-12
+
+- [x] Replace the dated/undated split with a single sequence of strength, cardio and rest. Advance Up next after completion, skip or a deliberate reorder, and retain actual and appointment dates.
+- [x] Restore direct rest check/uncheck in the agenda, scoped to the current microcycle and with save failure rollback.
+- [x] Pass 3,444 tests across 297 suites and TypeScript. Device Hub confirms one sequence with Up next and the progress rail on the normal Training home. The in-memory fixture verifies rest check/uncheck and reordering strength past cardio with the marker following the new order. Device Hub session closed. Evidence: `/private/tmp/vigor-relative-agenda-final-acceptance/acceptance.md`.
+- [x] Use the selected Hold and drag interaction, Start and Skip in the session preview, strength row tint, Add rest in the agenda and common routine actions. Document persistence and archive behavior in the PRD.
+- [x] Pass 3,451 tests across 297 suites and TypeScript. On the iPhone simulator, reorder strength, cardio and rest with the continuous hold gesture, verify the Up next marker, open the cardio actions, add and check/uncheck rest, and link a synthetic Health workout. On the normal Training home, verify the progress rail, common strength routine actions and cancellable deletion. Device Hub session closed. Evidence: `/private/tmp/vigor-hold-drag-acceptance/`.
+
+- [x] Offer compatible Health workouts recorded before the cardio block began when they fall within the existing read window. Preserve their actual dates and distinguish read failures from an empty selection.
+- [x] Protect the agenda prefix through Up next from upward moves. Retain the agenda viewport when reordering changes the upper workout card.
+- [x] Pass 3,453 tests and TypeScript. Device Hub verifies the protected drag boundary, moving the current session down, and a synthetic run recorded four days before the block linked with its actual date. The mixed-plan landing scroll anchor still needs native acceptance. Evidence: `/private/tmp/vigor-agenda-followup-acceptance/`.
+- [ ] Deferred: build the Vigor watchOS companion after iPhone cardio capture is polished. Then verify start, reconnect, finish, measured data and duplicate prevention on a physical pair.
+
+- [x] Save a rest check against the agenda’s displayed microcycle when the stored index lags, with a rest-specific alert and rollback for invalid entries. Read only the current Monday-based week when linking cardio. All 3,455 tests and TypeScript pass. Device Hub confirms rest toggling and links a synthetic Monday run from Friday with its original date. Evidence: `/private/tmp/vigor-week-rest-acceptance/`.
+
+- [x] Let completed cardio and rest rows cross Up next without changing their recorded date or check. Keep pending workouts behind the current next session. Test that linking the last pending run reveals existing opportunities in the next cardio microcycle. All 3,457 tests and TypeScript pass. Device Hub verifies both directions for a linked run and a checked rest, plus the pending-workout boundary. Evidence: `/private/tmp/vigor-agenda-recorded-acceptance/`.
+
+- [x] Keep future cardio cycles out of the agenda until their start. A seven-day plan with one completed run this week waits until next Monday. Swipe left to delete added rests or hide one planned occurrence. Full regression passes 3,460 tests and TypeScript. Device Hub verifies trash tap, full swipe, rest checking and no future cardio rows after resolving both current occurrences. Evidence: `/private/tmp/vigor-agenda-week-gate-acceptance/`.
+
+- [x] Preview cardio dated for tomorrow when its next cycle opens then, replacing the completed cardio of the preceding cycle and keeping Up next on an eligible workout. Test the November 15–16 weekly rollover and preserve the gate for plans more than a day ahead. Full regression passes 3,461 tests and TypeScript. Device Hub confirms one Monday cardio preview and the strength Up next marker in the Sunday fixture. Evidence: `/private/tmp/vigor-tomorrow-acceptance/`.
+
+- [x] Keep adjusted cardio in its original cycle tab across nominal date boundaries. Merge due cardio by agreed strength forecast anchors and allow local agenda reorder. Reproduce November 17 → 16 with the prior run recorded November 9. TypeScript and 3,464 tests pass. Device Hub confirms the adjusted run in the agenda and Cardio Cycle 2, and the completed result in Cycle 1. Evidence: `/private/tmp/vigor-cycle-move-acceptance/`.
+
+- [x] Keep one microcycle per routine in the agenda. Retain an early completion in its own cycle, keep linked equal-duration cardio visible while strength is pending, and separate plans of different durations. Regression covers the completed November 16 run with the November 9 result still available in history. All 3,467 tests across 297 suites and TypeScript pass.
+- [x] Verify the shared agenda in Device Hub with synthetic data. After advancing and finishing the November 16 run, the agenda shows only that completed run and returns Up next to strength. Evidence: `/private/tmp/vigor-onecycle-acceptance/`.
+
+## Shared Training agenda — 2026-11-12
+
+- [x] Implement the selected Grouped days direction with one agenda, distinct routine identities, compact active plan shortcuts, and an Unscheduled group.
+- [x] Restore the original segmented progress rails under Active routines, with direct navigation to the strength mesocycle and the current cardio microcycle. Full regression passes 3,442 tests across 296 suites. Device Hub confirms the strength rail, direct entry and return with the shared agenda intact. The cardio route is covered by component tests. Device Hub session closed.
+- [x] Confirm a new date from the selected pending strength or cardio row, preserving the prescription and stable occurrence.
+- [x] Link an explicitly selected Apple Health activity as a finished cardio workout, with atomic duplicate protection, measured date and duration, and unlinking in the existing workout detail.
+- [x] Pass full regression (3,441 tests across 296 suites), TypeScript and whitespace checks. The subsequent inactive-only empty-state correction passes all seven Training home tests. Verify the grouped landing, both date changes, the Health chooser and duplicate exclusion on a signed iPhone simulator Release with in-memory records. Evidence: `/private/tmp/vigor-grouped-agenda-acceptance/`.
+- [ ] Verify a real Apple Watch-recorded workout can be reviewed/linked on the physical iPhone. This is Health import/link acceptance, not acceptance of a Vigor watchOS companion.
+
+## Training landing feedback — 2026-11-12
+
+- [x] Keep routine cards independently expanded to prevent the previous card from collapsing when another opens.
+- [x] Reuse the cardio date editor from a pending session's long press and VoiceOver action in the routine and shared calendar. Regression covers the date selection, locked sessions and calendar placement.
+- [x] Pass full regression (3,427 tests in 293 suites), TypeScript, and a simulator Release build. Device Hub confirms that opening the second routine keeps the first in place and that selecting a new date updates both the shared calendar and the cardio card using the same memory-only session.
 
 ## Cardio and routine feedback — 2026-11-10
 
 - [x] Show the cardio microcycle review only after the reviewed cycle's civil end date; remove "How progression works"; show a single total when the dose is unchanged. Focused progression, cardio flow and i18n checks pass 68 tests; TypeScript passes.
 - [x] Verify the review timing in Device Hub and pass full regression: **3,424 tests / 293 suites**, TypeScript and whitespace checks, signed simulator Release. On iPhone 18 Pro / iOS 27, a new memory-only "Preview just-activated block" fixture shows cycle 1 without a review card. The completed-cycle fixture shows the card; its sheet has no explanation control, reads "40 min" with Keep enabled before answers, and "40 → 42 min" with Confirm increase enabled after positive answers. Nothing was saved; Device Hub sessions closed.
-- [ ] Delete cardio routines and saved cardio proposals from the landing. Needs approved visual options.
+- [x] Add shared Activate/Edit/Delete actions for strength routines, ended cardio blocks and saved cardio proposals. Cardio blocks archive to preserve history. Verified in the simulator with a cancellation-safe deletion confirmation.
 - [ ] Selectable identity icon for cardio routines, reusing the strength emoji identity sheet. Needs approved visual options.
 - [ ] Present and manage a hybrid plan as one routine instead of a strength routine plus a separate saved cardio proposal. Needs approved visual options and depends on integrated activation.
 - [ ] Decide whether a review can still record "keep the current dose" after the next cardio microcycle has started. Today that review stays blocked for the rest of the block.

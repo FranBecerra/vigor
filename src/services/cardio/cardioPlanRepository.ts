@@ -31,4 +31,14 @@ export class CardioPlanRepository extends BaseRepository<SavedCardioPlan> {
     if (failed || !current()) throw Error('cardioSaveFailed');
     return next;
   }
+  async rename(plan: SavedCardioPlan, name: string, current: () => boolean, rejected: () => void) {
+    const latest = await this.get(plan.id);
+    if (!current() || !validSavedCardioPlan(latest, this.owner) || latest.archivedAt !== null || latest.createdAt !== plan.createdAt) throw Error('staleCardioPlan');
+    const next = { ...latest, name: name.trim() };
+    if (!validSavedCardioPlan(next, this.owner)) throw Error('invalidCardioPlan');
+    let failed = false;
+    await this.updateLocally(plan.id, { name: next.name }, () => { failed = true; if (current()) rejected(); });
+    if (failed || !current()) throw Error('cardioSaveFailed');
+    return next;
+  }
 }

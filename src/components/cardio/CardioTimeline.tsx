@@ -16,6 +16,10 @@ export function CardioTimeline({ block, sports, strength, workouts, onEdit, onOp
 }) {
   const [cycle, setCycle] = useState(Number.isInteger(initialCycle) && initialCycle >= 0 && initialCycle < block.cycles ? initialCycle : 0); const { t } = useTranslation(); const { colors, surfaces, radius, semantic } = useTheme();
   const rows = coordinateCardioBlock(block, sports, strength), current = Math.min(cycle, block.cycles - 1), doses = cardioCycleDoses(block);
+  const cycleRows = rows.filter(({ slot }) => slot.cycle === current);
+  const cycleDays = block.proposal.input.cycleDays;
+  const regularDays = Array.from({ length: cycleDays }, (_, day) => shiftCalendarDate(block.startDate, current * cycleDays + day));
+  const dates = [...new Set([...regularDays, ...cycleRows.map(({ slot }) => slot.date)])].sort();
   return <View style={{ gap: 10 }}>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
       {Array.from({ length: block.cycles }, (_, i) => <Pressable key={i} accessibilityRole="tab" accessibilityState={{ selected: i === current }} onPress={() => setCycle(i)} style={{ borderBottomWidth: 2, borderBottomColor: i === current ? colors.accentText : 'transparent', padding: 12, minHeight: 48 }}>
@@ -24,9 +28,10 @@ export function CardioTimeline({ block, sports, strength, workouts, onEdit, onOp
       </Pressable>)}
     </ScrollView>
     {block.progression && <Text style={{ color: colors.textSecondary }}>{t(doses[current].confirmed ? 'cardioProgression.confirmed' : 'cardioProgression.provisional')}</Text>}
-    {Array.from({ length: block.proposal.input.cycleDays }, (_, day) => {
-      const date = shiftCalendarDate(block.startDate, current * block.proposal.input.cycleDays + day);
-      const slots = rows.filter(r => r.slot.date === date), forecast = block.proposal.input.strength.filter(s => s.dayIndex === day);
+    {dates.map(date => {
+      const day = regularDays.indexOf(date);
+      const slots = cycleRows.filter(r => r.slot.date === date);
+      const forecast = day < 0 ? [] : block.proposal.input.strength.filter(s => s.dayIndex === day);
       const activities = sports.filter(s => s.discardedAt === null && dateInZone((s.record ?? s.planned)!.startAt, block.timeZone) === date);
       return <View key={date} style={{ ...surfaces.card, borderRadius: radius.lg, padding: 16, gap: 10 }}>
         <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{date}</Text>

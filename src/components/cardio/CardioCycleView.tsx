@@ -104,7 +104,7 @@ export function CardioCycleView({ input, preview, strengthRoutine, sessionCeilin
                     <Text style={caption}>{duration(segment.durationSeconds)} · {t('cardioPlan.effortRange', { min: segment.effort.min, max: segment.effort.max })}</Text>
                   </View>)}
                   <Text style={caption}>{t('cardioPlan.talkTest')}</Text>
-                  {prescription.allowWalking && <Text style={caption}>{t('cardioPlan.walking')}</Text>}
+                  {prescription.allowWalking && <Text style={caption}>{t(prescription.runWalk ? 'cardioPlan.runWalk' : 'cardioPlan.walking')}</Text>}
                 </> : <Text style={caption}>{t('combinedReview.cardioUnavailable')}</Text>}
             </View>}
           </Animated.View>;
@@ -121,7 +121,8 @@ export function CardioCycleView({ input, preview, strengthRoutine, sessionCeilin
       <ScrollView style={{ ...surfaces.sheet, flex: 1 }} contentContainerStyle={{ padding: 24, paddingTop: 40, paddingBottom: insets.bottom + 30 }}>
         <Pressable accessibilityRole="button" accessibilityLabel={t('workout.done')} onPress={() => setBasisVisible(false)} style={{ minHeight: 48, justifyContent: 'center' }}><Text style={{ color: colors.accentText, fontSize: 17 }}>{t('workout.done')}</Text></Pressable>
         <Text style={{ color: colors.textPrimary, fontSize: 26, fontWeight: '600', marginVertical: 22 }}>{t('editorFlow.cardioWhy')}</Text>
-        <Text style={{ color: colors.textPrimary, fontSize: 16, lineHeight: 25 }}>{t(input.healthBaseline?.policy === 'OBSERVED_REPEATABLE_START_V2'
+        <Text style={{ color: colors.textPrimary, fontSize: 16, lineHeight: 25 }}>{t(input.healthBaseline?.policy.startsWith('OBSERVED_MONTHLY_') ? 'planningHistory.monthlyMethod'
+          : input.healthBaseline?.policy === 'OBSERVED_REPEATABLE_START_V2'
           ? 'planningHistory.inferredMethod' : input.healthBaseline ? 'healthPlanning.explanation' : 'editorFlow.cardioExplanation')}</Text>
         {input.healthBaseline && <Text style={[caption, { marginTop: 16 }]}>{t('healthPlanning.provenance', { date: new Date(input.healthBaseline.observedAt).toLocaleDateString(), count: input.healthBaseline.observedSessions })}</Text>}
       </ScrollView>

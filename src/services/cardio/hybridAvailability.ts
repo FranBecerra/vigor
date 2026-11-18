@@ -23,6 +23,13 @@ export function availabilityHybridSettings(a: HybridAvailability, priority: Hybr
     totalMinutesPerCycle: Math.min(10000, a.trainingDays * a.minutesPerSession * (a.allowDoubles ? 2 : 1)) };
 }
 
+/** Preserve room for cardio while comparing calendars for a fixed hypertrophy dose. */
+export function hybridStrengthSessionCeiling(a: HybridAvailability, priority: HybridPriority) {
+  if (!validHybridAvailability(a)) throw Error('invalidHybridAvailability');
+  const cardio = priority === 'STRENGTH' && a.trainingDays <= 4 ? 1 : Math.min(2, a.trainingDays - 2);
+  return Math.min(6, a.trainingDays - (a.allowDoubles ? 0 : cardio));
+}
+
 /** Editable starter frequencies per cycle. Priority resolves competition for days. */
 export function strengthHybridTarget(level?: ExperienceLevel) {
   return level === 'BEGINNER' ? 2 : level === 'ADVANCED' ? 4 : 3;

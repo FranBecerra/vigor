@@ -1,3 +1,4 @@
+import { acceptReviewedCardioStart, validReviewedCardioStart } from '../reviewedCardioStart';
 import { proposeCardioStartingPoint as propose, type CardioStartContext } from '../cardioStartingPoint';
 import type { CardioHealthRead, CardioHealthWorkout } from '@/models/cardioHealth';
 const day = 86400000, now = Date.UTC(2026, 9, 30, 12);
@@ -148,4 +149,47 @@ it('uses a repeated longer outing across the 42-day window while keeping frequen
     state: 'READY', typicalMinutes: 26, sessionMinutes: 26, usedZones: true,
   });
   expect(propose(data, observedAt, observedAt, { ...context, response: 'DISCOMFORT' })).toMatchObject({ state: 'DISCOMFORT' });
+});
+
+describe('monthly capacity assessment', () => {
+  const monthly = { inferFromHistory: true, assessMonthlyCapacity: true, response: 'UNKNOWN' as const };
+  const runs = [2, 9, 16, 23].map((days, i) => {
+    const duration = [25, 30, 35, 80][i] * 60;
+    return workout(days, { durationSeconds: duration, end: now - days * day + duration * 1000 });
+  });
+  const assess = (workouts: CardioHealthWorkout[], patch: Partial<CardioStartContext> = {}) =>
+    result({ ...monthly, ...patch }, { ...data, workouts });
+
+  it('uses the recent median and preserves the observed frequency without effort evidence', () => {
+    expect(assess([...runs, workout(32, { durationSeconds: 90 * 60, end: now - 32 * day + 90 * 60000 })]))
+      .toMatchObject({ policy: 'OBSERVED_MONTHLY_CAPACITY_V3', state: 'READY',
+        typicalMinutes: 32.5, weeklyMinutes: 32.5, sessions: 1, sessionMinutes: 32 });
+  });
+
+  it('repartitions repeated easy runs without exceeding observed volume or explicit availability', () => {
+    const easy = runs.map(w => ({ ...w, heartRateZoneSeconds: [0, w.durationSeconds, 0, 0, 0] }));
+    expect(assess(easy)).toMatchObject({ policy: 'OBSERVED_MONTHLY_REPARTITION_V3', sessions: 2,
+      usedZones: true, sessionMinutes: 16, totalMinutes: 32, typicalMinutes: 32.5, weeklySessions: 1 });
+    expect(assess(easy, { maxSessions: 1 })).toMatchObject({ policy: 'OBSERVED_MONTHLY_CAPACITY_V3', sessions: 1 });
+    expect(assess(easy, { cycleDays: 10, maxSessions: 3 })).toMatchObject({ sessions: 3, totalMinutes: 45 });
+    expect(assess(easy, { response: 'DISCOMFORT' })).toMatchObject({ state: 'DISCOMFORT' });
+    const patchy = runs.map(w => ({ ...w, heartRateZoneSeconds: [0, w.durationSeconds * 0.4, 0, 0, 0] }));
+    expect(assess(patchy)).toMatchObject({ sessions: 1 });
+  });
+
+  it('round-trips an accepted redistribution without persisting raw measurements', () => {
+    const easy = runs.map(w => ({ ...w, heartRateZoneSeconds: [0, w.durationSeconds, 0, 0, 0] }));
+    const accepted = acceptReviewedCardioStart({ ...data, workouts: easy }, now, now, { ...context, ...monthly });
+    expect(validReviewedCardioStart(JSON.parse(JSON.stringify(accepted)))).toBe(true);
+    expect(accepted).toMatchObject({ policy: 'OBSERVED_MONTHLY_REPARTITION_V3', sessions: 2, totalMinutes: 32 });
+    expect(JSON.stringify(accepted)).not.toContain('heartRate');
+    expect(validReviewedCardioStart({ ...accepted, sessions: 1 })).toBe(false);
+  });
+
+  it('uses repeated low Vigor effort while an explicitly hard session blocks redistribution', () => {
+    const logged = runs.map(w => ({ ...w, sourceId: 'vigor-timer', id: `vigor:${w.id}`, sessionEffort: 3 }));
+    expect(assess(logged)).toMatchObject({ sessions: 2 });
+    expect(assess([...logged.slice(0, 3), { ...logged[3], sessionEffort: 8 }])).toMatchObject({ sessions: 1 });
+    expect(assess(runs.map(w => ({ ...w, averageHeartRateBpm: 125, sessionEffort: 3 })))).toMatchObject({ sessions: 1 });
+  });
 });
