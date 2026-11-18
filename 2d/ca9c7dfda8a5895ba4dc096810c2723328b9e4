@@ -1,0 +1,93 @@
+src/models/cardioTraining.ts
+  s_b6a0f22c32fc5f::t_d4b61e09b8eac6 68-69
+  s_b6a0f22c32fc5f::t_3b870d7490a653 45
+src/services/health/__tests__/healthCapabilities.test.ts
+  s_b6a0f22c32fc5f::t_5e2178fee2f3ab 16
+  s_b6a0f22c32fc5f::t_e643405da2039a 15,21
+src/services/health/workoutExport.ts
+  s_b6a0f22c32fc5f::t_ef954336370375 2-4,9-19,26,55-82,91-92,157-162,166,171,206,212-221
+  s_cffd13d1a98738::t_5b79997676ed13 225
+src/hooks/useHealthExport.tsx
+  s_58860a6dd107b9::t_479dcf5a98e5c3 4,19-22
+src/services/health/__tests__/workoutExport.test.ts
+  s_b6a0f22c32fc5f::t_a9b586dbe174c3 5,19
+  s_b6a0f22c32fc5f::t_80565eac483cb4 2-4,13,16,21,30-127
+  s_b6a0f22c32fc5f::t_73e51facaed8d7 128
+src/services/health/healthClient.ts
+  s_58860a6dd107b9::t_479dcf5a98e5c3 4-6,8-12,17-31,35-37,40-41,43,45-54
+src/services/cardio/cardioWorkout.ts
+  s_b6a0f22c32fc5f::t_d4b61e09b8eac6 17-21
+  s_58860a6dd107b9::t_31ab657bcda047 29,76-82
+src/services/repositories/index.ts
+  s_b6a0f22c32fc5f::t_ae5ebff991feb5 123,130
+modules/vigor-health/ios/VigorHealthModule.swift
+  s_b6a0f22c32fc5f::t_d4b61e09b8eac6 182-183
+  s_b6a0f22c32fc5f::t_7cc2dfeebda5fa 13-14,394,398-399,403-404,408-436,438,495,509,517,530,540,566,575,580,592-593,599
+  s_b6a0f22c32fc5f::t_e096dabe8a95b7 15
+  s_b6a0f22c32fc5f::t_d308d323721ff5 391-393
+  s_b6a0f22c32fc5f::t_5aa4d62760136e 395-397
+  s_b6a0f22c32fc5f::t_0f13cb6ed622e7 400-402
+  s_b6a0f22c32fc5f::t_550b58af7ec311 405-407
+  s_b6a0f22c32fc5f::t_7a61c47e4e9ade 437
+  s_b6a0f22c32fc5f::t_b6c15d35a797c1 492-494
+  s_b6a0f22c32fc5f::t_51f14b5d507621 496-498,506-508
+  s_b6a0f22c32fc5f::t_fb8ee5702deb87 510-512,514-516
+  s_b6a0f22c32fc5f::t_1bd08f38afa596 518-520,527-529
+  s_b6a0f22c32fc5f::t_98b21397d5f15e 531-533,537-539
+  s_b6a0f22c32fc5f::t_a3cc33f01f418c 541-543,563-565
+  s_b6a0f22c32fc5f::t_1e4e63863744e3 567-569,572-574
+  s_b6a0f22c32fc5f::t_161fafa88c085d 576-579
+  s_b6a0f22c32fc5f::t_c9fb75db135662 581-583,589-591
+  s_b6a0f22c32fc5f::t_23691a1ff39878 594-598
+  s_b6a0f22c32fc5f::t_35e21612029b66 600-602
+  s_cffd13d1a98738::t_88a16b8ff5d548 19-22,385-390,459-491,499-505,513,521-526,534-536,544-562,570-571,584-588,603-610
+src/app/(tabs)/(train)/cardio-workout.tsx
+  s_58860a6dd107b9::t_479dcf5a98e5c3 9,26-32,37-38
+  s_b6a0f22c32fc5f::t_bb03c5b37ebe3f 58-60
+  s_b6a0f22c32fc5f::t_a85e042d2d2924 10,33-34,39,56-57,61-62
+  s_b6a0f22c32fc5f::t_49c9bd69289667 86-87,111,118-122
+src/services/health/cardioCapture.ts
+  s_58860a6dd107b9::t_479dcf5a98e5c3 1-23
+plugins/withWorkoutHealth.js
+  s_b6a0f22c32fc5f::t_ee0b7c9daa4ea3 9-10
+src/hooks/__tests__/healthExport.test.tsx
+  s_b6a0f22c32fc5f::t_f6e8c67fb21965 8,10,36,47-56
+src/services/cardio/__tests__/cardioWorkout.test.ts
+  s_b6a0f22c32fc5f::t_56aa6602089f24 50-64
+src/services/health/__tests__/cardioCapture.test.ts
+  s_b6a0f22c32fc5f::t_57a669b61a2626 1-45
+src/services/health/__tests__/healthClient.test.ts
+  s_b6a0f22c32fc5f::t_6fad8662ba43d1 3,12-21,23-38,40,69-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2dca9c7dfda8a5895ba4dc096810c2723328b9e4",
+  "prompts": {},
+  "sessions": {
+    "s_58860a6dd107b9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_b6a0f22c32fc5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d325-705c-76f3-b8d6-088e68a9c714",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    },
+    "s_cffd13d1a98738": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a0a9-a738-7020-8f0b-96bf79e2aa1f",
+        "model": "unknown"
+      },
+      "human_author": "Francisco Becerra <francisco.becerra@vonage.com>"
+    }
+  }
+}
